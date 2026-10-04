@@ -41,7 +41,10 @@ public class GlobalExceptionHandler {
         if (exception instanceof RateLimitException rateLimit) {
             headers.set(HttpHeaders.RETRY_AFTER, String.valueOf(rateLimit.getRetryAfterSeconds()));
         }
-        return respond(request, code, exception.getMessage(), errors, headers);
+        Integer retryAfter = exception instanceof RateLimitException rateLimit
+                ? rateLimit.getRetryAfterSeconds() : null;
+        return respond(request, code, exception.getMessage(), errors, headers, retryAfter,
+                HttpStatus.valueOf(code.getHttpStatus()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -77,16 +80,19 @@ public class GlobalExceptionHandler {
         LOG.error("Lỗi không xử lý được, traceId={}", traceId, exception);
         return respond(request, ErrorCode.ERR_CONFLICT,
                 "Có lỗi hệ thống, mã tham chiếu " + traceId, List.of(), new HttpHeaders(),
+                null,
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private Object respond(HttpServletRequest request, ErrorCode code, String message,
                            List<FieldErrorItem> errors, HttpHeaders headers) {
-        return respond(request, code, message, errors, headers, HttpStatus.valueOf(code.getHttpStatus()));
+        return respond(request, code, message, errors, headers, null,
+                HttpStatus.valueOf(code.getHttpStatus()));
     }
 
     private Object respond(HttpServletRequest request, ErrorCode code, String message,
-                           List<FieldErrorItem> errors, HttpHeaders headers, HttpStatus status) {
+                           List<FieldErrorItem> errors, HttpHeaders headers, Integer retryAfter,
+                           HttpStatus status) {
         if (isApi(request)) {
             ApiResponse<Void> body = errors.isEmpty() ? ApiResponse.fail(message) : ApiResponse.fail(message, errors);
             return new ResponseEntity<>(body, headers, status);
@@ -95,6 +101,9 @@ public class GlobalExceptionHandler {
         modelAndView.setStatus(status);
         modelAndView.addObject("message", message);
         modelAndView.addObject("traceId", traceId());
+        if (retryAfter != null) {
+            modelAndView.addObject("retryAfter", retryAfter);
+        }
         return modelAndView;
     }
 
@@ -110,6 +119,7 @@ public class GlobalExceptionHandler {
     private String viewFor(int status) {
         return switch (status) {
             case 400 -> "error/400";
+            case 401 -> "error/401";
             case 403 -> "error/403";
             case 404 -> "error/404";
             case 429 -> "error/429";
