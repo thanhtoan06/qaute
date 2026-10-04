@@ -15,12 +15,7 @@
         </div>
         <div class="card card-md">
             <div class="card-body">
-                <c:if test="${not empty flashSuccess}">
-                    <div class="alert alert-success" role="alert"><c:out value="${flashSuccess}"/></div>
-                </c:if>
-                <c:if test="${not empty flashError}">
-                    <div class="alert alert-danger" role="alert"><c:out value="${flashError}"/></div>
-                </c:if>
+                <qa:alert/>
                 <sitemesh:write property="body"/>
             </div>
         </div>

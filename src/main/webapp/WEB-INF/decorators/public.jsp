@@ -50,7 +50,7 @@
 </header>
 <main class="flex-grow-1">
     <div class="container-xl py-4">
-        <%-- TODO: Bật qa:alert khi tag thông báo được tạo ở T1-06. --%>
+        <qa:alert/>
         <sitemesh:write property="body"/>
     </div>
 </main>

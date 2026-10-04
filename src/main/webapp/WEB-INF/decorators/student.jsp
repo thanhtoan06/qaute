@@ -108,13 +108,7 @@
         </header>
         <div class="page-body">
             <div class="container-xl py-4">
-                <c:if test="${not empty flashSuccess}">
-                    <div class="alert alert-success" role="alert"><c:out value="${flashSuccess}"/></div>
-                </c:if>
-                <c:if test="${not empty flashError}">
-                    <div class="alert alert-danger" role="alert"><c:out value="${flashError}"/></div>
-                </c:if>
-                <%-- TODO: Thay bằng qa:alert khi tag thông báo được tạo ở T1-06. --%>
+                <qa:alert/>
                 <sitemesh:write property="body"/>
             </div>
         </div>

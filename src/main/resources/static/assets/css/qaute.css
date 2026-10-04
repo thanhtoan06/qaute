@@ -21,6 +21,66 @@
     top: 1rem;
 }
 
+.qa-toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1090;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: min(24rem, calc(100vw - 2rem));
+}
+
+.qa-chat-window {
+    min-height: 24rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.qa-chat-message {
+    max-width: 80%;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.qa-chat-message--student {
+    margin-left: auto;
+    background: var(--qa-primary);
+    color: #fff;
+}
+
+.qa-chat-message--manager {
+    margin-right: auto;
+    background: var(--tblr-bg-surface-secondary);
+}
+
+.qa-skeleton {
+    min-height: 1rem;
+    border-radius: 0.25rem;
+    background: linear-gradient(90deg, #edf1f5 25%, #f7f9fb 50%, #edf1f5 75%);
+    background-size: 200% 100%;
+    animation: qa-skeleton-loading 1.5s infinite;
+}
+
+.qa-badge-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--qa-primary);
+    vertical-align: middle;
+}
+
+@keyframes qa-skeleton-loading {
+    from {
+        background-position: 200% 0;
+    }
+    to {
+        background-position: -200% 0;
+    }
+}
+
 @media (max-width: 991.98px) {
     .qa-sticky-sidebar {
         position: static;
