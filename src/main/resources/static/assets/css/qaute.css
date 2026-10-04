@@ -1,1 +1,28 @@
-/* Tệp CSS riêng của QAUTE sẽ được bổ sung ở bước sau. */
+:root {
+    --qa-primary: #206bc4;
+}
+
+.qa-card-hover {
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.qa-card-hover:hover {
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 10%);
+    transform: translateY(-2px);
+}
+
+.qa-page-title {
+    color: var(--qa-primary);
+    font-weight: 600;
+}
+
+.qa-sticky-sidebar {
+    position: sticky;
+    top: 1rem;
+}
+
+@media (max-width: 991.98px) {
+    .qa-sticky-sidebar {
+        position: static;
+    }
+}
