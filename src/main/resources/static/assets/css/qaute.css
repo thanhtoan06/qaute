@@ -86,3 +86,128 @@
         position: static;
     }
 }
+
+/* ==========================================================================
+   T2-03: Khung giao diện Manager và Admin (chỉ thêm, không sửa style có sẵn)
+   ========================================================================== */
+
+/* --- Nhóm nút trạng thái trực của Manager (header manager.jsp) --- */
+.qa-status-online,
+.qa-status-busy,
+.qa-status-offline {
+  --qa-status-color: #6c7a91;
+  --qa-status-soft: rgba(108, 122, 145, 0.12);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  color: var(--qa-status-color);
+  background-color: transparent;
+  border-color: var(--qa-status-color);
+}
+
+.qa-status-online  { --qa-status-color: #2fb344; --qa-status-soft: rgba(47, 179, 68, 0.12); }
+.qa-status-busy    { --qa-status-color: #f59f00; --qa-status-soft: rgba(245, 159, 0, 0.16); }
+.qa-status-offline { --qa-status-color: #6c7a91; --qa-status-soft: rgba(108, 122, 145, 0.12); }
+
+/* Chấm tròn màu đứng trước nhãn */
+.qa-status-online::before,
+.qa-status-busy::before,
+.qa-status-offline::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.qa-status-online:hover,
+.qa-status-busy:hover,
+.qa-status-offline:hover,
+.qa-status-online:focus-visible,
+.qa-status-busy:focus-visible,
+.qa-status-offline:focus-visible {
+  color: var(--qa-status-color);
+  background-color: var(--qa-status-soft);
+  border-color: var(--qa-status-color);
+}
+
+/* Trạng thái đang chọn: tô đặc */
+.qa-status-online.active,
+.qa-status-busy.active,
+.qa-status-offline.active {
+  color: #ffffff;
+  background-color: var(--qa-status-color);
+  border-color: var(--qa-status-color);
+}
+
+.qa-status-busy.active {
+  color: #1d273b; /* nền vàng cần chữ tối để đủ tương phản */
+}
+
+/* --- Bảng quản trị (Admin, danh sách Manager/Sinh viên) --- */
+.qa-admin-table {
+  width: 100%;
+  margin-bottom: 0;
+  vertical-align: middle;
+}
+
+.qa-admin-table thead th {
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #667382;
+  background-color: #f6f8fb;
+  border-bottom: 1px solid var(--tblr-border-color, #e6e7e9);
+}
+
+.qa-admin-table tbody td {
+  vertical-align: middle;
+}
+
+.qa-admin-table tbody tr:hover {
+  background-color: rgba(32, 107, 196, 0.04);
+}
+
+.qa-admin-table .btn-list {
+  flex-wrap: nowrap;
+}
+
+/* --- Thanh lọc phía trên bảng --- */
+.qa-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background-color: #ffffff;
+  border: 1px solid var(--tblr-border-color, #e6e7e9);
+  border-radius: 4px;
+}
+
+.qa-filter-bar .form-label {
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  color: #667382;
+}
+
+.qa-filter-bar .form-control,
+.qa-filter-bar .form-select {
+  width: auto;
+  min-width: 10rem;
+}
+
+@media (max-width: 575.98px) {
+  .qa-filter-bar > * {
+    flex: 1 1 100%;
+  }
+
+  .qa-filter-bar .form-control,
+  .qa-filter-bar .form-select {
+    width: 100%;
+  }
+}
