@@ -79,8 +79,10 @@ public class LoginController {
                         + URLEncoder.encode(outcome.email(), StandardCharsets.UTF_8);
             }
             case LOCKED_ADMIN -> showError(model, "Tài khoản đang bị khóa, vui lòng liên hệ quản trị");
-            case BAD_CREDENTIALS, LOCKED_TEMP -> showError(model,
-                    "Thông tin đăng nhập không đúng");
+            case LOCKED_TEMP -> showError(model,
+                    "Tài khoản bị khóa tạm thời, thử lại sau "
+                            + outcome.lockedMinutes() + " phút");
+            case BAD_CREDENTIALS -> showError(model, "Thông tin đăng nhập không đúng");
         };
     }
 

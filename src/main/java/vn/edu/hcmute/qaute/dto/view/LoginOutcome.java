@@ -1,6 +1,7 @@
 package vn.edu.hcmute.qaute.dto.view;
 
-public record LoginOutcome(Kind kind, SessionTokens tokens, String email, String redirectRole) {
+public record LoginOutcome(Kind kind, SessionTokens tokens, String email, String redirectRole,
+                           long lockedMinutes) {
 
     public enum Kind {
         OK,
