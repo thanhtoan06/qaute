@@ -7,10 +7,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.OtpPurpose;
+import vn.edu.hcmute.qaute.common.constant.SettingKeys;
 import vn.edu.hcmute.qaute.common.constant.RoleCode;
 import vn.edu.hcmute.qaute.common.constant.UserStatus;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.exception.DuplicateException;
+import vn.edu.hcmute.qaute.common.exception.AppException;
 import vn.edu.hcmute.qaute.dto.request.auth.RegisterForm;
 import vn.edu.hcmute.qaute.entity.identity.Role;
 import vn.edu.hcmute.qaute.entity.identity.StudentProfile;
@@ -18,6 +20,7 @@ import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.identity.RoleRepository;
 import vn.edu.hcmute.qaute.repository.identity.StudentProfileRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
+import vn.edu.hcmute.qaute.service.system.SettingsService;
 
 @Service
 public class RegistrationService {
@@ -27,15 +30,39 @@ public class RegistrationService {
     private final StudentProfileRepository studentProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final OtpService otpService;
+    private final SettingsService settingsService;
 
     public RegistrationService(UserRepository userRepository, RoleRepository roleRepository,
                                StudentProfileRepository studentProfileRepository,
-                               PasswordEncoder passwordEncoder, OtpService otpService) {
+                               PasswordEncoder passwordEncoder, OtpService otpService,
+                               SettingsService settingsService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.studentProfileRepository = studentProfileRepository;
         this.passwordEncoder = passwordEncoder;
         this.otpService = otpService;
+        this.settingsService = settingsService;
+    }
+
+    @Transactional
+    public void verifyRegistration(String email, String otp) {
+        User user = userRepository.findByEmailIgnoreCase(email.trim().toLowerCase())
+                .filter(item -> item.getStatus() == UserStatus.PENDING_VERIFICATION)
+                .orElseThrow(() -> new AppException(vn.edu.hcmute.qaute.common.constant.ErrorCode.ERR_OTP_INVALID));
+        otpService.verify(user, OtpPurpose.REGISTER_VERIFY, otp);
+        user.setStatus(UserStatus.ACTIVE);
+        user.setEmailVerifiedAt(LocalDateTime.now());
+    }
+
+    @Transactional
+    public void resendOtp(String email) {
+        userRepository.findByEmailIgnoreCase(email.trim().toLowerCase())
+                .filter(item -> item.getStatus() == UserStatus.PENDING_VERIFICATION)
+                .ifPresent(user -> otpService.issue(user, OtpPurpose.REGISTER_VERIFY, "otp-register"));
+    }
+
+    public int otpTtlMinutes() {
+        return settingsService.getInt(SettingKeys.OTP_TTL_MINUTES);
     }
 
     @Transactional

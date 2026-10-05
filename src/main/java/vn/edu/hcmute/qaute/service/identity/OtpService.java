@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import vn.edu.hcmute.qaute.common.constant.ErrorCode;
 import vn.edu.hcmute.qaute.common.constant.OtpPurpose;
 import vn.edu.hcmute.qaute.common.constant.SettingKeys;
@@ -78,7 +79,7 @@ public class OtpService {
                         "ttlMinutes", String.valueOf(ttlMinutes)));
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = AppException.class)
     public void verify(User user, OtpPurpose purpose, String code) {
         OtpCode otp = otpCodeRepository
                 .findFirstByUserIdAndPurposeAndConsumedAtIsNullOrderByIdDesc(user.getId(), purpose)

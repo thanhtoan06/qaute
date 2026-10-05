@@ -8,6 +8,8 @@ import vn.edu.hcmute.qaute.entity.identity.OtpCode;
 
 public interface OtpCodeRepository extends JpaRepository<OtpCode, Long> {
 
+    long deleteByUserId(Long userId);
+
     Optional<OtpCode> findFirstByUserIdAndPurposeAndConsumedAtIsNullOrderByIdDesc(
             Long userId, OtpPurpose purpose);
 
