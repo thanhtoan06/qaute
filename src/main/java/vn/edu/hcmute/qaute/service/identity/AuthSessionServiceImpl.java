@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import vn.edu.hcmute.qaute.repository.identity.AuthSessionRepository;
 import vn.edu.hcmute.qaute.repository.identity.LoginHistoryRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.security.JwtService;
+import vn.edu.hcmute.qaute.security.event.SessionRevokedEvent;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
 @Service
@@ -35,17 +37,20 @@ public class AuthSessionServiceImpl implements AuthSessionService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final SettingsService settingsService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AuthSessionServiceImpl(AuthSessionRepository authSessionRepository,
                                   LoginHistoryRepository loginHistoryRepository,
                                   UserRepository userRepository,
                                   JwtService jwtService,
-                                  SettingsService settingsService) {
+                                  SettingsService settingsService,
+                                  ApplicationEventPublisher eventPublisher) {
         this.authSessionRepository = authSessionRepository;
         this.loginHistoryRepository = loginHistoryRepository;
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.settingsService = settingsService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -109,20 +114,29 @@ public class AuthSessionServiceImpl implements AuthSessionService {
 
     @Override
     public void revokeByJti(String jti, String reason) {
-        authSessionRepository.findByJti(jti).ifPresent(session -> revoke(session, reason));
+        authSessionRepository.findByJti(jti).ifPresent(session -> {
+            if (revoke(session, reason)) {
+                eventPublisher.publishEvent(new SessionRevokedEvent(session.getUserId(), session.getJti()));
+            }
+        });
     }
 
     @Override
     public void revokeAllSessions(Long userId, String reason) {
         authSessionRepository.findByUserIdOrderByCreatedAtDesc(userId)
                 .forEach(session -> revoke(session, reason));
+        eventPublisher.publishEvent(new SessionRevokedEvent(userId, null));
     }
 
     @Override
     public void revokeAllExcept(Long userId, String keepJti, String reason) {
         authSessionRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
                 .filter(session -> keepJti == null || !keepJti.equals(session.getJti()))
-                .forEach(session -> revoke(session, reason));
+                .forEach(session -> {
+                    if (revoke(session, reason)) {
+                        eventPublisher.publishEvent(new SessionRevokedEvent(userId, session.getJti()));
+                    }
+                });
     }
 
     @Override
@@ -188,12 +202,14 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         return Math.toIntExact(seconds);
     }
 
-    private void revoke(AuthSession session, String reason) {
+    private boolean revoke(AuthSession session, String reason) {
         if (session.getRevokedAt() == null) {
             session.setRevokedAt(LocalDateTime.now());
             session.setRevokedReason(reason);
             authSessionRepository.save(session);
+            return true;
         }
+        return false;
     }
 
     private String maskIdentifier(String identifier) {
