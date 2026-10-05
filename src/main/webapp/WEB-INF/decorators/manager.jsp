@@ -1,11 +1,11 @@
-<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true" %>
 <%--
   QAUTE - Decorator khu vực Manager (SiteMesh áp dụng cho /manager/*).
   Bố cục giống student.jsp: menu dọc bên trái + header trên cùng + vùng nội dung.
-  SiteMesh 3 không có taglib JSP riêng: thẻ <sitemesh:write> được bộ lọc SiteMesh thay thế
-  khi trả về, nên ở đây không khai báo prefix "sitemesh".
+  Mở đầu giống student.jsp: include taglibs.jspf (đã có page directive nên ở đây không khai báo
+  lại pageEncoding/contentType, tránh khai báo trùng) rồi khai báo taglib sitemesh.
 --%>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
+<%@ taglib prefix="sitemesh" uri="http://www.sitemesh.org/sitemesh-3.0" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <%-- Đường dẫn hiện tại (bỏ context path). Sau forward thì lấy từ thuộc tính forward.request_uri. --%>
