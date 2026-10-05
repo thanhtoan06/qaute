@@ -43,13 +43,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
         long retryAfter = rateLimitService.secondsToWait(key);
         response.setHeader("Retry-After", String.valueOf(retryAfter));
         if (isApi(request)) {
-            response.setStatus(HttpServletResponse.SC_TOO_MANY_REQUESTS);
+            response.setStatus(429);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
             objectMapper.writeValue(response.getWriter(),
                     ApiResponse.fail("Bạn thao tác quá nhanh, vui lòng thử lại sau"));
         } else {
-            response.sendError(HttpServletResponse.SC_TOO_MANY_REQUESTS);
+            response.sendError(429);
         }
     }
 

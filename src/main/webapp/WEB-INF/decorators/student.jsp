@@ -11,6 +11,13 @@
         <c:set var="studentName" value="${authenticatedFullName}"/>
     </c:if>
 </c:catch>
+<c:set var="studentEmail" value=""/>
+<c:catch var="principalEmailError">
+    <sec:authentication property="principal.email" var="authenticatedEmail"/>
+    <c:if test="${not empty authenticatedEmail}">
+        <c:set var="studentEmail" value="${authenticatedEmail}"/>
+    </c:if>
+</c:catch>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -85,7 +92,7 @@
                             <span class="avatar avatar-sm"><i class="bi bi-person"></i></span>
                             <div class="d-none d-xl-block ps-2">
                                 <div><c:out value="${studentName}"/></div>
-                                <div class="mt-1 small text-secondary">Sinh viên</div>
+                                <div class="mt-1 small text-secondary"><c:out value="${studentEmail}"/></div>
                             </div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
