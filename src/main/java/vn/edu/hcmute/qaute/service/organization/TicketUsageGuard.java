@@ -18,59 +18,42 @@ import vn.edu.hcmute.qaute.common.constant.TicketStatus;
 @Component
 public class TicketUsageGuard {
 
-    /** Ticket chưa kết thúc thì tính là "đang xử lý". */
-    private static final Set<TicketStatus> OPEN_STATUSES = Set.of(
-            TicketStatus.NEW,
-            TicketStatus.ASSIGNED,
-            TicketStatus.IN_PROGRESS,
-            TicketStatus.WAITING_STUDENT,
-            TicketStatus.RESOLVED);
+    /** Ticket ở các trạng thái này là đã kết thúc; mọi trạng thái khác là "đang xử lý". */
+    private static final Set<TicketStatus> DONE_STATUSES =
+            Set.of(TicketStatus.CLOSED, TicketStatus.CANCELLED);
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    /**
-     * Số ticket chưa kết thúc thuộc các chuyên mục cho trước.
-     * Danh sách rỗng hoặc entity Ticket chưa có thì trả 0.
-     */
     public long countOpenTicketsByCategoryIds(Collection<Long> categoryIds) {
-        if (categoryIds == null || categoryIds.isEmpty()) {
+        if (categoryIds == null || categoryIds.isEmpty() || !ticketEntityExists()) {
             return 0;
         }
-        try {
-            Long count = entityManager.createQuery(
-                    "select count(t) from Ticket t"
-                            + " where t.categoryId in :ids and t.status not in :done",
-                    Long.class)
-                    .setParameter("ids", categoryIds)
-                    .setParameter("done", Set.of(TicketStatus.CLOSED, TicketStatus.CANCELLED))
-                    .getSingleResult();
-            return count == null ? 0 : count;
-        } catch (IllegalArgumentException e) {
-            // Entity Ticket của TV1 chưa có trong dự án.
-            return 0;
-        }
+        return entityManager.createQuery(
+                "select count(t) from Ticket t"
+                        + " where t.categoryId in :ids and t.status not in :done",
+                Long.class)
+                .setParameter("ids", categoryIds)
+                .setParameter("done", DONE_STATUSES)
+                .getSingleResult();
     }
 
-    /**
-     * Số ticket chưa kết thúc do Manager đang phụ trách.
-     * Entity Ticket chưa có trong dự án thì trả 0.
-     */
     public long countOpenTicketsByAssignee(Long managerId) {
-        if (managerId == null) {
+        if (managerId == null || !ticketEntityExists()) {
             return 0;
         }
-        try {
-            Long count = entityManager.createQuery(
-                    "select count(t) from Ticket t"
-                            + " where t.currentAssigneeId = :id and t.status in :st",
-                    Long.class)
-                    .setParameter("id", managerId)
-                    .setParameter("st", OPEN_STATUSES)
-                    .getSingleResult();
-            return count == null ? 0 : count;
-        } catch (IllegalArgumentException e) {
-            return 0;
-        }
+        return entityManager.createQuery(
+                "select count(t) from Ticket t"
+                        + " where t.currentAssigneeId = :id and t.status not in :done",
+                Long.class)
+                .setParameter("id", managerId)
+                .setParameter("done", DONE_STATUSES)
+                .getSingleResult();
+    }
+
+    /** Kiểm tra bằng metamodel để không phải chạy JPQL lỗi (làm transaction rollback-only). */
+    private boolean ticketEntityExists() {
+        return entityManager.getMetamodel().getEntities().stream()
+                .anyMatch(e -> "Ticket".equals(e.getName()));
     }
 }
