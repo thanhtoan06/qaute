@@ -11,6 +11,8 @@ public interface ManagerCategoryRepository extends JpaRepository<ManagerCategory
 
     List<ManagerCategory> findByManagerId(Long managerId);
 
+    List<ManagerCategory> findByManagerIdIn(Collection<Long> managerIds);
+
     List<ManagerCategory> findByCategoryIdIn(Collection<Long> categoryIds);
 
     void deleteByManagerId(Long managerId);
