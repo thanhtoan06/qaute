@@ -1,7 +1,9 @@
 package vn.edu.hcmute.qaute.service.admin;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Isolation;
@@ -15,6 +17,8 @@ import vn.edu.hcmute.qaute.common.exception.DuplicateException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.dto.request.admin.UserCreateForm;
 import vn.edu.hcmute.qaute.dto.request.admin.UserEditForm;
+import vn.edu.hcmute.qaute.dto.view.AuthSessionView;
+import vn.edu.hcmute.qaute.dto.view.LoginHistoryView;
 import vn.edu.hcmute.qaute.entity.identity.StudentProfile;
 import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.entity.organization.ManagerProfile;
@@ -24,11 +28,13 @@ import vn.edu.hcmute.qaute.repository.identity.StudentProfileRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.repository.organization.DepartmentRepository;
 import vn.edu.hcmute.qaute.repository.organization.ManagerProfileRepository;
+import vn.edu.hcmute.qaute.repository.organization.ManagerCategoryRepository;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.email.EmailService;
 import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
 import vn.edu.hcmute.qaute.service.identity.InvitationService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
+import vn.edu.hcmute.qaute.service.notification.NotificationService;
 
 @Service
 @Transactional
@@ -37,29 +43,35 @@ public class AdminUserService {
     private final RoleRepository roles;
     private final StudentProfileRepository students;
     private final ManagerProfileRepository managers;
+    private final ManagerCategoryRepository managerCategories;
     private final FacultyRepository faculties;
     private final DepartmentRepository departments;
     private final InvitationService invitations;
     private final AuthSessionService sessions;
     private final ManagerScopeService managerScope;
     private final EmailService emails;
+    private final ObjectProvider<NotificationService> notifications;
     private final AuditService audit;
 
     public AdminUserService(UserRepository users, RoleRepository roles,
                             StudentProfileRepository students, ManagerProfileRepository managers,
+                            ManagerCategoryRepository managerCategories,
                             FacultyRepository faculties, DepartmentRepository departments,
                             InvitationService invitations, AuthSessionService sessions,
-                            ManagerScopeService managerScope, EmailService emails, AuditService audit) {
+                            ManagerScopeService managerScope, EmailService emails,
+                            ObjectProvider<NotificationService> notifications, AuditService audit) {
         this.users = users;
         this.roles = roles;
         this.students = students;
         this.managers = managers;
+        this.managerCategories = managerCategories;
         this.faculties = faculties;
         this.departments = departments;
         this.invitations = invitations;
         this.sessions = sessions;
         this.managerScope = managerScope;
         this.emails = emails;
+        this.notifications = notifications;
         this.audit = audit;
     }
 
@@ -227,6 +239,99 @@ public class AdminUserService {
         sessions.revokeAllSessions(id, "admin_force_reset");
         audit.log(AuditActions.USER_FORCE_RESET, "User", id, summary(user),
                 "invitationSent=true,sessionsRevoked=true");
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public void changeRole(Long id, RoleCode newRole, String reason, Long actorId) {
+        User user = requireUser(id);
+        String normalizedReason = requireReason(reason);
+        if (newRole == null) {
+            throw fieldError("role", "Vui lòng chọn vai trò");
+        }
+        if (Objects.equals(id, actorId)) {
+            throw new BadRequestException("Không thể thay đổi vai trò của chính mình");
+        }
+        RoleCode oldRole = user.getRole().getCode();
+        if (oldRole == newRole) {
+            throw new BadRequestException("Vai trò mới phải khác vai trò hiện tại");
+        }
+        if (oldRole == RoleCode.ADMIN && user.getStatus() == UserStatus.ACTIVE
+                && users.findIdsByRoleCodeAndStatus(RoleCode.ADMIN, UserStatus.ACTIVE).size() <= 1) {
+            throw new BadRequestException("Không thể hạ vai trò Admin cuối cùng đang hoạt động");
+        }
+        if (oldRole == RoleCode.MANAGER) {
+            int openTickets = managerScope.currentOpenTicketCount(id);
+            if (openTickets > 0) {
+                throw new BadRequestException("Hãy chuyển giao " + openTickets
+                        + " yêu cầu đang phụ trách trước");
+            }
+        }
+        String before = summary(user);
+        user.setRole(roles.findByCode(newRole)
+                .orElseThrow(() -> fieldError("role", "Vai trò chưa được cấu hình")));
+        if (oldRole == RoleCode.MANAGER) {
+            managerCategories.deleteByManagerId(id);
+        }
+        if (newRole == RoleCode.MANAGER && managers.findByUserId(id).isEmpty()) {
+            managers.save(ManagerProfile.builder().userId(id)
+                    .availabilityStatus(AvailabilityStatus.OFFLINE).build());
+        }
+        if (newRole == RoleCode.STUDENT && students.findByUserId(id).isEmpty()) {
+            students.save(StudentProfile.builder().userId(id).build());
+        }
+        if (oldRole == RoleCode.STUDENT && newRole != RoleCode.STUDENT) {
+            user.setMssv(null);
+        }
+        sessions.revokeAllSessions(id, "admin_role_changed");
+        Map<String, String> details = Map.of("fullName", user.getFullName(),
+                "oldRole", oldRole.name(), "newRole", newRole.name(), "reason", normalizedReason);
+        NotificationService notificationService = notifications.getIfAvailable();
+        if (notificationService != null) {
+            notificationService.notifyUser(id, NotificationType.SECURITY_ROLE_CHANGED, details);
+        }
+        emails.sendTemplated(user.getEmail(),
+                "QAUTE - " + NotificationType.SECURITY_ROLE_CHANGED.getLabel(),
+                "security-role-changed", details);
+        audit.log(AuditActions.USER_ROLE_CHANGED, "User", id, before,
+                summary(user) + ",reason=" + normalizedReason);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AuthSessionView> sessions(Long id) {
+        requireUser(id);
+        return sessions.listSessions(id);
+    }
+
+    public void revokeSession(Long sessionId, Long userId, Long actorId) {
+        requireUser(userId);
+        AuthSessionView target = sessions.listSessions(userId).stream()
+                .filter(session -> session.id().equals(sessionId)).findFirst()
+                .orElse(null);
+        if (target == null) {
+            throw new NotFoundException("Không tìm thấy phiên đăng nhập của người dùng này");
+        }
+        if (target.revoked()) {
+            throw new BadRequestException("Phiên đăng nhập đã được thu hồi");
+        }
+        if (target.expired()) {
+            throw new BadRequestException("Phiên đăng nhập đã hết hạn");
+        }
+        sessions.revokeSession(sessionId, actorId);
+        audit.log(AuditActions.USER_SESSION_REVOKED, "User", userId,
+                "sessionId=" + sessionId, "revokedBy=" + actorId);
+    }
+
+    public void revokeAllSessions(Long userId, Long actorId) {
+        requireUser(userId);
+        sessions.revokeAllSessions(userId, "admin_manual");
+        audit.log(AuditActions.USER_SESSION_REVOKED, "User", userId,
+                "allSessions=true", "revokedBy=" + actorId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<LoginHistoryView> loginHistory(Long id) {
+        requireUser(id);
+        return sessions.listLoginHistory(id, 50);
     }
 
     private void protectAccountRemoval(User user, Long actorId) {
