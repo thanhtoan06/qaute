@@ -1,10 +1,13 @@
 package vn.edu.hcmute.qaute.service.admin;
 
 import java.util.Map;
+import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.common.constant.AvailabilityStatus;
+import vn.edu.hcmute.qaute.common.constant.NotificationType;
 import vn.edu.hcmute.qaute.common.constant.RoleCode;
 import vn.edu.hcmute.qaute.common.constant.UserStatus;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
@@ -22,7 +25,10 @@ import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.repository.organization.DepartmentRepository;
 import vn.edu.hcmute.qaute.repository.organization.ManagerProfileRepository;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
+import vn.edu.hcmute.qaute.service.email.EmailService;
+import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
 import vn.edu.hcmute.qaute.service.identity.InvitationService;
+import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 
 @Service
 @Transactional
@@ -34,12 +40,16 @@ public class AdminUserService {
     private final FacultyRepository faculties;
     private final DepartmentRepository departments;
     private final InvitationService invitations;
+    private final AuthSessionService sessions;
+    private final ManagerScopeService managerScope;
+    private final EmailService emails;
     private final AuditService audit;
 
     public AdminUserService(UserRepository users, RoleRepository roles,
                             StudentProfileRepository students, ManagerProfileRepository managers,
                             FacultyRepository faculties, DepartmentRepository departments,
-                            InvitationService invitations, AuditService audit) {
+                            InvitationService invitations, AuthSessionService sessions,
+                            ManagerScopeService managerScope, EmailService emails, AuditService audit) {
         this.users = users;
         this.roles = roles;
         this.students = students;
@@ -47,6 +57,9 @@ public class AdminUserService {
         this.faculties = faculties;
         this.departments = departments;
         this.invitations = invitations;
+        this.sessions = sessions;
+        this.managerScope = managerScope;
+        this.emails = emails;
         this.audit = audit;
     }
 
@@ -141,6 +154,105 @@ public class AdminUserService {
             throw new BadRequestException("Chỉ tài khoản chờ kích hoạt mới được gửi lại lời mời");
         }
         invitations.sendInvitation(id);
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public void lock(Long id, String reason, Long actorId) {
+        User user = requireUser(id);
+        String normalizedReason = requireReason(reason);
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new BadRequestException("Chỉ tài khoản đang hoạt động mới có thể bị khóa");
+        }
+        protectAccountRemoval(user, actorId);
+        String before = summary(user);
+        user.setStatus(UserStatus.LOCKED);
+        sessions.revokeAllSessions(id, "admin_locked");
+        emails.sendTemplated(user.getEmail(),
+                "QAUTE - " + NotificationType.SECURITY_ACCOUNT_LOCKED.getLabel(),
+                "security-account-locked",
+                Map.of("fullName", user.getFullName(), "reason", normalizedReason));
+        audit.log(AuditActions.USER_LOCKED, "User", id, before,
+                summary(user) + ",reason=" + normalizedReason);
+    }
+
+    public void unlock(Long id, Long actorId) {
+        User user = requireUser(id);
+        if (user.getStatus() != UserStatus.LOCKED) {
+            throw new BadRequestException("Chỉ tài khoản đã khóa mới có thể mở khóa");
+        }
+        String before = summary(user);
+        user.setStatus(UserStatus.ACTIVE);
+        user.setFailedLoginCount(0);
+        user.setLockedUntil(null);
+        audit.log(AuditActions.USER_UNLOCKED, "User", id, before, summary(user));
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public void deactivate(Long id, String reason, Long actorId) {
+        User user = requireUser(id);
+        String normalizedReason = requireReason(reason);
+        if (user.getStatus() == UserStatus.DEACTIVATED) {
+            throw new BadRequestException("Tài khoản đã được vô hiệu hóa");
+        }
+        protectAccountRemoval(user, actorId);
+        String before = summary(user);
+        user.setStatus(UserStatus.DEACTIVATED);
+        sessions.revokeAllSessions(id, "admin_deactivated");
+        audit.log(AuditActions.USER_DEACTIVATED, "User", id, before,
+                summary(user) + ",reason=" + normalizedReason);
+    }
+
+    public void reactivate(Long id, Long actorId) {
+        User user = requireUser(id);
+        if (user.getStatus() != UserStatus.DEACTIVATED) {
+            throw new BadRequestException("Chỉ tài khoản đã vô hiệu hóa mới có thể kích hoạt lại");
+        }
+        String before = summary(user);
+        boolean hasPassword = user.getPasswordHash() != null && !user.getPasswordHash().isBlank();
+        user.setStatus(hasPassword ? UserStatus.ACTIVE : UserStatus.PENDING_ACTIVATION);
+        user.setFailedLoginCount(0);
+        user.setLockedUntil(null);
+        if (!hasPassword) {
+            invitations.sendInvitation(id);
+        }
+        audit.log(AuditActions.USER_REACTIVATED, "User", id, before, summary(user));
+    }
+
+    public void forcePasswordReset(Long id, Long actorId) {
+        User user = requireUser(id);
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new BadRequestException("Chỉ tài khoản đang hoạt động mới có thể đặt lại mật khẩu");
+        }
+        invitations.sendInvitation(id);
+        sessions.revokeAllSessions(id, "admin_force_reset");
+        audit.log(AuditActions.USER_FORCE_RESET, "User", id, summary(user),
+                "invitationSent=true,sessionsRevoked=true");
+    }
+
+    private void protectAccountRemoval(User user, Long actorId) {
+        if (Objects.equals(user.getId(), actorId)) {
+            throw new BadRequestException("Không thể khóa hoặc vô hiệu hóa tài khoản của chính mình");
+        }
+        RoleCode role = user.getRole().getCode();
+        if (role == RoleCode.ADMIN && user.getStatus() == UserStatus.ACTIVE
+                && users.findIdsByRoleCodeAndStatus(RoleCode.ADMIN, UserStatus.ACTIVE).size() <= 1) {
+            throw new BadRequestException("Không thể khóa hoặc vô hiệu hóa Admin cuối cùng đang hoạt động");
+        }
+        if (role == RoleCode.MANAGER) {
+            int openTickets = managerScope.currentOpenTicketCount(user.getId());
+            if (openTickets > 0) {
+                throw new BadRequestException("Hãy chuyển giao " + openTickets
+                        + " yêu cầu đang phụ trách trước");
+            }
+        }
+    }
+
+    private static String requireReason(String reason) {
+        String normalized = reason == null ? "" : reason.trim();
+        if (normalized.length() < 10 || normalized.length() > 500) {
+            throw fieldError("reason", "Lý do phải từ 10 đến 500 ký tự");
+        }
+        return normalized;
     }
 
     private User requireUser(Long id) {
