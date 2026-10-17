@@ -24,6 +24,8 @@ public interface AuthSessionService {
 
     List<AuthSessionView> listSessions(Long userId);
 
+    List<AuthSessionView> listSessions(Long userId, String currentJti);
+
     List<LoginHistoryView> listLoginHistory(Long userId, int limit);
 
     void recordLogin(Long userId, String identifier, boolean success, String ip, String userAgent);

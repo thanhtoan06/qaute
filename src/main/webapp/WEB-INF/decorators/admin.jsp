@@ -1,21 +1,14 @@
-<%--
-  QAUTE - Decorator khu vực Admin (SiteMesh áp dụng cho /admin/*).
-  Bố cục giống student.jsp và manager.jsp, thêm nhóm menu và breadcrumb theo requestScope.pageTitle.
-  Mở đầu giống student.jsp: include taglibs.jspf (đã có page directive nên ở đây không khai báo
-  lại pageEncoding/contentType, tránh khai báo trùng). SiteMesh xử lý thẻ write sau khi JSP render.
---%>
+<%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
+<%@ page import="org.sitemesh.content.Content" %>
+<%
+    Content pageContent = (Content) request.getAttribute("org.sitemesh.content.Content");
+%>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<%-- Đường dẫn hiện tại (bỏ context path). Sau forward thì lấy từ thuộc tính forward.request_uri. --%>
 <c:set var="rawUri" value="${not empty requestScope['jakarta.servlet.forward.request_uri'] ? requestScope['jakarta.servlet.forward.request_uri'] : pageContext.request.requestURI}"/>
 <c:set var="currentPath" value="${fn:startsWith(rawUri, ctx) ? fn:substring(rawUri, fn:length(ctx), fn:length(rawUri)) : rawUri}"/>
 
-<%--
-  Tô sáng menu: chọn đường dẫn menu KHỚP DÀI NHẤT với đường dẫn hiện tại, nhờ vậy
-  /admin/users/import không làm sáng cả /admin/users, /admin/faq/tags không làm sáng /admin/faq.
-  Khi thêm mục menu mới, nhớ thêm đường dẫn của nó vào menuPaths (và vào cờ nhóm bên dưới nếu thuộc nhóm).
---%>
 <c:set var="menuPaths" value="/admin/dashboard,/admin/users,/admin/users/import,/admin/departments,/admin/categories,/admin/managers,/admin/faq,/admin/faq/tags,/admin/faq/synonyms,/admin/tickets,/admin/sla,/admin/settings,/admin/announcements,/admin/audit-logs,/admin/reports,/admin/health"/>
 <c:set var="activePath" value=""/>
 <c:forTokens items="${menuPaths}" delims="," var="menuPath">
@@ -26,7 +19,6 @@
   </c:if>
 </c:forTokens>
 
-<%-- Cờ "nhóm đang mở": nhóm có mục con đang được chọn thì mở sẵn. --%>
 <c:set var="grpUsers" value="${activePath == '/admin/users' or activePath == '/admin/users/import'}"/>
 <c:set var="grpOrg" value="${activePath == '/admin/departments' or activePath == '/admin/categories' or activePath == '/admin/managers'}"/>
 <c:set var="grpKnowledge" value="${activePath == '/admin/faq' or activePath == '/admin/faq/tags' or activePath == '/admin/faq/synonyms'}"/>
@@ -37,13 +29,12 @@
 <head>
   <meta charset="UTF-8">
   <%@ include file="/WEB-INF/views/common/head-assets.jspf" %>
-  <title><sitemesh:write property="title"/> - QAUTE</title>
-  <sitemesh:write property="head"/>
+  <title><%= pageContent.getExtractedProperties().getChild("title").getValue() %> - QAUTE</title>
+  <%= pageContent.getExtractedProperties().getChild("head").getValue() %>
 </head>
 <body>
 <div class="page">
 
-  <%-- ===== Menu dọc bên trái ===== --%>
   <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
     <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#qa-sidebar-menu"
@@ -147,17 +138,9 @@
     </div>
   </aside>
 
-  <%-- ===== Header trên cùng: chuông + người dùng ===== --%>
   <header class="navbar navbar-expand-md d-print-none">
     <div class="container-xl">
       <div class="navbar-nav flex-row ms-auto align-items-center gap-3">
-
-        <%--
-          TODO (T1-44): khi TV1 đã gộp notification-bell.jspf vào main thì thay khối comment này bằng 2 dòng:
-            <c:set var="notificationsUrl" value="/admin/notifications" scope="request"/>
-            <%@ include file="/WEB-INF/views/common/notification-bell.jspf" %>
-          (Kế hoạch hiện chưa có trang thông báo cho Admin; cần thống nhất với TV1 giá trị notificationsUrl.)
-        --%>
 
         <div class="nav-item dropdown">
           <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Mở menu người dùng">
@@ -178,10 +161,8 @@
     </div>
   </header>
 
-  <%-- ===== Vùng nội dung ===== --%>
   <div class="page-wrapper">
 
-    <%-- Breadcrumb đơn giản, chỉ hiện khi controller đặt requestScope.pageTitle. --%>
     <c:if test="${not empty requestScope.pageTitle}">
       <div class="page-header d-print-none">
         <div class="container-xl">
@@ -196,7 +177,7 @@
     <div class="page-body">
       <div class="container-xl">
         <qa:alert/>
-        <sitemesh:write property="body"/>
+        <%= pageContent.getExtractedProperties().getChild("body").getValue() %>
       </div>
     </div>
     <footer class="footer footer-transparent d-print-none">
@@ -206,9 +187,5 @@
 </div>
 
 <%@ include file="/WEB-INF/views/common/scripts.jspf" %>
-<%--
-  TODO (T1-44): khi TV1 đã gộp ws-scripts.jspf vào main thì thay khối comment này bằng dòng:
-    <%@ include file="/WEB-INF/views/common/ws-scripts.jspf" %>
---%>
 </body>
 </html>

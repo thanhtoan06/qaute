@@ -1,22 +1,15 @@
-<%--
-  QAUTE - Decorator khu vực Manager (SiteMesh áp dụng cho /manager/*).
-  Bố cục giống student.jsp: menu dọc bên trái + header trên cùng + vùng nội dung.
-  Mở đầu giống student.jsp: include taglibs.jspf (đã có page directive nên ở đây không khai báo
-  lại pageEncoding/contentType, tránh khai báo trùng). SiteMesh xử lý thẻ write sau khi JSP render.
---%>
+<%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
+<%@ page import="org.sitemesh.content.Content" %>
+<%
+    Content pageContent = (Content) request.getAttribute("org.sitemesh.content.Content");
+%>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<%-- Đường dẫn hiện tại (bỏ context path). Sau forward thì lấy từ thuộc tính forward.request_uri. --%>
 <c:set var="rawUri" value="${not empty requestScope['jakarta.servlet.forward.request_uri'] ? requestScope['jakarta.servlet.forward.request_uri'] : pageContext.request.requestURI}"/>
 <c:set var="currentPath" value="${fn:startsWith(rawUri, ctx) ? fn:substring(rawUri, fn:length(ctx), fn:length(rawUri)) : rawUri}"/>
-<%-- Trang chi tiết yêu cầu (/manager/tickets/{id}) thuộc mục "Hàng đợi yêu cầu". --%>
 <c:set var="navPath" value="${fn:startsWith(currentPath, '/manager/tickets') ? '/manager/queue' : currentPath}"/>
 
-<%--
-  Tô sáng menu: chọn đường dẫn menu KHỚP DÀI NHẤT với đường dẫn hiện tại.
-  Khi thêm mục menu mới, nhớ thêm đường dẫn của nó vào menuPaths.
---%>
 <c:set var="menuPaths" value="/manager/dashboard,/manager/queue,/manager/chat,/manager/schedule,/manager/appointments,/manager/students,/manager/canned-responses,/manager/faq,/manager/reports,/manager/profile"/>
 <c:set var="activePath" value=""/>
 <c:forTokens items="${menuPaths}" delims="," var="menuPath">
@@ -27,20 +20,18 @@
   </c:if>
 </c:forTokens>
 
-<%-- Trạng thái trực hiện tại (ONLINE/BUSY/OFFLINE) do ManagerContextAdvice nạp ở bước T2-31; chưa có thì ẩn nhóm nút. --%>
 <c:set var="mgrStatus" value="${fn:toUpperCase(managerStatus)}"/>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <%@ include file="/WEB-INF/views/common/head-assets.jspf" %>
-  <title><sitemesh:write property="title"/> - QAUTE</title>
-  <sitemesh:write property="head"/>
+  <title><%= pageContent.getExtractedProperties().getChild("title").getValue() %> - QAUTE</title>
+  <%= pageContent.getExtractedProperties().getChild("head").getValue() %>
 </head>
 <body>
 <div class="page">
 
-  <%-- ===== Menu dọc bên trái ===== --%>
   <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
     <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#qa-sidebar-menu"
@@ -119,12 +110,10 @@
     </div>
   </aside>
 
-  <%-- ===== Header trên cùng: trạng thái trực + chuông + người dùng ===== --%>
   <header class="navbar navbar-expand-md d-print-none">
     <div class="container-xl">
       <div class="navbar-nav flex-row ms-auto align-items-center gap-3">
 
-        <%-- Nhóm nút trạng thái trực: chỉ hiện khi đã có requestScope.managerStatus (nạp ở T2-31). --%>
         <c:if test="${not empty mgrStatus}">
           <form method="post" action="${ctx}/manager/profile/status" class="m-0">
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
@@ -141,13 +130,6 @@
             </div>
           </form>
         </c:if>
-
-        <%--
-          TODO (T1-44): khi TV1 đã gộp notification-bell.jspf vào main thì thay khối comment này bằng 2 dòng:
-            <c:set var="notificationsUrl" value="/manager/notifications" scope="request"/>
-            <%@ include file="/WEB-INF/views/common/notification-bell.jspf" %>
-          (Kế hoạch hiện chưa có trang thông báo cho Manager; cần thống nhất với TV1 giá trị notificationsUrl.)
-        --%>
 
         <div class="nav-item dropdown">
           <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Mở menu người dùng">
@@ -171,12 +153,11 @@
     </div>
   </header>
 
-  <%-- ===== Vùng nội dung ===== --%>
   <div class="page-wrapper">
     <div class="page-body">
       <div class="container-xl">
         <qa:alert/>
-        <sitemesh:write property="body"/>
+        <%= pageContent.getExtractedProperties().getChild("body").getValue() %>
       </div>
     </div>
     <footer class="footer footer-transparent d-print-none">
@@ -186,9 +167,5 @@
 </div>
 
 <%@ include file="/WEB-INF/views/common/scripts.jspf" %>
-<%--
-  TODO (T1-44): khi TV1 đã gộp ws-scripts.jspf vào main thì thay khối comment này bằng dòng:
-    <%@ include file="/WEB-INF/views/common/ws-scripts.jspf" %>
---%>
 </body>
 </html>

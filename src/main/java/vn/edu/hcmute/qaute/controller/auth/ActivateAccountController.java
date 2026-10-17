@@ -1,7 +1,7 @@
 package vn.edu.hcmute.qaute.controller.auth;
 
 import jakarta.validation.Valid;
-import java.util.Map;
+import java.util.Objects;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,41 +17,52 @@ import vn.edu.hcmute.qaute.service.identity.AccountActivationService;
 
 @Controller
 public class ActivateAccountController {
-    private final AccountActivationService activation;
 
-    public ActivateAccountController(AccountActivationService activation) {
-        this.activation = activation;
+    private final AccountActivationService accountActivationService;
+
+    public ActivateAccountController(AccountActivationService accountActivationService) {
+        this.accountActivationService = accountActivationService;
     }
 
     @GetMapping("/auth/activate")
-    public String page(@RequestParam(defaultValue = "") String token, Model model) {
-        ActivateAccountForm form = new ActivateAccountForm();
-        form.setToken(token);
-        model.addAttribute("form", form);
-        model.addAttribute("validToken", activation.isTokenValid(token));
+    public String activatePage(@RequestParam(defaultValue = "") String token, Model model) {
+        if (token.isBlank() || !accountActivationService.isTokenValid(token)) {
+            model.addAttribute("tokenValid", false);
+            model.addAttribute("errorMessage", "Liên kết đã hết hạn, hãy nhờ quản trị gửi lại lời mời");
+            return "auth/activate";
+        }
+
+        model.addAttribute("tokenValid", true);
+        if (!model.containsAttribute("form")) {
+            ActivateAccountForm form = new ActivateAccountForm();
+            form.setToken(token);
+            model.addAttribute("form", form);
+        }
         return "auth/activate";
     }
 
     @PostMapping("/auth/activate")
     public String activate(@Valid @ModelAttribute("form") ActivateAccountForm form,
-                           BindingResult result, Model model, RedirectAttributes redirect) {
-        if (result.hasErrors()) {
-            model.addAttribute("errors", FormErrors.of(result));
-            model.addAttribute("validToken", activation.isTokenValid(form.getToken()));
+                           BindingResult bindingResult,
+                           Model model,
+                           RedirectAttributes redirectAttributes) {
+        if (!Objects.equals(form.getNewPassword(), form.getConfirmPassword())) {
+            bindingResult.rejectValue("confirmPassword", "error.confirmPassword", "Mật khẩu nhập lại không khớp");
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("tokenValid", true);
+            model.addAttribute("errors", FormErrors.of(bindingResult));
             return "auth/activate";
         }
-        if (!form.getNewPassword().equals(form.getConfirmPassword())) {
-            model.addAttribute("errors", Map.of("confirmPassword", "Mật khẩu nhập lại không khớp"));
-            model.addAttribute("validToken", activation.isTokenValid(form.getToken()));
-            return "auth/activate";
-        }
+
         try {
-            activation.activate(form.getToken(), form.getNewPassword());
-            redirect.addFlashAttribute("flashSuccess", "Kích hoạt thành công, hãy đăng nhập");
+            accountActivationService.activate(form.getToken(), form.getNewPassword());
+            redirectAttributes.addFlashAttribute("flashSuccess", "Kích hoạt thành công");
             return "redirect:/auth/login";
-        } catch (AppException e) {
-            model.addAttribute("errors", Map.of("global", e.getMessage()));
-            model.addAttribute("validToken", false);
+        } catch (AppException exception) {
+            model.addAttribute("tokenValid", false);
+            model.addAttribute("errorMessage", exception.getMessage());
             return "auth/activate";
         }
     }

@@ -10,6 +10,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import vn.edu.hcmute.qaute.security.AuthEntryPoint;
 import vn.edu.hcmute.qaute.security.CookieService;
 import vn.edu.hcmute.qaute.security.CsrfCookieFilter;
@@ -22,6 +25,18 @@ import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    @Bean
+    public HttpFirewall httpFirewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        firewall.getDecodedUrlBlocklist().remove("//");
+        return firewall;
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer(HttpFirewall httpFirewall) {
+        return web -> web.httpFirewall(httpFirewall);
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -52,7 +67,8 @@ public class SecurityConfig {
                         // Quyền truy cập đã được kiểm tra ở lượt REQUEST gốc, không kiểm tra lại.
                         .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
                         .requestMatchers("/", "/assets/**", "/faq/**", "/topics/**", "/search",
-                                "/pages/**", "/auth/**", "/error", "/api/faqs/**", "/api/public/**")
+                                "/pages/**", "/auth/**", "/error",
+                                "/api/faqs/**", "/api/public/**")
                         .permitAll()
                         .requestMatchers("/student/**").hasRole("STUDENT")
                         .requestMatchers("/manager/**").hasRole("MANAGER")
