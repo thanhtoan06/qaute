@@ -65,5 +65,12 @@
   </div>
 </div>
 
-<%-- T2-13+: add account actions here without changing the information layout. --%>
-<div id="actions" class="mt-3"></div>
+<div id="actions" class="mt-3 d-flex flex-wrap gap-2">
+  <a class="btn btn-primary" href="${ctx}/admin/users/${user.id()}/edit"><i class="bi bi-pencil me-1"></i>Sửa</a>
+  <c:if test="${user.status() == 'PENDING_ACTIVATION'}">
+    <form method="post" action="${ctx}/admin/users/${user.id()}/resend-invitation">
+      <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+      <button class="btn btn-outline-primary" type="submit">Gửi lại lời mời</button>
+    </form>
+  </c:if>
+</div>
