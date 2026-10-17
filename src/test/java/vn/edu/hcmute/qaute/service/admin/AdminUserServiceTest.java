@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.ObjectProvider;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,11 +30,13 @@ import vn.edu.hcmute.qaute.repository.identity.StudentProfileRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.repository.organization.DepartmentRepository;
 import vn.edu.hcmute.qaute.repository.organization.ManagerProfileRepository;
+import vn.edu.hcmute.qaute.repository.organization.ManagerCategoryRepository;
 import vn.edu.hcmute.qaute.service.email.EmailService;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
 import vn.edu.hcmute.qaute.service.identity.InvitationService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
+import vn.edu.hcmute.qaute.service.notification.NotificationService;
 
 @ExtendWith(MockitoExtension.class)
 class AdminUserServiceTest {
@@ -41,12 +44,14 @@ class AdminUserServiceTest {
     @Mock RoleRepository roles;
     @Mock StudentProfileRepository students;
     @Mock ManagerProfileRepository managers;
+    @Mock ManagerCategoryRepository managerCategories;
     @Mock FacultyRepository faculties;
     @Mock DepartmentRepository departments;
     @Mock InvitationService invitations;
     @Mock AuthSessionService sessions;
     @Mock ManagerScopeService managerScope;
     @Mock EmailService emails;
+    @Mock ObjectProvider<NotificationService> notifications;
     @Mock AuditService audit;
     @InjectMocks AdminUserService service;
 
@@ -135,6 +140,72 @@ class AdminUserServiceTest {
 
         assertThrows(BadRequestException.class, () -> service.forcePasswordReset(7L, 1L));
         verifyNoInteractions(invitations, sessions);
+    }
+
+    @Test
+    void cannotChangeOwnRole() {
+        User user = user(1L, RoleCode.ADMIN, UserStatus.ACTIVE, "hash");
+        when(users.findById(1L)).thenReturn(Optional.of(user));
+
+        assertThrows(BadRequestException.class,
+                () -> service.changeRole(1L, RoleCode.MANAGER, "Điều chỉnh phân công", 1L));
+
+        assertEquals(RoleCode.ADMIN, user.getRole().getCode());
+        verifyNoInteractions(sessions, emails);
+    }
+
+    @Test
+    void cannotDemoteLastActiveAdmin() {
+        User user = user(2L, RoleCode.ADMIN, UserStatus.ACTIVE, "hash");
+        when(users.findById(2L)).thenReturn(Optional.of(user));
+        when(users.findIdsByRoleCodeAndStatus(RoleCode.ADMIN, UserStatus.ACTIVE))
+                .thenReturn(List.of(2L));
+
+        assertThrows(BadRequestException.class,
+                () -> service.changeRole(2L, RoleCode.STUDENT, "Điều chỉnh phân công", 1L));
+
+        assertEquals(RoleCode.ADMIN, user.getRole().getCode());
+    }
+
+    @Test
+    void changingManagerRoleRemovesScopeAndRevokesSessions() {
+        User user = user(3L, RoleCode.MANAGER, UserStatus.ACTIVE, "hash");
+        when(users.findById(3L)).thenReturn(Optional.of(user));
+        when(roles.findByCode(RoleCode.ADMIN))
+                .thenReturn(Optional.of(Role.builder().code(RoleCode.ADMIN).name("ADMIN").build()));
+
+        service.changeRole(3L, RoleCode.ADMIN, "Thay đổi nhiệm vụ", 1L);
+
+        assertEquals(RoleCode.ADMIN, user.getRole().getCode());
+        verify(managerCategories).deleteByManagerId(3L);
+        verify(sessions).revokeAllSessions(3L, "admin_role_changed");
+        verify(emails).sendTemplated(eq("user3@example.com"), any(),
+                eq("security-role-changed"), any());
+    }
+
+    @Test
+    void cannotChangeManagerRoleWhileTicketsAreOpen() {
+        User user = user(8L, RoleCode.MANAGER, UserStatus.ACTIVE, "hash");
+        when(users.findById(8L)).thenReturn(Optional.of(user));
+        when(managerScope.currentOpenTicketCount(8L)).thenReturn(3);
+
+        BadRequestException error = assertThrows(BadRequestException.class,
+                () -> service.changeRole(8L, RoleCode.ADMIN, "Thay đổi nhiệm vụ", 1L));
+
+        assertTrue(error.getMessage().contains("3 yêu cầu"));
+        verifyNoInteractions(managerCategories, sessions, emails);
+    }
+
+    @Test
+    void cannotRevokeAnotherUsersSession() {
+        when(users.findById(4L)).thenReturn(Optional.of(user(4L, RoleCode.STUDENT,
+                UserStatus.ACTIVE, "hash")));
+        when(sessions.listSessions(4L)).thenReturn(List.of());
+
+        assertThrows(vn.edu.hcmute.qaute.common.exception.NotFoundException.class,
+                () -> service.revokeSession(99L, 4L, 1L));
+
+        verify(sessions, org.mockito.Mockito.never()).revokeSession(any(), any());
     }
 
     private static User user(Long id, RoleCode role, UserStatus status, String passwordHash) {

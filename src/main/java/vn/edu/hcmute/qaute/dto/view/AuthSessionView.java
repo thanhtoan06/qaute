@@ -9,5 +9,6 @@ public record AuthSessionView(
         LocalDateTime createdAt,
         LocalDateTime lastUsedAt,
         boolean revoked,
+        boolean expired,
         boolean current) {
 }

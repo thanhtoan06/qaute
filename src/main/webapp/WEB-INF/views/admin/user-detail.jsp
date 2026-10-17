@@ -66,6 +66,7 @@
 </div>
 
 <div id="actions" class="mt-3 d-flex flex-wrap gap-2">
+  <a class="btn btn-outline-primary" href="${ctx}/admin/users/${user.id()}/security"><i class="bi bi-shield-lock me-1"></i>Bảo mật</a>
   <a class="btn btn-primary" href="${ctx}/admin/users/${user.id()}/edit"><i class="bi bi-pencil me-1"></i>Sửa</a>
   <c:if test="${user.status() == 'PENDING_ACTIVATION'}">
     <form method="post" action="${ctx}/admin/users/${user.id()}/resend-invitation">
@@ -104,3 +105,29 @@
                      confirmLabel="Kích hoạt lại" cssClass="btn-success"/>
   </c:if>
 </div>
+
+<c:if test="${user.id() != currentUserId}">
+  <div class="card mt-3">
+    <div class="card-header"><h3 class="card-title">Đổi vai trò</h3></div>
+    <div class="card-body">
+      <form method="post" action="${ctx}/admin/users/${user.id()}/role">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label required" for="new-role">Vai trò mới</label>
+            <select class="form-select" id="new-role" name="role" required>
+              <c:forEach var="role" items="${roles}">
+                <c:if test="${role != user.role()}"><option value="${role}"><c:out value="${role}"/></option></c:if>
+              </c:forEach>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label required" for="role-reason">Lý do</label>
+            <textarea class="form-control" id="role-reason" name="reason" rows="2" minlength="10" maxlength="500" required></textarea>
+          </div>
+          <div class="col-md-2"><button type="submit" class="btn btn-warning w-100">Đổi vai trò</button></div>
+        </div>
+      </form>
+    </div>
+  </div>
+</c:if>
