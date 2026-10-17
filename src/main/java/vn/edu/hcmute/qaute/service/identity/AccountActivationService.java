@@ -4,8 +4,10 @@ import java.time.LocalDateTime;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.edu.hcmute.qaute.common.constant.ErrorCode;
 import vn.edu.hcmute.qaute.common.constant.UserStatus;
-import vn.edu.hcmute.qaute.common.exception.BadRequestException;
+import vn.edu.hcmute.qaute.common.exception.AppException;
+import vn.edu.hcmute.qaute.common.util.TokenUtil;
 import vn.edu.hcmute.qaute.common.validation.StrongPasswordValidator;
 import vn.edu.hcmute.qaute.entity.identity.AccountActivationToken;
 import vn.edu.hcmute.qaute.entity.identity.User;
@@ -14,62 +16,71 @@ import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 
 @Service
 public class AccountActivationService {
-    private final AccountActivationTokenRepository tokens;
-    private final UserRepository users;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthSessionService sessions;
 
-    public AccountActivationService(AccountActivationTokenRepository tokens, UserRepository users,
-                                    PasswordEncoder passwordEncoder, AuthSessionService sessions) {
-        this.tokens = tokens;
-        this.users = users;
+    private final AccountActivationTokenRepository accountActivationTokenRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthSessionService authSessionService;
+
+    public AccountActivationService(AccountActivationTokenRepository accountActivationTokenRepository,
+                                    UserRepository userRepository,
+                                    PasswordEncoder passwordEncoder,
+                                    AuthSessionService authSessionService) {
+        this.accountActivationTokenRepository = accountActivationTokenRepository;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.sessions = sessions;
+        this.authSessionService = authSessionService;
     }
 
     @Transactional(readOnly = true)
     public boolean isTokenValid(String rawToken) {
-        AccountActivationToken token = findValid(rawToken, false);
-        return token != null && users.findById(token.getUserId())
-                .map(user -> user.getStatus() == UserStatus.PENDING_ACTIVATION
-                        || user.getStatus() == UserStatus.ACTIVE)
-                .orElse(false);
+        if (rawToken == null || rawToken.isBlank()) {
+            return false;
+        }
+        String tokenHash = TokenUtil.sha256Hex(rawToken);
+        return accountActivationTokenRepository.findByTokenHash(tokenHash)
+                .filter(token -> token.getUsedAt() == null && LocalDateTime.now().isBefore(token.getExpiresAt()))
+                .flatMap(token -> userRepository.findById(token.getUserId()))
+                .filter(user -> user.getStatus() == UserStatus.PENDING_ACTIVATION || user.getStatus() == UserStatus.ACTIVE)
+                .isPresent();
     }
 
     @Transactional
     public void activate(String rawToken, String newPassword) {
         if (!new StrongPasswordValidator().isValid(newPassword, null)) {
-            throw new BadRequestException("Mật khẩu 8–64 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
+            throw new AppException(ErrorCode.ERR_VALIDATION,
+                    "Mật khẩu 8–64 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
         }
-        AccountActivationToken token = findValid(rawToken, true);
-        if (token == null) {
-            throw new BadRequestException("Liên kết kích hoạt không hợp lệ hoặc đã hết hạn");
+        if (rawToken == null || rawToken.isBlank()) {
+            throw new AppException(ErrorCode.ERR_VALIDATION, "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn");
         }
-        User user = users.findById(token.getUserId())
-                .orElseThrow(() -> new BadRequestException("Tài khoản không còn tồn tại"));
-        if (user.getStatus() != UserStatus.PENDING_ACTIVATION && user.getStatus() != UserStatus.ACTIVE) {
-            throw new BadRequestException("Tài khoản không thể kích hoạt");
+        String tokenHash = TokenUtil.sha256Hex(rawToken);
+        AccountActivationToken token = accountActivationTokenRepository.findByTokenHashForUpdate(tokenHash)
+                .orElseThrow(() -> new AppException(ErrorCode.ERR_VALIDATION,
+                        "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn"));
+
+        if (token.getUsedAt() != null || !LocalDateTime.now().isBefore(token.getExpiresAt())) {
+            throw new AppException(ErrorCode.ERR_VALIDATION,
+                    "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn");
         }
+
+        User user = userRepository.findById(token.getUserId())
+                .filter(u -> u.getStatus() == UserStatus.PENDING_ACTIVATION || u.getStatus() == UserStatus.ACTIVE)
+                .orElseThrow(() -> new AppException(ErrorCode.ERR_VALIDATION,
+                        "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn"));
+
         LocalDateTime now = LocalDateTime.now();
         user.setPasswordHash(passwordEncoder.encode(newPassword));
-        user.setPasswordChangedAt(now);
         user.setStatus(UserStatus.ACTIVE);
         if (user.getEmailVerifiedAt() == null) {
             user.setEmailVerifiedAt(now);
         }
+        user.setPasswordChangedAt(now);
         user.setFailedLoginCount(0);
         user.setLockedUntil(null);
-        token.setUsedAt(now);
-        sessions.revokeAllSessions(user.getId(), "account_activated");
-    }
 
-    private AccountActivationToken findValid(String rawToken, boolean lock) {
-        if (rawToken == null || !rawToken.matches("[0-9a-fA-F]{64}")) {
-            return null;
-        }
-        String hash = InvitationServiceImpl.hash(rawToken.toLowerCase());
-        return (lock ? tokens.findByTokenHashForUpdate(hash) : tokens.findByTokenHash(hash))
-                .filter(token -> token.getUsedAt() == null && token.getExpiresAt().isAfter(LocalDateTime.now()))
-                .orElse(null);
+        token.setUsedAt(now);
+
+        authSessionService.revokeAllSessions(user.getId(), "activation");
     }
 }

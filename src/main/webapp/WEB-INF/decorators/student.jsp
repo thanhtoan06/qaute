@@ -1,4 +1,9 @@
+<%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
+<%@ page import="org.sitemesh.content.Content" %>
+<%
+    Content pageContent = (Content) request.getAttribute("org.sitemesh.content.Content");
+%>
 <c:set var="currentUri" value="${requestScope['jakarta.servlet.forward.request_uri']}"/>
 <c:if test="${empty currentUri}">
     <c:set var="currentUri" value="${pageContext.request.requestURI}"/>
@@ -21,8 +26,8 @@
 <html lang="vi">
 <head>
     <%@ include file="/WEB-INF/views/common/head-assets.jspf" %>
-    <title><sitemesh:write property="title"/> - QAUTE</title>
-    <sitemesh:write property="head"/>
+    <title><%= pageContent.getExtractedProperties().getChild("title").getValue() %> - QAUTE</title>
+    <%= pageContent.getExtractedProperties().getChild("head").getValue() %>
 </head>
 <body>
 <div class="page">
@@ -115,7 +120,7 @@
         <div class="page-body">
             <div class="container-xl py-4">
                 <qa:alert/>
-                <sitemesh:write property="body"/>
+                <%= pageContent.getExtractedProperties().getChild("body").getValue() %>
             </div>
         </div>
     </div>

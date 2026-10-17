@@ -28,6 +28,7 @@ public class SiteMeshConfig {
                     .addDecoratorPath("/admin/*", "admin.jsp")
                     .addDecoratorPath("/auth/*", "auth.jsp")
                     .addDecoratorPath("/*", "public.jsp")
+                    .addExcludedPath("/WEB-INF/*")
                     .addExcludedPath("/api/*")
                     .addExcludedPath("/assets/*")
                     .addExcludedPath("/ws/*")
