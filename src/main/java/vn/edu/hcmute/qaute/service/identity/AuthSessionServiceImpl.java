@@ -148,7 +148,9 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         if (!owner && !admin) {
             throw new AccessDeniedException("Bạn không có quyền thu hồi phiên này");
         }
-        revoke(session, "manual");
+        if (revoke(session, "manual")) {
+            eventPublisher.publishEvent(new SessionRevokedEvent(session.getUserId(), session.getJti()));
+        }
     }
 
     @Override
@@ -165,6 +167,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
                         session.getId(), session.getDeviceInfo(), session.getIp(),
                         session.getCreatedAt(), session.getLastUsedAt(),
                         session.getRevokedAt() != null,
+                        !session.getExpiresAt().isAfter(LocalDateTime.now()),
                         currentJti != null && currentJti.equals(session.getJti())))
                 .toList();
     }
