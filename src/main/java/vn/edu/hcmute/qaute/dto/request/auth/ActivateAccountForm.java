@@ -20,4 +20,3 @@ public class ActivateAccountForm {
     @NotBlank(message = "Vui lòng nhập lại mật khẩu")
     private String confirmPassword;
 }
-

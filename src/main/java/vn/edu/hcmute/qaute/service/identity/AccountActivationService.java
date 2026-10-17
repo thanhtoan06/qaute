@@ -8,6 +8,7 @@ import vn.edu.hcmute.qaute.common.constant.ErrorCode;
 import vn.edu.hcmute.qaute.common.constant.UserStatus;
 import vn.edu.hcmute.qaute.common.exception.AppException;
 import vn.edu.hcmute.qaute.common.util.TokenUtil;
+import vn.edu.hcmute.qaute.common.validation.StrongPasswordValidator;
 import vn.edu.hcmute.qaute.entity.identity.AccountActivationToken;
 import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.identity.AccountActivationTokenRepository;
@@ -46,11 +47,15 @@ public class AccountActivationService {
 
     @Transactional
     public void activate(String rawToken, String newPassword) {
+        if (!new StrongPasswordValidator().isValid(newPassword, null)) {
+            throw new AppException(ErrorCode.ERR_VALIDATION,
+                    "Mật khẩu 8–64 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
+        }
         if (rawToken == null || rawToken.isBlank()) {
             throw new AppException(ErrorCode.ERR_VALIDATION, "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn");
         }
         String tokenHash = TokenUtil.sha256Hex(rawToken);
-        AccountActivationToken token = accountActivationTokenRepository.findByTokenHash(tokenHash)
+        AccountActivationToken token = accountActivationTokenRepository.findByTokenHashForUpdate(tokenHash)
                 .orElseThrow(() -> new AppException(ErrorCode.ERR_VALIDATION,
                         "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn"));
 
@@ -79,4 +84,3 @@ public class AccountActivationService {
         authSessionService.revokeAllSessions(user.getId(), "activation");
     }
 }
-

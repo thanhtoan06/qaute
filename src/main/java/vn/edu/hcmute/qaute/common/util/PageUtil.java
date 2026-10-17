@@ -14,7 +14,8 @@ public final class PageUtil {
                               Set<String> allowedSortFields, String defaultSortField) {
         int safePage = Math.max(page, 0);
         int safeSize = size <= 0 ? 10 : Math.min(size, 100);
-        String safeSortField = allowedSortFields.contains(sortField) ? sortField : defaultSortField;
+        String safeSortField = sortField != null && allowedSortFields.contains(sortField)
+                ? sortField : defaultSortField;
         Sort.Direction direction = desc ? Sort.Direction.DESC : Sort.Direction.ASC;
         return PageRequest.of(safePage, safeSize, Sort.by(direction, safeSortField));
     }
