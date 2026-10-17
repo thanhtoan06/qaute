@@ -2,10 +2,9 @@
   QAUTE - Decorator khu vực Admin (SiteMesh áp dụng cho /admin/*).
   Bố cục giống student.jsp và manager.jsp, thêm nhóm menu và breadcrumb theo requestScope.pageTitle.
   Mở đầu giống student.jsp: include taglibs.jspf (đã có page directive nên ở đây không khai báo
-  lại pageEncoding/contentType, tránh khai báo trùng) rồi khai báo taglib sitemesh.
+  lại pageEncoding/contentType, tránh khai báo trùng). SiteMesh xử lý thẻ write sau khi JSP render.
 --%>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
-<%@ taglib prefix="sitemesh" uri="http://www.sitemesh.org/sitemesh-3.0" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <%-- Đường dẫn hiện tại (bỏ context path). Sau forward thì lấy từ thuộc tính forward.request_uri. --%>

@@ -1,5 +1,6 @@
 package vn.edu.hcmute.qaute.config;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -47,6 +48,9 @@ public class SecurityConfig {
                         jwtService, authSessionService),
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
+                        // Forward tới JSP trong /WEB-INF và error dispatch là nội bộ của container.
+                        // Quyền truy cập đã được kiểm tra ở lượt REQUEST gốc, không kiểm tra lại.
+                        .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
                         .requestMatchers("/", "/assets/**", "/faq/**", "/topics/**", "/search",
                                 "/pages/**", "/auth/**", "/error", "/api/faqs/**", "/api/public/**")
                         .permitAll()
