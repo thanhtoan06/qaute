@@ -1,11 +1,15 @@
+<%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
-<%@ taglib prefix="sitemesh" uri="http://www.sitemesh.org/sitemesh-3.0" %>
+<%@ page import="org.sitemesh.content.Content" %>
+<%
+    Content pageContent = (Content) request.getAttribute("org.sitemesh.content.Content");
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <%@ include file="/WEB-INF/views/common/head-assets.jspf" %>
-    <title><sitemesh:write property="title"/> - QAUTE</title>
-    <sitemesh:write property="head"/>
+    <title><%= pageContent.getExtractedProperties().getChild("title").getValue() %> - QAUTE</title>
+    <%= pageContent.getExtractedProperties().getChild("head").getValue() %>
 </head>
 <body>
 <div class="page page-center">
@@ -16,7 +20,7 @@
         <div class="card card-md">
             <div class="card-body">
                 <qa:alert/>
-                <sitemesh:write property="body"/>
+                <%= pageContent.getExtractedProperties().getChild("body").getValue() %>
             </div>
         </div>
         <div class="text-center text-secondary mt-3">
