@@ -21,6 +21,7 @@ import vn.edu.hcmute.qaute.common.exception.DuplicateException;
 import vn.edu.hcmute.qaute.common.util.PageUtil;
 import vn.edu.hcmute.qaute.common.web.FormErrors;
 import vn.edu.hcmute.qaute.dto.request.admin.UserCreateForm;
+import vn.edu.hcmute.qaute.dto.request.admin.UserActionForm;
 import vn.edu.hcmute.qaute.dto.request.admin.UserEditForm;
 import vn.edu.hcmute.qaute.dto.request.admin.UserFilter;
 import vn.edu.hcmute.qaute.entity.identity.User;
@@ -69,6 +70,7 @@ public class AdminUserController {
     @GetMapping("/admin/users/{id}")
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("user", adminUserQueryService.getDetail(id));
+        model.addAttribute("currentUserId", SecurityUtils.requireUserId());
         model.addAttribute("pageTitle", "Chi tiết người dùng");
         return "admin/user-detail";
     }
@@ -139,6 +141,64 @@ public class AdminUserController {
         } catch (BadRequestException e) {
             redirect.addFlashAttribute("flashError", e.getMessage());
         }
+        return "redirect:/admin/users/" + id;
+    }
+
+    @PostMapping("/admin/users/{id}/lock")
+    public String lock(@PathVariable Long id, @Valid @ModelAttribute UserActionForm form,
+                       BindingResult result, RedirectAttributes redirect) {
+        if (result.hasErrors()) {
+            return actionError(id, redirect, "Lý do khóa phải từ 10 đến 500 ký tự");
+        }
+        return runAction(id, redirect,
+                () -> adminUserService.lock(id, form.getReason(), SecurityUtils.requireUserId()),
+                "Đã khóa tài khoản và thu hồi các phiên đăng nhập");
+    }
+
+    @PostMapping("/admin/users/{id}/unlock")
+    public String unlock(@PathVariable Long id, RedirectAttributes redirect) {
+        return runAction(id, redirect,
+                () -> adminUserService.unlock(id, SecurityUtils.requireUserId()),
+                "Đã mở khóa tài khoản");
+    }
+
+    @PostMapping("/admin/users/{id}/deactivate")
+    public String deactivate(@PathVariable Long id, @Valid @ModelAttribute UserActionForm form,
+                             BindingResult result, RedirectAttributes redirect) {
+        if (result.hasErrors()) {
+            return actionError(id, redirect, "Lý do vô hiệu hóa phải từ 10 đến 500 ký tự");
+        }
+        return runAction(id, redirect,
+                () -> adminUserService.deactivate(id, form.getReason(), SecurityUtils.requireUserId()),
+                "Đã vô hiệu hóa tài khoản và thu hồi các phiên đăng nhập");
+    }
+
+    @PostMapping("/admin/users/{id}/reactivate")
+    public String reactivate(@PathVariable Long id, RedirectAttributes redirect) {
+        return runAction(id, redirect,
+                () -> adminUserService.reactivate(id, SecurityUtils.requireUserId()),
+                "Đã kích hoạt lại tài khoản; lời mời được gửi nếu cần đặt mật khẩu");
+    }
+
+    @PostMapping("/admin/users/{id}/force-reset")
+    public String forcePasswordReset(@PathVariable Long id, RedirectAttributes redirect) {
+        return runAction(id, redirect,
+                () -> adminUserService.forcePasswordReset(id, SecurityUtils.requireUserId()),
+                "Đã gửi lời mời đặt lại mật khẩu và thu hồi các phiên đăng nhập");
+    }
+
+    private String runAction(Long id, RedirectAttributes redirect, Runnable action, String success) {
+        try {
+            action.run();
+            redirect.addFlashAttribute("flashSuccess", success);
+        } catch (BadRequestException e) {
+            redirect.addFlashAttribute("flashError", e.getMessage());
+        }
+        return "redirect:/admin/users/" + id;
+    }
+
+    private String actionError(Long id, RedirectAttributes redirect, String message) {
+        redirect.addFlashAttribute("flashError", message);
         return "redirect:/admin/users/" + id;
     }
 
