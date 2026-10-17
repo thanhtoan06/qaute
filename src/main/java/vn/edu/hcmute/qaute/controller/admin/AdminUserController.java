@@ -24,6 +24,7 @@ import vn.edu.hcmute.qaute.dto.request.admin.UserCreateForm;
 import vn.edu.hcmute.qaute.dto.request.admin.UserActionForm;
 import vn.edu.hcmute.qaute.dto.request.admin.UserEditForm;
 import vn.edu.hcmute.qaute.dto.request.admin.UserFilter;
+import vn.edu.hcmute.qaute.dto.request.admin.UserRoleChangeForm;
 import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.identity.FacultyRepository;
 import vn.edu.hcmute.qaute.repository.organization.DepartmentRepository;
@@ -71,6 +72,7 @@ public class AdminUserController {
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("user", adminUserQueryService.getDetail(id));
         model.addAttribute("currentUserId", SecurityUtils.requireUserId());
+        model.addAttribute("roles", RoleCode.values());
         model.addAttribute("pageTitle", "Chi tiết người dùng");
         return "admin/user-detail";
     }
@@ -185,6 +187,52 @@ public class AdminUserController {
         return runAction(id, redirect,
                 () -> adminUserService.forcePasswordReset(id, SecurityUtils.requireUserId()),
                 "Đã gửi lời mời đặt lại mật khẩu và thu hồi các phiên đăng nhập");
+    }
+
+    @PostMapping("/admin/users/{id}/role")
+    public String changeRole(@PathVariable Long id,
+                             @Valid @ModelAttribute UserRoleChangeForm form,
+                             BindingResult result, RedirectAttributes redirect) {
+        if (result.hasErrors()) {
+            return actionError(id, redirect, "Vui lòng chọn vai trò và nhập lý do từ 10 đến 500 ký tự");
+        }
+        return runAction(id, redirect,
+                () -> adminUserService.changeRole(id, form.getRole(), form.getReason(), SecurityUtils.requireUserId()),
+                "Đã đổi vai trò và thu hồi các phiên đăng nhập");
+    }
+
+    @GetMapping("/admin/users/{id}/security")
+    public String security(@PathVariable Long id, Model model) {
+        model.addAttribute("user", adminUserQueryService.getDetail(id));
+        model.addAttribute("sessions", adminUserService.sessions(id));
+        model.addAttribute("loginHistory", adminUserService.loginHistory(id));
+        model.addAttribute("pageTitle", "Bảo mật người dùng");
+        return "admin/user-security";
+    }
+
+    @PostMapping("/admin/users/{id}/sessions/{sessionId}/revoke")
+    public String revokeSession(@PathVariable Long id, @PathVariable Long sessionId,
+                                RedirectAttributes redirect) {
+        return runSecurityAction(id, redirect,
+                () -> adminUserService.revokeSession(sessionId, id, SecurityUtils.requireUserId()),
+                "Đã thu hồi phiên đăng nhập");
+    }
+
+    @PostMapping("/admin/users/{id}/sessions/revoke-all")
+    public String revokeAllSessions(@PathVariable Long id, RedirectAttributes redirect) {
+        return runSecurityAction(id, redirect,
+                () -> adminUserService.revokeAllSessions(id, SecurityUtils.requireUserId()),
+                "Đã thu hồi mọi phiên đăng nhập");
+    }
+
+    private String runSecurityAction(Long id, RedirectAttributes redirect, Runnable action, String success) {
+        try {
+            action.run();
+            redirect.addFlashAttribute("flashSuccess", success);
+        } catch (BadRequestException e) {
+            redirect.addFlashAttribute("flashError", e.getMessage());
+        }
+        return "redirect:/admin/users/" + id + "/security";
     }
 
     private String runAction(Long id, RedirectAttributes redirect, Runnable action, String success) {
