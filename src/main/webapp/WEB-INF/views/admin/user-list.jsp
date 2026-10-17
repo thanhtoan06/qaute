@@ -5,6 +5,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <h2 class="page-title mb-0">Danh sách người dùng</h2>
   <div class="d-flex align-items-center gap-3"><span class="text-secondary small">${users.totalElements} tài khoản</span>
+    <a class="btn btn-outline-primary" href="${ctx}/admin/users/import"><i class="bi bi-upload me-1"></i>Nhập CSV</a>
     <a class="btn btn-primary" href="${ctx}/admin/users/new"><i class="bi bi-plus-lg me-1"></i>Thêm người dùng</a></div>
 </div>
 
