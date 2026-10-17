@@ -23,6 +23,10 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     List<User> findByStatusAndCreatedAtBefore(UserStatus status, LocalDateTime before);
 
+    @Query("select u.id from User u where u.role.code = :roleCode and u.status = :status")
+    List<Long> findIdsByRoleCodeAndStatus(@Param("roleCode") RoleCode roleCode,
+                                          @Param("status") UserStatus status);
+
     /** Danh sách Manager theo tên hoặc email; keyword null/rỗng nghĩa là lấy toàn bộ. */
     @Query("""
             select u from User u

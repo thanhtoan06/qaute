@@ -73,4 +73,34 @@
       <button class="btn btn-outline-primary" type="submit">Gửi lại lời mời</button>
     </form>
   </c:if>
+  <c:if test="${user.status() == 'ACTIVE'}">
+    <c:if test="${user.id() != currentUserId}">
+      <qa:confirmModal id="lock-user-${user.id()}" title="Khóa tài khoản"
+                       message="Khóa tài khoản của ${user.fullName()} và thu hồi mọi phiên đăng nhập?"
+                       actionUrl="${ctx}/admin/users/${user.id()}/lock" confirmLabel="Khóa"
+                       requireReason="true"/>
+    </c:if>
+    <qa:confirmModal id="reset-user-${user.id()}" title="Buộc đặt lại mật khẩu"
+                     message="Gửi liên kết đặt lại mật khẩu và thu hồi mọi phiên đăng nhập của ${user.fullName()}?"
+                     actionUrl="${ctx}/admin/users/${user.id()}/force-reset"
+                     confirmLabel="Gửi liên kết" cssClass="btn-outline-warning"/>
+  </c:if>
+  <c:if test="${user.status() == 'LOCKED'}">
+    <qa:confirmModal id="unlock-user-${user.id()}" title="Mở khóa tài khoản"
+                     message="Mở khóa tài khoản của ${user.fullName()}?"
+                     actionUrl="${ctx}/admin/users/${user.id()}/unlock"
+                     confirmLabel="Mở khóa" cssClass="btn-success"/>
+  </c:if>
+  <c:if test="${user.status() != 'DEACTIVATED' and user.id() != currentUserId}">
+    <qa:confirmModal id="deactivate-user-${user.id()}" title="Vô hiệu hóa tài khoản"
+                     message="Vô hiệu hóa tài khoản của ${user.fullName()} và thu hồi mọi phiên đăng nhập?"
+                     actionUrl="${ctx}/admin/users/${user.id()}/deactivate"
+                     confirmLabel="Vô hiệu hóa" requireReason="true"/>
+  </c:if>
+  <c:if test="${user.status() == 'DEACTIVATED'}">
+    <qa:confirmModal id="reactivate-user-${user.id()}" title="Kích hoạt lại tài khoản"
+                     message="Kích hoạt lại tài khoản của ${user.fullName()}?"
+                     actionUrl="${ctx}/admin/users/${user.id()}/reactivate"
+                     confirmLabel="Kích hoạt lại" cssClass="btn-success"/>
+  </c:if>
 </div>
