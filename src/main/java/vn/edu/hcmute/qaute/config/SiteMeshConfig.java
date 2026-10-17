@@ -23,11 +23,11 @@ public class SiteMeshConfig {
 
         @Override
         protected void applyCustomConfiguration(SiteMeshFilterBuilder builder) {
-            builder.addDecoratorPath("/student/*", "/WEB-INF/decorators/student.jsp")
-                    .addDecoratorPath("/manager/*", "/WEB-INF/decorators/manager.jsp")
-                    .addDecoratorPath("/admin/*", "/WEB-INF/decorators/admin.jsp")
-                    .addDecoratorPath("/auth/*", "/WEB-INF/decorators/auth.jsp")
-                    .addDecoratorPath("/*", "/WEB-INF/decorators/public.jsp")
+            builder.addDecoratorPath("/student/*", "student.jsp")
+                    .addDecoratorPath("/manager/*", "manager.jsp")
+                    .addDecoratorPath("/admin/*", "admin.jsp")
+                    .addDecoratorPath("/auth/*", "auth.jsp")
+                    .addDecoratorPath("/*", "public.jsp")
                     .addExcludedPath("/api/*")
                     .addExcludedPath("/assets/*")
                     .addExcludedPath("/ws/*")

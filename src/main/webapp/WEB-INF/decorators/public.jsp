@@ -1,5 +1,4 @@
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
-<%@ taglib prefix="sitemesh" uri="http://www.sitemesh.org/sitemesh-3.0" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>

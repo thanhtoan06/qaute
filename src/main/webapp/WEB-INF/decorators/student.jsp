@@ -1,5 +1,4 @@
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
-<%@ taglib prefix="sitemesh" uri="http://www.sitemesh.org/sitemesh-3.0" %>
 <c:set var="currentUri" value="${requestScope['jakarta.servlet.forward.request_uri']}"/>
 <c:if test="${empty currentUri}">
     <c:set var="currentUri" value="${pageContext.request.requestURI}"/>
