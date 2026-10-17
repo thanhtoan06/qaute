@@ -4,4 +4,3 @@ public interface InvitationService {
 
     void sendInvitation(Long userId);
 }
-

@@ -1,6 +1,7 @@
 package vn.edu.hcmute.qaute.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,6 +29,13 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             objectMapper.writeValue(response.getWriter(), ApiResponse.fail("Bạn cần đăng nhập"));
+            return;
+        }
+        // Chốt chặn: không bao giờ dùng đường dẫn nội bộ (forward/error tới JSP) làm returnUrl,
+        // nếu không returnUrl sẽ lồng nhau vô hạn đến khi header phản hồi quá lớn.
+        if (request.getDispatcherType() != DispatcherType.REQUEST
+                || request.getRequestURI().startsWith("/WEB-INF/")) {
+            response.sendRedirect("/auth/login");
             return;
         }
         String path = request.getRequestURI();

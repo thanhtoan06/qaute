@@ -60,4 +60,3 @@
         <script src="/assets/js/auth/register.js"></script>
     </c:otherwise>
 </c:choose>
-
