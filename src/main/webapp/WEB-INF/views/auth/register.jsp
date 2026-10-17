@@ -1,3 +1,4 @@
+<%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <title>Đăng ký</title>
 <div class="mb-3">

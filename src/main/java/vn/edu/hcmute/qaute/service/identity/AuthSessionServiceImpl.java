@@ -154,11 +154,18 @@ public class AuthSessionServiceImpl implements AuthSessionService {
     @Override
     @Transactional(readOnly = true)
     public List<AuthSessionView> listSessions(Long userId) {
+        return listSessions(userId, null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AuthSessionView> listSessions(Long userId, String currentJti) {
         return authSessionRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
                 .map(session -> new AuthSessionView(
                         session.getId(), session.getDeviceInfo(), session.getIp(),
                         session.getCreatedAt(), session.getLastUsedAt(),
-                        session.getRevokedAt() != null, false))
+                        session.getRevokedAt() != null,
+                        currentJti != null && currentJti.equals(session.getJti())))
                 .toList();
     }
 
