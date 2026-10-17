@@ -1,5 +1,6 @@
 package vn.edu.hcmute.qaute.controller.guest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -11,13 +12,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.hcmute.qaute.common.constant.FaqSort;
+import vn.edu.hcmute.qaute.common.util.TokenUtil;
+import vn.edu.hcmute.qaute.common.web.ClientIpResolver;
 import vn.edu.hcmute.qaute.dto.request.FaqFilter;
 import vn.edu.hcmute.qaute.dto.view.CategoryView;
+import vn.edu.hcmute.qaute.dto.view.FaqDetailView;
 import vn.edu.hcmute.qaute.dto.view.FaqListItem;
 import vn.edu.hcmute.qaute.dto.view.TagView;
+import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
+import vn.edu.hcmute.qaute.service.knowledge.FaqViewCounter;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
 @Controller
@@ -27,11 +34,14 @@ public class PublicFaqController {
 
     private final FaqQueryService faqQueryService;
     private final CategoryQueryService categoryQueryService;
+    private final FaqViewCounter faqViewCounter;
 
     public PublicFaqController(FaqQueryService faqQueryService,
-                               CategoryQueryService categoryQueryService) {
+                               CategoryQueryService categoryQueryService,
+                               FaqViewCounter faqViewCounter) {
         this.faqQueryService = faqQueryService;
         this.categoryQueryService = categoryQueryService;
+        this.faqViewCounter = faqViewCounter;
     }
 
     @GetMapping("/faq")
@@ -102,5 +112,24 @@ public class PublicFaqController {
 
         return "guest/faq-list";
     }
-}
 
+    @GetMapping("/faq/{slug}")
+    public String viewFaq(@PathVariable String slug,
+                          HttpServletRequest request,
+                          Model model) {
+        FaqDetailView faq = faqQueryService.getPublishedBySlug(slug);
+
+        String viewerKey = SecurityUtils.currentUser()
+                .map(user -> "u" + user.getId())
+                .orElseGet(() -> "ip" + TokenUtil.sha256Hex(ClientIpResolver.resolve(request)));
+
+        faqViewCounter.recordView(faq.id(), viewerKey);
+
+        List<FaqListItem> related = faqQueryService.related(faq.id(), 5);
+
+        model.addAttribute("faq", faq);
+        model.addAttribute("related", related);
+
+        return "guest/faq-detail";
+    }
+}

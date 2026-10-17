@@ -80,7 +80,6 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
-    @Transactional
     public FaqDetailView getPublishedBySlug(String slug) {
         Faq faq = faqRepository.findBySlug(slug)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy FAQ"));
@@ -90,8 +89,6 @@ public class FaqQueryServiceImpl implements FaqQueryService {
                 || (faq.getPublishAt() != null && faq.getPublishAt().isAfter(now))) {
             throw new NotFoundException("Không tìm thấy FAQ");
         }
-
-        faqRepository.incrementViewCount(faq.getId());
 
         String categoryPath = categoryQueryService.getDisplayPath(faq.getCategoryId());
         List<TagView> tagViews = faq.getTags().stream()
@@ -106,7 +103,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
                 faq.getBodyHtml(),
                 faq.getCategoryId(),
                 categoryPath,
-                faq.getViewCount() + 1,
+                faq.getViewCount(),
                 faq.getHelpfulCount(),
                 faq.getNotHelpfulCount(),
                 faq.getUpdatedAt(),
