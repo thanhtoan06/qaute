@@ -19,6 +19,12 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
     long countByStudentIdAndUrgentRequestedTrueAndStatusIn(Long studentId, Collection<TicketStatus> statuses);
     long countByCurrentAssigneeIdAndStatusIn(Long assigneeId, Collection<TicketStatus> statuses);
 
+    @Query("SELECT t FROM Ticket t WHERE t.studentId = :studentId AND t.id <> :ticketId "
+            + "AND t.categoryId IN :categoryIds ORDER BY t.createdAt DESC, t.id DESC")
+    List<Ticket> findOtherStudentTicketsInScope(@Param("studentId") Long studentId,
+            @Param("ticketId") Long ticketId, @Param("categoryIds") Collection<Long> categoryIds,
+            Pageable pageable);
+
     @Query("SELECT DISTINCT t.categoryId FROM Ticket t WHERE t.currentAssigneeId = :managerId")
     List<Long> findAssignedCategoryIds(@Param("managerId") Long managerId);
 
