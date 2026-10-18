@@ -289,11 +289,177 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         return new UnsupportedOperationException("Chưa cài đặt");
     }
 
-    @Override public Ticket requestMoreInfo(Long ticketId, Long managerId, String messageHtml, List<Long> assetIds) { throw unsupported(); }
-    @Override public Ticket resolve(Long ticketId, Long managerId, String resolutionNote) { throw unsupported(); }
-    @Override public Ticket confirmClose(Long ticketId, Long studentId) { throw unsupported(); }
-    @Override public Ticket reopen(Long ticketId, Long studentId, String reason) { throw unsupported(); }
-    @Override public Ticket cancel(Long ticketId, Long studentId, String reason) { throw unsupported(); }
+    @Override
+    public Ticket requestMoreInfo(Long ticketId, Long managerId, String messageHtml, List<Long> assetIds) {
+        try {
+            Ticket ticket = findOrThrow(ticketId);
+            if (!managerId.equals(ticket.getCurrentAssigneeId())) {
+                throw new ForbiddenException("Ticket không được giao cho bạn");
+            }
+            if (ticket.getStatus() != TicketStatus.ASSIGNED && ticket.getStatus() != TicketStatus.IN_PROGRESS) {
+                throw new InvalidTransitionException("Chỉ có thể yêu cầu thêm thông tin khi ticket đang được xử lý");
+            }
+            Content content = sanitize(messageHtml, 1, "messageHtml");
+            LocalDateTime now = LocalDateTime.now();
+            if (ticket.getFirstResponseAt() == null) ticket.setFirstResponseAt(now);
+            if (ticket.getStatus() == TicketStatus.ASSIGNED) {
+                recordHistory(ticket, TicketStatus.ASSIGNED, TicketStatus.IN_PROGRESS, managerId, ActorType.MANAGER, null);
+                ticket.setStatus(TicketStatus.IN_PROGRESS);
+            }
+            addMessage(ticket, managerId, SenderType.MANAGER, content, normalizedAssetIds(assetIds, managerId));
+            ticket.setStatus(TicketStatus.WAITING_STUDENT);
+            ticket.setWaitingReminderCount(0);
+            sla.pause(ticket, now);
+            touch(ticket);
+            ticket = tickets.saveAndFlush(ticket);
+            recordHistory(ticket, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_STUDENT, managerId, ActorType.MANAGER, null);
+            events.publish(TicketEventType.INFO_REQUESTED, ticket, managerId, Map.of());
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
+        }
+    }
+
+    @Override
+    public Ticket resolve(Long ticketId, Long managerId, String resolutionNote) {
+        try {
+            Ticket ticket = findOrThrow(ticketId);
+            if (!managerId.equals(ticket.getCurrentAssigneeId())) {
+                throw new ForbiddenException("Ticket không được giao cho bạn");
+            }
+            if (ticket.getStatus() == TicketStatus.ASSIGNED) {
+                if (!messages.existsByTicketIdAndSenderType(ticketId, SenderType.MANAGER)) {
+                    throw new InvalidTransitionException("Cần có ít nhất một phản hồi trước khi giải quyết");
+                }
+            } else if (ticket.getStatus() != TicketStatus.IN_PROGRESS) {
+                throw new InvalidTransitionException("Chỉ có thể giải quyết ticket đang được xử lý");
+            }
+            String note = resolutionNote == null ? "" : resolutionNote.trim();
+            if (note.length() < 10 || note.length() > 2000) {
+                throw new BadRequestException("Ghi chú giải quyết phải từ 10 đến 2000 ký tự");
+            }
+            LocalDateTime now = LocalDateTime.now();
+            TicketStatus prevStatus = ticket.getStatus();
+            ticket.setStatus(TicketStatus.RESOLVED);
+            ticket.setResolvedAt(now);
+            ticket.setResolutionNote(note);
+            touch(ticket);
+            ticket = tickets.saveAndFlush(ticket);
+            recordHistory(ticket, prevStatus, TicketStatus.RESOLVED, managerId, ActorType.MANAGER, null);
+            addSystemMessage(ticket, "Yêu cầu đã được giải quyết");
+            events.publish(TicketEventType.RESOLVED, ticket, managerId, Map.of());
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
+        }
+    }
+
+    @Override
+    public Ticket confirmClose(Long ticketId, Long studentId) {
+        try {
+            Ticket ticket = findOrThrow(ticketId);
+            if (!studentId.equals(ticket.getStudentId())) {
+                throw new ForbiddenException("Bạn không sở hữu ticket này");
+            }
+            if (ticket.getStatus() != TicketStatus.RESOLVED) {
+                throw new InvalidTransitionException("Chỉ có thể xác nhận đóng ticket đã giải quyết");
+            }
+            LocalDateTime now = LocalDateTime.now();
+            ticket.setStatus(TicketStatus.CLOSED);
+            ticket.setClosedAt(now);
+            ticket.setCloseReason("STUDENT_CONFIRMED");
+            touch(ticket);
+            ticket = tickets.saveAndFlush(ticket);
+            recordHistory(ticket, TicketStatus.RESOLVED, TicketStatus.CLOSED, studentId, ActorType.STUDENT, null);
+            events.publish(TicketEventType.CLOSED_BY_STUDENT, ticket, studentId, Map.of());
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
+        }
+    }
+
+    @Override
+    public Ticket reopen(Long ticketId, Long studentId, String reason) {
+        try {
+            Ticket ticket = findOrThrow(ticketId);
+            if (!studentId.equals(ticket.getStudentId())) {
+                throw new ForbiddenException("Bạn không sở hữu ticket này");
+            }
+            boolean isResolved = ticket.getStatus() == TicketStatus.RESOLVED;
+            boolean isClosed = ticket.getStatus() == TicketStatus.CLOSED
+                    && !"ADMIN_FORCE".equals(ticket.getCloseReason());
+            if (!isResolved && !isClosed) {
+                throw new InvalidTransitionException("Chỉ có thể mở lại ticket đã giải quyết hoặc đóng");
+            }
+            LocalDateTime refTime = ticket.getClosedAt() != null ? ticket.getClosedAt() : ticket.getResolvedAt();
+            int windowDays = settings.getInt(SettingKeys.TICKET_REOPEN_WINDOW_DAYS);
+            if (refTime == null || refTime.plusDays(windowDays).isBefore(LocalDateTime.now())) {
+                throw new InvalidTransitionException("Đã hết thời hạn mở lại ticket");
+            }
+            int maxReopen = settings.getInt(SettingKeys.TICKET_REOPEN_MAX);
+            if (ticket.getReopenCount() >= maxReopen) {
+                throw new AppException(ErrorCode.ERR_LIMIT_EXCEEDED, "Bạn đã đạt giới hạn số lần mở lại ticket");
+            }
+            String trimmed = reason == null ? "" : reason.trim();
+            if (trimmed.length() < 10 || trimmed.length() > 500) {
+                throw new BadRequestException("Lý do mở lại phải từ 10 đến 500 ký tự");
+            }
+            TicketStatus prevStatus = ticket.getStatus();
+            LocalDateTime now = LocalDateTime.now();
+            Content content = new Content("<p>" + trimmed + "</p>", trimmed);
+            addMessage(ticket, studentId, SenderType.STUDENT, content, List.of());
+            ticket.setResolvedAt(null);
+            ticket.setClosedAt(null);
+            ticket.setCloseReason(null);
+            ticket.setReopenCount(ticket.getReopenCount() + 1);
+            Long prevAssigneeId = ticket.getCurrentAssigneeId();
+            boolean keepAssignee = prevAssigneeId != null && isManagerActiveAndInScope(prevAssigneeId, ticket.getCategoryId());
+            if (keepAssignee) {
+                ticket.setStatus(TicketStatus.ASSIGNED);
+            } else {
+                ticket.setCurrentAssigneeId(null);
+                ticket.setStatus(TicketStatus.NEW);
+            }
+            touch(ticket);
+            ticket = tickets.saveAndFlush(ticket);
+            recordHistory(ticket, prevStatus, ticket.getStatus(), studentId, ActorType.STUDENT, trimmed);
+            sla.recompute(ticket, now);
+            events.publish(TicketEventType.REOPENED, ticket, studentId, Map.of());
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
+        }
+    }
+
+    @Override
+    public Ticket cancel(Long ticketId, Long studentId, String reason) {
+        try {
+            Ticket ticket = findOrThrow(ticketId);
+            if (!studentId.equals(ticket.getStudentId())) {
+                throw new ForbiddenException("Bạn không sở hữu ticket này");
+            }
+            if (ticket.getStatus() != TicketStatus.NEW) {
+                throw new InvalidTransitionException("Chỉ có thể huỷ ticket chưa được nhận");
+            }
+            String trimmed = reason == null ? "" : reason.trim();
+            if (trimmed.length() > 500) {
+                throw new BadRequestException("Lý do huỷ không được vượt quá 500 ký tự");
+            }
+            LocalDateTime now = LocalDateTime.now();
+            ticket.setStatus(TicketStatus.CANCELLED);
+            ticket.setClosedAt(now);
+            ticket.setCloseReason("STUDENT_CANCELLED");
+            touch(ticket);
+            ticket = tickets.saveAndFlush(ticket);
+            recordHistory(ticket, TicketStatus.NEW, TicketStatus.CANCELLED, studentId, ActorType.STUDENT,
+                    trimmed.isEmpty() ? null : trimmed);
+            events.publish(TicketEventType.CANCELLED, ticket, studentId, Map.of());
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
+        }
+    }
+
     @Override public Ticket changePriority(Long ticketId, Long actorUserId, TicketPriority priority, String reason) { throw unsupported(); }
     @Override public Ticket changeCategory(Long ticketId, Long actorUserId, Long newCategoryId, String reason) { throw unsupported(); }
     @Override public Ticket escalate(Long ticketId, Long managerId, Long toCategoryId, Long toManagerId, String reason) { throw unsupported(); }
@@ -484,6 +650,17 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
                 .contentHtml("<p>" + text + "</p>")
                 .contentText(text)
                 .build());
+    }
+
+    private boolean isManagerActiveAndInScope(Long managerId, Long categoryId) {
+        try {
+            UserSummary user = users.getSummary(managerId);
+            return user.role() == RoleCode.MANAGER
+                    && user.status() == UserStatus.ACTIVE
+                    && managerScope.isInScope(managerId, categoryId);
+        } catch (NotFoundException e) {
+            return false;
+        }
     }
 
     private record Content(String html, String text) {
