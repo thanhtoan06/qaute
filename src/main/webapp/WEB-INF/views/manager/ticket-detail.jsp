@@ -1,5 +1,6 @@
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <title>Không gian xử lý yêu cầu</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css"/>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <c:set var="ticket" value="${detail.ticket()}"/>
 <c:set var="student" value="${detail.student()}"/>
@@ -47,7 +48,45 @@
         </div></div></c:otherwise></c:choose>
       </c:forEach></div></c:otherwise></c:choose>
     </div></div>
-    <div id="workspace-actions"></div>
+    <div id="workspace-actions" data-upload-url="${ctx}/api/media/upload">
+      <c:if test="${detail.canReply()}">
+        <div class="card mb-3"><div class="card-header"><h3 class="card-title">Trả lời sinh viên</h3></div><div class="card-body">
+          <form method="post" action="${ctx}/manager/tickets/${ticket.id()}/reply" class="qa-workspace-form" novalidate>
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <div class="mb-3"><label class="form-label required" for="reply-content">Nội dung trả lời</label><textarea class="form-control js-ticket-editor" id="reply-content" name="contentHtml" rows="7" required></textarea><div class="js-editor-error text-danger small" role="alert"></div></div>
+            <div class="mb-3"><label class="form-label" for="reply-files">Tệp đính kèm</label><input class="form-control js-ticket-files" id="reply-files" type="file" multiple/><div class="form-hint">Tệp được tải lên trước khi gửi phản hồi.</div><div class="js-upload-list small mt-2" aria-live="polite"></div><div class="js-upload-error text-danger small" role="alert"></div><div class="js-asset-ids"></div></div>
+            <button class="btn btn-primary" type="submit">Gửi phản hồi</button>
+          </form>
+        </div></div>
+      </c:if>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <c:if test="${detail.canClaim()}"><form method="post" action="${ctx}/manager/tickets/${ticket.id()}/claim" class="qa-workspace-form"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/><input type="hidden" name="redirect" value="/manager/tickets/${ticket.id()}"/><button class="btn btn-primary" type="submit">Nhận yêu cầu</button></form></c:if>
+        <c:if test="${detail.canRequestInfo()}"><button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#request-info-modal">Yêu cầu bổ sung thông tin</button></c:if>
+        <c:if test="${detail.canResolve()}"><button class="btn btn-outline-success" type="button" data-bs-toggle="modal" data-bs-target="#resolve-modal">Đánh dấu đã giải quyết</button></c:if>
+        <c:if test="${detail.canChangePriority()}"><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#priority-modal">Đổi ưu tiên</button></c:if>
+        <c:if test="${detail.canChangeCategory()}"><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#category-modal">Đổi chuyên mục</button></c:if>
+      </div>
+      <c:if test="${detail.canRequestInfo()}"><div class="modal modal-blur fade" id="request-info-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h3 class="modal-title">Yêu cầu bổ sung thông tin</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+        <form method="post" action="${ctx}/manager/tickets/${ticket.id()}/request-info" class="qa-workspace-form" novalidate><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+          <div class="modal-body"><label class="form-label required" for="request-info-content">Nội dung gửi sinh viên</label><textarea class="form-control js-ticket-editor" id="request-info-content" name="messageHtml" rows="6" required></textarea><div class="js-editor-error text-danger small" role="alert"></div>
+            <div class="mt-3"><label class="form-label" for="request-info-files">Tệp đính kèm</label><input class="form-control js-ticket-files" id="request-info-files" type="file" multiple/><div class="js-upload-list small mt-2" aria-live="polite"></div><div class="js-upload-error text-danger small" role="alert"></div><div class="js-asset-ids"></div></div>
+          </div><div class="modal-footer"><button class="btn btn-link" type="button" data-bs-dismiss="modal">Hủy</button><button class="btn btn-primary" type="submit">Gửi yêu cầu</button></div>
+        </form>
+      </div></div></div></c:if>
+      <c:if test="${detail.canResolve()}"><div class="modal modal-blur fade" id="resolve-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h3 class="modal-title">Đánh dấu đã giải quyết</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+        <form method="post" action="${ctx}/manager/tickets/${ticket.id()}/resolve" class="qa-workspace-form"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/><div class="modal-body"><label class="form-label required" for="resolution-note">Tóm tắt giải pháp</label><textarea class="form-control" id="resolution-note" name="resolutionNote" minlength="10" maxlength="2000" rows="5" required></textarea><small class="form-hint">Từ 10 đến 2000 ký tự.</small></div><div class="modal-footer"><button class="btn btn-link" type="button" data-bs-dismiss="modal">Hủy</button><button class="btn btn-success" type="submit">Xác nhận giải quyết</button></div></form>
+      </div></div></div></c:if>
+      <c:if test="${detail.canChangePriority()}"><div class="modal modal-blur fade" id="priority-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h3 class="modal-title">Đổi ưu tiên</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+        <form method="post" action="${ctx}/manager/tickets/${ticket.id()}/priority" class="qa-workspace-form"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/><div class="modal-body"><div class="mb-3"><label class="form-label required" for="new-priority">Mức ưu tiên mới</label><select class="form-select" id="new-priority" name="priority" required><option value="">Chọn mức ưu tiên</option><c:forEach var="priority" items="${priorities}"><option value="${priority}" ${ticket.priority() eq priority ? 'disabled' : ''}><c:out value="${priority.label}"/></option></c:forEach></select></div><div><label class="form-label required" for="priority-reason">Lý do</label><textarea class="form-control" id="priority-reason" name="reason" minlength="10" maxlength="500" rows="3" required></textarea></div></div><div class="modal-footer"><button class="btn btn-link" type="button" data-bs-dismiss="modal">Hủy</button><button class="btn btn-primary" type="submit">Lưu ưu tiên</button></div></form>
+      </div></div></div></c:if>
+      <c:if test="${detail.canChangeCategory()}"><div class="modal modal-blur fade" id="category-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h3 class="modal-title">Đổi chuyên mục</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+        <form method="post" action="${ctx}/manager/tickets/${ticket.id()}/category" class="qa-workspace-form"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/><div class="modal-body"><div class="mb-3"><label class="form-label required" for="new-category">Chuyên mục mới</label><select class="form-select" id="new-category" name="newCategoryId" required><option value="">Chọn chuyên mục</option><c:forEach var="option" items="${categoryOptions}"><option value="${option.key}" ${ticket.categoryId() eq option.key ? 'disabled' : ''}><c:out value="${option.value}"/></option></c:forEach></select></div><div><label class="form-label required" for="category-reason">Lý do</label><textarea class="form-control" id="category-reason" name="reason" minlength="10" maxlength="500" rows="3" required></textarea></div></div><div class="modal-footer"><button class="btn btn-link" type="button" data-bs-dismiss="modal">Hủy</button><button class="btn btn-primary" type="submit">Lưu chuyên mục</button></div></form>
+      </div></div></div></c:if>
+    </div>
   </main>
 
   <aside class="col-12 col-lg-3">
@@ -67,7 +106,9 @@
       <c:choose><c:when test="${empty detail.timeline()}"><p class="text-secondary mb-0">Chưa có sự kiện.</p></c:when><c:otherwise><ol class="ps-3 mb-0"><c:forEach var="event" items="${detail.timeline()}"><li class="mb-2"><div><c:out value="${event.label()}"/></div><small class="text-secondary"><c:out value="${event.at()}"/></small></li></c:forEach></ol></c:otherwise></c:choose>
     </div></div>
     <div class="card"><div class="card-header"><h3 class="card-title">FAQ gợi ý</h3></div><div class="list-group list-group-flush">
-      <c:choose><c:when test="${empty detail.suggestions()}"><div class="list-group-item text-secondary">Chưa có bài viết phù hợp.</div></c:when><c:otherwise><c:forEach var="faq" items="${detail.suggestions()}"><a class="list-group-item list-group-item-action" href="${ctx}/faq/${fn:escapeXml(faq.slug())}"><c:out value="${faq.title()}"/></a></c:forEach></c:otherwise></c:choose>
+      <c:choose><c:when test="${empty detail.suggestions()}"><div class="list-group-item text-secondary">Chưa có bài viết phù hợp.</div></c:when><c:otherwise><c:forEach var="faq" items="${detail.suggestions()}"><div class="list-group-item"><a href="${ctx}/faq/${fn:escapeXml(faq.slug())}"><c:out value="${faq.title()}"/></a><c:if test="${detail.canReply()}"><button class="btn btn-sm btn-outline-primary mt-2 js-insert-faq" type="button" data-faq-url="${ctx}/faq/${fn:escapeXml(faq.slug())}" data-faq-title="${fn:escapeXml(faq.title())}">Chèn liên kết FAQ</button></c:if></div></c:forEach></c:otherwise></c:choose>
     </div></div>
   </aside>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js" defer></script>
+<script src="${ctx}/assets/js/manager/ticket-workspace.js" defer></script>
