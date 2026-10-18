@@ -36,6 +36,6 @@ public class FaqRevision extends AuditableEntity {
     @Column(name = "changed_by")
     private Long changedBy;
 
-    @Column(name = "change_note", length = 255)
+    @Column(name = "change_note", length = 500)
     private String changeNote;
 }

@@ -42,6 +42,7 @@ public final class AuditActions {
     public static final String FAQ_REJECTED = "FAQ_REJECTED";
     public static final String FAQ_ARCHIVED = "FAQ_ARCHIVED";
     public static final String FAQ_RESTORED = "FAQ_RESTORED";
+    public static final String FAQ_FEATURED_CHANGED = "FAQ_FEATURED_CHANGED";
     public static final String FAQ_REVISION_RESTORED = "FAQ_REVISION_RESTORED";
     public static final String FAQ_FROM_TICKET = "FAQ_FROM_TICKET";
     public static final String TAG_CHANGED = "TAG_CHANGED";
