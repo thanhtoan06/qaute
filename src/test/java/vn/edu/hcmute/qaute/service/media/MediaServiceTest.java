@@ -17,7 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import vn.edu.hcmute.qaute.common.constant.MediaStatus;
 import vn.edu.hcmute.qaute.common.constant.MediaUsageType;
 import vn.edu.hcmute.qaute.common.constant.RoleCode;
-import vn.edu.hcmute.qaute.common.exception.BadRequestException;
+import vn.edu.hcmute.qaute.common.exception.AppException;
 import vn.edu.hcmute.qaute.entity.media.MediaAsset;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
 import vn.edu.hcmute.qaute.security.QauteUserDetails;
@@ -38,7 +38,7 @@ class MediaServiceTest {
                 .status(MediaStatus.ORPHAN).build();
         when(assets.findById(31L)).thenReturn(Optional.of(asset));
 
-        new MediaService(assets, "").attach(31L, MediaUsageType.FAQ_IMAGE, 12L);
+        new MediaServiceImpl(assets, null, null, null, null).attach(31L, MediaUsageType.FAQ_IMAGE, 12L);
 
         assertEquals(12L, asset.getUsageRefId());
         assertEquals(MediaStatus.ACTIVE, asset.getStatus());
@@ -51,14 +51,14 @@ class MediaServiceTest {
         MediaAsset foreign = MediaAsset.builder().ownerId(8L).usageType(MediaUsageType.FAQ_IMAGE)
                 .status(MediaStatus.ORPHAN).build();
         when(assets.findById(31L)).thenReturn(Optional.of(foreign));
-        MediaService service = new MediaService(assets, "");
+        MediaService service = new MediaServiceImpl(assets, null, null, null, null);
 
-        assertThrows(BadRequestException.class,
+        assertThrows(AppException.class,
                 () -> service.attach(31L, MediaUsageType.FAQ_IMAGE, 12L));
 
         foreign.setUsageRefId(13L);
         foreign.setStatus(MediaStatus.ACTIVE);
-        assertThrows(BadRequestException.class,
+        assertThrows(AppException.class,
                 () -> service.attach(31L, MediaUsageType.FAQ_IMAGE, 12L));
         verify(assets, never()).save(foreign);
     }

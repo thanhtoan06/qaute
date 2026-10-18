@@ -25,17 +25,18 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (!response.ok) throw new Error('Không thể tải ảnh lên. Vui lòng thử lại.');
       const result = await response.json();
-      if (!result.assetId || !result.publicUrl) throw new Error('Phản hồi tải ảnh không hợp lệ.');
+      const asset = result.data;
+      if (!result.success || !asset?.id || !asset.publicUrl) throw new Error(result.message || 'Phản hồi tải ảnh không hợp lệ.');
 
       const img = document.createElement('img');
-      img.src = result.publicUrl;
+      img.src = asset.publicUrl;
       img.alt = file.name;
       window.jQuery(textarea).summernote('insertNode', img);
 
       const hidden = document.createElement('input');
       hidden.type = 'hidden';
       hidden.name = 'imageAssetIds';
-      hidden.value = result.assetId;
+      hidden.value = asset.id;
       assets.append(hidden);
     } catch (failure) {
       error.textContent = failure.message || 'Không thể tải ảnh lên.';
