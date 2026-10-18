@@ -1,6 +1,6 @@
 CREATE TABLE ticket_sequences (
     year INT NOT NULL,
-    last_value INT NOT NULL,
+    last_sequence_value INT NOT NULL,
     created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     PRIMARY KEY (year)

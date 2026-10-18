@@ -203,7 +203,7 @@ public class AdminFaqService {
         faq.setStatus(FaqStatus.PUBLISHED);
         faq.setReviewerId(reviewerId);
         faq.setPublishAt(scheduledAt);
-        faq.setPublishedAt(scheduledAt == null ? now : null);
+        faq.setPublishedAt(scheduledAt == null ? now : scheduledAt);
         flushTransition(faq);
         notifyAuthor(faq, NotificationType.FAQ_APPROVED,
                 Map.of("faqId", faq.getId().toString(), "title", faq.getTitle()));
