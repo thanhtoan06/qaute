@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
+import vn.edu.hcmute.qaute.common.exception.DuplicateException;
+import vn.edu.hcmute.qaute.dto.request.admin.BusinessHoursForm;
+import vn.edu.hcmute.qaute.dto.request.admin.HolidayForm;
 import vn.edu.hcmute.qaute.dto.request.admin.SlaPolicyForm;
 import vn.edu.hcmute.qaute.dto.view.CategoryNode;
 import vn.edu.hcmute.qaute.dto.view.DepartmentNode;
@@ -34,8 +37,9 @@ public class AdminSlaController {
     }
 
     @GetMapping("/admin/sla")
-    public String page(Model model) {
+    public String page(@RequestParam(required = false, defaultValue = "policy") String tab, Model model) {
         populate(model, sla.getForm(null), Map.of());
+        model.addAttribute("activeTab", List.of("policy", "hours", "holidays").contains(tab) ? tab : "policy");
         return "admin/sla";
     }
 
@@ -83,11 +87,71 @@ public class AdminSlaController {
         return "redirect:/admin/sla";
     }
 
+    @PostMapping("/admin/sla/hours")
+    public String saveHours(@ModelAttribute("hoursForm") BusinessHoursForm hoursForm,
+                            Model model, RedirectAttributes redirect) {
+        try {
+            sla.saveBusinessHours(hoursForm, SecurityUtils.requireUserId());
+            redirect.addFlashAttribute("flashSuccess", "Đã lưu giờ làm việc");
+            return "redirect:/admin/sla?tab=hours";
+        } catch (BadRequestException e) {
+            populate(model, sla.getForm(null), e.getFieldErrors());
+            model.addAttribute("hoursForm", hoursForm);
+            model.addAttribute("activeTab", "hours");
+            model.addAttribute("formError", e.getMessage());
+            return "admin/sla";
+        }
+    }
+
+    @PostMapping("/admin/sla/holidays")
+    public String addHoliday(@Valid @ModelAttribute("holidayForm") HolidayForm holidayForm,
+                             BindingResult result, Model model, RedirectAttributes redirect) {
+        Map<String, String> holidayErrors = new LinkedHashMap<>();
+        result.getFieldErrors().forEach(error -> holidayErrors.putIfAbsent(error.getField(),
+                error.getDefaultMessage()));
+        if (!result.hasErrors()) {
+            try {
+                sla.addHoliday(holidayForm, SecurityUtils.requireUserId());
+                redirect.addFlashAttribute("flashSuccess", "Đã thêm ngày nghỉ");
+                return "redirect:/admin/sla?tab=holidays";
+            } catch (DuplicateException e) {
+                holidayErrors.put(e.getField(), e.getMessage());
+            } catch (BadRequestException e) {
+                holidayErrors.put("name", e.getMessage());
+            }
+        }
+        populate(model, sla.getForm(null), Map.of());
+        model.addAttribute("holidayForm", holidayForm);
+        model.addAttribute("holidayErrors", holidayErrors);
+        model.addAttribute("activeTab", "holidays");
+        return "admin/sla";
+    }
+
+    @PostMapping("/admin/sla/holidays/{id}/delete")
+    public String deleteHoliday(@PathVariable Long id, RedirectAttributes redirect) {
+        sla.deleteHoliday(id, SecurityUtils.requireUserId());
+        redirect.addFlashAttribute("flashSuccess", "Đã xóa ngày nghỉ");
+        return "redirect:/admin/sla?tab=holidays";
+    }
+
     private void populate(Model model, SlaPolicyForm form, Map<String, String> errors) {
         model.addAttribute("form", form);
         model.addAttribute("matrix", sla.matrix());
         model.addAttribute("categoryOptions", categoryOptions(form.getCategoryId()));
         model.addAttribute("errors", errors);
+        BusinessHoursForm hoursForm = new BusinessHoursForm();
+        sla.businessHours().forEach((day, dayHours) -> dayHours.forEach(hour -> {
+            BusinessHoursForm.Interval interval = new BusinessHoursForm.Interval();
+            interval.setDayOfWeek(day);
+            interval.setStart(hour.getStartTime().toString());
+            interval.setEnd(hour.getEndTime().toString());
+            interval.setActive(hour.isActive());
+            hoursForm.getIntervals().add(interval);
+        }));
+        model.addAttribute("hoursForm", hoursForm);
+        model.addAttribute("holidays", sla.holidays());
+        model.addAttribute("holidayForm", new HolidayForm());
+        model.addAttribute("activeTab", "policy");
         model.addAttribute("pageTitle", "Chính sách SLA");
     }
 

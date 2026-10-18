@@ -9,13 +9,13 @@
 <div class="card">
   <div class="card-header p-0">
     <div class="nav nav-tabs card-header-tabs px-3" role="tablist">
-      <button class="nav-link active" type="button" data-bs-toggle="tab" data-bs-target="#sla-policy" role="tab" aria-selected="true">Chính sách</button>
-      <button class="nav-link" type="button" data-bs-toggle="tab" data-bs-target="#sla-hours" role="tab" aria-selected="false">Giờ làm việc</button>
-      <button class="nav-link" type="button" data-bs-toggle="tab" data-bs-target="#sla-holidays" role="tab" aria-selected="false">Ngày nghỉ</button>
+      <button class="nav-link ${activeTab eq 'policy' ? 'active' : ''}" type="button" data-bs-toggle="tab" data-bs-target="#sla-policy" role="tab" aria-selected="true">Chính sách</button>
+      <button class="nav-link ${activeTab eq 'hours' ? 'active' : ''}" type="button" data-bs-toggle="tab" data-bs-target="#sla-hours" role="tab" aria-selected="false">Giờ làm việc</button>
+      <button class="nav-link ${activeTab eq 'holidays' ? 'active' : ''}" type="button" data-bs-toggle="tab" data-bs-target="#sla-holidays" role="tab" aria-selected="false">Ngày nghỉ</button>
     </div>
   </div>
   <div class="tab-content">
-    <div class="tab-pane fade show active" id="sla-policy" role="tabpanel">
+    <div class="tab-pane fade ${activeTab eq 'policy' ? 'show active' : ''}" id="sla-policy" role="tabpanel">
       <div class="card-body border-bottom">
         <h3 class="card-title">Mặc định toàn hệ thống</h3>
         <div class="table-responsive">
@@ -132,7 +132,66 @@
         </form>
       </div>
     </div>
-    <div class="tab-pane fade" id="sla-hours" role="tabpanel"><div class="card-body text-secondary">Giờ làm việc: làm ở bước sau.</div></div>
-    <div class="tab-pane fade" id="sla-holidays" role="tabpanel"><div class="card-body text-secondary">Ngày nghỉ: làm ở bước sau.</div></div>
+    <div class="tab-pane fade ${activeTab eq 'hours' ? 'show active' : ''}" id="sla-hours" role="tabpanel">
+      <div class="card-body">
+        <h3 class="card-title">Giờ làm việc</h3>
+        <p class="text-secondary">Mỗi ngày tối đa 4 khoảng giờ. Để trống ngày không làm việc.</p>
+        <c:if test="${not empty errors}"><div class="alert alert-danger"><c:forEach var="entry" items="${errors}"><div><c:out value="${entry.value}"/></div></c:forEach></div></c:if>
+        <form method="post" action="${ctx}/admin/sla/hours" id="business-hours-form">
+          <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+          <c:set var="intervalIndex" value="0"/>
+          <c:forEach var="day" begin="1" end="7">
+            <div class="border rounded p-3 mb-2 hours-day" data-day="${day}">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong><c:choose><c:when test="${day eq 1}">Thứ Hai</c:when><c:when test="${day eq 2}">Thứ Ba</c:when><c:when test="${day eq 3}">Thứ Tư</c:when><c:when test="${day eq 4}">Thứ Năm</c:when><c:when test="${day eq 5}">Thứ Sáu</c:when><c:when test="${day eq 6}">Thứ Bảy</c:when><c:otherwise>Chủ nhật</c:otherwise></c:choose></strong>
+                <button class="btn btn-sm btn-outline-primary" type="button" data-add-interval>Thêm khoảng giờ</button>
+              </div>
+              <div class="hour-intervals">
+                <c:forEach var="interval" items="${hoursForm.intervals}">
+                  <c:if test="${interval.dayOfWeek eq day}">
+                    <div class="hour-interval d-flex flex-wrap gap-2 align-items-center mb-2">
+                      <input type="hidden" data-field="dayOfWeek" name="intervals[${intervalIndex}].dayOfWeek" value="${day}"/>
+                      <input class="form-control w-auto" type="time" data-field="start" name="intervals[${intervalIndex}].start" value="<c:out value='${interval.start}'/>" required aria-label="Giờ bắt đầu"/>
+                      <span>đến</span>
+                      <input class="form-control w-auto" type="time" data-field="end" name="intervals[${intervalIndex}].end" value="<c:out value='${interval.end}'/>" required aria-label="Giờ kết thúc"/>
+                      <input type="hidden" data-field="_active" name="_intervals[${intervalIndex}].active" value="on"/>
+                      <label class="form-check mb-0"><input class="form-check-input" type="checkbox" data-field="active" name="intervals[${intervalIndex}].active" value="true" ${interval.active ? 'checked' : ''}/> Bật</label>
+                      <button class="btn btn-sm btn-outline-danger" type="button" data-remove-interval>Xóa</button>
+                    </div>
+                    <c:set var="intervalIndex" value="${intervalIndex + 1}"/>
+                  </c:if>
+                </c:forEach>
+              </div>
+              <c:set var="dayErrorKey" value="day${day}"/>
+              <c:if test="${not empty errors[dayErrorKey]}"><div class="text-danger small"><c:out value="${errors[dayErrorKey]}"/></div></c:if>
+            </div>
+          </c:forEach>
+          <button class="btn btn-primary" type="submit">Lưu giờ làm việc</button>
+        </form>
+      </div>
+    </div>
+    <div class="tab-pane fade ${activeTab eq 'holidays' ? 'show active' : ''}" id="sla-holidays" role="tabpanel">
+      <div class="card-body">
+        <h3 class="card-title">Ngày nghỉ</h3>
+        <div class="table-responsive"><table class="table table-vcenter">
+          <thead><tr><th>Ngày</th><th>Tên ngày nghỉ</th><th>Thao tác</th></tr></thead>
+          <tbody>
+            <c:forEach var="holiday" items="${holidays}"><tr>
+              <td><c:out value="${holiday.date}"/></td><td><c:out value="${holiday.name}"/></td>
+              <td><qa:confirmModal id="delete-holiday-${holiday.id}" title="Xóa ngày nghỉ" message="Xóa ngày nghỉ này?" actionUrl="${ctx}/admin/sla/holidays/${holiday.id}/delete" confirmLabel="Xóa"/></td>
+            </tr></c:forEach>
+            <c:if test="${empty holidays}"><tr><td colspan="3" class="text-secondary text-center">Chưa có ngày nghỉ.</td></tr></c:if>
+          </tbody>
+        </table></div>
+        <h4>Thêm ngày nghỉ</h4>
+        <form method="post" action="${ctx}/admin/sla/holidays" class="row g-2 align-items-end">
+          <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+          <div class="col-md-3"><label class="form-label" for="holiday-date">Ngày</label><input class="form-control ${not empty holidayErrors.date ? 'is-invalid' : ''}" id="holiday-date" type="date" name="date" value="<c:out value='${holidayForm.date}'/>" required/><c:if test="${not empty holidayErrors.date}"><div class="invalid-feedback"><c:out value="${holidayErrors.date}"/></div></c:if></div>
+          <div class="col-md-6"><label class="form-label" for="holiday-name">Tên ngày nghỉ</label><input class="form-control ${not empty holidayErrors.name ? 'is-invalid' : ''}" id="holiday-name" type="text" name="name" maxlength="150" value="<c:out value='${holidayForm.name}'/>" required/><c:if test="${not empty holidayErrors.name}"><div class="invalid-feedback"><c:out value="${holidayErrors.name}"/></div></c:if></div>
+          <div class="col-md-3"><button class="btn btn-primary" type="submit">Thêm ngày nghỉ</button></div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
+<script src="${ctx}/assets/js/admin/business-hours.js" defer></script>
