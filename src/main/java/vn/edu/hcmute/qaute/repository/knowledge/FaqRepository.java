@@ -27,5 +27,29 @@ public interface FaqRepository extends JpaRepository<Faq, Long>, JpaSpecificatio
     @Modifying
     @Query("UPDATE Faq f SET f.viewCount = f.viewCount + 1 WHERE f.id = :id")
     void incrementViewCount(@Param("id") Long id);
+
+    @Query(value = """
+            SELECT f.* FROM faqs f
+            WHERE f.status = 'PUBLISHED'
+              AND (f.publish_at IS NULL OR f.publish_at <= :now)
+              AND (
+                  f.title_norm LIKE :prefix
+                  OR f.title_norm LIKE :contains
+                  OR MATCH(f.title_norm) AGAINST(:q IN NATURAL LANGUAGE MODE) > 0
+              )
+            ORDER BY
+              CASE
+                WHEN f.title_norm LIKE :prefix THEN 1
+                WHEN f.title_norm LIKE :contains THEN 2
+                ELSE 3
+              END,
+              f.view_count DESC,
+              f.updated_at DESC
+            """, nativeQuery = true)
+    List<Faq> suggestFaqs(@Param("prefix") String prefix,
+                          @Param("contains") String contains,
+                          @Param("q") String q,
+                          @Param("now") LocalDateTime now,
+                          org.springframework.data.domain.Pageable pageable);
 }
 

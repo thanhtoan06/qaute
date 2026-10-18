@@ -28,7 +28,7 @@
             </nav>
             <form class="ms-auto me-3" method="get" action="/search">
                 <div class="input-group input-group-sm">
-                    <input class="form-control" type="search" name="q" placeholder="Tìm kiếm" aria-label="Tìm kiếm">
+                    <input class="form-control" type="search" name="q" placeholder="Tìm kiếm" aria-label="Tìm kiếm" data-qa-suggest="NAVBAR">
                     <button class="btn btn-outline-secondary" type="submit">Tìm</button>
                 </div>
             </form>
@@ -59,8 +59,13 @@
     </div>
 </main>
 <footer class="border-top mt-auto py-4">
-    <div class="container-xl d-flex justify-content-between">
+    <div class="container-xl d-flex flex-wrap justify-content-between align-items-center gap-2">
         <span>Liên hệ: Phòng Công tác Sinh viên HCMUTE</span>
+        <div class="d-flex gap-3 small">
+            <a href="/pages/about" class="text-secondary text-decoration-none">Giới thiệu</a>
+            <a href="/pages/guide" class="text-secondary text-decoration-none">Hướng dẫn</a>
+            <a href="/pages/contact" class="text-secondary text-decoration-none">Liên hệ</a>
+        </div>
         <span>© QAUTE</span>
     </div>
 </footer>
