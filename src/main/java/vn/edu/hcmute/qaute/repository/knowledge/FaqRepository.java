@@ -35,7 +35,6 @@ public interface FaqRepository extends JpaRepository<Faq, Long>, JpaSpecificatio
               AND (
                   f.title_norm LIKE :prefix
                   OR f.title_norm LIKE :contains
-                  OR MATCH(f.title_norm) AGAINST(:q IN NATURAL LANGUAGE MODE) > 0
               )
             ORDER BY
               CASE
@@ -48,7 +47,6 @@ public interface FaqRepository extends JpaRepository<Faq, Long>, JpaSpecificatio
             """, nativeQuery = true)
     List<Faq> suggestFaqs(@Param("prefix") String prefix,
                           @Param("contains") String contains,
-                          @Param("q") String q,
                           @Param("now") LocalDateTime now,
                           org.springframework.data.domain.Pageable pageable);
 }

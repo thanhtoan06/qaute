@@ -235,7 +235,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
         LocalDateTime now = LocalDateTime.now();
         Pageable pageable = PageRequest.of(0, maxLimit);
 
-        List<Faq> faqs = faqRepository.suggestFaqs(prefix, contains, q, now, pageable);
+        List<Faq> faqs = faqRepository.suggestFaqs(prefix, contains, now, pageable);
         return faqs.stream()
                 .map(faq -> new FaqSuggestion(
                         faq.getId(),
