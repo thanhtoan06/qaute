@@ -41,6 +41,7 @@
       <td><c:out value="${item.updatedAt()}"/></td>
       <td><div class="d-flex flex-wrap gap-1">
         <c:if test="${item.status() ne 'ARCHIVED'}"><a class="btn btn-sm btn-outline-primary" href="${ctx}/admin/faq/${item.id()}/edit">Sửa</a></c:if>
+        <a class="btn btn-sm btn-outline-secondary" href="${ctx}/admin/faq/${item.id()}/revisions">Phiên bản</a>
         <c:choose>
           <c:when test="${item.status() eq 'DRAFT'}">
             <a class="btn btn-sm btn-outline-secondary" href="${ctx}/admin/faq/${item.id()}/review">Xem trước</a>

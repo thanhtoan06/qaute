@@ -210,6 +210,42 @@ class AdminFaqWorkflowTest {
         verify(audit).log(AuditActions.FAQ_FEATURED_CHANGED, "Faq", 12L, "false", "true");
     }
 
+    @Test
+    void restoringRevisionCreatesNewVersionAndKeepsPublishedStatus() {
+        authenticate(1L, RoleCode.ADMIN);
+        Faq faq = faq(FaqStatus.PUBLISHED);
+        faq.setVersionNo(4);
+        FaqRevision source = FaqRevision.builder().faqId(12L).versionNo(1)
+                .title("Bài viết cũ").summary("Tóm tắt cũ")
+                .bodyHtml("<p>Nội dung cũ</p><script>alert(1)</script>").build();
+        when(faqRepository.findById(12L)).thenReturn(Optional.of(faq));
+        when(revisions.findByFaqIdAndVersionNo(12L, 1)).thenReturn(Optional.of(source));
+
+        service.restoreRevision(12L, 1, 1L);
+
+        assertEquals(FaqStatus.PUBLISHED, faq.getStatus());
+        assertEquals(5, faq.getVersionNo());
+        assertEquals("hoc-phi-sinh-vien", faq.getSlug());
+        assertTrue(!faq.getBodyHtml().contains("<script>"));
+        ArgumentCaptor<FaqRevision> saved = ArgumentCaptor.forClass(FaqRevision.class);
+        verify(revisions).save(saved.capture());
+        assertEquals(5, saved.getValue().getVersionNo());
+        assertEquals(faq.getBodyHtml(), saved.getValue().getBodyHtml());
+        verify(audit).log(AuditActions.FAQ_REVISION_RESTORED, "Faq", 12L,
+                "v4", "v5 từ v1");
+    }
+
+    @Test
+    void archivedFaqCannotRestoreRevision() {
+        authenticate(1L, RoleCode.ADMIN);
+        when(faqRepository.findById(12L)).thenReturn(Optional.of(faq(FaqStatus.ARCHIVED)));
+
+        assertThrows(InvalidTransitionException.class,
+                () -> service.restoreRevision(12L, 1, 1L));
+
+        verify(revisions, never()).findByFaqIdAndVersionNo(any(), any());
+    }
+
     private static Faq faq(FaqStatus status) {
         Faq faq = Faq.builder().status(status).authorId(7L).title("Học phí sinh viên")
                 .slug("hoc-phi-sinh-vien").bodyHtml("<p>Nội dung</p>").versionNo(2).build();

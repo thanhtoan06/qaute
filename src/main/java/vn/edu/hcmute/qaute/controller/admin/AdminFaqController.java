@@ -32,6 +32,8 @@ import vn.edu.hcmute.qaute.dto.request.admin.FaqForm;
 import vn.edu.hcmute.qaute.dto.view.CategoryNode;
 import vn.edu.hcmute.qaute.dto.view.DepartmentNode;
 import vn.edu.hcmute.qaute.dto.view.SlaCategoryOption;
+import vn.edu.hcmute.qaute.dto.view.AdminFaqReviewView;
+import vn.edu.hcmute.qaute.dto.view.FaqRevisionView;
 import vn.edu.hcmute.qaute.service.admin.AdminFaqService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
@@ -69,8 +71,10 @@ public class AdminFaqController {
     }
 
     @GetMapping("/admin/faq/new")
-    public String newPage(Model model) {
-        model.addAttribute("form", new FaqForm());
+    public String newPage(@RequestParam(required = false) String title, Model model) {
+        FaqForm form = new FaqForm();
+        if (title != null) form.setTitle(title.length() > 200 ? title.substring(0, 200) : title);
+        model.addAttribute("form", form);
         formOptions(model, null);
         return "admin/faq-form";
     }
@@ -109,6 +113,50 @@ public class AdminFaqController {
         model.addAttribute("faq", faqs.review(id));
         model.addAttribute("pageTitle", "Duyệt FAQ");
         return "admin/faq-review";
+    }
+
+    @GetMapping("/admin/faq/{id}/revisions")
+    public String revisions(@PathVariable Long id, Model model) {
+        revisionPage(id, model);
+        return "admin/faq-revisions";
+    }
+
+    @GetMapping("/admin/faq/{id}/revisions/compare")
+    public String compareRevisions(@PathVariable Long id, @RequestParam int a, @RequestParam int b,
+                                   Model model) {
+        revisionPage(id, model);
+        FaqRevisionView left = faqs.revision(id, a);
+        FaqRevisionView right = faqs.revision(id, b);
+        model.addAttribute("left", left);
+        model.addAttribute("right", right);
+        model.addAttribute("comparison", List.of(left, right));
+        return "admin/faq-revisions";
+    }
+
+    @GetMapping("/admin/faq/{id}/revisions/{versionNo}")
+    public String revision(@PathVariable Long id, @PathVariable int versionNo, Model model) {
+        revisionPage(id, model);
+        model.addAttribute("selected", faqs.revision(id, versionNo));
+        return "admin/faq-revisions";
+    }
+
+    @PostMapping("/admin/faq/{id}/revisions/{versionNo}/restore")
+    public String restoreRevision(@PathVariable Long id, @PathVariable int versionNo,
+                                  RedirectAttributes redirect) {
+        try {
+            faqs.restoreRevision(id, versionNo, SecurityUtils.requireUserId());
+            redirect.addFlashAttribute("flashSuccess", "Đã khôi phục thành phiên bản FAQ mới");
+        } catch (InvalidTransitionException | ConflictException | BadRequestException e) {
+            redirect.addFlashAttribute("flashError", e.getMessage());
+        }
+        return "redirect:/admin/faq/" + id + "/revisions";
+    }
+
+    private void revisionPage(Long id, Model model) {
+        AdminFaqReviewView faq = faqs.review(id);
+        model.addAttribute("faq", faq);
+        model.addAttribute("history", faqs.revisionHistory(id));
+        model.addAttribute("pageTitle", "Phiên bản FAQ");
     }
 
     @PostMapping("/admin/faq/{id}/submit")
