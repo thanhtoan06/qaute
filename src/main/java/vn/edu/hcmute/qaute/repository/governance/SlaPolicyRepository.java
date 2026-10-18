@@ -14,7 +14,11 @@ public interface SlaPolicyRepository extends JpaRepository<SlaPolicy, Long> {
 
     Optional<SlaPolicy> findFirstByCategoryIdIsNullAndPriorityAndActiveTrue(TicketPriority priority);
 
+    Optional<SlaPolicy> findFirstByCategoryIdIsNullAndPriorityOrderByIdAsc(TicketPriority priority);
+
     List<SlaPolicy> findAllByOrderByCategoryIdAscPriorityAsc();
 
     Optional<SlaPolicy> findByCategoryIdAndPriority(Long categoryId, TicketPriority priority);
+
+    List<SlaPolicy> findByCategoryId(Long categoryId);
 }
