@@ -1,5 +1,6 @@
 package vn.edu.hcmute.qaute.controller.manager;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
@@ -26,7 +27,8 @@ public class ManagerQueueController {
 
     @GetMapping("/manager/queue")
     public String list(@ModelAttribute("filter") QueueFilter filter,
-                       @RequestParam(defaultValue = "0") int page, Model model) {
+                       @RequestParam(defaultValue = "0") int page, Model model,
+                       HttpServletRequest request) {
         Long managerId = SecurityUtils.requireUserId();
         filter.setTab(ManagerQueueService.tab(filter.getTab()));
         Pageable pageable = PageUtil.of(page, 15, filter.getSort(), true,
@@ -39,6 +41,10 @@ public class ManagerQueueController {
         model.addAttribute("paginationParams", params(filter, true));
         String tabParams = params(filter, false);
         model.addAttribute("tabParams", tabParams.isEmpty() ? "" : tabParams + "&amp;");
+        String rawQuery = request.getQueryString();
+        String returnPath = "/manager/queue" + (rawQuery == null || rawQuery.isBlank() ? "" : "?" + rawQuery);
+        model.addAttribute("queueReturn", returnPath);
+        model.addAttribute("queueReturnEncoded", URLEncoder.encode(returnPath, StandardCharsets.UTF_8));
         model.addAttribute("pageTitle", "Hàng đợi yêu cầu");
         return "manager/queue";
     }
