@@ -33,5 +33,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
 
     @Query("SELECT t FROM Ticket t WHERE t.status = vn.edu.hcmute.qaute.common.constant.TicketStatus.WAITING_STUDENT AND t.lastActivityAt < :cutoff AND t.waitingReminderCount < :maxCount")
     List<Ticket> findWaitingNeedingReminder(@Param("cutoff") LocalDateTime cutoff, @Param("maxCount") int maxCount, Pageable pageable);
+
+    @Query("SELECT t FROM Ticket t WHERE t.status IN :statuses AND t.slaPausedAt IS NULL AND (t.slaFirstResponseDueAt IS NOT NULL OR t.slaResolutionDueAt IS NOT NULL)")
+    List<Ticket> findActiveSlaTickets(@Param("statuses") Collection<TicketStatus> statuses, Pageable pageable);
 }
 
