@@ -1,0 +1,55 @@
+<%@ page pageEncoding="UTF-8" %>
+<div class="mb-3">
+  <label class="form-label required" for="faq-title">Tiêu đề</label>
+  <input class="form-control ${not empty errors.title ? 'is-invalid' : ''}" id="faq-title" name="title" type="text" minlength="10" maxlength="200" value="<c:out value='${form.title}'/>" required/>
+  <qa:formError field="title"/>
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="faq-summary">Tóm tắt</label>
+  <textarea class="form-control ${not empty errors.summary ? 'is-invalid' : ''}" id="faq-summary" name="summary" rows="3" maxlength="500"><c:out value="${form.summary}"/></textarea>
+  <qa:formError field="summary"/>
+</div>
+
+<div class="mb-3">
+  <label class="form-label required" for="faq-category">Chuyên mục</label>
+  <select class="form-select ${not empty errors.categoryId ? 'is-invalid' : ''}" id="faq-category" name="categoryId" required>
+    <option value="">-- Chọn chuyên mục --</option>
+    <c:forEach var="option" items="${categoryOptions}"><option value="${option.id()}" ${form.categoryId eq option.id() ? 'selected' : ''}><c:out value="${option.label()}"/></option></c:forEach>
+  </select>
+  <qa:formError field="categoryId"/>
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="faq-tags">Tag</label>
+  <input class="form-control ${not empty errors.tags ? 'is-invalid' : ''}" id="faq-tags" name="tags" type="text" value="<c:out value='${form.tags}'/>" placeholder="Ví dụ: học phí, đăng ký môn"/>
+  <div class="form-hint">Phân tách bằng dấu phẩy; tối đa 8 tag, mỗi tag 2–40 ký tự.</div>
+  <qa:formError field="tags"/>
+</div>
+
+<div class="mb-3">
+  <label class="form-label required" for="faq-body">Nội dung</label>
+  <textarea class="form-control ${not empty errors.bodyHtml ? 'is-invalid' : ''}" id="faq-body" name="bodyHtml" rows="16" required><c:out value="${form.bodyHtml}"/></textarea>
+  <div class="form-hint">Dùng nút hình ảnh trên thanh công cụ để tải và chèn ảnh.</div>
+  <qa:formError field="bodyHtml"/>
+  <div id="faq-upload-error" class="text-danger small" role="alert" aria-live="polite"></div>
+  <div id="faq-image-assets"><c:forEach var="assetId" items="${form.imageAssetIds}"><input type="hidden" name="imageAssetIds" value="${assetId}"/></c:forEach></div>
+</div>
+
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <label class="form-check form-switch mt-3"><input type="hidden" name="_featured" value="on"/><input class="form-check-input" type="checkbox" name="featured" value="true" ${form.featured ? 'checked' : ''}/><span class="form-check-label">Bài nổi bật</span></label>
+  </div>
+  <div class="col-md-6 mb-3">
+    <label class="form-label" for="faq-publish-at">Hẹn giờ xuất bản</label>
+    <input class="form-control ${not empty errors.publishAt ? 'is-invalid' : ''}" id="faq-publish-at" name="publishAt" type="datetime-local" value="<c:out value='${publishAtValue}'/>"/>
+    <div class="form-hint">Thời điểm này được dùng khi bài được xuất bản.</div>
+    <qa:formError field="publishAt"/>
+  </div>
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="faq-change-note">Ghi chú thay đổi</label>
+  <input class="form-control ${not empty errors.changeNote ? 'is-invalid' : ''}" id="faq-change-note" name="changeNote" type="text" maxlength="255" value="<c:out value='${form.changeNote}'/>"/>
+  <qa:formError field="changeNote"/>
+</div>

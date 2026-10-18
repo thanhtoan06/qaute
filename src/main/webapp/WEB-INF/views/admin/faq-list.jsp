@@ -32,7 +32,7 @@
   <tbody>
     <c:choose><c:when test="${empty faqs.content}"><tr><td colspan="7"><qa:emptyState icon="bi-journal-text" title="Không có FAQ phù hợp" message="Hãy thử thay đổi điều kiện lọc."/></td></tr></c:when>
     <c:otherwise><c:forEach var="item" items="${faqs.content}"><tr>
-      <td><div class="fw-semibold"><c:out value="${item.title()}"/></div><div class="small text-secondary"><c:out value="${item.slug()}"/></div><c:if test="${item.featured()}"><span class="badge bg-yellow-lt mt-1">Nổi bật</span></c:if></td>
+      <td><div class="fw-semibold"><c:choose><c:when test="${item.status() eq 'ARCHIVED'}"><c:out value="${item.title()}"/></c:when><c:otherwise><a href="${ctx}/admin/faq/${item.id()}/edit"><c:out value="${item.title()}"/></a></c:otherwise></c:choose></div><div class="small text-secondary"><c:out value="${item.slug()}"/></div><c:if test="${item.featured()}"><span class="badge bg-yellow-lt mt-1">Nổi bật</span></c:if></td>
       <td><c:out value="${item.categoryPath()}"/></td>
       <td><c:out value="${item.authorName()}"/></td>
       <td><c:choose><c:when test="${item.status() eq 'DRAFT'}"><span class="badge bg-secondary-lt">Nháp</span></c:when><c:when test="${item.status() eq 'PENDING_REVIEW'}"><span class="badge bg-yellow-lt">Chờ duyệt</span></c:when><c:when test="${item.status() eq 'PUBLISHED'}"><span class="badge bg-green-lt">Đã xuất bản</span></c:when><c:otherwise><span class="badge bg-gray-lt">Lưu trữ</span></c:otherwise></c:choose></td>
