@@ -28,9 +28,9 @@
 </form>
 
 <div class="card"><div class="table-responsive"><table class="table table-vcenter card-table qa-admin-table">
-  <thead><tr><th>Tiêu đề</th><th>Chuyên mục</th><th>Tác giả</th><th>Trạng thái</th><th>Lượt xem</th><th>Hữu ích</th><th>Cập nhật</th></tr></thead>
+  <thead><tr><th>Tiêu đề</th><th>Chuyên mục</th><th>Tác giả</th><th>Trạng thái</th><th>Lượt xem</th><th>Hữu ích</th><th>Cập nhật</th><th>Thao tác</th></tr></thead>
   <tbody>
-    <c:choose><c:when test="${empty faqs.content}"><tr><td colspan="7"><qa:emptyState icon="bi-journal-text" title="Không có FAQ phù hợp" message="Hãy thử thay đổi điều kiện lọc."/></td></tr></c:when>
+    <c:choose><c:when test="${empty faqs.content}"><tr><td colspan="8"><qa:emptyState icon="bi-journal-text" title="Không có FAQ phù hợp" message="Hãy thử thay đổi điều kiện lọc."/></td></tr></c:when>
     <c:otherwise><c:forEach var="item" items="${faqs.content}"><tr>
       <td><div class="fw-semibold"><c:choose><c:when test="${item.status() eq 'ARCHIVED'}"><c:out value="${item.title()}"/></c:when><c:otherwise><a href="${ctx}/admin/faq/${item.id()}/edit"><c:out value="${item.title()}"/></a></c:otherwise></c:choose></div><div class="small text-secondary"><c:out value="${item.slug()}"/></div><c:if test="${item.featured()}"><span class="badge bg-yellow-lt mt-1">Nổi bật</span></c:if></td>
       <td><c:out value="${item.categoryPath()}"/></td>
@@ -39,6 +39,21 @@
       <td><c:out value="${item.viewCount()}"/></td>
       <td><c:set var="voteCount" value="${item.helpfulCount() + item.notHelpfulCount()}"/><c:choose><c:when test="${voteCount gt 0}"><fmt:formatNumber value="${100.0 * item.helpfulCount() / voteCount}" maxFractionDigits="0"/>% <span class="small text-secondary">(${voteCount})</span></c:when><c:otherwise><span class="text-secondary">—</span></c:otherwise></c:choose></td>
       <td><c:out value="${item.updatedAt()}"/></td>
+      <td><div class="d-flex flex-wrap gap-1">
+        <c:if test="${item.status() ne 'ARCHIVED'}"><a class="btn btn-sm btn-outline-primary" href="${ctx}/admin/faq/${item.id()}/edit">Sửa</a></c:if>
+        <c:choose>
+          <c:when test="${item.status() eq 'DRAFT'}">
+            <a class="btn btn-sm btn-outline-secondary" href="${ctx}/admin/faq/${item.id()}/review">Xem trước</a>
+            <qa:confirmModal id="submit-faq-${item.id()}" title="Gửi duyệt FAQ" message="Gửi bài viết này tới quản trị viên để duyệt?" actionUrl="${ctx}/admin/faq/${item.id()}/submit" confirmLabel="Gửi duyệt" cssClass="btn-sm btn-outline-primary"/>
+          </c:when>
+          <c:when test="${item.status() eq 'PENDING_REVIEW'}"><a class="btn btn-sm btn-success" href="${ctx}/admin/faq/${item.id()}/review">Duyệt</a></c:when>
+          <c:when test="${item.status() eq 'PUBLISHED'}">
+            <qa:confirmModal id="archive-faq-${item.id()}" title="Lưu trữ FAQ" message="Lưu trữ bài viết này?" actionUrl="${ctx}/admin/faq/${item.id()}/archive" confirmLabel="Lưu trữ" cssClass="btn-sm btn-outline-danger" requireReason="${true}"/>
+            <qa:confirmModal id="featured-faq-${item.id()}" title="Bài nổi bật" message="Thay đổi trạng thái nổi bật của bài viết?" actionUrl="${ctx}/admin/faq/${item.id()}/featured" confirmLabel="${item.featured() ? 'Bỏ ghim' : 'Ghim nổi bật'}" cssClass="btn-sm btn-outline-warning"/>
+          </c:when>
+          <c:otherwise><qa:confirmModal id="restore-faq-${item.id()}" title="Khôi phục FAQ" message="Khôi phục bài viết thành bản nháp?" actionUrl="${ctx}/admin/faq/${item.id()}/restore" confirmLabel="Khôi phục" cssClass="btn-sm btn-outline-primary"/></c:otherwise>
+        </c:choose>
+      </div></td>
     </tr></c:forEach></c:otherwise></c:choose>
   </tbody>
 </table></div></div>

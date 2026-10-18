@@ -1,6 +1,7 @@
 package vn.edu.hcmute.qaute.service.admin;
 
 import jakarta.persistence.criteria.Predicate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,15 +25,19 @@ import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.common.constant.MediaUsageType;
 import vn.edu.hcmute.qaute.common.constant.MediaStatus;
 import vn.edu.hcmute.qaute.common.constant.RoleCode;
+import vn.edu.hcmute.qaute.common.constant.UserStatus;
+import vn.edu.hcmute.qaute.common.constant.NotificationType;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.exception.ConflictException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
+import vn.edu.hcmute.qaute.common.exception.InvalidTransitionException;
 import vn.edu.hcmute.qaute.common.util.PageUtil;
 import vn.edu.hcmute.qaute.common.util.SlugUtil;
 import vn.edu.hcmute.qaute.common.util.TextUtil;
 import vn.edu.hcmute.qaute.dto.request.admin.AdminFaqFilter;
 import vn.edu.hcmute.qaute.dto.request.admin.FaqForm;
 import vn.edu.hcmute.qaute.dto.view.AdminFaqListItem;
+import vn.edu.hcmute.qaute.dto.view.AdminFaqReviewView;
 import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.entity.knowledge.Faq;
 import vn.edu.hcmute.qaute.entity.knowledge.FaqTag;
@@ -46,6 +52,7 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.knowledge.FaqContentSupport;
 import vn.edu.hcmute.qaute.service.media.MediaService;
+import vn.edu.hcmute.qaute.service.notification.NotificationService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
 @Service
@@ -64,11 +71,13 @@ public class AdminFaqService {
     private final MediaAssetRepository assets;
     private final MediaService media;
     private final AuditService audit;
+    private final ObjectProvider<NotificationService> notifications;
 
     public AdminFaqService(AdminFaqRepository faqs, CategoryQueryService categories,
                            UserRepository users, FaqRepository faqRepository,
                            FaqTagRepository tagRepository, FaqRevisionRepository revisions,
-                           MediaAssetRepository assets, MediaService media, AuditService audit) {
+                           MediaAssetRepository assets, MediaService media, AuditService audit,
+                           ObjectProvider<NotificationService> notifications) {
         this.faqs = faqs;
         this.categories = categories;
         this.users = users;
@@ -78,6 +87,168 @@ public class AdminFaqService {
         this.assets = assets;
         this.media = media;
         this.audit = audit;
+        this.notifications = notifications;
+    }
+
+    public AdminFaqReviewView review(Long id) {
+        Faq faq = requireFaq(id);
+        String authorName = faq.getAuthorId() == null ? "—" : users.findById(faq.getAuthorId())
+                .map(User::getFullName).orElse("—");
+        List<AdminFaqReviewView.RevisionNote> notes = revisions.findByFaqIdOrderByVersionNoDesc(id)
+                .stream().map(revision -> new AdminFaqReviewView.RevisionNote(
+                        revision.getVersionNo(), revision.getChangeNote(),
+                        revision.getChangedBy(), revision.getCreatedAt())).toList();
+        return new AdminFaqReviewView(faq.getId(), faq.getTitle(), faq.getSlug(),
+                faq.getSummary(), faq.getBodyHtml(), categories.getDisplayPath(faq.getCategoryId()),
+                authorName, faq.getStatus(), faq.isFeatured(), faq.getPublishAt(),
+                faq.getPublishedAt(), faq.getTags().stream().map(FaqTag::getName).sorted().toList(),
+                notes);
+    }
+
+    @Transactional
+    public void submitForReview(Long id, Long actorId) {
+        Faq faq = requireFaq(id);
+        requireStatus(faq, FaqStatus.DRAFT);
+        if (!actorId.equals(faq.getAuthorId()) && !SecurityUtils.hasRole(RoleCode.ADMIN)) {
+            throw new InvalidTransitionException("Chỉ tác giả hoặc quản trị viên có thể gửi duyệt");
+        }
+        faq.setStatus(FaqStatus.PENDING_REVIEW);
+        flushTransition(faq);
+        NotificationService notification = notifications.getIfAvailable();
+        if (notification != null) {
+            Map<String, String> details = Map.of("faqId", id.toString(), "title", faq.getTitle(),
+                    "link", "/admin/faq/" + id + "/review");
+            for (Long adminId : users.findIdsByRoleCodeAndStatus(RoleCode.ADMIN, UserStatus.ACTIVE)) {
+                notification.notifyUser(adminId, NotificationType.FAQ_REVIEW_REQUESTED, details);
+            }
+        }
+        audit.log(AuditActions.FAQ_SUBMITTED, "Faq", id, "DRAFT", "PENDING_REVIEW");
+    }
+
+    @Transactional
+    public void approve(Long id, Long reviewerId, LocalDateTime publishAt) {
+        requireAdmin();
+        Faq faq = requireFaq(id);
+        requireStatus(faq, FaqStatus.PENDING_REVIEW);
+        publish(faq, reviewerId, publishAt, FaqStatus.PENDING_REVIEW);
+    }
+
+    @Transactional
+    public void publishDirect(Long id, Long adminId, LocalDateTime publishAt) {
+        requireAdmin();
+        Faq faq = requireFaq(id);
+        requireStatus(faq, FaqStatus.DRAFT);
+        publish(faq, adminId, publishAt, FaqStatus.DRAFT);
+    }
+
+    @Transactional
+    public void reject(Long id, Long reviewerId, String reason) {
+        requireAdmin();
+        Faq faq = requireFaq(id);
+        requireStatus(faq, FaqStatus.PENDING_REVIEW);
+        String note = requireReason(reason);
+        FaqRevision latest = revisions.findByFaqIdOrderByVersionNoDesc(id).stream().findFirst()
+                .orElseGet(() -> FaqRevision.builder().faqId(id).versionNo(faq.getVersionNo())
+                        .title(faq.getTitle()).summary(faq.getSummary()).bodyHtml(faq.getBodyHtml())
+                        .changedBy(reviewerId).build());
+        latest.setChangeNote(note);
+        revisions.save(latest);
+        faq.setStatus(FaqStatus.DRAFT);
+        faq.setReviewerId(reviewerId);
+        flushTransition(faq);
+        notifyAuthor(faq, NotificationType.FAQ_REJECTED,
+                Map.of("faqId", id.toString(), "title", faq.getTitle(), "reason", note));
+        audit.log(AuditActions.FAQ_REJECTED, "Faq", id, "PENDING_REVIEW", "DRAFT: " + note);
+    }
+
+    @Transactional
+    public void archive(Long id, Long adminId, String reason) {
+        requireAdmin();
+        Faq faq = requireFaq(id);
+        requireStatus(faq, FaqStatus.PUBLISHED);
+        String note = requireReason(reason);
+        faq.setStatus(FaqStatus.ARCHIVED);
+        flushTransition(faq);
+        audit.log(AuditActions.FAQ_ARCHIVED, "Faq", id, "PUBLISHED", "ARCHIVED: " + note);
+    }
+
+    @Transactional
+    public void restore(Long id, Long adminId) {
+        requireAdmin();
+        Faq faq = requireFaq(id);
+        requireStatus(faq, FaqStatus.ARCHIVED);
+        faq.setStatus(FaqStatus.DRAFT);
+        faq.setReviewerId(null);
+        faq.setPublishAt(null);
+        faq.setPublishedAt(null);
+        flushTransition(faq);
+        audit.log(AuditActions.FAQ_RESTORED, "Faq", id, "ARCHIVED", "DRAFT");
+    }
+
+    @Transactional
+    public void toggleFeatured(Long id, Long adminId) {
+        requireAdmin();
+        Faq faq = requireFaq(id);
+        requireStatus(faq, FaqStatus.PUBLISHED);
+        boolean before = faq.isFeatured();
+        faq.setFeatured(!before);
+        flushTransition(faq);
+        audit.log(AuditActions.FAQ_FEATURED_CHANGED, "Faq", id,
+                Boolean.toString(before), Boolean.toString(faq.isFeatured()));
+    }
+
+    private void publish(Faq faq, Long reviewerId, LocalDateTime requestedAt, FaqStatus from) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime scheduledAt = requestedAt != null && requestedAt.isAfter(now) ? requestedAt : null;
+        faq.setStatus(FaqStatus.PUBLISHED);
+        faq.setReviewerId(reviewerId);
+        faq.setPublishAt(scheduledAt);
+        faq.setPublishedAt(scheduledAt == null ? now : null);
+        flushTransition(faq);
+        notifyAuthor(faq, NotificationType.FAQ_APPROVED,
+                Map.of("faqId", faq.getId().toString(), "title", faq.getTitle()));
+        audit.log(AuditActions.FAQ_PUBLISHED, "Faq", faq.getId(), from.name(),
+                "PUBLISHED at " + (scheduledAt == null ? now : scheduledAt));
+    }
+
+    private void notifyAuthor(Faq faq, NotificationType type, Map<String, String> details) {
+        NotificationService notification = notifications.getIfAvailable();
+        if (notification != null && faq.getAuthorId() != null) {
+            notification.notifyUser(faq.getAuthorId(), type, details);
+        }
+    }
+
+    private Faq requireFaq(Long id) {
+        return faqRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy FAQ"));
+    }
+
+    private static void requireStatus(Faq faq, FaqStatus expected) {
+        if (faq.getStatus() != expected) {
+            throw new InvalidTransitionException("FAQ phải ở trạng thái " + expected.name());
+        }
+    }
+
+    private static void requireAdmin() {
+        if (!SecurityUtils.hasRole(RoleCode.ADMIN)) {
+            throw new InvalidTransitionException("Chỉ quản trị viên được thực hiện thao tác này");
+        }
+    }
+
+    private static String requireReason(String reason) {
+        String trimmed = reason == null ? "" : reason.trim();
+        if (trimmed.length() < 10 || trimmed.length() > 500) {
+            throw new BadRequestException("Lý do phải từ 10 đến 500 ký tự");
+        }
+        return trimmed;
+    }
+
+    private void flushTransition(Faq faq) {
+        try {
+            faqRepository.saveAndFlush(faq);
+        } catch (OptimisticLockingFailureException | jakarta.persistence.OptimisticLockException e) {
+            throw new ConflictException("FAQ đã được cập nhật đồng thời. Vui lòng tải lại trang");
+        }
     }
 
     public FaqForm getForm(Long id) {

@@ -3,6 +3,7 @@ package vn.edu.hcmute.qaute.controller.admin;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,10 +19,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.hcmute.qaute.common.constant.FaqStatus;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.exception.ConflictException;
+import vn.edu.hcmute.qaute.common.exception.InvalidTransitionException;
 import vn.edu.hcmute.qaute.common.util.PageUtil;
 import vn.edu.hcmute.qaute.common.web.FormErrors;
 import vn.edu.hcmute.qaute.dto.request.admin.AdminFaqFilter;
@@ -99,6 +102,67 @@ public class AdminFaqController {
         model.addAttribute("errors", errors);
         formOptions(model, form.getId());
         return "admin/faq-form";
+    }
+
+    @GetMapping("/admin/faq/{id}/review")
+    public String review(@PathVariable Long id, Model model) {
+        model.addAttribute("faq", faqs.review(id));
+        model.addAttribute("pageTitle", "Duyệt FAQ");
+        return "admin/faq-review";
+    }
+
+    @PostMapping("/admin/faq/{id}/submit")
+    public String submit(@PathVariable Long id, RedirectAttributes redirect) {
+        return action(id, redirect, () -> faqs.submitForReview(id, SecurityUtils.requireUserId()),
+                "Đã gửi FAQ chờ duyệt");
+    }
+
+    @PostMapping("/admin/faq/{id}/approve")
+    public String approve(@PathVariable Long id,
+                          @RequestParam(required = false, defaultValue = "false") boolean direct,
+                          @RequestParam(required = false)
+                          @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime publishAt,
+                          RedirectAttributes redirect) {
+        return action(id, redirect, () -> {
+            if (direct) faqs.publishDirect(id, SecurityUtils.requireUserId(), publishAt);
+            else faqs.approve(id, SecurityUtils.requireUserId(), publishAt);
+        }, publishAt == null ? "Đã xuất bản FAQ" : "Đã duyệt lịch xuất bản FAQ");
+    }
+
+    @PostMapping("/admin/faq/{id}/reject")
+    public String reject(@PathVariable Long id, @RequestParam(required = false) String reason,
+                         RedirectAttributes redirect) {
+        return action(id, redirect, () -> faqs.reject(id, SecurityUtils.requireUserId(), reason),
+                "Đã từ chối FAQ và trả về bản nháp");
+    }
+
+    @PostMapping("/admin/faq/{id}/archive")
+    public String archive(@PathVariable Long id, @RequestParam(required = false) String reason,
+                          RedirectAttributes redirect) {
+        return action(id, redirect, () -> faqs.archive(id, SecurityUtils.requireUserId(), reason),
+                "Đã lưu trữ FAQ");
+    }
+
+    @PostMapping("/admin/faq/{id}/restore")
+    public String restore(@PathVariable Long id, RedirectAttributes redirect) {
+        return action(id, redirect, () -> faqs.restore(id, SecurityUtils.requireUserId()),
+                "Đã khôi phục FAQ thành bản nháp");
+    }
+
+    @PostMapping("/admin/faq/{id}/featured")
+    public String featured(@PathVariable Long id, RedirectAttributes redirect) {
+        return action(id, redirect, () -> faqs.toggleFeatured(id, SecurityUtils.requireUserId()),
+                "Đã cập nhật trạng thái nổi bật");
+    }
+
+    private String action(Long id, RedirectAttributes redirect, Runnable operation, String success) {
+        try {
+            operation.run();
+            redirect.addFlashAttribute("flashSuccess", success);
+        } catch (InvalidTransitionException | ConflictException | BadRequestException e) {
+            redirect.addFlashAttribute("flashError", e.getMessage());
+        }
+        return "redirect:/admin/faq";
     }
 
     private void formOptions(Model model, Long selectedId) {
