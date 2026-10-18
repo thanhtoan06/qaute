@@ -20,13 +20,13 @@ public interface FaqSearchRepository extends JpaRepository<Faq, Long> {
                    f.view_count AS viewCount,
                    f.helpful_count AS helpfulCount,
                    f.updated_at AS updatedAt,
-                   (5 * MATCH(f.title_norm) AGAINST(:q IN NATURAL LANGUAGE MODE)
+                   (5 * (CASE WHEN f.title_norm LIKE CONCAT('%', :q, '%') THEN 1 ELSE 0 END)
                     + 3 * (CASE WHEN EXISTS (
                         SELECT 1 FROM faq_tag_map ftm
                         JOIN faq_tags ft ON ft.id = ftm.tag_id
                         WHERE ftm.faq_id = f.id AND ft.name_norm LIKE CONCAT('%', :tagQuery, '%')
                       ) THEN 1 ELSE 0 END)
-                    + 1 * MATCH(f.body_norm) AGAINST(:q IN NATURAL LANGUAGE MODE)
+                    + 1 * (CASE WHEN f.body_norm LIKE CONCAT('%', :q, '%') THEN 1 ELSE 0 END)
                     + 0.5 * LOG10(1 + f.view_count)
                     + 1 / (1 + GREATEST(0, DATEDIFF(NOW(), f.updated_at)) / 365.0)) AS score
             FROM faqs f
@@ -34,8 +34,8 @@ public interface FaqSearchRepository extends JpaRepository<Faq, Long> {
             WHERE f.status = 'PUBLISHED'
               AND (f.publish_at IS NULL OR f.publish_at <= NOW())
               AND (
-                  MATCH(f.title_norm) AGAINST(:q IN NATURAL LANGUAGE MODE) > 0
-                  OR MATCH(f.body_norm) AGAINST(:q IN NATURAL LANGUAGE MODE) > 0
+                  f.title_norm LIKE CONCAT('%', :q, '%')
+                  OR f.body_norm LIKE CONCAT('%', :q, '%')
                   OR EXISTS (
                       SELECT 1 FROM faq_tag_map ftm2
                       JOIN faq_tags ft2 ON ft2.id = ftm2.tag_id
@@ -52,13 +52,13 @@ public interface FaqSearchRepository extends JpaRepository<Faq, Long> {
               CASE WHEN :sort = 'MOST_VIEWED' THEN f.view_count END DESC,
               CASE WHEN :sort = 'MOST_HELPFUL' THEN f.helpful_count END DESC,
               CASE WHEN :sort = 'RELEVANCE' OR :sort NOT IN ('LATEST', 'MOST_VIEWED', 'MOST_HELPFUL') THEN
-                  (5 * MATCH(f.title_norm) AGAINST(:q IN NATURAL LANGUAGE MODE)
+                  (5 * (CASE WHEN f.title_norm LIKE CONCAT('%', :q, '%') THEN 1 ELSE 0 END)
                    + 3 * (CASE WHEN EXISTS (
                        SELECT 1 FROM faq_tag_map ftm
                        JOIN faq_tags ft ON ft.id = ftm.tag_id
                        WHERE ftm.faq_id = f.id AND ft.name_norm LIKE CONCAT('%', :tagQuery, '%')
                      ) THEN 1 ELSE 0 END)
-                   + 1 * MATCH(f.body_norm) AGAINST(:q IN NATURAL LANGUAGE MODE)
+                   + 1 * (CASE WHEN f.body_norm LIKE CONCAT('%', :q, '%') THEN 1 ELSE 0 END)
                    + 0.5 * LOG10(1 + f.view_count)
                    + 1 / (1 + GREATEST(0, DATEDIFF(NOW(), f.updated_at)) / 365.0))
               END DESC,
@@ -70,8 +70,8 @@ public interface FaqSearchRepository extends JpaRepository<Faq, Long> {
             WHERE f.status = 'PUBLISHED'
               AND (f.publish_at IS NULL OR f.publish_at <= NOW())
               AND (
-                  MATCH(f.title_norm) AGAINST(:q IN NATURAL LANGUAGE MODE) > 0
-                  OR MATCH(f.body_norm) AGAINST(:q IN NATURAL LANGUAGE MODE) > 0
+                  f.title_norm LIKE CONCAT('%', :q, '%')
+                  OR f.body_norm LIKE CONCAT('%', :q, '%')
                   OR EXISTS (
                       SELECT 1 FROM faq_tag_map ftm
                       JOIN faq_tags ft ON ft.id = ftm.tag_id
@@ -102,13 +102,13 @@ public interface FaqSearchRepository extends JpaRepository<Faq, Long> {
                    f.view_count AS viewCount,
                    f.helpful_count AS helpfulCount,
                    f.updated_at AS updatedAt,
-                   (5 * MATCH(f.title_norm) AGAINST(:q IN NATURAL LANGUAGE MODE)
+                   (5 * (CASE WHEN f.title_norm LIKE CONCAT('%', :q, '%') THEN 1 ELSE 0 END)
                     + 3 * (CASE WHEN EXISTS (
                         SELECT 1 FROM faq_tag_map ftm
                         JOIN faq_tags ft ON ft.id = ftm.tag_id
                         WHERE ftm.faq_id = f.id AND ft.name_norm LIKE CONCAT('%', :tagQuery, '%')
                       ) THEN 1 ELSE 0 END)
-                    + 1 * MATCH(f.body_norm) AGAINST(:q IN NATURAL LANGUAGE MODE)
+                    + 1 * (CASE WHEN f.body_norm LIKE CONCAT('%', :q, '%') THEN 1 ELSE 0 END)
                     + 0.5 * LOG10(1 + f.view_count)
                     + 1 / (1 + GREATEST(0, DATEDIFF(NOW(), f.updated_at)) / 365.0)) AS score
             FROM faqs f
@@ -116,8 +116,8 @@ public interface FaqSearchRepository extends JpaRepository<Faq, Long> {
             WHERE f.status = 'PUBLISHED'
               AND (f.publish_at IS NULL OR f.publish_at <= NOW())
               AND (
-                  MATCH(f.title_norm) AGAINST(:q IN NATURAL LANGUAGE MODE) > 0
-                  OR MATCH(f.body_norm) AGAINST(:q IN NATURAL LANGUAGE MODE) > 0
+                  f.title_norm LIKE CONCAT('%', :q, '%')
+                  OR f.body_norm LIKE CONCAT('%', :q, '%')
                   OR EXISTS (
                       SELECT 1 FROM faq_tag_map ftm2
                       JOIN faq_tags ft2 ON ft2.id = ftm2.tag_id
@@ -135,13 +135,13 @@ public interface FaqSearchRepository extends JpaRepository<Faq, Long> {
               CASE WHEN :sort = 'MOST_VIEWED' THEN f.view_count END DESC,
               CASE WHEN :sort = 'MOST_HELPFUL' THEN f.helpful_count END DESC,
               CASE WHEN :sort = 'RELEVANCE' OR :sort NOT IN ('LATEST', 'MOST_VIEWED', 'MOST_HELPFUL') THEN
-                  (5 * MATCH(f.title_norm) AGAINST(:q IN NATURAL LANGUAGE MODE)
+                  (5 * (CASE WHEN f.title_norm LIKE CONCAT('%', :q, '%') THEN 1 ELSE 0 END)
                    + 3 * (CASE WHEN EXISTS (
                        SELECT 1 FROM faq_tag_map ftm
                        JOIN faq_tags ft ON ft.id = ftm.tag_id
                        WHERE ftm.faq_id = f.id AND ft.name_norm LIKE CONCAT('%', :tagQuery, '%')
                      ) THEN 1 ELSE 0 END)
-                   + 1 * MATCH(f.body_norm) AGAINST(:q IN NATURAL LANGUAGE MODE)
+                   + 1 * (CASE WHEN f.body_norm LIKE CONCAT('%', :q, '%') THEN 1 ELSE 0 END)
                    + 0.5 * LOG10(1 + f.view_count)
                    + 1 / (1 + GREATEST(0, DATEDIFF(NOW(), f.updated_at)) / 365.0))
               END DESC,
@@ -153,8 +153,8 @@ public interface FaqSearchRepository extends JpaRepository<Faq, Long> {
             WHERE f.status = 'PUBLISHED'
               AND (f.publish_at IS NULL OR f.publish_at <= NOW())
               AND (
-                  MATCH(f.title_norm) AGAINST(:q IN NATURAL LANGUAGE MODE) > 0
-                  OR MATCH(f.body_norm) AGAINST(:q IN NATURAL LANGUAGE MODE) > 0
+                  f.title_norm LIKE CONCAT('%', :q, '%')
+                  OR f.body_norm LIKE CONCAT('%', :q, '%')
                   OR EXISTS (
                       SELECT 1 FROM faq_tag_map ftm
                       JOIN faq_tags ft ON ft.id = ftm.tag_id
