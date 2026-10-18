@@ -1,6 +1,7 @@
 package vn.edu.hcmute.qaute.service.ticket;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.ActorType;
+import vn.edu.hcmute.qaute.common.constant.AssignmentType;
+import vn.edu.hcmute.qaute.common.constant.AvailabilityStatus;
 import vn.edu.hcmute.qaute.common.constant.ErrorCode;
 import vn.edu.hcmute.qaute.common.constant.MediaStatus;
 import vn.edu.hcmute.qaute.common.constant.MediaUsageType;
@@ -27,14 +30,17 @@ import vn.edu.hcmute.qaute.common.exception.InvalidTransitionException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.common.util.HtmlSanitizerUtil;
 import vn.edu.hcmute.qaute.common.util.TextUtil;
+import vn.edu.hcmute.qaute.dto.view.ManagerOption;
 import vn.edu.hcmute.qaute.dto.view.SlaSnapshot;
 import vn.edu.hcmute.qaute.dto.view.UserSummary;
 import vn.edu.hcmute.qaute.entity.media.MediaAsset;
 import vn.edu.hcmute.qaute.entity.ticket.Ticket;
+import vn.edu.hcmute.qaute.entity.ticket.TicketAssignment;
 import vn.edu.hcmute.qaute.entity.ticket.TicketAttachment;
 import vn.edu.hcmute.qaute.entity.ticket.TicketMessage;
 import vn.edu.hcmute.qaute.entity.ticket.TicketStatusHistory;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
+import vn.edu.hcmute.qaute.repository.ticket.TicketAssignmentRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketAttachmentRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketMessageRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
@@ -42,6 +48,7 @@ import vn.edu.hcmute.qaute.repository.ticket.TicketStatusHistoryRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.media.MediaService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
+import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 import vn.edu.hcmute.qaute.service.ticket.command.CreateTicketCommand;
 import vn.edu.hcmute.qaute.service.ticket.event.TicketEventPublisher;
@@ -52,14 +59,18 @@ import vn.edu.hcmute.qaute.service.ticket.event.TicketEventType;
 public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     private static final Set<TicketStatus> URGENT_OPEN_STATUSES = Set.of(
             TicketStatus.NEW, TicketStatus.ASSIGNED, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_STUDENT);
+    private static final Set<TicketStatus> ASSIGNABLE_STATUSES = Set.of(
+            TicketStatus.NEW, TicketStatus.ASSIGNED, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_STUDENT);
     private final TicketRepository tickets;
     private final TicketMessageRepository messages;
     private final TicketAttachmentRepository attachments;
     private final TicketStatusHistoryRepository histories;
+    private final TicketAssignmentRepository assignments;
     private final MediaAssetRepository assets;
     private final MediaService media;
     private final UserLookupService users;
     private final CategoryQueryService categories;
+    private final ManagerScopeService managerScope;
     private final SlaService sla;
     private final TicketCodeGenerator codes;
     private final SettingsService settings;
@@ -67,17 +78,21 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
 
     public TicketWorkflowServiceImpl(TicketRepository tickets, TicketMessageRepository messages,
                                      TicketAttachmentRepository attachments, TicketStatusHistoryRepository histories,
+                                     TicketAssignmentRepository assignments,
                                      MediaAssetRepository assets, MediaService media, UserLookupService users,
-                                     CategoryQueryService categories, SlaService sla, TicketCodeGenerator codes,
+                                     CategoryQueryService categories, ManagerScopeService managerScope,
+                                     SlaService sla, TicketCodeGenerator codes,
                                      SettingsService settings, TicketEventPublisher events) {
         this.tickets = tickets;
         this.messages = messages;
         this.attachments = attachments;
         this.histories = histories;
+        this.assignments = assignments;
         this.assets = assets;
         this.media = media;
         this.users = users;
         this.categories = categories;
+        this.managerScope = managerScope;
         this.sla = sla;
         this.codes = codes;
         this.settings = settings;
@@ -274,9 +289,6 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         return new UnsupportedOperationException("Chưa cài đặt");
     }
 
-    @Override public Ticket claim(Long ticketId, Long managerId) { throw unsupported(); }
-    @Override public Ticket assign(Long ticketId, Long toManagerId, Long actorUserId, String reason) { throw unsupported(); }
-    @Override public Ticket returnToQueue(Long ticketId, Long actorUserId, String reason) { throw unsupported(); }
     @Override public Ticket requestMoreInfo(Long ticketId, Long managerId, String messageHtml, List<Long> assetIds) { throw unsupported(); }
     @Override public Ticket resolve(Long ticketId, Long managerId, String resolutionNote) { throw unsupported(); }
     @Override public Ticket confirmClose(Long ticketId, Long studentId) { throw unsupported(); }
@@ -289,10 +301,189 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     @Override public int autoCloseExpired() { throw unsupported(); }
 
     @Override
-    public void autoAssignIfEnabled(Ticket ticket) {
-        if (ticket != null && settings.getBoolean(SettingKeys.TICKET_AUTO_ASSIGN_ENABLED)) {
-            // Chiến lược chọn tư vấn viên sẽ được bổ sung ở bước workflow auto-assign.
+    public Ticket claim(Long ticketId, Long managerId) {
+        try {
+            requireActiveManager(managerId);
+            Ticket ticket = findOrThrow(ticketId);
+            if (!managerScope.isInScope(managerId, ticket.getCategoryId())) {
+                throw new NotFoundException("Chuyên mục ticket không thuộc phạm vi của bạn");
+            }
+            if (!managerScope.isAvailableForAssignment(managerId)) {
+                throw new AppException(ErrorCode.ERR_LIMIT_EXCEEDED, "Bạn đã nhận tối đa số yêu cầu đồng thời");
+            }
+            LocalDateTime now = LocalDateTime.now();
+            int updated = tickets.claimIfNew(ticketId, managerId, now);
+            if (updated == 0) {
+                throw new ConflictException("Yêu cầu vừa được người khác nhận");
+            }
+            ticket = findOrThrow(ticketId);
+            saveAssignment(ticket, null, managerId, managerId, AssignmentType.CLAIM, null, now);
+            recordHistory(ticket, TicketStatus.NEW, TicketStatus.ASSIGNED, managerId, ActorType.MANAGER, null);
+            events.publish(TicketEventType.ASSIGNED, ticket, managerId, Map.of());
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
         }
+    }
+
+    @Override
+    public Ticket assign(Long ticketId, Long toManagerId, Long actorUserId, String reason) {
+        try {
+            Ticket ticket = findOrThrow(ticketId);
+            requireAssignActor(actorUserId, ticket);
+            if (!ASSIGNABLE_STATUSES.contains(ticket.getStatus())) {
+                throw new InvalidTransitionException("Trạng thái ticket không cho phép giao lại");
+            }
+            requireActiveManager(toManagerId);
+            if (!managerScope.isInScope(toManagerId, ticket.getCategoryId())) {
+                throw new NotFoundException("Tư vấn viên không phụ trách chuyên mục này");
+            }
+            if (!managerScope.isAvailableForAssignment(toManagerId)) {
+                throw new AppException(ErrorCode.ERR_LIMIT_EXCEEDED, "Tư vấn viên đã đạt giới hạn số yêu cầu đồng thời");
+            }
+            boolean hadAssignee = ticket.getCurrentAssigneeId() != null;
+            if (hadAssignee) {
+                String trimmed = reason == null ? "" : reason.trim();
+                if (trimmed.length() < 10 || trimmed.length() > 500) {
+                    throw new BadRequestException("Lý do giao lại phải từ 10 đến 500 ký tự");
+                }
+            }
+            LocalDateTime now = LocalDateTime.now();
+            closeCurrentAssignment(ticketId, now);
+            Long fromManagerId = ticket.getCurrentAssigneeId();
+            AssignmentType type = hadAssignee ? AssignmentType.REASSIGN : AssignmentType.ASSIGN;
+            ticket.setCurrentAssigneeId(toManagerId);
+            if (ticket.getFirstAssignedAt() == null) ticket.setFirstAssignedAt(now);
+            if (ticket.getStatus() == TicketStatus.NEW) {
+                ticket.setStatus(TicketStatus.ASSIGNED);
+                recordHistory(ticket, TicketStatus.NEW, TicketStatus.ASSIGNED, actorUserId, ActorType.MANAGER, null);
+            }
+            touch(ticket);
+            ticket = tickets.saveAndFlush(ticket);
+            saveAssignment(ticket, fromManagerId, toManagerId, actorUserId, type, hadAssignee ? reason.trim() : null, now);
+            String assigneeName = users.getSummary(toManagerId).fullName();
+            addSystemMessage(ticket, "Yêu cầu được giao cho " + assigneeName);
+            events.publish(TicketEventType.ASSIGNED, ticket, actorUserId, Map.of());
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
+        }
+    }
+
+    @Override
+    public Ticket returnToQueue(Long ticketId, Long actorUserId, String reason) {
+        try {
+            Ticket ticket = findOrThrow(ticketId);
+            boolean isAssignee = actorUserId.equals(ticket.getCurrentAssigneeId());
+            boolean isAdmin = isActorAdmin(actorUserId);
+            if (!isAssignee && !isAdmin) {
+                throw new ForbiddenException("Bạn không có quyền trả ticket về hàng chờ");
+            }
+            Set<TicketStatus> allowed = Set.of(TicketStatus.ASSIGNED, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_STUDENT);
+            if (!allowed.contains(ticket.getStatus())) {
+                throw new InvalidTransitionException("Chỉ có thể trả ticket đang được xử lý về hàng chờ");
+            }
+            String trimmed = reason == null ? "" : reason.trim();
+            if (trimmed.length() < 10 || trimmed.length() > 500) {
+                throw new BadRequestException("Lý do trả hàng chờ phải từ 10 đến 500 ký tự");
+            }
+            LocalDateTime now = LocalDateTime.now();
+            closeCurrentAssignment(ticketId, now);
+            TicketStatus prevStatus = ticket.getStatus();
+            if (ticket.getSlaPausedAt() != null) {
+                sla.resume(ticket, now);
+            }
+            ticket.setCurrentAssigneeId(null);
+            ticket.setStatus(TicketStatus.NEW);
+            touch(ticket);
+            ticket = tickets.saveAndFlush(ticket);
+            recordHistory(ticket, prevStatus, TicketStatus.NEW, actorUserId, ActorType.MANAGER, trimmed);
+            events.publish(TicketEventType.RETURNED_TO_QUEUE, ticket, actorUserId, Map.of());
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
+        }
+    }
+
+    @Override
+    public void autoAssignIfEnabled(Ticket ticket) {
+        if (ticket == null || ticket.getStatus() != TicketStatus.NEW) return;
+        if (!settings.getBoolean(SettingKeys.TICKET_AUTO_ASSIGN_ENABLED)) return;
+        List<ManagerOption> candidates = managerScope.findAdvisors(ticket.getCategoryId()).stream()
+                .filter(m -> m.status() == AvailabilityStatus.ONLINE && managerScope.isAvailableForAssignment(m.id()))
+                .collect(java.util.stream.Collectors.toList());
+        if (candidates.isEmpty()) return;
+        ManagerOption chosen = candidates.stream()
+                .min(Comparator.comparingInt((ManagerOption m) -> managerScope.currentOpenTicketCount(m.id()))
+                        .thenComparingLong(ManagerOption::id))
+                .orElse(null);
+        if (chosen == null) return;
+        LocalDateTime now = LocalDateTime.now();
+        tickets.claimIfNew(ticket.getId(), chosen.id(), now);
+        Ticket updated = findOrThrow(ticket.getId());
+        saveAssignment(updated, null, chosen.id(), null, AssignmentType.AUTO, null, now);
+        recordHistory(updated, TicketStatus.NEW, TicketStatus.ASSIGNED, chosen.id(), ActorType.MANAGER, null);
+        events.publish(TicketEventType.ASSIGNED, updated, chosen.id(), Map.of());
+        ticket.setStatus(updated.getStatus());
+        ticket.setCurrentAssigneeId(updated.getCurrentAssigneeId());
+        ticket.setFirstAssignedAt(updated.getFirstAssignedAt());
+    }
+
+    private void requireActiveManager(Long managerId) {
+        UserSummary user = users.getSummary(managerId);
+        if (user.role() != RoleCode.MANAGER || user.status() != UserStatus.ACTIVE) {
+            throw new BadRequestException("Tư vấn viên không ở trạng thái hoạt động");
+        }
+    }
+
+    private void requireAssignActor(Long actorUserId, Ticket ticket) {
+        UserSummary actor = users.getSummary(actorUserId);
+        if (actor.role() == RoleCode.ADMIN) return;
+        if (actor.role() == RoleCode.MANAGER && actor.status() == UserStatus.ACTIVE) {
+            if (actorUserId.equals(ticket.getCurrentAssigneeId())) return;
+            if (managerScope.isInScope(actorUserId, ticket.getCategoryId())) return;
+        }
+        throw new ForbiddenException("Bạn không có quyền giao ticket này");
+    }
+
+    private boolean isActorAdmin(Long actorUserId) {
+        try {
+            UserSummary actor = users.getSummary(actorUserId);
+            return actor.role() == RoleCode.ADMIN;
+        } catch (NotFoundException e) {
+            return false;
+        }
+    }
+
+    private void saveAssignment(Ticket ticket, Long fromManagerId, Long toManagerId,
+                                Long assignedBy, AssignmentType type, String reason, LocalDateTime now) {
+        assignments.save(TicketAssignment.builder()
+                .ticketId(ticket.getId())
+                .fromManagerId(fromManagerId)
+                .toManagerId(toManagerId)
+                .assignedBy(assignedBy)
+                .type(type)
+                .reason(reason)
+                .assignedAt(now)
+                .build());
+    }
+
+    private void closeCurrentAssignment(Long ticketId, LocalDateTime now) {
+        assignments.findFirstByTicketIdAndEndedAtIsNullOrderByIdDesc(ticketId)
+                .ifPresent(a -> {
+                    a.setEndedAt(now);
+                    assignments.save(a);
+                });
+    }
+
+    private void addSystemMessage(Ticket ticket, String text) {
+        messages.save(TicketMessage.builder()
+                .ticketId(ticket.getId())
+                .senderId(null)
+                .senderType(SenderType.SYSTEM)
+                .contentHtml("<p>" + text + "</p>")
+                .contentText(text)
+                .build());
     }
 
     private record Content(String html, String text) {
