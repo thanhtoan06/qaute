@@ -53,7 +53,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfRepository)
                         .csrfTokenRequestHandler(csrfHandler)
-                        .ignoringRequestMatchers("/ws/**"))
+                        .ignoringRequestMatchers("/ws/**", "/api/public/**"))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(login -> login.disable())
                 .httpBasic(basic -> basic.disable())

@@ -28,7 +28,7 @@
             </nav>
             <form class="ms-auto me-3" method="get" action="/search">
                 <div class="input-group input-group-sm">
-                    <input class="form-control" type="search" name="q" placeholder="Tìm kiếm" aria-label="Tìm kiếm">
+                    <input class="form-control" type="search" name="q" placeholder="Tìm kiếm" aria-label="Tìm kiếm" data-qa-suggest="NAVBAR">
                     <button class="btn btn-outline-secondary" type="submit">Tìm</button>
                 </div>
             </form>

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.FaqSort;
 import vn.edu.hcmute.qaute.common.constant.FaqStatus;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
+import vn.edu.hcmute.qaute.common.util.TextUtil;
 import vn.edu.hcmute.qaute.dto.request.FaqFilter;
 import vn.edu.hcmute.qaute.dto.view.CategoryView;
 import vn.edu.hcmute.qaute.dto.view.FaqDetailView;
@@ -220,7 +221,29 @@ public class FaqQueryServiceImpl implements FaqQueryService {
 
     @Override
     public List<FaqSuggestion> suggest(String query, int limit) {
-        return List.of();
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+        String q = TextUtil.normalizeVi(query);
+        if (q.length() < 2) {
+            return List.of();
+        }
+        int maxLimit = Math.min(limit > 0 ? limit : 10, 10);
+        String escaped = TextUtil.escapeLike(q);
+        String prefix = escaped + "%";
+        String contains = "%" + escaped + "%";
+        LocalDateTime now = LocalDateTime.now();
+        Pageable pageable = PageRequest.of(0, maxLimit);
+
+        List<Faq> faqs = faqRepository.suggestFaqs(prefix, contains, q, now, pageable);
+        return faqs.stream()
+                .map(faq -> new FaqSuggestion(
+                        faq.getId(),
+                        faq.getTitle(),
+                        faq.getSlug(),
+                        categoryQueryService.getDisplayPath(faq.getCategoryId())
+                ))
+                .toList();
     }
 
     private Pageable resolvePageable(FaqFilter filter, Pageable pageable) {

@@ -29,7 +29,9 @@
                     </span>
                     <input type="text" name="q" class="form-control form-control-lg"
                            placeholder="Nhập từ khóa tìm kiếm FAQ..."
-                           value="<c:out value='${q}'/>" autofocus required minlength="2"/>
+                           value="<c:out value='${q}'/>"
+                           data-qa-suggest="SEARCH"
+                           autofocus required minlength="2"/>
                 </div>
             </div>
             <div class="col-md-2">
@@ -106,51 +108,94 @@
     </div>
 
     <div class="col-lg-9">
-        <c:if test="${not empty q and empty errorMessage}">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="text-secondary">
-                    Tìm thấy <strong class="text-dark"><c:out value="${page.totalElements}"/></strong> kết quả cho từ khóa "<strong class="text-dark"><c:out value="${q}"/></strong>"
-                    <c:if test="${not empty selectedCategoryName}">
-                        trong chuyên mục "<strong class="text-dark"><c:out value="${selectedCategoryName}"/></strong>"
-                    </c:if>
-                </div>
-            </div>
-        </c:if>
-
-        <c:forEach var="item" items="${page.content}">
-            <div class="card mb-3 qa-card-hover">
-                <div class="card-body">
-                    <h2 class="card-title h3 mb-2">
-                        <a href="/faq/<c:out value='${item.slug()}'/>" class="text-primary text-decoration-none">
-                            <c:out value="${item.titleHtml()}" escapeXml="false"/>
-                        </a>
+        <c:choose>
+            <c:when test="${not empty q and page.totalElements == 0 and empty errorMessage}">
+                <div class="card p-4 text-center my-2 border">
+                    <div class="my-3">
+                        <i class="bi bi-search display-3 text-secondary"></i>
+                    </div>
+                    <h2 class="h3 mb-3">
+                        Không tìm thấy kết quả cho '<c:out value="${q}"/>'
                     </h2>
-                    <p class="text-secondary mb-3">
-                        <c:out value="${item.snippetHtml()}" escapeXml="false"/>
-                    </p>
-                    <div class="d-flex flex-wrap align-items-center gap-3 text-secondary small pt-2 border-top">
-                        <c:if test="${not empty item.categoryName()}">
-                            <span class="badge bg-light text-secondary border">
-                                <i class="bi bi-folder me-1"></i><c:out value="${item.categoryName()}"/>
-                            </span>
-                        </c:if>
-                        <span>
-                            <i class="bi bi-eye me-1"></i><c:out value="${item.viewCount()}"/> lượt xem
-                        </span>
-                        <span>
-                            <i class="bi bi-hand-thumbs-up me-1"></i><c:out value="${item.helpfulCount()}"/> hữu ích
-                        </span>
-                        <c:if test="${not empty item.updatedAt()}">
-                            <span>
-                                <i class="bi bi-clock-history me-1"></i>Cập nhật: ${item.updatedAt().dayOfMonth}/${item.updatedAt().monthValue}/${item.updatedAt().year}
-                            </span>
-                        </c:if>
+                    <div class="card bg-light border-0 mx-auto text-start p-3 mb-4" style="max-width: 600px;">
+                        <div class="fw-bold mb-2 text-dark"><i class="bi bi-lightbulb me-2 text-warning"></i>Mẹo tìm kiếm:</div>
+                        <ul class="mb-0 text-secondary ps-3 small">
+                            <li>Kiểm tra lại chính tả của từ khóa tìm kiếm.</li>
+                            <li>Thử dùng các từ khóa ngắn hơn hoặc các từ khóa thông dụng khác.</li>
+                            <li>Bỏ bớt các bộ lọc chuyên mục hoặc chọn "Tất cả chuyên mục".</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4 text-start mx-auto w-100" style="max-width: 700px;">
+                        <div class="fw-bold mb-2 text-secondary text-center small text-uppercase">Các chuyên mục gợi ý:</div>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <c:forEach var="dept" items="${tree}">
+                                <c:forEach var="cat" items="${dept.categories()}">
+                                    <a href="/faq?category=<c:out value='${cat.id()}'/>" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi <c:out value='${empty cat.icon() ? "bi-folder" : cat.icon()}'/> me-1"></i>
+                                        <c:out value="${cat.name()}"/>
+                                    </a>
+                                </c:forEach>
+                            </c:forEach>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-top">
+                        <p class="text-secondary mb-3">Vẫn chưa tìm thấy thông tin bạn cần?</p>
+                        <a href="<c:url value='/student/tickets/new'><c:param name='q' value='${q}'/></c:url>" class="btn btn-primary">
+                            <i class="bi bi-pencil-square me-1"></i>Tạo yêu cầu hỗ trợ
+                        </a>
                     </div>
                 </div>
-            </div>
-        </c:forEach>
+            </c:when>
 
-        <qa:pagination page="${page}" baseUrl="/search" params="${queryString}"/>
+            <c:otherwise>
+                <c:if test="${not empty q and empty errorMessage}">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-secondary">
+                            Tìm thấy <strong class="text-dark"><c:out value="${page.totalElements}"/></strong> kết quả cho từ khóa "<strong class="text-dark"><c:out value="${q}"/></strong>"
+                            <c:if test="${not empty selectedCategoryName}">
+                                trong chuyên mục "<strong class="text-dark"><c:out value="${selectedCategoryName}"/></strong>"
+                            </c:if>
+                        </div>
+                    </div>
+                </c:if>
+
+                <c:forEach var="item" items="${page.content}">
+                    <div class="card mb-3 qa-card-hover">
+                        <div class="card-body">
+                            <h2 class="card-title h3 mb-2">
+                                <a href="/faq/<c:out value='${item.slug()}'/>" class="text-primary text-decoration-none">
+                                    <c:out value="${item.titleHtml()}" escapeXml="false"/>
+                                </a>
+                            </h2>
+                            <p class="text-secondary mb-3">
+                                <c:out value="${item.snippetHtml()}" escapeXml="false"/>
+                            </p>
+                            <div class="d-flex flex-wrap align-items-center gap-3 text-secondary small pt-2 border-top">
+                                <c:if test="${not empty item.categoryName()}">
+                                    <span class="badge bg-light text-secondary border">
+                                        <i class="bi bi-folder me-1"></i><c:out value="${item.categoryName()}"/>
+                                    </span>
+                                </c:if>
+                                <span>
+                                    <i class="bi bi-eye me-1"></i><c:out value="${item.viewCount()}"/> lượt xem
+                                </span>
+                                <span>
+                                    <i class="bi bi-hand-thumbs-up me-1"></i><c:out value="${item.helpfulCount()}"/> hữu ích
+                                </span>
+                                <c:if test="${not empty item.updatedAt()}">
+                                    <span>
+                                        <i class="bi bi-clock-history me-1"></i>Cập nhật: ${item.updatedAt().dayOfMonth}/${item.updatedAt().monthValue}/${item.updatedAt().year}
+                                    </span>
+                                </c:if>
+                            </div>
+                        </div>
+                    </div>
+                </c:forEach>
+
+                <qa:pagination page="${page}" baseUrl="/search" params="${queryString}"/>
+            </c:otherwise>
+        </c:choose>
     </div>
 </div>
-
