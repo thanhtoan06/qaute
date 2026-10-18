@@ -32,12 +32,14 @@ import vn.edu.hcmute.qaute.common.exception.ConflictException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.common.exception.InvalidTransitionException;
 import vn.edu.hcmute.qaute.common.util.PageUtil;
+import vn.edu.hcmute.qaute.common.util.HtmlSanitizerUtil;
 import vn.edu.hcmute.qaute.common.util.SlugUtil;
 import vn.edu.hcmute.qaute.common.util.TextUtil;
 import vn.edu.hcmute.qaute.dto.request.admin.AdminFaqFilter;
 import vn.edu.hcmute.qaute.dto.request.admin.FaqForm;
 import vn.edu.hcmute.qaute.dto.view.AdminFaqListItem;
 import vn.edu.hcmute.qaute.dto.view.AdminFaqReviewView;
+import vn.edu.hcmute.qaute.dto.view.FaqRevisionView;
 import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.entity.knowledge.Faq;
 import vn.edu.hcmute.qaute.entity.knowledge.FaqTag;
@@ -103,6 +105,58 @@ public class AdminFaqService {
                 authorName, faq.getStatus(), faq.isFeatured(), faq.getPublishAt(),
                 faq.getPublishedAt(), faq.getTags().stream().map(FaqTag::getName).sorted().toList(),
                 notes);
+    }
+
+    public List<FaqRevisionView> revisionHistory(Long id) {
+        requireFaq(id);
+        List<FaqRevision> history = revisions.findByFaqIdOrderByVersionNoDesc(id);
+        Set<Long> editorIds = history.stream().map(FaqRevision::getChangedBy)
+                .filter(java.util.Objects::nonNull).collect(Collectors.toSet());
+        Map<Long, String> editorNames = new HashMap<>();
+        users.findAllById(editorIds).forEach(user -> editorNames.put(user.getId(), user.getFullName()));
+        return history.stream().map(revision -> toRevisionView(revision, editorNames)).toList();
+    }
+
+    public FaqRevisionView revision(Long id, int versionNo) {
+        requireFaq(id);
+        FaqRevision item = revisions.findByFaqIdAndVersionNo(id, versionNo)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên bản FAQ"));
+        String editor = item.getChangedBy() == null ? null : users.findById(item.getChangedBy())
+                .map(User::getFullName).orElse(null);
+        return toRevisionView(item, editor == null ? Map.of() : Map.of(item.getChangedBy(), editor));
+    }
+
+    @Transactional
+    public void restoreRevision(Long id, int versionNo, Long actorId) {
+        requireAdmin();
+        Faq faq = requireFaq(id);
+        if (faq.getStatus() == FaqStatus.ARCHIVED) {
+            throw new InvalidTransitionException("Không thể khôi phục phiên bản của FAQ đã lưu trữ");
+        }
+        FaqRevision source = revisions.findByFaqIdAndVersionNo(id, versionNo)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên bản FAQ"));
+        int previousVersion = faq.getVersionNo();
+        faq.setTitle(source.getTitle());
+        faq.setSummary(source.getSummary());
+        faq.setBodyHtml(source.getBodyHtml());
+        if (faq.getStatus() != FaqStatus.PUBLISHED) {
+            faq.setSlug(uniqueSlug(source.getTitle(), id));
+        }
+        faq.setVersionNo(previousVersion + 1);
+        FaqContentSupport.prepare(faq);
+        flushTransition(faq);
+        revisions.save(FaqRevision.builder().faqId(id).versionNo(faq.getVersionNo())
+                .title(faq.getTitle()).summary(faq.getSummary()).bodyHtml(faq.getBodyHtml())
+                .changedBy(actorId).changeNote("Khôi phục từ phiên bản " + versionNo).build());
+        audit.log(AuditActions.FAQ_REVISION_RESTORED, "Faq", id,
+                "v" + previousVersion, "v" + faq.getVersionNo() + " từ v" + versionNo);
+    }
+
+    private static FaqRevisionView toRevisionView(FaqRevision item, Map<Long, String> editorNames) {
+        return new FaqRevisionView(item.getVersionNo(), item.getTitle(), item.getSummary(),
+                HtmlSanitizerUtil.sanitize(item.getBodyHtml()), item.getChangedBy(),
+                item.getChangedBy() == null ? "—" : editorNames.getOrDefault(item.getChangedBy(), "—"),
+                item.getChangeNote(), item.getCreatedAt());
     }
 
     @Transactional

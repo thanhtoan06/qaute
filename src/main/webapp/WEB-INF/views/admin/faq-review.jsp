@@ -4,7 +4,7 @@
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <h2 class="page-title mb-0">Xem trước FAQ</h2>
-  <a class="btn btn-outline-secondary" href="${ctx}/admin/faq">Danh sách FAQ</a>
+  <div class="d-flex gap-2"><a class="btn btn-outline-primary" href="${ctx}/admin/faq/${faq.id()}/revisions">Phiên bản</a><a class="btn btn-outline-secondary" href="${ctx}/admin/faq">Danh sách FAQ</a></div>
 </div>
 
 <div class="row g-3">

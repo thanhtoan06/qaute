@@ -5,7 +5,7 @@
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <h2 class="page-title mb-0"><c:out value="${pageTitle}"/></h2>
-  <a class="btn btn-outline-secondary" href="${ctx}/admin/faq">Danh sách FAQ</a>
+  <div class="d-flex gap-2"><c:if test="${editing}"><a class="btn btn-outline-primary" href="${ctx}/admin/faq/${form.id}/revisions">Phiên bản</a></c:if><a class="btn btn-outline-secondary" href="${ctx}/admin/faq">Danh sách FAQ</a></div>
 </div>
 
 <div class="row"><div class="col-xl-10"><div class="card"><div class="card-body">
