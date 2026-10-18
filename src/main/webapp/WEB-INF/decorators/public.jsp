@@ -59,8 +59,13 @@
     </div>
 </main>
 <footer class="border-top mt-auto py-4">
-    <div class="container-xl d-flex justify-content-between">
+    <div class="container-xl d-flex flex-wrap justify-content-between align-items-center gap-2">
         <span>Liên hệ: Phòng Công tác Sinh viên HCMUTE</span>
+        <div class="d-flex gap-3 small">
+            <a href="/pages/about" class="text-secondary text-decoration-none">Giới thiệu</a>
+            <a href="/pages/guide" class="text-secondary text-decoration-none">Hướng dẫn</a>
+            <a href="/pages/contact" class="text-secondary text-decoration-none">Liên hệ</a>
+        </div>
         <span>© QAUTE</span>
     </div>
 </footer>
