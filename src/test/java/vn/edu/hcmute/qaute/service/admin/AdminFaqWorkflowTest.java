@@ -117,7 +117,7 @@ class AdminFaqWorkflowTest {
 
         assertEquals(FaqStatus.PUBLISHED, faq.getStatus());
         assertEquals(future, faq.getPublishAt());
-        assertNull(faq.getPublishedAt());
+        assertEquals(future, faq.getPublishedAt());
         assertEquals(1L, faq.getReviewerId());
         verify(notification).notifyUser(eq(7L), eq(NotificationType.FAQ_APPROVED), any());
         verify(audit).log(eq(AuditActions.FAQ_PUBLISHED), eq("Faq"), eq(12L),

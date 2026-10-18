@@ -16,7 +16,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class TicketSequence {
     @Id private Integer year;
-    @Column(name = "last_value", nullable = false) private Integer lastValue;
+    @Column(name = "last_sequence_value", nullable = false) private Integer lastValue;
     @CreationTimestamp @Column(name = "created_at", updatable = false, nullable = false) private LocalDateTime createdAt;
     @UpdateTimestamp @Column(name = "updated_at", nullable = false) private LocalDateTime updatedAt;
 
