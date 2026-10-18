@@ -2,7 +2,9 @@ package vn.edu.hcmute.qaute.repository.ticket;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,4 +24,14 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
             + "t.currentAssigneeId = :managerId, t.firstAssignedAt = :now, t.lastActivityAt = :now, "
             + "t.version = t.version + 1 WHERE t.id = :id AND t.status = vn.edu.hcmute.qaute.common.constant.TicketStatus.NEW")
     int claimIfNew(@Param("id") Long id, @Param("managerId") Long managerId, @Param("now") LocalDateTime now);
+
+    @Query("SELECT t FROM Ticket t WHERE t.status = vn.edu.hcmute.qaute.common.constant.TicketStatus.RESOLVED AND t.resolvedAt < :cutoff")
+    List<Ticket> findExpiredResolved(@Param("cutoff") LocalDateTime cutoff, Pageable pageable);
+
+    @Query("SELECT t FROM Ticket t WHERE t.status = vn.edu.hcmute.qaute.common.constant.TicketStatus.WAITING_STUDENT AND t.lastActivityAt < :cutoff")
+    List<Ticket> findExpiredWaiting(@Param("cutoff") LocalDateTime cutoff, Pageable pageable);
+
+    @Query("SELECT t FROM Ticket t WHERE t.status = vn.edu.hcmute.qaute.common.constant.TicketStatus.WAITING_STUDENT AND t.lastActivityAt < :cutoff AND t.waitingReminderCount < :maxCount")
+    List<Ticket> findWaitingNeedingReminder(@Param("cutoff") LocalDateTime cutoff, @Param("maxCount") int maxCount, Pageable pageable);
 }
+

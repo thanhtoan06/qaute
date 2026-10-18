@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.ActorType;
@@ -37,11 +38,13 @@ import vn.edu.hcmute.qaute.entity.media.MediaAsset;
 import vn.edu.hcmute.qaute.entity.ticket.Ticket;
 import vn.edu.hcmute.qaute.entity.ticket.TicketAssignment;
 import vn.edu.hcmute.qaute.entity.ticket.TicketAttachment;
+import vn.edu.hcmute.qaute.entity.ticket.TicketEscalation;
 import vn.edu.hcmute.qaute.entity.ticket.TicketMessage;
 import vn.edu.hcmute.qaute.entity.ticket.TicketStatusHistory;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketAssignmentRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketAttachmentRepository;
+import vn.edu.hcmute.qaute.repository.ticket.TicketEscalationRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketMessageRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketStatusHistoryRepository;
@@ -61,11 +64,15 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
             TicketStatus.NEW, TicketStatus.ASSIGNED, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_STUDENT);
     private static final Set<TicketStatus> ASSIGNABLE_STATUSES = Set.of(
             TicketStatus.NEW, TicketStatus.ASSIGNED, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_STUDENT);
+    private static final Set<TicketStatus> OPEN_STATUSES = Set.of(
+            TicketStatus.NEW, TicketStatus.ASSIGNED, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_STUDENT, TicketStatus.RESOLVED);
+    private static final int BATCH_SIZE = 100;
     private final TicketRepository tickets;
     private final TicketMessageRepository messages;
     private final TicketAttachmentRepository attachments;
     private final TicketStatusHistoryRepository histories;
     private final TicketAssignmentRepository assignments;
+    private final TicketEscalationRepository escalations;
     private final MediaAssetRepository assets;
     private final MediaService media;
     private final UserLookupService users;
@@ -78,7 +85,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
 
     public TicketWorkflowServiceImpl(TicketRepository tickets, TicketMessageRepository messages,
                                      TicketAttachmentRepository attachments, TicketStatusHistoryRepository histories,
-                                     TicketAssignmentRepository assignments,
+                                     TicketAssignmentRepository assignments, TicketEscalationRepository escalations,
                                      MediaAssetRepository assets, MediaService media, UserLookupService users,
                                      CategoryQueryService categories, ManagerScopeService managerScope,
                                      SlaService sla, TicketCodeGenerator codes,
@@ -88,6 +95,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         this.attachments = attachments;
         this.histories = histories;
         this.assignments = assignments;
+        this.escalations = escalations;
         this.assets = assets;
         this.media = media;
         this.users = users;
@@ -460,11 +468,215 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         }
     }
 
-    @Override public Ticket changePriority(Long ticketId, Long actorUserId, TicketPriority priority, String reason) { throw unsupported(); }
-    @Override public Ticket changeCategory(Long ticketId, Long actorUserId, Long newCategoryId, String reason) { throw unsupported(); }
-    @Override public Ticket escalate(Long ticketId, Long managerId, Long toCategoryId, Long toManagerId, String reason) { throw unsupported(); }
-    @Override public Ticket forceClose(Long ticketId, Long adminId, String reason) { throw unsupported(); }
-    @Override public int autoCloseExpired() { throw unsupported(); }
+    @Override
+    public Ticket changePriority(Long ticketId, Long actorUserId, TicketPriority priority, String reason) {
+        try {
+            Ticket ticket = findOrThrow(ticketId);
+            requireChangeActor(actorUserId, ticket);
+            if (!OPEN_STATUSES.contains(ticket.getStatus())) {
+                throw new InvalidTransitionException("Không thể thay đổi ưu tiên của ticket đã kết thúc");
+            }
+            if (priority == ticket.getPriority()) {
+                throw new BadRequestException("Mức ưu tiên mới phải khác mức hiện tại");
+            }
+            String trimmed = reason == null ? "" : reason.trim();
+            if (trimmed.length() < 10 || trimmed.length() > 500) {
+                throw new BadRequestException("Lý do thay đổi ưu tiên phải từ 10 đến 500 ký tự");
+            }
+            TicketPriority prev = ticket.getPriority();
+            ticket.setPriority(priority);
+            touch(ticket);
+            LocalDateTime now = LocalDateTime.now();
+            sla.recompute(ticket, now);
+            ticket = tickets.saveAndFlush(ticket);
+            addSystemMessage(ticket, "Mức ưu tiên đổi từ " + prev.name() + " sang " + priority.name());
+            events.publish(TicketEventType.PRIORITY_CHANGED, ticket, actorUserId,
+                    Map.of("from", prev.name(), "to", priority.name()));
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
+        }
+    }
+
+    @Override
+    public Ticket changeCategory(Long ticketId, Long actorUserId, Long newCategoryId, String reason) {
+        try {
+            Ticket ticket = findOrThrow(ticketId);
+            requireChangeActor(actorUserId, ticket);
+            if (!OPEN_STATUSES.contains(ticket.getStatus())) {
+                throw new InvalidTransitionException("Không thể chuyển chuyên mục của ticket đã kết thúc");
+            }
+            if (categories.findCategory(newCategoryId).filter(c -> c.active()).isEmpty()) {
+                throw new BadRequestException("Chuyên mục mới không hợp lệ");
+            }
+            String trimmed = reason == null ? "" : reason.trim();
+            if (trimmed.length() < 10 || trimmed.length() > 500) {
+                throw new BadRequestException("Lý do chuyển chuyên mục phải từ 10 đến 500 ký tự");
+            }
+            Long prevCategoryId = ticket.getCategoryId();
+            ticket.setCategoryId(newCategoryId);
+            Long currentAssigneeId = ticket.getCurrentAssigneeId();
+            if (currentAssigneeId != null && !managerScope.isInScope(currentAssigneeId, newCategoryId)) {
+                closeCurrentAssignment(ticketId, LocalDateTime.now());
+                ticket.setCurrentAssigneeId(null);
+                ticket.setStatus(TicketStatus.NEW);
+                recordHistory(ticket, TicketStatus.ASSIGNED, TicketStatus.NEW, actorUserId, ActorType.MANAGER, "Chuyển chuyên mục");
+            }
+            touch(ticket);
+            sla.recompute(ticket, LocalDateTime.now());
+            ticket = tickets.saveAndFlush(ticket);
+            addSystemMessage(ticket, "Yêu cầu được chuyển sang chuyên mục mới");
+            events.publish(TicketEventType.CATEGORY_CHANGED, ticket, actorUserId,
+                    Map.of("from", String.valueOf(prevCategoryId), "to", String.valueOf(newCategoryId)));
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
+        }
+    }
+
+    @Override
+    public Ticket escalate(Long ticketId, Long managerId, Long toCategoryId, Long toManagerId, String reason) {
+        try {
+            Ticket ticket = findOrThrow(ticketId);
+            if (!managerId.equals(ticket.getCurrentAssigneeId())) {
+                throw new ForbiddenException("Ticket không được giao cho bạn");
+            }
+            Set<TicketStatus> escalatableStatuses = Set.of(
+                    TicketStatus.ASSIGNED, TicketStatus.IN_PROGRESS, TicketStatus.WAITING_STUDENT);
+            if (!escalatableStatuses.contains(ticket.getStatus())) {
+                throw new InvalidTransitionException("Chỉ có thể chuyển cấp ticket đang được xử lý");
+            }
+            if (categories.findCategory(toCategoryId).filter(c -> c.active()).isEmpty()) {
+                throw new BadRequestException("Chuyên mục đích không hợp lệ");
+            }
+            String trimmed = reason == null ? "" : reason.trim();
+            if (trimmed.length() < 10 || trimmed.length() > 500) {
+                throw new BadRequestException("Lý do chuyển cấp phải từ 10 đến 500 ký tự");
+            }
+            Long fromCategoryId = ticket.getCategoryId();
+            LocalDateTime now = LocalDateTime.now();
+            escalations.save(TicketEscalation.builder()
+                    .ticketId(ticketId)
+                    .fromManagerId(managerId)
+                    .fromCategoryId(fromCategoryId)
+                    .toCategoryId(toCategoryId)
+                    .toManagerId(toManagerId)
+                    .reason(trimmed)
+                    .build());
+            closeCurrentAssignment(ticketId, now);
+            if (ticket.getSlaPausedAt() != null) {
+                sla.resume(ticket, now);
+            }
+            TicketStatus prevStatus = ticket.getStatus();
+            ticket.setCategoryId(toCategoryId);
+            ticket.setCurrentAssigneeId(null);
+            ticket.setStatus(TicketStatus.NEW);
+            sla.recompute(ticket, now);
+            if (toManagerId != null) {
+                if (!managerScope.isInScope(toManagerId, toCategoryId)) {
+                    throw new BadRequestException("Tư vấn viên không phụ trách chuyên mục đích");
+                }
+                if (!managerScope.isAvailableForAssignment(toManagerId)) {
+                    throw new AppException(ErrorCode.ERR_LIMIT_EXCEEDED, "Tư vấn viên đích đã đạt giới hạn số yêu cầu");
+                }
+                ticket.setCurrentAssigneeId(toManagerId);
+                if (ticket.getFirstAssignedAt() == null) ticket.setFirstAssignedAt(now);
+                ticket.setStatus(TicketStatus.ASSIGNED);
+            }
+            touch(ticket);
+            ticket = tickets.saveAndFlush(ticket);
+            recordHistory(ticket, prevStatus, ticket.getStatus(), managerId, ActorType.MANAGER, trimmed);
+            if (toManagerId != null) {
+                saveAssignment(ticket, null, toManagerId, managerId, AssignmentType.ESCALATION, trimmed, now);
+            }
+            addSystemMessage(ticket, "Yêu cầu được chuyển cấp tới bộ phận phù hợp");
+            events.publish(TicketEventType.ESCALATED, ticket, managerId,
+                    Map.of("toCategoryId", String.valueOf(toCategoryId), "toManagerId", toManagerId != null ? String.valueOf(toManagerId) : ""));
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
+        }
+    }
+
+    @Override
+    public Ticket forceClose(Long ticketId, Long adminId, String reason) {
+        try {
+            UserSummary admin = users.getSummary(adminId);
+            if (admin.role() != RoleCode.ADMIN) {
+                throw new ForbiddenException("Chỉ Admin mới có thể đóng ticket bắt buộc");
+            }
+            Ticket ticket = findOrThrow(ticketId);
+            if (!OPEN_STATUSES.contains(ticket.getStatus())) {
+                throw new InvalidTransitionException("Ticket đã kết thúc");
+            }
+            String trimmed = reason == null ? "" : reason.trim();
+            if (trimmed.length() < 10 || trimmed.length() > 500) {
+                throw new BadRequestException("Lý do đóng bắt buộc phải từ 10 đến 500 ký tự");
+            }
+            LocalDateTime now = LocalDateTime.now();
+            TicketStatus prevStatus = ticket.getStatus();
+            ticket.setStatus(TicketStatus.CLOSED);
+            ticket.setClosedAt(now);
+            ticket.setCloseReason("ADMIN_FORCE: " + trimmed);
+            touch(ticket);
+            ticket = tickets.saveAndFlush(ticket);
+            recordHistory(ticket, prevStatus, TicketStatus.CLOSED, adminId, ActorType.MANAGER, trimmed);
+            addSystemMessage(ticket, "Yêu cầu đã bị đóng bởi quản trị viên");
+            events.publish(TicketEventType.FORCE_CLOSED, ticket, adminId, Map.of());
+            return ticket;
+        } catch (OptimisticLockingFailureException ex) {
+            throw mapOptimisticLock(ex);
+        }
+    }
+
+    @Override
+    @Transactional
+    public int autoCloseExpired() {
+        LocalDateTime now = LocalDateTime.now();
+        int closedCount = 0;
+        int resolvedDays = settings.getInt(SettingKeys.TICKET_AUTO_CLOSE_RESOLVED_DAYS);
+        LocalDateTime resolvedCutoff = now.minusDays(resolvedDays);
+        List<Ticket> expiredResolved = tickets.findExpiredResolved(resolvedCutoff, PageRequest.of(0, BATCH_SIZE));
+        for (Ticket t : expiredResolved) {
+            t.setStatus(TicketStatus.CLOSED);
+            t.setClosedAt(now);
+            t.setCloseReason("AUTO_TIMEOUT");
+            touch(t);
+            tickets.save(t);
+            recordHistory(t, TicketStatus.RESOLVED, TicketStatus.CLOSED, null, ActorType.MANAGER, "AUTO_TIMEOUT");
+            events.publish(TicketEventType.AUTO_CLOSED, t, null, Map.of());
+            closedCount++;
+        }
+        int waitingDays = settings.getInt(SettingKeys.TICKET_AUTO_CLOSE_WAITING_DAYS);
+        LocalDateTime waitingCutoff = now.minusDays(waitingDays);
+        List<Ticket> expiredWaiting = tickets.findExpiredWaiting(waitingCutoff, PageRequest.of(0, BATCH_SIZE));
+        for (Ticket t : expiredWaiting) {
+            t.setStatus(TicketStatus.CLOSED);
+            t.setClosedAt(now);
+            t.setCloseReason("AUTO_NO_RESPONSE");
+            if (t.getSlaPausedAt() != null) sla.resume(t, now);
+            touch(t);
+            tickets.save(t);
+            recordHistory(t, TicketStatus.WAITING_STUDENT, TicketStatus.CLOSED, null, ActorType.MANAGER, "AUTO_NO_RESPONSE");
+            events.publish(TicketEventType.AUTO_CLOSED, t, null, Map.of());
+            closedCount++;
+        }
+        LocalDateTime reminder3Cutoff = now.minusDays(3);
+        LocalDateTime reminder6Cutoff = now.minusDays(6);
+        List<Ticket> needReminder = tickets.findWaitingNeedingReminder(reminder3Cutoff, 2, PageRequest.of(0, BATCH_SIZE));
+        for (Ticket t : needReminder) {
+            if (t.getWaitingReminderCount() == 0 && t.getLastActivityAt().isBefore(reminder3Cutoff)) {
+                t.setWaitingReminderCount(1);
+                tickets.save(t);
+                events.publish(TicketEventType.REMINDER_WAITING, t, null, Map.of("reminderCount", "1"));
+            } else if (t.getWaitingReminderCount() == 1 && t.getLastActivityAt().isBefore(reminder6Cutoff)) {
+                t.setWaitingReminderCount(2);
+                tickets.save(t);
+                events.publish(TicketEventType.REMINDER_WAITING, t, null, Map.of("reminderCount", "2"));
+            }
+        }
+        return closedCount;
+    }
 
     @Override
     public Ticket claim(Long ticketId, Long managerId) {
@@ -610,6 +822,16 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
             if (managerScope.isInScope(actorUserId, ticket.getCategoryId())) return;
         }
         throw new ForbiddenException("Bạn không có quyền giao ticket này");
+    }
+
+    private void requireChangeActor(Long actorUserId, Ticket ticket) {
+        UserSummary actor = users.getSummary(actorUserId);
+        if (actor.role() == RoleCode.ADMIN) return;
+        if (actor.role() == RoleCode.MANAGER && actor.status() == UserStatus.ACTIVE) {
+            if (actorUserId.equals(ticket.getCurrentAssigneeId())) return;
+            if (managerScope.isInScope(actorUserId, ticket.getCategoryId())) return;
+        }
+        throw new ForbiddenException("Bạn không có quyền thực hiện thao tác này");
     }
 
     private boolean isActorAdmin(Long actorUserId) {
