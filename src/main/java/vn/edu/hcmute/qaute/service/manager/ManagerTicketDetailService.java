@@ -59,13 +59,15 @@ public class ManagerTicketDetailService {
     private final ManagerScopeService scopes;
     private final CategoryQueryService categories;
     private final FaqQueryService faqs;
+    private final TicketNoteService noteService;
 
     public ManagerTicketDetailService(TicketAccessService access, TicketRepository tickets,
             TicketMessageRepository messages, TicketAttachmentRepository attachments,
             TicketStatusHistoryRepository histories, TicketAssignmentRepository assignments,
             TicketEscalationRepository escalations, MediaAssetRepository assets,
             UserLookupService users, ManagerScopeService scopes,
-            CategoryQueryService categories, FaqQueryService faqs) {
+            CategoryQueryService categories, FaqQueryService faqs,
+            TicketNoteService noteService) {
         this.access = access;
         this.tickets = tickets;
         this.messages = messages;
@@ -78,6 +80,7 @@ public class ManagerTicketDetailService {
         this.scopes = scopes;
         this.categories = categories;
         this.faqs = faqs;
+        this.noteService = noteService;
     }
 
     public ManagerTicketDetailView getDetail(Long managerId, Long ticketId) {
@@ -146,7 +149,9 @@ public class ManagerTicketDetailService {
                 name(summaries, ticket.getCurrentAssigneeId()), ticket.isUrgentRequested(),
                 ticket.getUrgentReason(), ticket.isAllowPublicFaq(), ticket.getCreatedAt(),
                 ticket.getResolutionNote());
-        return new ManagerTicketDetailView(info, student, descriptionAttachments, messageViews, timeline, otherTickets,
+        return new ManagerTicketDetailView(info, student, descriptionAttachments, messageViews,
+                noteService.listNotes(ticketId, managerId, RoleCode.MANAGER),
+                noteService.listTags(ticketId, managerId, RoleCode.MANAGER), timeline, otherTickets,
                 faqs.suggest(ticket.getTitle(), 5), mine, status == TicketStatus.NEW && inScope,
                 canReply, mine && (status == TicketStatus.ASSIGNED || status == TicketStatus.IN_PROGRESS),
                 mine && (status == TicketStatus.IN_PROGRESS || status == TicketStatus.ASSIGNED

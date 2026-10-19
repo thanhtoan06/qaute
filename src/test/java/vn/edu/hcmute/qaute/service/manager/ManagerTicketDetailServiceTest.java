@@ -55,6 +55,7 @@ class ManagerTicketDetailServiceTest {
     @Mock ManagerScopeService scopes;
     @Mock CategoryQueryService categories;
     @Mock FaqQueryService faqs;
+    @Mock TicketNoteService noteService;
     @InjectMocks ManagerTicketDetailService service;
 
     @Test

@@ -74,6 +74,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/media/*/download").permitAll()
                         .requestMatchers("/student/**").hasRole("STUDENT")
                         .requestMatchers("/manager/**").hasRole("MANAGER")
+                        .requestMatchers("/api/manager/**").hasRole("MANAGER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**", "/ws/**").authenticated()
                         .anyRequest().authenticated())
