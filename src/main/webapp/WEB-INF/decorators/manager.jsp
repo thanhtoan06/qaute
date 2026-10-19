@@ -117,6 +117,7 @@
         <c:if test="${not empty mgrStatus}">
           <form method="post" action="${ctx}/manager/profile/status" class="m-0">
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <input type="hidden" name="redirect" value="<c:out value='${currentPath}'/>"/>
             <div class="btn-group btn-group-sm" role="group" aria-label="Trạng thái trực">
               <button type="submit" name="status" value="ONLINE"
                       class="btn qa-status-online ${mgrStatus == 'ONLINE' ? 'active' : ''}"
