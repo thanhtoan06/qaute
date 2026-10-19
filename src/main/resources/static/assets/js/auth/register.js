@@ -49,14 +49,17 @@
 
     form.addEventListener("submit", function (event) {
         updateMatch();
+        const acceptTerms = document.getElementById("acceptTerms");
         if (!form.checkValidity() || password.value !== confirmPassword.value
-            || !document.getElementById("acceptTerms").checked) {
+            || (acceptTerms && !acceptTerms.checked)) {
             event.preventDefault();
             form.classList.add("was-validated");
             return;
         }
         const submit = document.getElementById("register-submit");
-        submit.disabled = true;
-        submit.textContent = "Đang đăng ký...";
+        if (submit) {
+            submit.disabled = true;
+            submit.textContent = submit.getAttribute("data-loading-text") || "Đang đăng ký...";
+        }
     });
 })();
