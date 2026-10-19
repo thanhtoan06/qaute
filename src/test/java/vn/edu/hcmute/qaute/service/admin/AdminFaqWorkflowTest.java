@@ -31,16 +31,19 @@ import vn.edu.hcmute.qaute.common.constant.NotificationType;
 import vn.edu.hcmute.qaute.common.constant.RoleCode;
 import vn.edu.hcmute.qaute.common.constant.UserStatus;
 import vn.edu.hcmute.qaute.common.exception.ConflictException;
+import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.exception.InvalidTransitionException;
 import vn.edu.hcmute.qaute.entity.governance.FaqRevision;
 import vn.edu.hcmute.qaute.entity.knowledge.Faq;
 import vn.edu.hcmute.qaute.entity.knowledge.FaqTag;
+import vn.edu.hcmute.qaute.entity.ticket.Ticket;
 import vn.edu.hcmute.qaute.repository.governance.AdminFaqRepository;
 import vn.edu.hcmute.qaute.repository.governance.FaqRevisionRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.repository.knowledge.FaqRepository;
 import vn.edu.hcmute.qaute.repository.knowledge.FaqTagRepository;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
+import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
 import vn.edu.hcmute.qaute.security.QauteUserDetails;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.media.MediaService;
@@ -60,6 +63,7 @@ class AdminFaqWorkflowTest {
     @Mock AuditService audit;
     @Mock ObjectProvider<NotificationService> notifications;
     @Mock NotificationService notification;
+    @Mock TicketRepository tickets;
     @InjectMocks AdminFaqService service;
 
     @AfterEach
@@ -82,6 +86,47 @@ class AdminFaqWorkflowTest {
         verify(notification).notifyUser(eq(1L), eq(NotificationType.FAQ_REVIEW_REQUESTED), any());
         verify(notification).notifyUser(eq(2L), eq(NotificationType.FAQ_REVIEW_REQUESTED), any());
         verify(audit).log(AuditActions.FAQ_SUBMITTED, "Faq", 12L, "DRAFT", "PENDING_REVIEW");
+    }
+
+    @Test
+    void ticketFaqRequiresPersonalInfoConfirmationBeforeSubmission() {
+        authenticate(7L, RoleCode.MANAGER);
+        Faq faq = faq(FaqStatus.DRAFT);
+        faq.setSourceTicketId(42L);
+        when(faqRepository.findById(12L)).thenReturn(Optional.of(faq));
+
+        assertThrows(BadRequestException.class, () -> service.submitForReview(12L, 7L, false));
+        assertEquals(FaqStatus.DRAFT, faq.getStatus());
+        verify(faqRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void confirmedTicketFaqCanBeSubmitted() {
+        authenticate(7L, RoleCode.MANAGER);
+        Faq faq = faq(FaqStatus.DRAFT);
+        faq.setSourceTicketId(42L);
+        when(faqRepository.findById(12L)).thenReturn(Optional.of(faq));
+
+        service.submitForReview(12L, 7L, true);
+
+        assertEquals(FaqStatus.PENDING_REVIEW, faq.getStatus());
+        verify(faqRepository).saveAndFlush(faq);
+    }
+
+    @Test
+    void publishingTicketFaqNotifiesOriginalStudent() {
+        authenticate(1L, RoleCode.ADMIN);
+        Faq faq = faq(FaqStatus.PENDING_REVIEW);
+        faq.setSourceTicketId(42L);
+        faq.setSlug("hoc-phi-sinh-vien");
+        when(faqRepository.findById(12L)).thenReturn(Optional.of(faq));
+        when(notifications.getIfAvailable()).thenReturn(notification);
+        when(tickets.findById(42L)).thenReturn(Optional.of(Ticket.builder().studentId(2L).build()));
+
+        service.approve(12L, 1L, null);
+
+        verify(notification).notifyUser(eq(2L),
+                eq(NotificationType.FAQ_FROM_TICKET_PUBLISHED), any());
     }
 
     @Test

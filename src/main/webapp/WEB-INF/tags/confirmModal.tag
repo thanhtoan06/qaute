@@ -8,6 +8,7 @@
 <%@ attribute name="confirmLabel" type="java.lang.String" required="false" rtexprvalue="true" %>
 <%@ attribute name="cssClass" type="java.lang.String" required="false" rtexprvalue="true" %>
 <%@ attribute name="requireReason" type="java.lang.Boolean" required="false" rtexprvalue="true" %>
+<%@ attribute name="requirePersonalInfoConfirmation" type="java.lang.Boolean" required="false" rtexprvalue="true" %>
 <c:set var="modalConfirmLabel" value="${empty confirmLabel ? 'Xác nhận' : confirmLabel}"/>
 <c:set var="modalCssClass" value="${empty cssClass ? 'btn-danger' : cssClass}"/>
 <button type="button" class="btn ${modalCssClass}" data-bs-toggle="modal" data-bs-target="#${id}">
@@ -27,6 +28,11 @@
                     <textarea class="form-control" id="${id}-reason" name="reason" form="${id}-form"
                               minlength="10" maxlength="500" rows="3" required></textarea>
                     <small class="form-hint">Từ 10 đến 500 ký tự.</small>
+                </c:if>
+                <c:if test="${requirePersonalInfoConfirmation}">
+                    <label class="form-check"><input class="form-check-input" type="checkbox"
+                        name="confirmedNoPersonalInfo" value="true" form="${id}-form" required/>
+                        <span class="form-check-label">Tôi đã loại bỏ thông tin cá nhân</span></label>
                 </c:if>
             </div>
             <div class="modal-footer">

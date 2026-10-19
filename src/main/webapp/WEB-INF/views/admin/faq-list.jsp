@@ -45,7 +45,7 @@
         <c:choose>
           <c:when test="${item.status() eq 'DRAFT'}">
             <a class="btn btn-sm btn-outline-secondary" href="${ctx}/admin/faq/${item.id()}/review">Xem trước</a>
-            <qa:confirmModal id="submit-faq-${item.id()}" title="Gửi duyệt FAQ" message="Gửi bài viết này tới quản trị viên để duyệt?" actionUrl="${ctx}/admin/faq/${item.id()}/submit" confirmLabel="Gửi duyệt" cssClass="btn-sm btn-outline-primary"/>
+            <qa:confirmModal id="submit-faq-${item.id()}" title="Gửi duyệt FAQ" message="Gửi bài viết này tới quản trị viên để duyệt?" actionUrl="${ctx}/admin/faq/${item.id()}/submit" confirmLabel="Gửi duyệt" cssClass="btn-sm btn-outline-primary" requirePersonalInfoConfirmation="${not empty item.sourceTicketId()}"/>
           </c:when>
           <c:when test="${item.status() eq 'PENDING_REVIEW'}"><a class="btn btn-sm btn-success" href="${ctx}/admin/faq/${item.id()}/review">Duyệt</a></c:when>
           <c:when test="${item.status() eq 'PUBLISHED'}">

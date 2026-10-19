@@ -160,8 +160,10 @@ public class AdminFaqController {
     }
 
     @PostMapping("/admin/faq/{id}/submit")
-    public String submit(@PathVariable Long id, RedirectAttributes redirect) {
-        return action(id, redirect, () -> faqs.submitForReview(id, SecurityUtils.requireUserId()),
+    public String submit(@PathVariable Long id, @ModelAttribute FaqForm form,
+                         RedirectAttributes redirect) {
+        return action(id, redirect, () -> faqs.submitForReview(id, SecurityUtils.requireUserId(),
+                        form.isConfirmedNoPersonalInfo()),
                 "Đã gửi FAQ chờ duyệt");
     }
 

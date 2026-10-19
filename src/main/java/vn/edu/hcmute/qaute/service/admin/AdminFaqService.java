@@ -50,6 +50,7 @@ import vn.edu.hcmute.qaute.repository.knowledge.FaqTagRepository;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
 import vn.edu.hcmute.qaute.repository.governance.AdminFaqRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
+import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.knowledge.FaqContentSupport;
@@ -74,12 +75,14 @@ public class AdminFaqService {
     private final MediaService media;
     private final AuditService audit;
     private final ObjectProvider<NotificationService> notifications;
+    private final TicketRepository tickets;
 
     public AdminFaqService(AdminFaqRepository faqs, CategoryQueryService categories,
                            UserRepository users, FaqRepository faqRepository,
                            FaqTagRepository tagRepository, FaqRevisionRepository revisions,
                            MediaAssetRepository assets, MediaService media, AuditService audit,
-                           ObjectProvider<NotificationService> notifications) {
+                           ObjectProvider<NotificationService> notifications,
+                           TicketRepository tickets) {
         this.faqs = faqs;
         this.categories = categories;
         this.users = users;
@@ -90,6 +93,7 @@ public class AdminFaqService {
         this.media = media;
         this.audit = audit;
         this.notifications = notifications;
+        this.tickets = tickets;
     }
 
     public AdminFaqReviewView review(Long id) {
@@ -161,10 +165,18 @@ public class AdminFaqService {
 
     @Transactional
     public void submitForReview(Long id, Long actorId) {
+        submitForReview(id, actorId, false);
+    }
+
+    @Transactional
+    public void submitForReview(Long id, Long actorId, boolean confirmedNoPersonalInfo) {
         Faq faq = requireFaq(id);
         requireStatus(faq, FaqStatus.DRAFT);
         if (!actorId.equals(faq.getAuthorId()) && !SecurityUtils.hasRole(RoleCode.ADMIN)) {
             throw new InvalidTransitionException("Chỉ tác giả hoặc quản trị viên có thể gửi duyệt");
+        }
+        if (faq.getSourceTicketId() != null && !confirmedNoPersonalInfo) {
+            throw new BadRequestException("Vui lòng xác nhận đã loại bỏ thông tin cá nhân trước khi gửi duyệt");
         }
         faq.setStatus(FaqStatus.PENDING_REVIEW);
         flushTransition(faq);
@@ -261,6 +273,16 @@ public class AdminFaqService {
         flushTransition(faq);
         notifyAuthor(faq, NotificationType.FAQ_APPROVED,
                 Map.of("faqId", faq.getId().toString(), "title", faq.getTitle()));
+        if (faq.getSourceTicketId() != null) {
+            NotificationService notification = notifications.getIfAvailable();
+            if (notification != null) {
+                tickets.findById(faq.getSourceTicketId()).ifPresent(ticket ->
+                        notification.notifyUser(ticket.getStudentId(),
+                                NotificationType.FAQ_FROM_TICKET_PUBLISHED,
+                                Map.of("faqId", faq.getId().toString(), "title", faq.getTitle(),
+                                        "link", "/faq/" + faq.getSlug())));
+            }
+        }
         audit.log(AuditActions.FAQ_PUBLISHED, "Faq", faq.getId(), from.name(),
                 "PUBLISHED at " + (scheduledAt == null ? now : scheduledAt));
     }
@@ -482,7 +504,7 @@ public class AdminFaqService {
                 faq.getStatus(), faq.isFeatured(),
                 authorNames.getOrDefault(faq.getAuthorId(), "—"),
                 faq.getViewCount(), faq.getHelpfulCount(), faq.getNotHelpfulCount(),
-                faq.getUpdatedAt(), faq.getPublishAt()));
+                faq.getUpdatedAt(), faq.getPublishAt(), faq.getSourceTicketId()));
     }
 
     public Map<FaqStatus, Long> countByStatus() {
