@@ -28,6 +28,7 @@ import vn.edu.hcmute.qaute.dto.view.CategoryView;
 import vn.edu.hcmute.qaute.dto.view.ManagerTicketDetailView;
 import vn.edu.hcmute.qaute.security.QauteUserDetails;
 import vn.edu.hcmute.qaute.service.manager.ManagerTicketDetailService;
+import vn.edu.hcmute.qaute.service.manager.TicketNoteService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
 
@@ -36,6 +37,7 @@ class ManagerTicketControllerTest {
     @Mock ManagerTicketDetailService details;
     @Mock TicketWorkflowService workflow;
     @Mock CategoryQueryService categories;
+    @Mock TicketNoteService notes;
     @InjectMocks ManagerTicketController controller;
 
     @AfterEach
@@ -54,6 +56,7 @@ class ManagerTicketControllerTest {
 
         assertEquals("redirect:/manager/tickets/42", location);
         verify(workflow).addAdvisorReply(42L, 7L, "<p>Xin chào</p>", List.of(8L, 9L));
+        verify(notes).deleteDraft(42L, 7L);
         assertEquals("Đã gửi phản hồi", flash.getFlashAttributes().get("flashSuccess"));
     }
 
@@ -88,7 +91,7 @@ class ManagerTicketControllerTest {
     void detailLoadsActiveLeafCategoriesOnlyWhenCategoryActionIsAvailable() {
         authenticate();
         var view = new ManagerTicketDetailView(null, null, List.of(), List.of(), List.of(),
-                List.of(), List.of(), false, false, false, false, false, false, true,
+                List.of(), List.of(), List.of(), List.of(), false, false, false, false, false, false, true,
                 false, false);
         when(details.getDetail(7L, 42L)).thenReturn(view);
         when(categories.findAllActiveLeaf()).thenReturn(List.of(new CategoryView(

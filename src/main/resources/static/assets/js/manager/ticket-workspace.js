@@ -4,6 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const csrf = workspace.querySelector('input[name="_csrf"]')?.value;
   const editor = document.getElementById('reply-content');
+  const draftStatus = document.getElementById('draft-status');
+  let draftDirty = false;
+  let lastSaved = '';
+  let draftSavePromise = null;
+  let replySubmitting = false;
+  let restoring = false;
 
   function htmlText(html) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -25,9 +31,59 @@ document.addEventListener('DOMContentLoaded', () => {
         ['para', ['ul', 'ol', 'paragraph']],
         ['insert', ['link']],
         ['view', ['codeview']]
-      ]
+      ],
+      callbacks: {
+        onChange() {
+          if (textarea === editor && !restoring) draftDirty = true;
+        }
+      }
     });
   });
+  editor?.addEventListener('input', () => { draftDirty = true; });
+
+  if (editor && workspace.dataset.draftUrl) {
+    fetch(workspace.dataset.draftUrl, { credentials: 'same-origin' })
+      .then(response => response.ok ? response.json() : Promise.reject())
+      .then(result => {
+        if (!result.success || draftDirty || replySubmitting) return;
+        const html = result.data?.contentHtml || '';
+        lastSaved = html;
+        if (!html) return;
+        restoring = true;
+        if (window.jQuery?.fn?.summernote && window.jQuery(editor).next('.note-editor').length) {
+          window.jQuery(editor).summernote('code', html);
+        } else {
+          editor.value = html;
+        }
+        restoring = false;
+        draftDirty = false;
+        draftStatus.textContent = 'Đã khôi phục bản nháp.';
+      })
+      .catch(() => { draftStatus.textContent = 'Không thể tải bản nháp.'; });
+
+    window.setInterval(() => {
+      if (!draftDirty || draftSavePromise || replySubmitting) return;
+      const html = editorCode(editor);
+      if (html === lastSaved) { draftDirty = false; return; }
+      draftStatus.textContent = 'Đang lưu bản nháp…';
+      draftSavePromise = fetch(workspace.dataset.draftUrl, {
+        method: 'PUT',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(csrf ? { 'X-XSRF-TOKEN': csrf } : {})
+        },
+        body: JSON.stringify({ contentHtml: html })
+      }).then(response => response.ok ? response.json() : Promise.reject())
+        .then(result => {
+          if (!result.success) throw new Error('Không thể lưu bản nháp.');
+          lastSaved = html;
+          draftDirty = editorCode(editor) !== html;
+          draftStatus.textContent = 'Đã lưu bản nháp.';
+        }).catch(() => { draftStatus.textContent = 'Chưa lưu được bản nháp. Hệ thống sẽ thử lại.'; })
+        .finally(() => { draftSavePromise = null; });
+    }, 10000);
+  }
 
   workspace.querySelectorAll('.qa-workspace-form').forEach(form => {
     const files = form.querySelector('.js-ticket-files');
@@ -100,6 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         editorError.textContent = '';
       }
+      if (textarea === editor && draftSavePromise) {
+        event.preventDefault();
+        replySubmitting = true;
+        draftSavePromise.then(() => form.requestSubmit());
+        return;
+      }
+      if (textarea === editor) replySubmitting = true;
       submitted = true;
       refreshSubmit();
     });
@@ -116,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.jQuery(editor).summernote('pasteHTML', link.outerHTML + ' ');
       } else {
         editor.value += (editor.value ? '\n' : '') + link.outerHTML;
+        draftDirty = true;
         editor.focus();
       }
     });

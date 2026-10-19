@@ -12,6 +12,8 @@ public record ManagerTicketDetailView(
         StudentSummary student,
         List<AttachmentView> descriptionAttachments,
         List<MessageView> messages,
+        List<TicketInternalNoteView> internalNotes,
+        List<TicketTagView> tags,
         List<TimelineEvent> timeline,
         List<TicketListMini> otherTickets,
         List<FaqSuggestion> suggestions,

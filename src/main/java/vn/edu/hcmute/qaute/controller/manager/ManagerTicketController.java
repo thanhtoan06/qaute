@@ -20,6 +20,7 @@ import vn.edu.hcmute.qaute.dto.request.manager.RequestInfoForm;
 import vn.edu.hcmute.qaute.dto.request.manager.ResolveForm;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.manager.ManagerTicketDetailService;
+import vn.edu.hcmute.qaute.service.manager.TicketNoteService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
 
@@ -28,12 +29,15 @@ public class ManagerTicketController {
     private final ManagerTicketDetailService details;
     private final TicketWorkflowService workflow;
     private final CategoryQueryService categories;
+    private final TicketNoteService notes;
 
     public ManagerTicketController(ManagerTicketDetailService details,
-            TicketWorkflowService workflow, CategoryQueryService categories) {
+            TicketWorkflowService workflow, CategoryQueryService categories,
+            TicketNoteService notes) {
         this.details = details;
         this.workflow = workflow;
         this.categories = categories;
+        this.notes = notes;
     }
 
     @GetMapping("/manager/tickets/{id}")
@@ -54,8 +58,11 @@ public class ManagerTicketController {
     @PostMapping("/manager/tickets/{id}/reply")
     public String reply(@PathVariable Long id, @Valid @ModelAttribute ReplyForm form,
             BindingResult result, RedirectAttributes flash) {
-        return run(id, result, flash, () -> workflow.addAdvisorReply(id,
-                SecurityUtils.requireUserId(), form.getContentHtml(), form.getAssetIds()),
+        return run(id, result, flash, () -> {
+                    Long managerId = SecurityUtils.requireUserId();
+                    workflow.addAdvisorReply(id, managerId, form.getContentHtml(), form.getAssetIds());
+                    notes.deleteDraft(id, managerId);
+                },
                 "Đã gửi phản hồi");
     }
 
