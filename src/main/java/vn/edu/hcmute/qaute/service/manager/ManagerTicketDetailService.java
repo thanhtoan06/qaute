@@ -20,6 +20,7 @@ import vn.edu.hcmute.qaute.common.util.HtmlSanitizerUtil;
 import vn.edu.hcmute.qaute.dto.view.ManagerTicketDetailView;
 import vn.edu.hcmute.qaute.dto.view.ManagerTicketDetailView.AttachmentView;
 import vn.edu.hcmute.qaute.dto.view.ManagerTicketDetailView.MessageView;
+import vn.edu.hcmute.qaute.dto.view.ManagerTicketDetailView.TicketReviewView;
 import vn.edu.hcmute.qaute.dto.view.ManagerTicketDetailView.TicketInfo;
 import vn.edu.hcmute.qaute.dto.view.ManagerTicketDetailView.TicketListMini;
 import vn.edu.hcmute.qaute.dto.view.ManagerTicketDetailView.TimelineEvent;
@@ -37,6 +38,7 @@ import vn.edu.hcmute.qaute.repository.ticket.TicketAttachmentRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketEscalationRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketMessageRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
+import vn.edu.hcmute.qaute.repository.ticket.TicketReviewRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketStatusHistoryRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
@@ -60,6 +62,7 @@ public class ManagerTicketDetailService {
     private final CategoryQueryService categories;
     private final FaqQueryService faqs;
     private final TicketNoteService noteService;
+    private final TicketReviewRepository reviews;
 
     public ManagerTicketDetailService(TicketAccessService access, TicketRepository tickets,
             TicketMessageRepository messages, TicketAttachmentRepository attachments,
@@ -67,7 +70,7 @@ public class ManagerTicketDetailService {
             TicketEscalationRepository escalations, MediaAssetRepository assets,
             UserLookupService users, ManagerScopeService scopes,
             CategoryQueryService categories, FaqQueryService faqs,
-            TicketNoteService noteService) {
+            TicketNoteService noteService, TicketReviewRepository reviews) {
         this.access = access;
         this.tickets = tickets;
         this.messages = messages;
@@ -81,10 +84,18 @@ public class ManagerTicketDetailService {
         this.categories = categories;
         this.faqs = faqs;
         this.noteService = noteService;
+        this.reviews = reviews;
     }
 
     public ManagerTicketDetailView getDetail(Long managerId, Long ticketId) {
-        Ticket ticket = access.requireViewable(ticketId, managerId, RoleCode.MANAGER);
+        return getDetail(managerId, ticketId, RoleCode.MANAGER);
+    }
+
+    public ManagerTicketDetailView getDetail(Long userId, Long ticketId, RoleCode role) {
+        if (role != RoleCode.MANAGER && role != RoleCode.ADMIN) {
+            throw new vn.edu.hcmute.qaute.common.exception.ForbiddenException();
+        }
+        Ticket ticket = access.requireViewable(ticketId, userId, role);
         StudentSummary student = users.getStudentSummary(ticket.getStudentId());
         List<TicketMessage> ticketMessages = messages.findByTicketIdOrderByCreatedAtAsc(ticketId);
         List<TicketAttachment> ticketAttachments = attachments.findByTicketId(ticketId);
@@ -132,14 +143,18 @@ public class ManagerTicketDetailService {
         timeline.sort(Comparator.comparing(TimelineEvent::at,
                 Comparator.nullsLast(Comparator.naturalOrder())));
 
-        List<Long> scopeIds = scopes.getScopeCategoryIds(managerId);
-        List<TicketListMini> otherTickets = scopeIds == null || scopeIds.isEmpty() ? List.of()
+        List<Long> scopeIds = role == RoleCode.ADMIN ? List.of() : scopes.getScopeCategoryIds(userId);
+        List<Ticket> relatedTickets = role == RoleCode.ADMIN
+                ? tickets.findByStudentIdAndIdNotOrderByCreatedAtDescIdDesc(ticket.getStudentId(),
+                        ticketId, PageRequest.of(0, 5))
+                : scopeIds == null || scopeIds.isEmpty() ? List.of()
                 : tickets.findOtherStudentTicketsInScope(ticket.getStudentId(), ticketId,
-                        scopeIds, PageRequest.of(0, 5)).stream().map(other -> new TicketListMini(
+                        scopeIds, PageRequest.of(0, 5));
+        List<TicketListMini> otherTickets = relatedTickets.stream().map(other -> new TicketListMini(
                         other.getId(), other.getCode(), other.getTitle(), other.getStatus(),
                         other.getCreatedAt())).toList();
 
-        boolean mine = managerId.equals(ticket.getCurrentAssigneeId());
+        boolean mine = userId.equals(ticket.getCurrentAssigneeId());
         boolean inScope = scopeIds != null && scopeIds.contains(ticket.getCategoryId());
         TicketStatus status = ticket.getStatus();
         boolean working = status != null && status.isWorking();
@@ -154,9 +169,12 @@ public class ManagerTicketDetailService {
                 ticket.getUrgentReason(), ticket.isAllowPublicFaq(), ticket.getCreatedAt(),
                 ticket.getResolutionNote());
         return new ManagerTicketDetailView(info, student, descriptionAttachments, messageViews,
-                noteService.listNotes(ticketId, managerId, RoleCode.MANAGER),
-                noteService.listTags(ticketId, managerId, RoleCode.MANAGER), timeline, otherTickets,
-                faqs.suggest(ticket.getTitle(), 5), mine, status == TicketStatus.NEW && inScope,
+                noteService.listNotes(ticketId, userId, role),
+                noteService.listTags(ticketId, userId, role), timeline, otherTickets,
+                faqs.suggest(ticket.getTitle(), 5), reviews.findByTicketId(ticketId).map(review ->
+                        new TicketReviewView(review.getRating(), review.getReasonCodes(),
+                                review.getComment(), review.getCreatedAt())).orElse(null),
+                mine, status == TicketStatus.NEW && inScope,
                 canReply, mine && (status == TicketStatus.ASSIGNED || status == TicketStatus.IN_PROGRESS),
                 mine && (status == TicketStatus.IN_PROGRESS || status == TicketStatus.ASSIGNED
                         && ticketMessages.stream().anyMatch(m -> m.getSenderType() == SenderType.MANAGER)),

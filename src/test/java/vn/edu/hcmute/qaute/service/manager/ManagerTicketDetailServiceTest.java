@@ -28,6 +28,7 @@ import vn.edu.hcmute.qaute.dto.view.UserSummary;
 import vn.edu.hcmute.qaute.entity.ticket.Ticket;
 import vn.edu.hcmute.qaute.entity.ticket.TicketEscalation;
 import vn.edu.hcmute.qaute.entity.ticket.TicketMessage;
+import vn.edu.hcmute.qaute.entity.ticket.TicketReview;
 import vn.edu.hcmute.qaute.entity.ticket.TicketStatusHistory;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketAssignmentRepository;
@@ -35,6 +36,7 @@ import vn.edu.hcmute.qaute.repository.ticket.TicketAttachmentRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketEscalationRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketMessageRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
+import vn.edu.hcmute.qaute.repository.ticket.TicketReviewRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketStatusHistoryRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
@@ -57,6 +59,7 @@ class ManagerTicketDetailServiceTest {
     @Mock CategoryQueryService categories;
     @Mock FaqQueryService faqs;
     @Mock TicketNoteService noteService;
+    @Mock TicketReviewRepository reviews;
     @InjectMocks ManagerTicketDetailService service;
 
     @Test
@@ -117,5 +120,29 @@ class ManagerTicketDetailServiceTest {
         assertFalse(detail.ticket().descriptionHtml().contains("<script>"));
         assertFalse(detail.messages().getFirst().contentHtml().contains("<script>"));
         verify(faqs).suggest("Xin tư vấn học vụ", 5);
+    }
+
+    @Test
+    void adminDetailShowsTicketsOutsideManagerScopeAndStudentReview() {
+        Ticket ticket = Ticket.builder().studentId(2L).categoryId(3L).code("TK-9")
+                .title("Yêu cầu").descriptionHtml("<p>Nội dung</p>")
+                .status(TicketStatus.CLOSED).build();
+        ticket.setId(9L);
+        Ticket other = Ticket.builder().code("TK-10").title("Yêu cầu khác")
+                .status(TicketStatus.NEW).build();
+        other.setId(10L);
+        TicketReview review = TicketReview.builder().ticketId(9L).studentId(2L)
+                .rating(4).comment("Hữu ích").build();
+        when(access.requireViewable(9L, 1L, RoleCode.ADMIN)).thenReturn(ticket);
+        when(tickets.findByStudentIdAndIdNotOrderByCreatedAtDescIdDesc(eq(2L), eq(9L),
+                any(Pageable.class))).thenReturn(List.of(other));
+        when(reviews.findByTicketId(9L)).thenReturn(java.util.Optional.of(review));
+
+        var detail = service.getDetail(1L, 9L, RoleCode.ADMIN);
+
+        assertEquals(10L, detail.otherTickets().getFirst().id());
+        assertEquals(4, detail.review().rating());
+        verify(scopes, never()).getScopeCategoryIds(any());
+        verify(noteService).listNotes(9L, 1L, RoleCode.ADMIN);
     }
 }

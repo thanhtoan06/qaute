@@ -17,6 +17,7 @@ public record ManagerTicketDetailView(
         List<TimelineEvent> timeline,
         List<TicketListMini> otherTickets,
         List<FaqSuggestion> suggestions,
+        TicketReviewView review,
         boolean mine,
         boolean canClaim,
         boolean canReply,
@@ -43,5 +44,8 @@ public record ManagerTicketDetailView(
     public record TimelineEvent(LocalDateTime at, String label) { }
 
     public record TicketListMini(Long id, String code, String title, TicketStatus status,
+            LocalDateTime createdAt) { }
+
+    public record TicketReviewView(int rating, String reasonCodes, String comment,
             LocalDateTime createdAt) { }
 }

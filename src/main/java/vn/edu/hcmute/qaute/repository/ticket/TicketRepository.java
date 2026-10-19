@@ -31,6 +31,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
             @Param("ticketId") Long ticketId, @Param("categoryIds") Collection<Long> categoryIds,
             Pageable pageable);
 
+    List<Ticket> findByStudentIdAndIdNotOrderByCreatedAtDescIdDesc(Long studentId, Long ticketId,
+            Pageable pageable);
+
     @Query("SELECT DISTINCT t.categoryId FROM Ticket t WHERE t.currentAssigneeId = :managerId")
     List<Long> findAssignedCategoryIds(@Param("managerId") Long managerId);
 
