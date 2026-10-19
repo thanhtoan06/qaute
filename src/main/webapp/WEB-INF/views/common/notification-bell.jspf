@@ -1,0 +1,35 @@
+<%@ page pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
+<c:set var="notifTargetUrl" value="${not empty requestScope.notificationsUrl ? requestScope.notificationsUrl : '/student/notifications'}"/>
+<div class="nav-item dropdown d-flex me-2" id="notification-bell-dropdown">
+    <a href="#" class="nav-link px-0 position-relative text-reset" data-bs-toggle="dropdown" tabindex="-1" aria-label="Thông báo" aria-expanded="false" id="notification-bell-btn">
+        <i class="bi bi-bell fs-2"></i>
+        <span class="badge bg-danger text-white position-absolute translate-middle d-none" id="notification-badge" style="top: 8px; left: 100%; border-radius: 10px; font-size: 0.65rem; padding: 0.2em 0.45em;">0</span>
+    </a>
+    <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow shadow" style="width: 360px; max-width: 90vw; padding: 0;">
+        <div class="card border-0 m-0">
+            <div class="card-header d-flex justify-content-between align-items-center py-2 px-3 bg-body">
+                <span class="fw-semibold">Thông báo</span>
+                <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 text-muted" id="btn-mark-all-read" style="font-size: 0.8rem;">
+                    <i class="bi bi-check2-all me-1"></i>Đánh dấu đã đọc hết
+                </button>
+            </div>
+            <div class="list-group list-group-flush overflow-auto" id="notification-list" style="max-height: 380px;">
+                <div class="text-center text-muted py-4" id="notification-empty" style="display: none;">
+                    <i class="bi bi-bell-slash fs-3 d-block mb-1 text-secondary opacity-50"></i>
+                    <small>Không có thông báo nào</small>
+                </div>
+                <div class="text-center text-muted py-4" id="notification-loading">
+                    <div class="spinner-border spinner-border-sm text-secondary me-2" role="status"></div>
+                    <small>Đang tải...</small>
+                </div>
+            </div>
+            <div class="card-footer text-center py-2 bg-light border-top">
+                <a href="<c:out value='${notifTargetUrl}'/>" class="text-muted small text-decoration-none fw-medium">
+                    Xem tất cả <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

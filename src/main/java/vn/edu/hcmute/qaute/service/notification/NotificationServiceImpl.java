@@ -5,10 +5,15 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.NotificationType;
+import vn.edu.hcmute.qaute.common.exception.ForbiddenException;
+import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.config.AppProperties;
+import vn.edu.hcmute.qaute.dto.view.NotificationView;
 import vn.edu.hcmute.qaute.dto.view.UserSummary;
 import vn.edu.hcmute.qaute.entity.notification.Notification;
 import vn.edu.hcmute.qaute.entity.notification.NotificationPreference;
@@ -152,5 +157,71 @@ public class NotificationServiceImpl implements NotificationService {
         } catch (Exception ignored) {
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<NotificationView> list(Long userId, boolean unreadOnly, Pageable p) {
+        if (userId == null) {
+            return Page.empty(p);
+        }
+        Page<Notification> page = unreadOnly
+                ? notificationRepository.findByUserIdAndDeletedAtIsNullAndReadAtIsNullOrderByIdDesc(userId, p)
+                : notificationRepository.findByUserIdAndDeletedAtIsNullOrderByIdDesc(userId, p);
+        return page.map(NotificationView::from);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long unreadCount(Long userId) {
+        if (userId == null) {
+            return 0L;
+        }
+        return notificationRepository.countByUserIdAndDeletedAtIsNullAndReadAtIsNull(userId);
+    }
+
+    @Override
+    public void markRead(Long userId, Long id) {
+        if (userId == null || id == null) {
+            throw new NotFoundException("Thông báo không tồn tại");
+        }
+        Notification notification = notificationRepository.findById(id)
+                .filter(n -> n.getDeletedAt() == null)
+                .orElseThrow(() -> new NotFoundException("Thông báo không tồn tại"));
+
+        if (!Objects.equals(notification.getUserId(), userId)) {
+            throw new ForbiddenException("Không có quyền thao tác trên thông báo này");
+        }
+
+        if (notification.getReadAt() == null) {
+            notification.setReadAt(LocalDateTime.now());
+            notificationRepository.save(notification);
+        }
+    }
+
+    @Override
+    public void markAllRead(Long userId) {
+        if (userId == null) {
+            return;
+        }
+        notificationRepository.markAllRead(userId, LocalDateTime.now());
+    }
+
+    @Override
+    public void hide(Long userId, Long id) {
+        if (userId == null || id == null) {
+            throw new NotFoundException("Thông báo không tồn tại");
+        }
+        Notification notification = notificationRepository.findById(id)
+                .filter(n -> n.getDeletedAt() == null)
+                .orElseThrow(() -> new NotFoundException("Thông báo không tồn tại"));
+
+        if (!Objects.equals(notification.getUserId(), userId)) {
+            throw new ForbiddenException("Không có quyền thao tác trên thông báo này");
+        }
+
+        notification.setDeletedAt(LocalDateTime.now());
+        notificationRepository.save(notification);
+    }
 }
+
 
