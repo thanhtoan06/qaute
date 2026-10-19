@@ -233,4 +233,38 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  const escalationCategory = document.getElementById('escalate-category');
+  if (escalationCategory) {
+    const recipient = document.getElementById('escalate-manager');
+    const error = document.getElementById('escalate-advisors-error');
+    let requestNumber = 0;
+    escalationCategory.addEventListener('change', async () => {
+      const currentRequest = ++requestNumber;
+      recipient.replaceChildren(new Option(
+        escalationCategory.value ? 'Đang tải tư vấn viên…' : 'Chọn chuyên mục trước', ''));
+      recipient.disabled = true;
+      error.textContent = '';
+      if (!escalationCategory.value) return;
+      try {
+        const url = `${escalationCategory.dataset.advisorsBase}/` +
+          `${encodeURIComponent(escalationCategory.value)}/advisors`;
+        const response = await fetch(url, { credentials: 'same-origin' });
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.success || !Array.isArray(result.data)) {
+          throw new Error(result?.message || 'Không tải được danh sách tư vấn viên.');
+        }
+        if (currentRequest !== requestNumber) return;
+        recipient.replaceChildren(new Option('Đưa vào hàng đợi (không chọn tư vấn viên)', ''));
+        result.data.forEach(advisor => {
+          recipient.add(new Option(advisor.fullName, String(advisor.id)));
+        });
+        recipient.disabled = false;
+      } catch (failure) {
+        if (currentRequest !== requestNumber) return;
+        recipient.replaceChildren(new Option('Đưa vào hàng đợi', ''));
+        error.textContent = failure.message || 'Không tải được danh sách tư vấn viên.';
+      }
+    });
+  }
 });

@@ -73,6 +73,7 @@
         <c:if test="${detail.canResolve()}"><button class="btn btn-outline-success" type="button" data-bs-toggle="modal" data-bs-target="#resolve-modal">Đánh dấu đã giải quyết</button></c:if>
         <c:if test="${detail.canChangePriority()}"><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#priority-modal">Đổi ưu tiên</button></c:if>
         <c:if test="${detail.canChangeCategory()}"><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#category-modal">Đổi chuyên mục</button></c:if>
+        <c:if test="${detail.canEscalate()}"><button class="btn btn-outline-warning" type="button" data-bs-toggle="modal" data-bs-target="#escalate-modal">Chuyển cấp</button></c:if>
       </div>
       <c:if test="${detail.canRequestInfo()}"><div class="modal modal-blur fade" id="request-info-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
         <div class="modal-header"><h3 class="modal-title">Yêu cầu bổ sung thông tin</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
@@ -80,6 +81,16 @@
           <div class="modal-body"><label class="form-label required" for="request-info-content">Nội dung gửi sinh viên</label><textarea class="form-control js-ticket-editor" id="request-info-content" name="messageHtml" rows="6" required></textarea><div class="js-editor-error text-danger small" role="alert"></div>
             <div class="mt-3"><label class="form-label" for="request-info-files">Tệp đính kèm</label><input class="form-control js-ticket-files" id="request-info-files" type="file" multiple/><div class="js-upload-list small mt-2" aria-live="polite"></div><div class="js-upload-error text-danger small" role="alert"></div><div class="js-asset-ids"></div></div>
           </div><div class="modal-footer"><button class="btn btn-link" type="button" data-bs-dismiss="modal">Hủy</button><button class="btn btn-primary" type="submit">Gửi yêu cầu</button></div>
+        </form>
+      </div></div></div></c:if>
+      <c:if test="${detail.canEscalate()}"><div class="modal modal-blur fade" id="escalate-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><h3 class="modal-title">Chuyển cấp yêu cầu</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+        <form method="post" action="${ctx}/manager/tickets/${ticket.id()}/escalate" class="qa-workspace-form"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+          <div class="modal-body">
+            <div class="mb-3"><label class="form-label required" for="escalate-category">Chuyên mục đích</label><select class="form-select" id="escalate-category" name="toCategoryId" data-advisors-base="${ctx}/api/manager/categories" required><option value="">Chọn chuyên mục</option><c:forEach var="option" items="${categoryOptions}"><option value="${option.key}" ${ticket.categoryId() eq option.key ? 'disabled' : ''}><c:out value="${option.value}"/></option></c:forEach></select></div>
+            <div class="mb-3"><label class="form-label" for="escalate-manager">Tư vấn viên đích (tùy chọn)</label><select class="form-select" id="escalate-manager" name="toManagerId" disabled><option value="">Chọn chuyên mục trước</option></select><div class="form-hint">Để trống nếu muốn chuyển vào hàng đợi của chuyên mục đích.</div><div class="text-danger small" id="escalate-advisors-error" role="alert"></div></div>
+            <div><label class="form-label required" for="escalate-reason">Lý do chuyển cấp</label><textarea class="form-control" id="escalate-reason" name="reason" minlength="10" maxlength="500" rows="3" required></textarea></div>
+          </div><div class="modal-footer"><button class="btn btn-link" type="button" data-bs-dismiss="modal">Hủy</button><button class="btn btn-warning" type="submit">Chuyển cấp</button></div>
         </form>
       </div></div></div></c:if>
       <c:if test="${detail.canResolve()}"><div class="modal modal-blur fade" id="resolve-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
