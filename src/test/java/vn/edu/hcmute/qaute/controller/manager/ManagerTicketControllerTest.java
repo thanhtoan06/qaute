@@ -100,7 +100,7 @@ class ManagerTicketControllerTest {
                 11L, null, null, null, null, null, null, null, null,
                 false, null, false, null, null);
         var view = new ManagerTicketDetailView(ticket, null, List.of(), List.of(), List.of(),
-                List.of(), List.of(), List.of(), List.of(), false, false, false, false, false, false, true,
+                List.of(), List.of(), List.of(), List.of(), null, false, false, false, false, false, false, true,
                 false, false);
         when(details.getDetail(7L, 42L)).thenReturn(view);
         when(categories.findAllActiveLeaf()).thenReturn(List.of(new CategoryView(

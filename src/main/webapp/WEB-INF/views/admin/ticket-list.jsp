@@ -1,0 +1,28 @@
+<%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
+<title>Giám sát yêu cầu</title>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<div class="d-flex justify-content-between align-items-center mb-3"><h2 class="page-title mb-0">Giám sát yêu cầu</h2><span class="text-secondary">${tickets.totalElements} yêu cầu</span></div>
+
+<form method="get" action="${ctx}/admin/tickets" class="qa-filter-bar mb-3">
+  <div><label class="form-label" for="ticket-q">Mã hoặc tiêu đề</label><input class="form-control" id="ticket-q" type="search" name="q" maxlength="150" value="<c:out value='${filter.q}'/>"/></div>
+  <div><label class="form-label" for="ticket-status">Trạng thái</label><select class="form-select" id="ticket-status" name="status"><option value="">Tất cả</option><c:forEach var="item" items="${statuses}"><option value="${item}" ${filter.status eq item ? 'selected' : ''}><c:out value="${item.label}"/></option></c:forEach></select></div>
+  <div><label class="form-label" for="ticket-priority">Ưu tiên</label><select class="form-select" id="ticket-priority" name="priority"><option value="">Tất cả</option><c:forEach var="item" items="${priorities}"><option value="${item}" ${filter.priority eq item ? 'selected' : ''}><c:out value="${item.label}"/></option></c:forEach></select></div>
+  <div><label class="form-label" for="ticket-department">Phòng ban</label><select class="form-select" id="ticket-department" name="departmentId"><option value="">Tất cả</option><c:forEach var="item" items="${departments}"><option value="${item.id}" ${filter.departmentId eq item.id ? 'selected' : ''}><c:out value="${item.name}"/></option></c:forEach></select></div>
+  <div><label class="form-label" for="ticket-category">Chuyên mục</label><select class="form-select" id="ticket-category" name="categoryId"><option value="">Tất cả</option><c:forEach var="item" items="${categories}"><option value="${item.key}" ${filter.categoryId eq item.key ? 'selected' : ''}><c:out value="${item.value}"/></option></c:forEach></select></div>
+  <div><label class="form-label" for="ticket-assignee">Người phụ trách</label><select class="form-select" id="ticket-assignee" name="assigneeId"><option value="">Tất cả</option><c:forEach var="item" items="${managers}"><option value="${item.id}" ${filter.assigneeId eq item.id ? 'selected' : ''}><c:out value="${item.fullName}"/></option></c:forEach></select></div>
+  <div><label class="form-label" for="ticket-sla">SLA</label><select class="form-select" id="ticket-sla" name="slaStatus"><option value="">Tất cả</option><c:forEach var="item" items="${slaStatuses}"><option value="${item}" ${filter.slaStatus eq item ? 'selected' : ''}><c:out value="${item}"/></option></c:forEach></select></div>
+  <div><label class="form-label" for="ticket-from">Tạo từ</label><input class="form-control" id="ticket-from" type="date" name="from" value="<c:out value='${filter.from}'/>"/></div>
+  <div><label class="form-label" for="ticket-to">Đến ngày</label><input class="form-control" id="ticket-to" type="date" name="to" value="<c:out value='${filter.to}'/>"/></div>
+  <div><label class="form-label" for="ticket-min-rating">Đánh giá từ</label><select class="form-select" id="ticket-min-rating" name="minRating"><option value="">Tất cả</option><c:forEach var="rating" begin="1" end="5"><option value="${rating}" ${filter.minRating eq rating ? 'selected' : ''}>${rating} sao</option></c:forEach></select></div>
+  <div><label class="form-label" for="ticket-max-rating">Đánh giá đến</label><select class="form-select" id="ticket-max-rating" name="maxRating"><option value="">Tất cả</option><c:forEach var="rating" begin="1" end="5"><option value="${rating}" ${filter.maxRating eq rating ? 'selected' : ''}>${rating} sao</option></c:forEach></select></div>
+  <div><label class="form-label" for="ticket-sort">Sắp xếp</label><select class="form-select" id="ticket-sort" name="sort"><option value="createdAt" ${empty filter.sort or filter.sort eq 'createdAt' ? 'selected' : ''}>Mới tạo</option><option value="lastActivityAt" ${filter.sort eq 'lastActivityAt' ? 'selected' : ''}>Mới hoạt động</option><option value="priority" ${filter.sort eq 'priority' ? 'selected' : ''}>Ưu tiên</option></select></div>
+  <div class="d-flex gap-2"><button class="btn btn-primary" type="submit">Lọc</button><a class="btn btn-outline-secondary" href="${ctx}/admin/tickets">Bỏ lọc</a></div>
+</form>
+
+<div class="card"><div class="table-responsive"><table class="table table-vcenter card-table qa-admin-table">
+  <thead><tr><th>Mã</th><th>Tiêu đề</th><th>Sinh viên</th><th>Chuyên mục</th><th>Ưu tiên</th><th>Trạng thái</th><th>SLA</th><th>Phụ trách</th><th>Tạo lúc</th><th></th></tr></thead>
+  <tbody><c:choose><c:when test="${empty tickets.content}"><tr><td colspan="10"><qa:emptyState icon="bi-inbox" title="Không có yêu cầu phù hợp" message="Thử thay đổi điều kiện lọc."/></td></tr></c:when><c:otherwise>
+    <c:forEach var="item" items="${tickets.content}"><tr><td class="fw-semibold"><c:out value="${item.code()}"/></td><td><c:out value="${item.title()}"/></td><td><c:out value="${item.studentName()}"/></td><td><c:out value="${item.categoryPath()}"/></td><td><qa:priorityBadge priority="${item.priority()}"/></td><td><qa:statusBadge status="${item.status()}"/></td><td><qa:slaBadge sla="${item.slaStatus()}"/></td><td><c:out value="${item.assigneeName()}"/></td><td><c:out value="${item.createdAt()}"/></td><td><a class="btn btn-sm btn-outline-primary" href="${ctx}/admin/tickets/${item.id()}">Mở</a></td></tr></c:forEach>
+  </c:otherwise></c:choose></tbody>
+</table></div></div>
+<qa:pagination page="${tickets}" baseUrl="${ctx}/admin/tickets" params="${paginationParams}"/>
