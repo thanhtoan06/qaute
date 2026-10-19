@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.hcmute.qaute.common.constant.TicketPriority;
+import vn.edu.hcmute.qaute.common.constant.TicketStatus;
 import vn.edu.hcmute.qaute.common.exception.AppException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.common.response.ApiResponse;
@@ -52,8 +53,13 @@ public class ManagerTicketController {
 
     @GetMapping("/manager/tickets/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        var detail = details.getDetail(SecurityUtils.requireUserId(), id);
+        Long managerId = SecurityUtils.requireUserId();
+        var detail = details.getDetail(managerId, id);
         model.addAttribute("detail", detail);
+        model.addAttribute("canCreateFaq", detail.ticket().allowPublicFaq()
+                && (detail.ticket().status() == TicketStatus.RESOLVED
+                || detail.ticket().status() == TicketStatus.CLOSED)
+                && scopes.isInScope(managerId, detail.ticket().categoryId()));
         model.addAttribute("priorities", TicketPriority.values());
         if (detail.canChangeCategory() || detail.canEscalate()) {
             Map<Long, String> categoryOptions = new LinkedHashMap<>();

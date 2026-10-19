@@ -74,6 +74,7 @@
         <c:if test="${detail.canChangePriority()}"><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#priority-modal">Đổi ưu tiên</button></c:if>
         <c:if test="${detail.canChangeCategory()}"><button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#category-modal">Đổi chuyên mục</button></c:if>
         <c:if test="${detail.canEscalate()}"><button class="btn btn-outline-warning" type="button" data-bs-toggle="modal" data-bs-target="#escalate-modal">Chuyển cấp</button></c:if>
+        <c:if test="${canCreateFaq}"><form method="post" action="${ctx}/manager/tickets/${ticket.id()}/to-faq"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/><button class="btn btn-outline-primary" type="submit">Tạo FAQ từ yêu cầu này</button></form></c:if>
       </div>
       <c:if test="${detail.canRequestInfo()}"><div class="modal modal-blur fade" id="request-info-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
         <div class="modal-header"><h3 class="modal-title">Yêu cầu bổ sung thông tin</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>

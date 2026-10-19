@@ -6,5 +6,6 @@ import vn.edu.hcmute.qaute.common.constant.FaqStatus;
 public record AdminFaqListItem(
         Long id, String title, String slug, String categoryPath, FaqStatus status,
         boolean featured, String authorName, long viewCount, int helpfulCount,
-        int notHelpfulCount, LocalDateTime updatedAt, LocalDateTime publishAt) {
+        int notHelpfulCount, LocalDateTime updatedAt, LocalDateTime publishAt,
+        Long sourceTicketId) {
 }

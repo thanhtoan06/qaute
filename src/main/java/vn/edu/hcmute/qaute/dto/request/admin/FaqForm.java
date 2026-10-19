@@ -39,4 +39,6 @@ public class FaqForm {
 
     @Size(max = 255, message = "Ghi chú thay đổi tối đa 255 ký tự")
     private String changeNote;
+
+    private boolean confirmedNoPersonalInfo;
 }

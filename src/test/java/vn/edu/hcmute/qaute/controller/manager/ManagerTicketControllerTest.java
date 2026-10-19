@@ -96,7 +96,10 @@ class ManagerTicketControllerTest {
     @Test
     void detailLoadsActiveLeafCategoriesOnlyWhenCategoryActionIsAvailable() {
         authenticate();
-        var view = new ManagerTicketDetailView(null, null, List.of(), List.of(), List.of(),
+        var ticket = new ManagerTicketDetailView.TicketInfo(42L, null, null, null,
+                11L, null, null, null, null, null, null, null, null,
+                false, null, false, null, null);
+        var view = new ManagerTicketDetailView(ticket, null, List.of(), List.of(), List.of(),
                 List.of(), List.of(), List.of(), List.of(), false, false, false, false, false, false, true,
                 false, false);
         when(details.getDetail(7L, 42L)).thenReturn(view);

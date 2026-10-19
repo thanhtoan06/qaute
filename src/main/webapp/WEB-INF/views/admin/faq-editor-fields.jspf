@@ -36,7 +36,7 @@
   <div id="faq-image-assets"><c:forEach var="assetId" items="${form.imageAssetIds}"><input type="hidden" name="imageAssetIds" value="${assetId}"/></c:forEach></div>
 </div>
 
-<div class="row">
+<c:if test="${not managerMode}"><div class="row">
   <div class="col-md-6 mb-3">
     <label class="form-check form-switch mt-3"><input type="hidden" name="_featured" value="on"/><input class="form-check-input" type="checkbox" name="featured" value="true" ${form.featured ? 'checked' : ''}/><span class="form-check-label">Bài nổi bật</span></label>
   </div>
@@ -46,7 +46,7 @@
     <div class="form-hint">Thời điểm này được dùng khi bài được xuất bản.</div>
     <qa:formError field="publishAt"/>
   </div>
-</div>
+</div></c:if>
 
 <div class="mb-3">
   <label class="form-label" for="faq-change-note">Ghi chú thay đổi</label>
