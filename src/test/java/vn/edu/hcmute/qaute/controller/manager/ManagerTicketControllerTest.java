@@ -2,6 +2,7 @@ package vn.edu.hcmute.qaute.controller.manager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -21,15 +22,19 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import vn.edu.hcmute.qaute.common.constant.RoleCode;
 import vn.edu.hcmute.qaute.common.exception.ConflictException;
+import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.dto.request.manager.CategoryChangeForm;
+import vn.edu.hcmute.qaute.dto.request.manager.EscalateForm;
 import vn.edu.hcmute.qaute.dto.request.manager.ReplyForm;
 import vn.edu.hcmute.qaute.dto.request.manager.ResolveForm;
 import vn.edu.hcmute.qaute.dto.view.CategoryView;
+import vn.edu.hcmute.qaute.dto.view.ManagerOption;
 import vn.edu.hcmute.qaute.dto.view.ManagerTicketDetailView;
 import vn.edu.hcmute.qaute.security.QauteUserDetails;
 import vn.edu.hcmute.qaute.service.manager.ManagerTicketDetailService;
 import vn.edu.hcmute.qaute.service.manager.TicketNoteService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
+import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +42,7 @@ class ManagerTicketControllerTest {
     @Mock ManagerTicketDetailService details;
     @Mock TicketWorkflowService workflow;
     @Mock CategoryQueryService categories;
+    @Mock ManagerScopeService scopes;
     @Mock TicketNoteService notes;
     @InjectMocks ManagerTicketController controller;
 
@@ -102,6 +108,43 @@ class ManagerTicketControllerTest {
         assertEquals("manager/ticket-detail", controller.detail(42L, model));
         assertEquals("Phòng đào tạo › Học vụ",
                 ((java.util.Map<?, ?>) model.get("categoryOptions")).get(11L));
+    }
+
+    @Test
+    void escalationRedirectsToQueueAfterWorkflowSucceeds() {
+        authenticate();
+        EscalateForm form = new EscalateForm();
+        form.setToCategoryId(11L);
+        form.setToManagerId(8L);
+        form.setReason("Chuyển đến bộ phận phù hợp");
+        var flash = new RedirectAttributesModelMap();
+
+        assertEquals("redirect:/manager/queue", controller.escalate(42L, form,
+                new BeanPropertyBindingResult(form, "escalateForm"), flash));
+        verify(workflow).escalate(42L, 7L, 11L, 8L, form.getReason());
+        assertEquals("Đã chuyển cấp yêu cầu", flash.getFlashAttributes().get("flashSuccess"));
+    }
+
+    @Test
+    void invalidEscalationDoesNotCallWorkflow() {
+        EscalateForm form = new EscalateForm();
+        var binding = new BeanPropertyBindingResult(form, "escalateForm");
+        binding.rejectValue("toCategoryId", "NotNull", "Vui lòng chọn chuyên mục đích");
+
+        assertEquals("redirect:/manager/tickets/42", controller.escalate(42L, form,
+                binding, new RedirectAttributesModelMap()));
+        verify(workflow, never()).escalate(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void advisorApiAcceptsActiveLeafCategory() {
+        when(categories.findAllActiveLeaf()).thenReturn(List.of(new CategoryView(
+                11L, 2L, "Phòng đào tạo", null, "ACA", "Học vụ", null, 1, true)));
+        var advisor = new ManagerOption(8L, "Người nhận", null, null, null);
+        when(scopes.findAdvisors(11L)).thenReturn(List.of(advisor));
+
+        assertEquals(List.of(advisor), controller.advisors(11L).getData());
+        assertThrows(NotFoundException.class, () -> controller.advisors(12L));
     }
 
     private static void authenticate() {

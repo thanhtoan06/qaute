@@ -96,6 +96,10 @@ public class ManagerTicketDetailService {
                 .forEach(userIds::add);
         ticketAssignments.stream().map(TicketAssignment::getToManagerId).filter(id -> id != null)
                 .forEach(userIds::add);
+        ticketEscalations.stream().map(TicketEscalation::getFromManagerId)
+                .filter(id -> id != null).forEach(userIds::add);
+        ticketEscalations.stream().map(TicketEscalation::getToManagerId)
+                .filter(id -> id != null).forEach(userIds::add);
         Map<Long, UserSummary> summaries = userIds.isEmpty() ? Map.of() : users.getSummaries(userIds);
         Map<Long, MediaAsset> media = ticketAttachments.isEmpty() ? Map.of()
                 : assets.findAllById(ticketAttachments.stream().map(TicketAttachment::getAssetId)
@@ -124,7 +128,7 @@ public class ManagerTicketDetailService {
         ticketAssignments.forEach(assignment -> timeline.add(
                 new TimelineEvent(assignment.getAssignedAt(), assignmentLabel(assignment, summaries))));
         ticketEscalations.forEach(escalation -> timeline.add(
-                new TimelineEvent(escalation.getCreatedAt(), escalationLabel(escalation))));
+                new TimelineEvent(escalation.getCreatedAt(), escalationLabel(escalation, summaries))));
         timeline.sort(Comparator.comparing(TimelineEvent::at,
                 Comparator.nullsLast(Comparator.naturalOrder())));
 
@@ -180,7 +184,14 @@ public class ManagerTicketDetailService {
         return "Đã phân công cho " + name(summaries, assignment.getToManagerId());
     }
 
-    private String escalationLabel(TicketEscalation escalation) {
-        return "Đã chuyển cấp sang " + categories.getDisplayPath(escalation.getToCategoryId());
+    private String escalationLabel(TicketEscalation escalation, Map<Long, UserSummary> summaries) {
+        String from = categories.getDisplayPath(escalation.getFromCategoryId());
+        String to = categories.getDisplayPath(escalation.getToCategoryId());
+        String actor = escalation.getFromManagerId() == null ? "Không rõ người chuyển"
+                : name(summaries, escalation.getFromManagerId());
+        String receiver = escalation.getToManagerId() == null ? "hàng đợi"
+                : name(summaries, escalation.getToManagerId());
+        return "Chuyển cấp từ " + from + " sang " + to + " bởi " + actor
+                + "; người nhận: " + receiver + "; lý do: " + escalation.getReason();
     }
 }

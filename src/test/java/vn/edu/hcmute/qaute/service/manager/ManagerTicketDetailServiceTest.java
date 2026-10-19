@@ -26,6 +26,7 @@ import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.dto.view.StudentSummary;
 import vn.edu.hcmute.qaute.dto.view.UserSummary;
 import vn.edu.hcmute.qaute.entity.ticket.Ticket;
+import vn.edu.hcmute.qaute.entity.ticket.TicketEscalation;
 import vn.edu.hcmute.qaute.entity.ticket.TicketMessage;
 import vn.edu.hcmute.qaute.entity.ticket.TicketStatusHistory;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
@@ -82,14 +83,22 @@ class ManagerTicketDetailServiceTest {
         message.setCreatedAt(LocalDateTime.of(2026, 1, 2, 10, 0));
         TicketStatusHistory history = TicketStatusHistory.builder().toStatus(TicketStatus.ASSIGNED).build();
         history.setCreatedAt(LocalDateTime.of(2026, 1, 2, 11, 0));
+        TicketEscalation escalation = TicketEscalation.builder().fromCategoryId(3L)
+                .toCategoryId(4L).fromManagerId(1L).toManagerId(5L)
+                .reason("Cần chuyên viên có thẩm quyền xử lý").build();
+        escalation.setCreatedAt(LocalDateTime.of(2026, 1, 2, 12, 0));
         when(access.requireViewable(9L, 1L, RoleCode.MANAGER)).thenReturn(ticket);
         when(users.getStudentSummary(2L)).thenReturn(new StudentSummary(
                 new UserSummary(2L, "Sinh viên", "sv@example.com", "12345678", null, null, null),
                 null, null, null, null, null));
         when(messages.findByTicketIdOrderByCreatedAtAsc(9L)).thenReturn(List.of(message));
         when(histories.findByTicketIdOrderByCreatedAtAsc(9L)).thenReturn(List.of(history));
-        when(users.getSummaries(any())).thenReturn(Map.of(1L,
-                new UserSummary(1L, "Tư vấn viên", null, null, null, null, null)));
+        when(escalations.findByTicketIdOrderByCreatedAtAsc(9L)).thenReturn(List.of(escalation));
+        when(users.getSummaries(any())).thenReturn(Map.of(
+                1L, new UserSummary(1L, "Tư vấn viên", null, null, null, null, null),
+                5L, new UserSummary(5L, "Người nhận", null, null, null, null, null)));
+        when(categories.getDisplayPath(3L)).thenReturn("Học vụ");
+        when(categories.getDisplayPath(4L)).thenReturn("Tài chính");
         when(scopes.getScopeCategoryIds(1L)).thenReturn(List.of(3L));
         when(tickets.findOtherStudentTicketsInScope(eq(2L), eq(9L), eq(List.of(3L)),
                 any(Pageable.class))).thenReturn(List.of(other));
@@ -97,7 +106,10 @@ class ManagerTicketDetailServiceTest {
         var detail = service.getDetail(1L, 9L);
 
         assertEquals(10L, detail.otherTickets().getFirst().id());
-        assertEquals(1, detail.timeline().size());
+        assertEquals(2, detail.timeline().size());
+        assertTrue(detail.timeline().get(1).label().contains("Học vụ sang Tài chính"));
+        assertTrue(detail.timeline().get(1).label().contains("người nhận: Người nhận"));
+        assertTrue(detail.timeline().get(1).label().contains(escalation.getReason()));
         assertTrue(detail.mine());
         assertTrue(detail.canReply());
         assertTrue(detail.canRequestInfo());
