@@ -12,18 +12,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.hcmute.qaute.common.exception.AppException;
 import vn.edu.hcmute.qaute.dto.request.student.TicketActionForm;
 import vn.edu.hcmute.qaute.dto.request.student.TicketReplyForm;
+import vn.edu.hcmute.qaute.dto.request.student.TicketReviewForm;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.student.StudentTicketDetailService;
+import vn.edu.hcmute.qaute.service.student.StudentReviewService;
 import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
 
 @Controller
 public class StudentTicketDetailController {
     private final StudentTicketDetailService details;
     private final TicketWorkflowService workflow;
+    private final StudentReviewService reviews;
 
-    public StudentTicketDetailController(StudentTicketDetailService details, TicketWorkflowService workflow) {
+    public StudentTicketDetailController(StudentTicketDetailService details, TicketWorkflowService workflow,
+                                         StudentReviewService reviews) {
         this.details = details;
         this.workflow = workflow;
+        this.reviews = reviews;
     }
 
     @GetMapping("/student/tickets/{id}")
@@ -32,6 +37,7 @@ public class StudentTicketDetailController {
         model.addAttribute("detail", details.getDetail(studentId, id));
         model.addAttribute("reopenRemaining", details.reopenRemaining(studentId, id));
         if (!model.containsAttribute("replyForm")) model.addAttribute("replyForm", new TicketReplyForm());
+        if (!model.containsAttribute("reviewForm")) model.addAttribute("reviewForm", new TicketReviewForm());
         return "student/ticket-detail";
     }
 
@@ -89,6 +95,22 @@ public class StudentTicketDetailController {
         try {
             workflow.reopen(id, SecurityUtils.requireUserId(), reason);
             flash.addFlashAttribute("flashSuccess", "Đã mở lại yêu cầu");
+        } catch (AppException exception) {
+            flash.addFlashAttribute("flashError", exception.getMessage());
+        }
+        return "redirect:/student/tickets/" + id;
+    }
+
+    @PostMapping("/student/tickets/{id}/review")
+    public String review(@PathVariable Long id, @Valid @ModelAttribute("reviewForm") TicketReviewForm form,
+                         BindingResult result, RedirectAttributes flash) {
+        if (result.hasErrors()) {
+            flash.addFlashAttribute("flashError", result.getAllErrors().getFirst().getDefaultMessage());
+            return "redirect:/student/tickets/" + id;
+        }
+        try {
+            reviews.saveReview(SecurityUtils.requireUserId(), id, form);
+            flash.addFlashAttribute("flashSuccess", "Đã lưu đánh giá của bạn");
         } catch (AppException exception) {
             flash.addFlashAttribute("flashError", exception.getMessage());
         }

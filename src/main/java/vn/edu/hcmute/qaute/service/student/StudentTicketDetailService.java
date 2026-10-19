@@ -20,6 +20,7 @@ import vn.edu.hcmute.qaute.common.util.HtmlSanitizerUtil;
 import vn.edu.hcmute.qaute.dto.view.TicketDetailView;
 import vn.edu.hcmute.qaute.dto.view.TicketDetailView.AttachmentView;
 import vn.edu.hcmute.qaute.dto.view.TicketDetailView.MessageView;
+import vn.edu.hcmute.qaute.dto.view.TicketDetailView.ReviewView;
 import vn.edu.hcmute.qaute.dto.view.TicketDetailView.TimelineEvent;
 import vn.edu.hcmute.qaute.dto.view.UserSummary;
 import vn.edu.hcmute.qaute.entity.media.MediaAsset;
@@ -27,11 +28,13 @@ import vn.edu.hcmute.qaute.entity.ticket.Ticket;
 import vn.edu.hcmute.qaute.entity.ticket.TicketAssignment;
 import vn.edu.hcmute.qaute.entity.ticket.TicketAttachment;
 import vn.edu.hcmute.qaute.entity.ticket.TicketMessage;
+import vn.edu.hcmute.qaute.entity.ticket.TicketReview;
 import vn.edu.hcmute.qaute.entity.ticket.TicketStatusHistory;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketAssignmentRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketAttachmentRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketMessageRepository;
+import vn.edu.hcmute.qaute.repository.ticket.TicketReviewRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketStatusHistoryRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
@@ -52,12 +55,14 @@ public class StudentTicketDetailService {
     private final CategoryQueryService categories;
     private final SettingsService settings;
     private final TicketWorkflowService workflow;
+    private final TicketReviewRepository reviews;
 
     public StudentTicketDetailService(TicketAccessService access, TicketMessageRepository messages,
                                       TicketAttachmentRepository attachments, TicketStatusHistoryRepository histories,
                                       TicketAssignmentRepository assignments, MediaAssetRepository assets,
                                       UserLookupService users, CategoryQueryService categories,
-                                      SettingsService settings, TicketWorkflowService workflow) {
+                                      SettingsService settings, TicketWorkflowService workflow,
+                                      TicketReviewRepository reviews) {
         this.access = access;
         this.messages = messages;
         this.attachments = attachments;
@@ -68,6 +73,7 @@ public class StudentTicketDetailService {
         this.categories = categories;
         this.settings = settings;
         this.workflow = workflow;
+        this.reviews = reviews;
     }
 
     public TicketDetailView getDetail(Long studentId, Long ticketId) {
@@ -91,8 +97,9 @@ public class StudentTicketDetailService {
                 .plusDays(settings.getInt(SettingKeys.TICKET_REOPEN_WINDOW_DAYS)).isBefore(now);
         boolean canReopen = isResolvedOrClosed && !"ADMIN_FORCE".equals(ticket.getCloseReason())
                 && inReopenWindow && ticket.getReopenCount() < settings.getInt(SettingKeys.TICKET_REOPEN_MAX);
-        boolean canRate = status == TicketStatus.CLOSED && ticket.getClosedAt() != null && !ticket.getClosedAt()
-                .plusDays(settings.getInt(SettingKeys.TICKET_RATING_EDIT_DAYS)).isBefore(now);
+        TicketReview ticketReview = reviews.findByTicketId(ticketId).orElse(null);
+        boolean reviewEditable = ticketReview != null && isReviewEditable(ticketReview, now);
+        boolean canRate = isResolvedOrClosed && (ticketReview == null || reviewEditable);
         UserSummary assignee = ticket.getCurrentAssigneeId() == null ? null : summaries.get(ticket.getCurrentAssigneeId());
         return new TicketDetailView(ticket.getId(), ticket.getCode(), ticket.getTitle(),
                 categories.getDisplayPath(ticket.getCategoryId()), status, ticket.getPriority(),
@@ -101,7 +108,7 @@ public class StudentTicketDetailService {
                 status == TicketStatus.NEW || status == TicketStatus.ASSIGNED || status == TicketStatus.IN_PROGRESS
                         || status == TicketStatus.WAITING_STUDENT,
                 status == TicketStatus.NEW, status == TicketStatus.RESOLVED, canReopen, canRate,
-                ticket.isAllowPublicFaq());
+                ticket.isAllowPublicFaq(), toReviewView(ticketReview, reviewEditable));
     }
 
     @Transactional
@@ -112,6 +119,19 @@ public class StudentTicketDetailService {
     public int reopenRemaining(Long studentId, Long ticketId) {
         Ticket ticket = access.requireViewable(ticketId, studentId, RoleCode.STUDENT);
         return Math.max(0, settings.getInt(SettingKeys.TICKET_REOPEN_MAX) - ticket.getReopenCount());
+    }
+
+    private boolean isReviewEditable(TicketReview review, LocalDateTime now) {
+        return review.getCreatedAt() != null && !review.getCreatedAt()
+                .plusDays(settings.getInt(SettingKeys.TICKET_RATING_EDIT_DAYS)).isBefore(now);
+    }
+
+    private static ReviewView toReviewView(TicketReview review, boolean editable) {
+        if (review == null) return null;
+        List<String> reasonCodes = review.getReasonCodes() == null || review.getReasonCodes().isBlank() ? List.of()
+                : java.util.Arrays.stream(review.getReasonCodes().split(","))
+                        .filter(code -> !code.isBlank()).toList();
+        return new ReviewView(review.getRating(), reasonCodes, review.getComment(), editable);
     }
 
     private Map<Long, UserSummary> loadSummaries(Ticket ticket, List<TicketMessage> ticketMessages,

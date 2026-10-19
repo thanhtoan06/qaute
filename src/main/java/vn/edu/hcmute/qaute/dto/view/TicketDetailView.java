@@ -12,7 +12,7 @@ public record TicketDetailView(Long id, String code, String title, String catego
                                String descriptionHtml, List<MessageView> messages,
                                List<TimelineEvent> timeline, boolean canReply, boolean canCancel,
                                boolean canConfirm, boolean canReopen, boolean canRate,
-                               boolean allowPublicFaq) {
+                               boolean allowPublicFaq, ReviewView review) {
     public record MessageView(Long id, String senderName, SenderType senderType, String contentHtml,
                               LocalDateTime createdAt, List<AttachmentView> attachments) {
     }
@@ -25,5 +25,8 @@ public record TicketDetailView(Long id, String code, String title, String catego
     }
 
     public record TimelineEvent(LocalDateTime at, String label) {
+    }
+
+    public record ReviewView(int rating, List<String> reasonCodes, String comment, boolean editable) {
     }
 }

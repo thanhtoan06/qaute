@@ -108,8 +108,61 @@
                 </div></div></div>
             </c:if>
 
-            <c:if test="${detail.canRate()}">
-                <section class="card"><div class="card-header"><h3 class="card-title">Đánh giá</h3></div><div class="card-body text-secondary">Khối đánh giá sẽ được bổ sung ở bước tiếp theo.</div></section>
+            <c:if test="${detail.canRate() or not empty detail.review()}">
+                <section class="card" id="ticket-review">
+                    <div class="card-header"><h3 class="card-title">Đánh giá</h3></div>
+                    <div class="card-body">
+                        <c:if test="${not empty detail.review()}">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                                <strong>${detail.review().rating()}/5 sao</strong>
+                                <span class="text-warning" aria-label="${detail.review().rating()} sao">
+                                    <c:forEach begin="1" end="5" var="star"><i class="bi ${star le detail.review().rating() ? 'bi-star-fill' : 'bi-star'}"></i></c:forEach>
+                                </span>
+                                <c:if test="${detail.review().editable()}">
+                                    <button class="btn btn-sm btn-outline-primary ms-auto" type="button" data-review-edit>Sửa đánh giá</button>
+                                </c:if>
+                            </div>
+                            <c:if test="${not empty detail.review().reasonCodes()}">
+                                <p class="small mb-2">Lý do: <c:forEach var="code" items="${detail.review().reasonCodes()}" varStatus="loop"><c:out value="${code}"/><c:if test="${not loop.last}">, </c:if></c:forEach></p>
+                            </c:if>
+                            <c:if test="${not empty detail.review().comment()}"><p class="mb-3"><c:out value="${detail.review().comment()}"/></p></c:if>
+                        </c:if>
+
+                        <c:if test="${detail.canRate()}">
+                            <form id="ticket-review-form" method="post" action="${ctx}/student/tickets/${detail.id()}/review" class="${not empty detail.review() ? 'd-none' : ''}" novalidate>
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                                <div class="mb-3">
+                                    <label class="form-label required d-block">Mức độ hài lòng</label>
+                                    <div class="btn-group" role="group" aria-label="Chọn số sao">
+                                        <c:forEach begin="1" end="5" var="star">
+                                            <input class="btn-check" type="radio" name="rating" id="ticket-rating-${star}" value="${star}" ${not empty detail.review() and detail.review().rating() eq star ? 'checked' : ''} required/>
+                                            <label class="btn btn-outline-warning review-star" for="ticket-rating-${star}" data-rating="${star}" aria-label="${star} sao"><i class="bi bi-star-fill"></i></label>
+                                        </c:forEach>
+                                    </div>
+                                    <div class="form-hint">Chọn từ 1 đến 5 sao.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label d-block">Lý do đánh giá <span class="text-secondary">(tùy chọn)</span></label>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <label class="form-check"><input class="form-check-input" type="checkbox" name="reasonCodes" value="FAST" ${not empty detail.review() and detail.review().reasonCodes().contains('FAST') ? 'checked' : ''}/><span class="form-check-label">Nhanh chóng</span></label>
+                                        <label class="form-check"><input class="form-check-input" type="checkbox" name="reasonCodes" value="CLEAR" ${not empty detail.review() and detail.review().reasonCodes().contains('CLEAR') ? 'checked' : ''}/><span class="form-check-label">Rõ ràng</span></label>
+                                        <label class="form-check"><input class="form-check-input" type="checkbox" name="reasonCodes" value="FRIENDLY" ${not empty detail.review() and detail.review().reasonCodes().contains('FRIENDLY') ? 'checked' : ''}/><span class="form-check-label">Thân thiện</span></label>
+                                        <label class="form-check"><input class="form-check-input" type="checkbox" name="reasonCodes" value="NOT_ON_POINT" ${not empty detail.review() and detail.review().reasonCodes().contains('NOT_ON_POINT') ? 'checked' : ''}/><span class="form-check-label">Chưa đúng trọng tâm</span></label>
+                                        <label class="form-check"><input class="form-check-input" type="checkbox" name="reasonCodes" value="SLOW" ${not empty detail.review() and detail.review().reasonCodes().contains('SLOW') ? 'checked' : ''}/><span class="form-check-label">Chậm phản hồi</span></label>
+                                        <label class="form-check"><input class="form-check-input" type="checkbox" name="reasonCodes" value="RUDE" ${not empty detail.review() and detail.review().reasonCodes().contains('RUDE') ? 'checked' : ''}/><span class="form-check-label">Chưa lịch sự</span></label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label id="review-comment-label" class="form-label" for="ticket-review-comment">Nhận xét</label>
+                                    <textarea id="ticket-review-comment" class="form-control" name="comment" maxlength="500" rows="4"><c:out value="${not empty detail.review() ? detail.review().comment() : ''}"/></textarea>
+                                    <div id="review-comment-hint" class="form-hint">Tối đa 500 ký tự.</div>
+                                    <div class="invalid-feedback">Đánh giá từ 1 đến 2 sao cần nhận xét ít nhất 20 ký tự.</div>
+                                </div>
+                                <button class="btn btn-primary" type="submit">${not empty detail.review() ? 'Cập nhật đánh giá' : 'Gửi đánh giá'}</button>
+                            </form>
+                        </c:if>
+                    </div>
+                </section>
             </c:if>
         </main>
 
@@ -130,3 +183,4 @@
 <script src="${ctx}/assets/js/common/richtext.js"></script>
 <script src="${ctx}/assets/js/common/file-uploader.js"></script>
 <script src="${ctx}/assets/js/student/ticket-detail.js"></script>
+<script src="${ctx}/assets/js/student/review.js"></script>
