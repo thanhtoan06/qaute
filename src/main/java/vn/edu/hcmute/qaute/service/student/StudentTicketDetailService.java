@@ -109,6 +109,11 @@ public class StudentTicketDetailService {
         workflow.addStudentReply(ticketId, studentId, html, assetIds == null ? List.of() : assetIds);
     }
 
+    public int reopenRemaining(Long studentId, Long ticketId) {
+        Ticket ticket = access.requireViewable(ticketId, studentId, RoleCode.STUDENT);
+        return Math.max(0, settings.getInt(SettingKeys.TICKET_REOPEN_MAX) - ticket.getReopenCount());
+    }
+
     private Map<Long, UserSummary> loadSummaries(Ticket ticket, List<TicketMessage> ticketMessages,
                                                    List<TicketAssignment> ticketAssignments) {
         Set<Long> ids = new HashSet<>();

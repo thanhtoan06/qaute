@@ -76,11 +76,36 @@
 
             <c:if test="${detail.canCancel() or detail.canConfirm() or detail.canReopen()}">
                 <section class="card mb-3"><div class="card-header"><h3 class="card-title">Thao tác yêu cầu</h3></div><div class="card-body d-flex flex-wrap gap-2">
-                    <c:if test="${detail.canCancel()}"><button class="btn btn-outline-danger" type="button" disabled>Hủy yêu cầu</button></c:if>
-                    <c:if test="${detail.canConfirm()}"><button class="btn btn-outline-success" type="button" disabled>Xác nhận đã giải quyết</button></c:if>
-                    <c:if test="${detail.canReopen()}"><button class="btn btn-outline-primary" type="button" disabled>Mở lại yêu cầu</button></c:if>
-                    <span class="text-secondary small align-self-center">Các thao tác này sẽ được bật ở bước tiếp theo.</span>
+                    <c:if test="${detail.canCancel()}">
+                        <button class="btn btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#cancel-ticket-modal">Hủy yêu cầu</button>
+                    </c:if>
+                    <c:if test="${detail.canConfirm()}">
+                        <qa:confirmModal id="confirm-ticket-modal" title="Xác nhận đã giải quyết" message="Bạn xác nhận yêu cầu này đã được giải quyết?" actionUrl="${ctx}/student/tickets/${detail.id()}/confirm" confirmLabel="Xác nhận đã giải quyết" cssClass="btn-outline-success"/>
+                    </c:if>
+                    <c:if test="${detail.canReopen()}">
+                        <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#reopen-ticket-modal">Chưa giải quyết — Mở lại</button>
+                    </c:if>
                 </div></section>
+            </c:if>
+
+            <c:if test="${detail.canCancel()}">
+                <div class="modal modal-blur fade" id="cancel-ticket-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                    <div class="modal-header"><h3 class="modal-title">Hủy yêu cầu</h3><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+                    <form method="post" action="${ctx}/student/tickets/${detail.id()}/cancel"><div class="modal-body"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                        <p>Bạn có chắc muốn hủy yêu cầu này? Thao tác chỉ áp dụng khi yêu cầu chưa được nhận.</p>
+                        <label class="form-label" for="cancel-reason">Lý do <span class="text-secondary">(tùy chọn)</span></label><textarea class="form-control" id="cancel-reason" name="reason" maxlength="500" rows="3"></textarea>
+                    </div><div class="modal-footer"><button class="btn btn-link" type="button" data-bs-dismiss="modal">Đóng</button><button class="btn btn-danger" type="submit">Hủy yêu cầu</button></div></form>
+                </div></div></div>
+            </c:if>
+
+            <c:if test="${detail.canReopen()}">
+                <div class="modal modal-blur fade" id="reopen-ticket-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                    <div class="modal-header"><h3 class="modal-title">Mở lại yêu cầu</h3><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+                    <form method="post" action="${ctx}/student/tickets/${detail.id()}/reopen"><div class="modal-body"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                        <p class="mb-2">Nếu vấn đề chưa được giải quyết, hãy cho tư vấn viên biết thêm chi tiết. Bạn còn <strong><c:out value="${reopenRemaining}"/></strong> lần mở lại.</p>
+                        <label class="form-label required" for="reopen-reason">Lý do mở lại</label><textarea class="form-control" id="reopen-reason" name="reason" minlength="10" maxlength="500" rows="4" required></textarea><div class="form-hint">Từ 10 đến 500 ký tự.</div>
+                    </div><div class="modal-footer"><button class="btn btn-link" type="button" data-bs-dismiss="modal">Đóng</button><button class="btn btn-primary" type="submit">Mở lại yêu cầu</button></div></form>
+                </div></div></div>
             </c:if>
 
             <c:if test="${detail.canRate()}">
