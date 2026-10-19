@@ -184,4 +184,53 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  const picker = document.getElementById('canned-response-picker');
+  if (picker && editor) {
+    const select = document.getElementById('canned-response-select');
+    const insert = document.getElementById('insert-canned-response');
+    const error = document.getElementById('canned-response-error');
+    fetch(picker.dataset.listUrl, { credentials: 'same-origin' })
+      .then(response => response.ok ? response.json() : Promise.reject())
+      .then(result => {
+        if (!result.success) throw new Error('Không thể tải mẫu trả lời.');
+        select.replaceChildren(new Option('Chọn mẫu trả lời', ''));
+        (result.data || []).forEach(item => {
+          const label = `${item.title} (${item.scope === 'PERSONAL' ? 'Cá nhân' : 'Dùng chung'})`;
+          select.add(new Option(label, String(item.id)));
+        });
+        if (!result.data?.length) select.options[0].textContent = 'Chưa có mẫu trả lời';
+      })
+      .catch(() => {
+        select.options[0].textContent = 'Không tải được mẫu trả lời';
+        error.textContent = 'Vui lòng tải lại trang để thử lại.';
+      });
+    select.addEventListener('change', () => { insert.disabled = !select.value; });
+    insert.addEventListener('click', async () => {
+      if (!select.value) return;
+      insert.disabled = true;
+      error.textContent = '';
+      try {
+        const url = `${picker.dataset.renderBase}/${encodeURIComponent(select.value)}/render` +
+          `?ticketId=${encodeURIComponent(picker.dataset.ticketId)}`;
+        const response = await fetch(url, { credentials: 'same-origin' });
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.success || typeof result.data?.html !== 'string') {
+          throw new Error(result?.message || 'Không thể chèn mẫu trả lời.');
+        }
+        if (window.jQuery?.fn?.summernote && window.jQuery(editor).next('.note-editor').length) {
+          window.jQuery(editor).summernote('focus');
+          window.jQuery(editor).summernote('pasteHTML', result.data.html);
+        } else {
+          editor.value += (editor.value ? '\n' : '') + result.data.html;
+          editor.focus();
+        }
+        draftDirty = true;
+      } catch (failure) {
+        error.textContent = failure.message || 'Không thể chèn mẫu trả lời.';
+      } finally {
+        insert.disabled = !select.value;
+      }
+    });
+  }
 });
