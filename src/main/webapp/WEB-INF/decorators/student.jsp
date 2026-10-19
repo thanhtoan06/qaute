@@ -89,7 +89,8 @@
     <div class="page-wrapper">
         <header class="navbar navbar-expand-md d-print-none">
             <div class="container-xl">
-                <div class="navbar-nav flex-row order-md-last">
+                <div class="navbar-nav flex-row order-md-last align-items-center">
+                    <%@ include file="/WEB-INF/views/common/notification-bell.jspf" %>
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
                            aria-label="Tài khoản sinh viên">
@@ -110,11 +111,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="navbar-nav">
-                    <a class="nav-link" href="/student/notifications" aria-label="Thông báo">
-                        <i class="bi bi-bell"></i><span class="badge bg-red"></span>
-                    </a>
-                </div>
             </div>
         </header>
         <div class="page-body">
@@ -126,5 +122,6 @@
     </div>
 </div>
 <%@ include file="/WEB-INF/views/common/scripts.jspf" %>
+<%@ include file="/WEB-INF/views/common/ws-scripts.jspf" %>
 </body>
 </html>
