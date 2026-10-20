@@ -31,6 +31,15 @@ public class ServiceReportQueryRepository {
     }
 
     @SuppressWarnings("unchecked")
+    public List<Object[]> chatsPerHour(ReportScope scope, ReportRange range) {
+        Query q = em.createNativeQuery("select hour(c.started_at), count(*) from chat_sessions c where "
+                + scopeClause(scope, "c") + " and c.started_at >= :from and c.started_at < :to "
+                + "group by hour(c.started_at) order by hour(c.started_at)");
+        bind(q, scope, range);
+        return q.getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
     public List<Object[]> chatsPerManager(ReportScope scope, ReportRange range) {
         Query q = em.createNativeQuery("select u.full_name, count(*) from chat_sessions c "
                 + "join users u on u.id = c.manager_id where " + scopeClause(scope, "c")

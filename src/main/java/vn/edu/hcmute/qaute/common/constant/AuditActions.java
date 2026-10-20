@@ -66,6 +66,7 @@ public final class AuditActions {
     public static final String APPOINTMENT_CANCELLED_BY_MANAGER = "APPOINTMENT_CANCELLED_BY_MANAGER";
     public static final String CHAT_TRANSFERRED = "CHAT_TRANSFERRED";
     public static final String MEDIA_DELETED = "MEDIA_DELETED";
+    public static final String REPORT_EXPORT = "REPORT_EXPORT";
 
     private AuditActions() {
     }
