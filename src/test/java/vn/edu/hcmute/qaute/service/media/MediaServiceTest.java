@@ -46,6 +46,20 @@ class MediaServiceTest {
     }
 
     @Test
+    void websocketActorCanAttachOwnChatFileWithoutHttpSecurityContext() {
+        SecurityContextHolder.clearContext();
+        MediaAsset asset = MediaAsset.builder().ownerId(7L).usageType(MediaUsageType.CHAT_ATTACHMENT)
+                .status(MediaStatus.ORPHAN).build();
+        when(assets.findById(31L)).thenReturn(Optional.of(asset));
+
+        new MediaServiceImpl(assets, null, null, null, null)
+                .attach(31L, MediaUsageType.CHAT_ATTACHMENT, 12L, 7L);
+
+        assertEquals(12L, asset.getUsageRefId());
+        assertEquals(MediaStatus.ACTIVE, asset.getStatus());
+    }
+
+    @Test
     void cannotAttachImageFromAnotherAccountOrFaq() {
         authenticate(7L);
         MediaAsset foreign = MediaAsset.builder().ownerId(8L).usageType(MediaUsageType.FAQ_IMAGE)

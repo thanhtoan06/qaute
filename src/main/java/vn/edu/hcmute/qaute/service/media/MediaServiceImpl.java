@@ -103,10 +103,15 @@ public class MediaServiceImpl implements MediaService {
 
     @Override @Transactional
     public void attach(Long assetId, MediaUsageType usage, Long refId) {
-        if (assetId == null || usage == null || refId == null) throw rejected("Thông tin đính kèm tệp không hợp lệ");
+        attach(assetId, usage, refId, SecurityUtils.requireUserId());
+    }
+
+    @Override @Transactional
+    public void attach(Long assetId, MediaUsageType usage, Long refId, Long ownerId) {
+        if (assetId == null || usage == null || refId == null || ownerId == null) throw rejected("Thông tin đính kèm tệp không hợp lệ");
         MediaAsset asset = assets.findById(assetId).orElseThrow(() -> new NotFoundException("Không tìm thấy tệp"));
         if (asset.getUsageType() != usage || asset.getStatus() == MediaStatus.DELETED
-                || (asset.getUsageRefId() == null && !SecurityUtils.requireUserId().equals(asset.getOwnerId()))
+                || (asset.getUsageRefId() == null && !ownerId.equals(asset.getOwnerId()))
                 || (asset.getUsageRefId() != null && !refId.equals(asset.getUsageRefId()))) {
             throw rejected("Tệp không phù hợp để đính kèm");
         }
