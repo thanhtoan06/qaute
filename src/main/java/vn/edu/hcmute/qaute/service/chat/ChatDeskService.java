@@ -27,6 +27,8 @@ import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.dto.view.ChatQueueItem;
 import vn.edu.hcmute.qaute.dto.view.ManagerOption;
 import vn.edu.hcmute.qaute.dto.view.ManagerChatSessionView;
+import vn.edu.hcmute.qaute.dto.view.ChatSessionView;
+import vn.edu.hcmute.qaute.dto.view.ChatStudentContextView;
 import vn.edu.hcmute.qaute.dto.view.UserSummary;
 import vn.edu.hcmute.qaute.entity.chat.ChatSession;
 import vn.edu.hcmute.qaute.entity.identity.User;
@@ -181,32 +183,52 @@ public class ChatDeskService {
 
     @Transactional(readOnly = true)
     public List<ManagerChatSessionView> mine(Long managerId) {
-        List<Long> scopeCategoryIds = scopes.getScopeCategoryIds(managerId);
+        UserSummary manager = users.getSummary(managerId);
         return sessions.findByManagerIdAndStatus(managerId, ChatSessionStatus.ACTIVE).stream()
                 .sorted(Comparator.comparing(ChatSession::getLastMessageAt,
                         Comparator.nullsFirst(Comparator.naturalOrder())).reversed())
-                .map(session -> {
-                    List<ManagerChatSessionView.RecentTicket> recent = (scopeCategoryIds.isEmpty()
-                            ? List.<Ticket>of()
-                            : tickets.findByStudentIdAndCategoryIdInOrderByCreatedAtDescIdDesc(
-                                    session.getStudentId(), scopeCategoryIds,
-                                    PageRequest.of(0, 5))).stream()
-                            .map(ticket -> new ManagerChatSessionView.RecentTicket(
-                                    ticket.getId(), ticket.getCode(), ticket.getTitle())).toList();
-                    return new ManagerChatSessionView(session.getId(), session.getStatus(),
-                            session.getCategoryId(), categories.getDisplayPath(session.getCategoryId()),
-                            session.getInitialQuestion(), users.getStudentSummary(session.getStudentId()),
-                            session.getLastMessageAt(), session.getTicketId(), recent);
-                }).toList();
+                .map(session -> new ManagerChatSessionView(new ChatSessionView(session.getId(),
+                        session.getStatus(), session.getCategoryId(),
+                        categories.getDisplayPath(session.getCategoryId()), session.getInitialQuestion(),
+                        managerId, manager == null ? null : manager.fullName(), null,
+                        availability.isWorkingNow(), null, List.of(), session.getStartedAt()),
+                        studentName(session.getStudentId()),
+                        session.getLastMessageAt(), session.getTicketId())).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ManagerOption> transferTargets(Long categoryId, Long managerId) {
-        if (!scopes.isInScope(managerId, categoryId)) throw new NotFoundException();
-        List<Long> eligible = availability.eligibleManagerIds(categoryId);
-        return scopes.findAdvisors(categoryId).stream()
+    public ChatStudentContextView studentContext(Long sessionId, Long managerId) {
+        ChatSession session = requireMine(sessionId, managerId);
+        List<Long> scopeCategoryIds = scopes.getScopeCategoryIds(managerId);
+        List<ChatStudentContextView.RecentTicket> recent = (scopeCategoryIds.isEmpty()
+                ? List.<Ticket>of()
+                : tickets.findByStudentIdAndCategoryIdInOrderByCreatedAtDescIdDesc(
+                        session.getStudentId(), scopeCategoryIds, PageRequest.of(0, 5))).stream()
+                .map(ticket -> new ChatStudentContextView.RecentTicket(ticket.getId(),
+                        ticket.getCode(), ticket.getTitle(), ticket.getStatus())).toList();
+        return new ChatStudentContextView(users.getStudentSummary(session.getStudentId()), recent);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ManagerOption> transferTargets(Long sessionId, Long managerId) {
+        ChatSession session = requireMine(sessionId, managerId);
+        List<Long> eligible = availability.eligibleManagerIds(session.getCategoryId());
+        return scopes.findAdvisors(session.getCategoryId()).stream()
                 .filter(option -> !option.id().equals(managerId) && eligible.contains(option.id()))
                 .toList();
+    }
+
+    private ChatSession requireMine(Long sessionId, Long managerId) {
+        ChatSession session = sessions.findById(sessionId).orElseThrow(NotFoundException::new);
+        if (session.getStatus() != ChatSessionStatus.ACTIVE || !Objects.equals(session.getManagerId(), managerId)) {
+            throw new NotFoundException();
+        }
+        return session;
+    }
+
+    private String studentName(Long studentId) {
+        UserSummary student = users.getSummary(studentId);
+        return student == null ? "Sinh viên" : student.fullName();
     }
 
     private boolean isActiveAdvisor(Long managerId, Long categoryId) {
