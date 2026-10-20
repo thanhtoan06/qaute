@@ -7,7 +7,8 @@
         'TICKET_ATTACHMENT': ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf', 'docx', 'xlsx', 'pptx', 'txt'],
         'CHAT_ATTACHMENT': ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf', 'docx', 'xlsx', 'pptx', 'txt'],
         'AVATAR': ['jpg', 'jpeg', 'png', 'webp', 'gif'],
-        'FAQ_IMAGE': ['jpg', 'jpeg', 'png', 'webp', 'gif']
+        'FAQ_IMAGE': ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+        'ANNOUNCEMENT_COVER': ['jpg', 'jpeg', 'png', 'webp', 'gif']
     };
 
     const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
