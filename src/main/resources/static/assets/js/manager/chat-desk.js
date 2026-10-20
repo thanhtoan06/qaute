@@ -3,7 +3,7 @@
     const root = document.getElementById('chat-desk');
     if (!root) return;
     const el = id => document.getElementById(id);
-    const state = {client: null, active: null, mine: new Map(), queue: [], subscriptions: new Map(), lastIds: new Map(), lastRead: new Map(), seen: new Map(), typingTimer: null, audio: null};
+    const state = {client: null, active: null, mine: new Map(), queue: [], subscriptions: new Map(), lastIds: new Map(), lastRead: new Map(), unread: new Map(), seen: new Map(), typingTimer: null, audio: null};
     const toast = (message, type) => Qaute.toast(message, type || 'info');
     const api = (url, options) => Qaute.fetchJson(url, options).then(result => result.data);
     const button = (label, click, className) => {
@@ -31,7 +31,7 @@
             row.append(text('div', '#' + item.position + ' · ' + item.studentName, 'fw-bold'));
             row.append(text('div', item.categoryPath, 'small text-secondary'));
             row.append(text('div', item.question, 'small text-break'));
-            row.append(text('div', 'Chờ ' + Math.floor(item.waitingSeconds / 60) + ' phút', 'small text-secondary'));
+            row.append(text('div', 'Chờ ' + String(Math.floor(item.waitingSeconds / 60)).padStart(2, '0') + ':' + String(item.waitingSeconds % 60).padStart(2, '0'), 'small text-secondary'));
             row.append(button('Nhận', () => send('/app/chat.accept', {sessionId: item.id}), 'btn btn-primary btn-sm mt-2'));
             box.append(row);
         });
@@ -39,14 +39,21 @@
     function renderMine() {
         const box = el('chat-mine'); box.replaceChildren();
         if (!state.mine.size) box.append(text('div', 'Chưa có phiên đang tư vấn.', 'list-group-item text-secondary'));
-        state.mine.forEach(item => box.append(button((item.student?.user?.fullName || 'Sinh viên') + ' · ' + item.categoryPath,
-            () => select(item.sessionId), 'list-group-item list-group-item-action' + (state.active === item.sessionId ? ' active' : ''))));
+        state.mine.forEach(item => {
+            const row = button((item.studentName || 'Sinh viên') + ' · ' + item.categoryPath,
+                () => select(item.sessionId), 'list-group-item list-group-item-action' + (state.active === item.sessionId ? ' active' : ''));
+            const unread = state.unread.get(item.sessionId) || 0;
+            if (unread) row.append(text('span', unread, 'badge bg-red ms-2'));
+            box.append(row);
+        });
     }
     async function loadQueue() {
         state.queue = await api('/api/chat/queue') || []; renderQueue();
     }
     async function loadMine(preferred) {
-        const items = await api('/api/chat/mine') || [];
+        const items = (await api('/api/chat/mine') || []).map(item => ({...item,
+            sessionId: item.session.sessionId, categoryId: item.session.categoryId,
+            categoryPath: item.session.categoryPath, question: item.session.question}));
         state.mine = new Map(items.map(item => [item.sessionId, item]));
         for (const id of Array.from(state.subscriptions.keys())) if (!state.mine.has(id)) { state.subscriptions.get(id).unsubscribe(); state.subscriptions.delete(id); }
         if (state.client?.connected) items.forEach(item => subscribe(item.sessionId));
@@ -64,7 +71,7 @@
             let after = state.lastIds.get(id) || 0, batch;
             do {
                 batch = await api('/api/chat/sessions/' + id + '/messages?afterId=' + after) || [];
-                batch.forEach(message => addMessage(message));
+                batch.forEach(message => addMessage(message, true));
                 after = state.lastIds.get(id) || after;
             } while (batch.length === 200);
         } catch (error) { toast(error.message, 'danger'); }
@@ -72,21 +79,27 @@
     function select(id) {
         state.active = id;
         const item = state.mine.get(id), enabled = !!item;
-        el('chat-title').textContent = item ? (item.student?.user?.fullName || 'Sinh viên') : 'Chọn hội thoại';
+        el('chat-title').textContent = item ? (item.studentName || 'Sinh viên') : 'Chọn hội thoại';
         el('chat-subtitle').textContent = item ? item.categoryPath + ' · ' + item.question : '';
         ['chat-transfer', 'chat-end', 'chat-input', 'chat-file', 'chat-send', 'chat-to-ticket'].forEach(key => el(key).disabled = !enabled);
         el('chat-messages').replaceChildren(); el('chat-typing').textContent = '';
         if (enabled) {
+            state.unread.delete(id);
             (state.seen.get(id) || []).forEach(addMessageToActive);
-            const student = item.student;
-            el('chat-student').replaceChildren(text('strong', student?.user?.fullName), text('div', student?.user?.mssv),
-                text('div', student?.facultyName), text('div', student?.classCode), text('div', student?.user?.email), text('div', student?.phone));
-            const recent = el('chat-recent-tickets'); recent.replaceChildren();
-            (item.recentTickets || []).forEach(ticket => {
-                const link = document.createElement('a'); link.href = '/manager/tickets/' + ticket.id;
-                link.className = 'list-group-item list-group-item-action'; link.textContent = ticket.code + ' · ' + ticket.title; recent.append(link);
-            });
-            if (!item.recentTickets?.length) recent.append(text('div', 'Chưa có ticket gần đây.', 'list-group-item text-secondary'));
+            el('chat-student').textContent = 'Đang tải…'; el('chat-recent-tickets').replaceChildren();
+            api('/api/chat/sessions/' + id + '/student').then(context => {
+                if (state.active !== id) return;
+                const student = context.student;
+                el('chat-student').replaceChildren(text('strong', student?.user?.fullName), text('div', student?.user?.mssv),
+                    text('div', student?.facultyName), text('div', student?.classCode), text('div', student?.user?.email), text('div', student?.phone));
+                const recent = el('chat-recent-tickets'); recent.replaceChildren();
+                (context.recentTickets || []).forEach(ticket => {
+                    const link = document.createElement('a'); link.href = '/manager/tickets/' + ticket.id;
+                    link.className = 'list-group-item list-group-item-action';
+                    link.textContent = ticket.code + ' · ' + ticket.title + ' (' + ticket.status + ')'; recent.append(link);
+                });
+                if (!context.recentTickets?.length) recent.append(text('div', 'Chưa có ticket gần đây.', 'list-group-item text-secondary'));
+            }).catch(error => toast(error.message, 'danger'));
             ticketLink(item.ticketId); sync(id); markRead();
         } else {
             el('chat-student').textContent = 'Chọn hội thoại để xem thông tin.';
@@ -99,8 +112,12 @@
         if (!id) return;
         const link = document.createElement('a'); link.href = '/manager/tickets/' + id; link.textContent = 'Mở ticket #' + id; box.append(link);
     }
-    function addMessage(message) {
+    function addMessage(message, fromHistory) {
         const id = message.sessionId, list = state.seen.get(id) || [];
+        if (!fromHistory && message.id && message.senderType === 'STUDENT' && state.active !== id &&
+                !list.some(item => item.id === message.id)) {
+            state.unread.set(id, (state.unread.get(id) || 0) + 1); renderMine();
+        }
         const previous = list.findIndex(item => item.id === message.id ||
             (message.clientMessageId && item.clientMessageId === message.clientMessageId));
         if (previous >= 0) list[previous] = message; else list.push(message);
@@ -204,7 +221,7 @@
     el('chat-transfer').addEventListener('click', async () => {
         const item = state.mine.get(state.active); if (!item) return;
         try {
-            const advisors = await api('/api/chat/categories/' + item.categoryId + '/advisors') || [];
+            const advisors = await api('/api/chat/transfer-targets?sessionId=' + encodeURIComponent(item.sessionId)) || [];
             const select = el('chat-transfer-target'); select.replaceChildren();
             advisors.forEach(advisor => { const option = document.createElement('option'); option.value = advisor.id; option.textContent = advisor.fullName; select.append(option); });
             el('chat-transfer-confirm').disabled = !advisors.length;

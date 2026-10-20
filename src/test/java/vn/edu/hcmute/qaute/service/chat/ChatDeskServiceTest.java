@@ -73,17 +73,16 @@ class ChatDeskServiceTest {
     }
 
     @Test
-    void mineShowsOnlyRecentTicketsWithinManagerScope() {
+    void studentContextShowsOnlyRecentTicketsWithinManagerScope() {
         ChatSession session = new ChatSession();
-        session.setId(8L); session.setStudentId(3L); session.setCategoryId(4L);
+        session.setId(8L); session.setStudentId(3L); session.setCategoryId(4L); session.setManagerId(7L);
         session.setStatus(vn.edu.hcmute.qaute.common.constant.ChatSessionStatus.ACTIVE);
         Ticket ticket = new Ticket(); ticket.setId(9L); ticket.setCode("QA-9"); ticket.setTitle("Cần hỗ trợ");
         when(scopes.getScopeCategoryIds(7L)).thenReturn(List.of(4L));
-        when(sessions.findByManagerIdAndStatus(7L,
-                vn.edu.hcmute.qaute.common.constant.ChatSessionStatus.ACTIVE)).thenReturn(List.of(session));
+        when(sessions.findById(8L)).thenReturn(Optional.of(session));
         when(tickets.findByStudentIdAndCategoryIdInOrderByCreatedAtDescIdDesc(
                 org.mockito.ArgumentMatchers.eq(3L), org.mockito.ArgumentMatchers.eq(List.of(4L)),
                 any(Pageable.class))).thenReturn(List.of(ticket));
-        assertEquals(9L, service.mine(7L).getFirst().recentTickets().getFirst().id());
+        assertEquals(9L, service.studentContext(8L, 7L).recentTickets().getFirst().id());
     }
 }
