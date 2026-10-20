@@ -71,7 +71,7 @@ public class StompChannelInterceptor implements ChannelInterceptor {
         if ("/user/queue/notifications".equals(destination)) {
             return;
         }
-        if ("/user/queue/chat-queue".equals(destination)
+        if (("/user/queue/chat-queue".equals(destination) || "/user/queue/errors".equals(destination))
                 && user.getRoleCode() == RoleCode.MANAGER) {
             return;
         }
