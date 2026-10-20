@@ -2,6 +2,8 @@ package vn.edu.hcmute.qaute.service.notification;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.springframework.context.ApplicationEventPublisher;
@@ -14,7 +16,9 @@ import vn.edu.hcmute.qaute.common.exception.ForbiddenException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.config.AppProperties;
 import vn.edu.hcmute.qaute.dto.view.NotificationView;
+import vn.edu.hcmute.qaute.dto.view.PreferenceView;
 import vn.edu.hcmute.qaute.dto.view.UserSummary;
+import vn.edu.hcmute.qaute.dto.request.student.PreferenceInput;
 import vn.edu.hcmute.qaute.entity.notification.Notification;
 import vn.edu.hcmute.qaute.entity.notification.NotificationPreference;
 import vn.edu.hcmute.qaute.repository.notification.NotificationPreferenceRepository;
@@ -25,6 +29,27 @@ import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 @Service
 @Transactional
 public class NotificationServiceImpl implements NotificationService {
+
+    private static final List<NotificationType> STUDENT_PREFERENCE_TYPES = List.of(
+            NotificationType.TICKET_CREATED,
+            NotificationType.TICKET_ASSIGNED,
+            NotificationType.TICKET_ADVISOR_REPLIED,
+            NotificationType.TICKET_INFO_REQUESTED,
+            NotificationType.TICKET_REMINDER_WAITING,
+            NotificationType.TICKET_RESOLVED,
+            NotificationType.TICKET_AUTO_CLOSED,
+            NotificationType.TICKET_ESCALATED,
+            NotificationType.TICKET_FORCE_CLOSED,
+            NotificationType.APPOINTMENT_CONFIRMED,
+            NotificationType.APPOINTMENT_CHANGED,
+            NotificationType.APPOINTMENT_CANCELLED,
+            NotificationType.APPOINTMENT_REMINDER,
+            NotificationType.CHAT_MISSED,
+            NotificationType.FAQ_FROM_TICKET_PUBLISHED,
+            NotificationType.ANNOUNCEMENT_PUBLISHED,
+            NotificationType.SECURITY_ACCOUNT_LOCKED,
+            NotificationType.SECURITY_PASSWORD_CHANGED,
+            NotificationType.SECURITY_ROLE_CHANGED);
 
     private final NotificationRepository notificationRepository;
     private final NotificationPreferenceRepository preferenceRepository;
@@ -221,6 +246,43 @@ public class NotificationServiceImpl implements NotificationService {
 
         notification.setDeletedAt(LocalDateTime.now());
         notificationRepository.save(notification);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PreferenceView> getPreferences(Long userId) {
+        if (userId == null) return List.of();
+        Map<NotificationType, NotificationPreference> existing = new EnumMap<>(NotificationType.class);
+        preferenceRepository.findByUserId(userId).forEach(preference ->
+                existing.put(preference.getEventType(), preference));
+        return STUDENT_PREFERENCE_TYPES.stream().map(type -> {
+            NotificationPreference preference = existing.get(type);
+            boolean emailLocked = type.isMandatoryEmail();
+            boolean inApp = preference == null || preference.isInAppEnabled();
+            boolean email = emailLocked || (preference == null ? type.isDefaultEmail() : preference.isEmailEnabled());
+            return new PreferenceView(type, type.getLabel(), inApp, email, emailLocked);
+        }).toList();
+    }
+
+    @Override
+    public void savePreferences(Long userId, Map<NotificationType, PreferenceInput> input) {
+        if (userId == null || input == null || input.isEmpty()) return;
+        Map<NotificationType, NotificationPreference> existing = new EnumMap<>(NotificationType.class);
+        preferenceRepository.findByUserId(userId).forEach(preference ->
+                existing.put(preference.getEventType(), preference));
+
+        for (Map.Entry<NotificationType, PreferenceInput> entry : input.entrySet()) {
+            NotificationType type = entry.getKey();
+            PreferenceInput value = entry.getValue();
+            if (type == null || value == null || !STUDENT_PREFERENCE_TYPES.contains(type)) continue;
+            NotificationPreference preference = existing.get(type);
+            if (preference == null) {
+                preference = NotificationPreference.builder().userId(userId).eventType(type).build();
+            }
+            preference.setInAppEnabled(value.inApp());
+            preference.setEmailEnabled(type.isMandatoryEmail() || value.email());
+            preferenceRepository.save(preference);
+        }
     }
 }
 

@@ -10,12 +10,16 @@
             <div class="text-secondary">Cập nhật về yêu cầu, lịch hẹn và hoạt động tài khoản của bạn.</div>
         </div>
         <c:if test="${unreadCount > 0}">
-            <form method="post" action="${ctx}/student/notifications/read-all">
-                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                <input type="hidden" name="unread" value="${unread}"/>
-                <button class="btn btn-outline-primary" type="submit"><i class="bi bi-check2-all me-1"></i>Đánh dấu đã đọc hết</button>
-            </form>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-secondary" href="${ctx}/student/notifications/preferences"><i class="bi bi-gear me-1"></i>Tùy chọn</a>
+                <form method="post" action="${ctx}/student/notifications/read-all">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                    <input type="hidden" name="unread" value="${unread}"/>
+                    <button class="btn btn-outline-primary" type="submit"><i class="bi bi-check2-all me-1"></i>Đánh dấu đã đọc hết</button>
+                </form>
+            </div>
         </c:if>
+        <c:if test="${unreadCount == 0}"><a class="btn btn-outline-secondary" href="${ctx}/student/notifications/preferences"><i class="bi bi-gear me-1"></i>Tùy chọn</a></c:if>
     </div>
 </div>
 
