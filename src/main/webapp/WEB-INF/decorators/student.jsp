@@ -58,8 +58,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link${currentUri.startsWith('/student/faq') ? ' active' : ''}" href="/student/faq">
+                        <a class="nav-link${currentUri.startsWith('/student/faq') and not currentUri.startsWith('/student/faq/recent') ? ' active' : ''}" href="/student/faq">
                             <span class="nav-link-icon"><i class="bi bi-question-circle"></i></span><span class="nav-link-title">Hỏi đáp FAQ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link${currentUri.startsWith('/student/faq/recent') ? ' active' : ''}" href="/student/faq/recent">
+                            <span class="nav-link-icon"><i class="bi bi-clock-history"></i></span><span class="nav-link-title">FAQ đã xem</span>
                         </a>
                     </li>
                     <li class="nav-item">
