@@ -17,6 +17,33 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
     List<Appointment> findBySlotIdInAndStatusIn(Collection<Long> slotIds, Collection<AppointmentStatus> statuses);
     List<Appointment> findBySlotIdIn(Collection<Long> slotIds);
 
+    @Query(value = "select a from Appointment a, AppointmentSlot s where a.slotId = s.id "
+            + "and a.managerId = :managerId and a.status = vn.edu.hcmute.qaute.common.constant.AppointmentStatus.CONFIRMED "
+            + "and s.startAt >= :from and s.startAt < :to order by s.startAt asc, a.id asc",
+            countQuery = "select count(a) from Appointment a, AppointmentSlot s where a.slotId = s.id "
+                    + "and a.managerId = :managerId and a.status = vn.edu.hcmute.qaute.common.constant.AppointmentStatus.CONFIRMED "
+                    + "and s.startAt >= :from and s.startAt < :to")
+    Page<Appointment> findManagerToday(@Param("managerId") Long managerId,
+            @Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
+
+    @Query(value = "select a from Appointment a, AppointmentSlot s where a.slotId = s.id "
+            + "and a.managerId = :managerId and a.status = vn.edu.hcmute.qaute.common.constant.AppointmentStatus.CONFIRMED "
+            + "and s.startAt >= :from order by s.startAt asc, a.id asc",
+            countQuery = "select count(a) from Appointment a, AppointmentSlot s where a.slotId = s.id "
+                    + "and a.managerId = :managerId and a.status = vn.edu.hcmute.qaute.common.constant.AppointmentStatus.CONFIRMED "
+                    + "and s.startAt >= :from")
+    Page<Appointment> findManagerUpcoming(@Param("managerId") Long managerId,
+            @Param("from") LocalDateTime from, Pageable pageable);
+
+    @Query(value = "select a from Appointment a, AppointmentSlot s where a.slotId = s.id "
+            + "and a.managerId = :managerId and (a.status <> vn.edu.hcmute.qaute.common.constant.AppointmentStatus.CONFIRMED "
+            + "or s.startAt < :today) order by s.startAt desc, a.id desc",
+            countQuery = "select count(a) from Appointment a, AppointmentSlot s where a.slotId = s.id "
+                    + "and a.managerId = :managerId and (a.status <> vn.edu.hcmute.qaute.common.constant.AppointmentStatus.CONFIRMED "
+                    + "or s.startAt < :today)")
+    Page<Appointment> findManagerPast(@Param("managerId") Long managerId,
+            @Param("today") LocalDateTime today, Pageable pageable);
+
     @Query("select count(a) from Appointment a, AppointmentSlot s where a.slotId = s.id "
             + "and a.studentId = :studentId and a.status = vn.edu.hcmute.qaute.common.constant.AppointmentStatus.CONFIRMED "
             + "and s.startAt >= :now")
