@@ -89,6 +89,7 @@ public class SlotGenerationService {
                     existing.add(start);
                     AppointmentSlot slot = new AppointmentSlot();
                     slot.setManagerId(managerId);
+                    slot.setAvailabilityRuleId(rule.getId());
                     slot.setStartAt(start);
                     slot.setEndAt(end);
                     slot.setModality(rule.getModality());
