@@ -24,6 +24,13 @@ public class ReportQueryRepository {
                 scope, range, Map.of());
     }
 
+    public List<Object[]> createdPerHour(ReportScope scope, ReportRange range) {
+        return rows("select function('hour', t.createdAt), count(t) from Ticket t where "
+                + scopeClause(scope) + " and t.createdAt >= :from and t.createdAt < :to "
+                + "group by function('hour', t.createdAt) order by function('hour', t.createdAt)",
+                scope, range, Map.of());
+    }
+
     public List<Object[]> createdByCategory(ReportScope scope, ReportRange range) {
         return rows("select t.categoryId, count(t) from Ticket t where " + scopeClause(scope)
                 + " and t.createdAt >= :from and t.createdAt < :to group by t.categoryId order by count(t) desc",
