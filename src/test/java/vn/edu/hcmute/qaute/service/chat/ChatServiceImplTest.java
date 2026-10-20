@@ -14,6 +14,7 @@ import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.mockito.ArgumentCaptor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,13 +24,17 @@ import org.springframework.context.ApplicationEventPublisher;
 import vn.edu.hcmute.qaute.common.constant.ChatSessionStatus;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.entity.chat.ChatSession;
+import vn.edu.hcmute.qaute.entity.chat.ChatMessage;
 import vn.edu.hcmute.qaute.entity.identity.User;
+import vn.edu.hcmute.qaute.entity.ticket.Ticket;
 import vn.edu.hcmute.qaute.repository.chat.ChatMessageRepository;
 import vn.edu.hcmute.qaute.repository.chat.ChatSessionRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
 import vn.edu.hcmute.qaute.service.notification.NotificationService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
+import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
+import vn.edu.hcmute.qaute.service.ticket.command.CreateTicketCommand;
 
 @ExtendWith(MockitoExtension.class)
 class ChatServiceImplTest {
@@ -42,6 +47,7 @@ class ChatServiceImplTest {
     @Mock NotificationService notifications;
     @Mock ApplicationEventPublisher events;
     @Mock EntityManager entityManager;
+    @Mock TicketWorkflowService ticketWorkflow;
     @InjectMocks ChatServiceImpl service;
 
     @Test
@@ -74,6 +80,27 @@ class ChatServiceImplTest {
         when(sessions.findById(9L)).thenReturn(Optional.of(session(ChatSessionStatus.ACTIVE)));
         assertThrows(NotFoundException.class, () -> service.messages(9L, 99L, 0L));
         verify(messages, never()).findTop200BySessionIdAndIdGreaterThanOrderByIdAsc(any(), any());
+    }
+
+    @Test
+    void ticketTranscriptEscapesChatContentAndKeepsStudentOwner() {
+        ChatSession session = session(ChatSessionStatus.ENDED);
+        when(sessions.findLockedById(9L)).thenReturn(Optional.of(session));
+        ChatMessage message = new ChatMessage();
+        message.setSenderType(vn.edu.hcmute.qaute.common.constant.ChatSenderType.STUDENT);
+        message.setContent("<script>alert('x')</script>");
+        message.setSentAt(LocalDateTime.now());
+        when(messages.findBySessionIdOrderByIdAsc(9L)).thenReturn(List.of(message));
+        Ticket ticket = new Ticket();
+        ticket.setId(50L);
+        when(ticketWorkflow.createTicket(eq(3L), any(CreateTicketCommand.class))).thenReturn(ticket);
+
+        assertEquals(50L, service.createTicketFromChat(9L, 3L));
+        ArgumentCaptor<CreateTicketCommand> command = ArgumentCaptor.forClass(CreateTicketCommand.class);
+        verify(ticketWorkflow).createTicket(eq(3L), command.capture());
+        assertTrue(command.getValue().descriptionHtml().contains("&lt;script&gt;"));
+        assertTrue(!command.getValue().descriptionHtml().contains("<script>"));
+        assertEquals(50L, session.getTicketId());
     }
 
     private ChatSession session(ChatSessionStatus status) {

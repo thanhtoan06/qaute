@@ -43,6 +43,9 @@ public class ChatApiController {
     public record HistoryData(List<ChatHistoryItem> content, int totalPages) {
     }
 
+    public record TicketData(Long ticketId) {
+    }
+
     @GetMapping("/current")
     public ApiResponse<ChatSessionView> current() {
         return ApiResponse.ok(chat.current(requireStudent()).orElse(null));
@@ -80,6 +83,11 @@ public class ChatApiController {
     public ApiResponse<HistoryData> history(@RequestParam(defaultValue = "0") int page) {
         Page<ChatHistoryItem> result = chat.history(requireStudent(), PageRequest.of(Math.max(0, page), 15));
         return ApiResponse.ok(new HistoryData(result.getContent(), result.getTotalPages()));
+    }
+
+    @PostMapping("/{id}/to-ticket")
+    public ApiResponse<TicketData> toTicket(@PathVariable Long id) {
+        return ApiResponse.ok(new TicketData(chat.createTicketFromChat(id, SecurityUtils.requireUserId())));
     }
 
     private Long requireStudent() {

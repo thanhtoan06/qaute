@@ -8,6 +8,7 @@ public interface MediaService {
     MediaAssetView uploadPublic(MultipartFile file, MediaUsageType usage, Long ownerId);
     MediaAssetView uploadPrivate(MultipartFile file, MediaUsageType usage, Long ownerId);
     void attach(Long assetId, MediaUsageType usage, Long refId);
+    void attach(Long assetId, MediaUsageType usage, Long refId, Long ownerId);
     String publicUrl(Long assetId);
     void delete(Long assetId);
 }

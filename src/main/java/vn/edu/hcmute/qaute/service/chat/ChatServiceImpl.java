@@ -3,17 +3,20 @@ package vn.edu.hcmute.qaute.service.chat;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.HtmlUtils;
 import vn.edu.hcmute.qaute.common.constant.ChatContentType;
 import vn.edu.hcmute.qaute.common.constant.ChatSenderType;
 import vn.edu.hcmute.qaute.common.constant.ChatSessionStatus;
@@ -36,6 +39,8 @@ import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
 import vn.edu.hcmute.qaute.service.notification.NotificationService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
+import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
+import vn.edu.hcmute.qaute.service.ticket.command.CreateTicketCommand;
 
 @Service
 @Transactional
@@ -51,11 +56,13 @@ public class ChatServiceImpl implements ChatService {
     private final NotificationService notifications;
     private final ApplicationEventPublisher events;
     private final EntityManager entityManager;
+    private final TicketWorkflowService ticketWorkflow;
 
     public ChatServiceImpl(ChatSessionRepository sessions, ChatMessageRepository messages,
             ChatAvailabilityService availability, CategoryQueryService categories, FaqQueryService faqs,
             UserLookupService users, NotificationService notifications,
-            ApplicationEventPublisher events, EntityManager entityManager) {
+            ApplicationEventPublisher events, EntityManager entityManager,
+            TicketWorkflowService ticketWorkflow) {
         this.sessions = sessions;
         this.messages = messages;
         this.availability = availability;
@@ -65,6 +72,7 @@ public class ChatServiceImpl implements ChatService {
         this.notifications = notifications;
         this.events = events;
         this.entityManager = entityManager;
+        this.ticketWorkflow = ticketWorkflow;
     }
 
     @Override
@@ -120,6 +128,7 @@ public class ChatServiceImpl implements ChatService {
                     "Hiện chưa có tư vấn viên trực. Bạn có thể chuyển thành yêu cầu tư vấn.");
         }
         session.setStatus(ChatSessionStatus.WAITING);
+        session.setLastMessageAt(LocalDateTime.now());
         sessions.saveAndFlush(session);
         events.publishEvent(new ChatQueueChangedEvent(session.getCategoryId()));
         notifications.notifyUsers(eligible, NotificationType.CHAT_WAITING_NEW,
@@ -196,7 +205,48 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public Long createTicketFromChat(Long sessionId, Long userId) {
-        throw new BadRequestException("Chức năng tạo yêu cầu từ chat được triển khai ở bước T2-39");
+        ChatSession session = sessions.findLockedById(sessionId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
+        if (!Objects.equals(userId, session.getStudentId())
+                && !Objects.equals(userId, session.getManagerId())) {
+            throw new NotFoundException("Không tìm thấy phiên chat");
+        }
+        if (session.getTicketId() != null) {
+            throw new InvalidTransitionException("Phiên chat đã được chuyển thành yêu cầu tư vấn");
+        }
+        String question = session.getInitialQuestion();
+        String title = "Từ hội thoại chat: " + question.substring(0, Math.min(100, question.length()));
+        String description = transcript(sessionId);
+        CreateTicketCommand command = new CreateTicketCommand(session.getCategoryId(), title,
+                description, false, null, false, UUID.randomUUID().toString(), List.of());
+        Long ticketId = ticketWorkflow.createTicket(session.getStudentId(), command).getId();
+        session.setTicketId(ticketId);
+        sessions.saveAndFlush(session);
+        return ticketId;
+    }
+
+    private String transcript(Long sessionId) {
+        StringBuilder html = new StringBuilder("<p>Biên bản hội thoại tư vấn trực tuyến QAUTE</p>");
+        int textLength = 40;
+        DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm");
+        for (ChatMessage message : messages.findBySessionIdOrderByIdAsc(sessionId)) {
+            String name = message.getSenderId() == null
+                    ? message.getSenderType() == ChatSenderType.BOT ? "Trợ lý QAUTE" : "Hệ thống"
+                    : getSenderName(message.getSenderId());
+            String line = "[" + message.getSentAt().format(timeFormat) + "] " + name + ": "
+                    + message.getContent().replace('\n', ' ').replace('\r', ' ');
+            int remaining = 4800 - textLength;
+            if (remaining <= 0) break;
+            if (line.length() > remaining) line = line.substring(0, remaining);
+            html.append("<p>").append(HtmlUtils.htmlEscape(line)).append("</p>");
+            textLength += line.length();
+        }
+        return html.toString();
+    }
+
+    private String getSenderName(Long senderId) {
+        UserSummary sender = users.getSummary(senderId);
+        return sender == null ? "Người tham gia" : sender.fullName();
     }
 
     private ChatSession requireOwn(Long id, Long studentId) {
