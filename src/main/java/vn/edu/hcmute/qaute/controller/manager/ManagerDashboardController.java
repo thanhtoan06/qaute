@@ -4,20 +4,28 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import vn.edu.hcmute.qaute.common.response.ApiResponse;
 import vn.edu.hcmute.qaute.security.QauteUserDetails;
+import vn.edu.hcmute.qaute.service.manager.ManagerDashboardService;
 
-/**
- * Trang tổng quan tạm của Manager (nội dung thật làm ở bước T2-45).
- * Quyền truy cập /manager/** (chỉ MANAGER) đã được SecurityConfig kiểm soát.
- */
 @Controller
 public class ManagerDashboardController {
+    private final ManagerDashboardService dashboards;
+
+    public ManagerDashboardController(ManagerDashboardService dashboards) { this.dashboards = dashboards; }
 
     @GetMapping("/manager/dashboard")
     public String dashboard(@AuthenticationPrincipal QauteUserDetails me, Model model) {
         model.addAttribute("me", me);
         model.addAttribute("pageTitle", "Tổng quan");
         return "manager/dashboard";
+    }
+
+    @GetMapping("/api/manager/dashboard")
+    @ResponseBody
+    public ApiResponse<ManagerDashboardService.Dashboard> data(@AuthenticationPrincipal QauteUserDetails me) {
+        return ApiResponse.ok(dashboards.get(me.getId()));
     }
 }
