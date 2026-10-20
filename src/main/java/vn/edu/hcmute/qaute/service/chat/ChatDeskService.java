@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -24,11 +26,14 @@ import vn.edu.hcmute.qaute.common.exception.InvalidTransitionException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.dto.view.ChatQueueItem;
 import vn.edu.hcmute.qaute.dto.view.ManagerOption;
+import vn.edu.hcmute.qaute.dto.view.ManagerChatSessionView;
 import vn.edu.hcmute.qaute.dto.view.UserSummary;
 import vn.edu.hcmute.qaute.entity.chat.ChatSession;
 import vn.edu.hcmute.qaute.entity.identity.User;
+import vn.edu.hcmute.qaute.entity.ticket.Ticket;
 import vn.edu.hcmute.qaute.repository.chat.ChatSessionRepository;
 import vn.edu.hcmute.qaute.repository.organization.ManagerProfileRepository;
+import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
@@ -52,13 +57,16 @@ public class ChatDeskService {
     private final AuditService audit;
     private final EntityManager entityManager;
     private final WsSessionRegistry webSocketSessions;
+    private final TicketRepository tickets;
+    private final SimpMessagingTemplate socket;
 
     public ChatDeskService(ChatSessionRepository sessions, ManagerScopeService scopes,
             ManagerProfileRepository profiles, ChatAvailabilityService availability,
             SettingsService settings, UserLookupService users, CategoryQueryService categories,
             ChatMessagingService messaging, ChatEventPublisher publisher,
             ApplicationEventPublisher events, AuditService audit, EntityManager entityManager,
-            WsSessionRegistry webSocketSessions) {
+            WsSessionRegistry webSocketSessions, TicketRepository tickets,
+            SimpMessagingTemplate socket) {
         this.sessions = sessions;
         this.scopes = scopes;
         this.profiles = profiles;
@@ -72,6 +80,8 @@ public class ChatDeskService {
         this.audit = audit;
         this.entityManager = entityManager;
         this.webSocketSessions = webSocketSessions;
+        this.tickets = tickets;
+        this.socket = socket;
     }
 
     public void accept(Long sessionId, Long managerId) {
@@ -102,6 +112,14 @@ public class ChatDeskService {
         publisher.sendToSession(sessionId, Map.of("type", "AGENT_JOINED",
                 "managerId", managerId, "managerName", managerName));
         events.publishEvent(new ChatQueueChangedEvent(session.getCategoryId()));
+        Long acceptedId = sessionId;
+        Runnable acknowledged = () -> socket.convertAndSendToUser(String.valueOf(managerId),
+                "/queue/chat-queue", Map.of("type", "CHAT_ACCEPTED", "sessionId", acceptedId));
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override public void afterCommit() { acknowledged.run(); }
+            });
+        } else acknowledged.run();
     }
 
     public void transfer(Long sessionId, Long managerId, Long toManagerId) {
@@ -159,6 +177,36 @@ public class ChatDeskService {
                             ? session.getStartedAt() : session.getLastMessageAt(), now).toSeconds()), position));
         }
         return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ManagerChatSessionView> mine(Long managerId) {
+        List<Long> scopeCategoryIds = scopes.getScopeCategoryIds(managerId);
+        return sessions.findByManagerIdAndStatus(managerId, ChatSessionStatus.ACTIVE).stream()
+                .sorted(Comparator.comparing(ChatSession::getLastMessageAt,
+                        Comparator.nullsFirst(Comparator.naturalOrder())).reversed())
+                .map(session -> {
+                    List<ManagerChatSessionView.RecentTicket> recent = (scopeCategoryIds.isEmpty()
+                            ? List.<Ticket>of()
+                            : tickets.findByStudentIdAndCategoryIdInOrderByCreatedAtDescIdDesc(
+                                    session.getStudentId(), scopeCategoryIds,
+                                    PageRequest.of(0, 5))).stream()
+                            .map(ticket -> new ManagerChatSessionView.RecentTicket(
+                                    ticket.getId(), ticket.getCode(), ticket.getTitle())).toList();
+                    return new ManagerChatSessionView(session.getId(), session.getStatus(),
+                            session.getCategoryId(), categories.getDisplayPath(session.getCategoryId()),
+                            session.getInitialQuestion(), users.getStudentSummary(session.getStudentId()),
+                            session.getLastMessageAt(), session.getTicketId(), recent);
+                }).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ManagerOption> transferTargets(Long categoryId, Long managerId) {
+        if (!scopes.isInScope(managerId, categoryId)) throw new NotFoundException();
+        List<Long> eligible = availability.eligibleManagerIds(categoryId);
+        return scopes.findAdvisors(categoryId).stream()
+                .filter(option -> !option.id().equals(managerId) && eligible.contains(option.id()))
+                .toList();
     }
 
     private boolean isActiveAdvisor(Long managerId, Long categoryId) {

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.dto.request.chat.ChatSessionPayload;
 import vn.edu.hcmute.qaute.service.chat.ChatAccessChecker;
@@ -25,6 +26,7 @@ class ChatStompControllerTest {
     @Mock ChatDeskService desk;
     @Mock ChatAccessChecker access;
     @Mock ChatEventPublisher publisher;
+    @Mock SimpMessagingTemplate socket;
     @InjectMocks ChatStompController controller;
     private final Principal user = () -> "3";
 
@@ -33,6 +35,7 @@ class ChatStompControllerTest {
         org.mockito.Mockito.doThrow(new BadRequestException("Lỗi"))
                 .when(messaging).end(8L, 3L);
         controller.end(new ChatSessionPayload(8L), user);
+        verify(socket).convertAndSendToUser(eq("3"), eq("/queue/errors"), any());
         verify(publisher, never()).sendToSession(any(), any());
     }
 

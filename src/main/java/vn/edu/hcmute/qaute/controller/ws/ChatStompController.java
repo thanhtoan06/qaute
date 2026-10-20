@@ -3,6 +3,7 @@ package vn.edu.hcmute.qaute.controller.ws;
 import java.security.Principal;
 import java.util.Map;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import vn.edu.hcmute.qaute.common.exception.AppException;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
@@ -22,13 +23,15 @@ public class ChatStompController {
     private final ChatDeskService desk;
     private final ChatAccessChecker access;
     private final ChatEventPublisher publisher;
+    private final SimpMessagingTemplate socket;
 
     public ChatStompController(ChatMessagingService messaging, ChatDeskService desk,
-            ChatAccessChecker access, ChatEventPublisher publisher) {
+            ChatAccessChecker access, ChatEventPublisher publisher, SimpMessagingTemplate socket) {
         this.messaging = messaging;
         this.desk = desk;
         this.access = access;
         this.publisher = publisher;
+        this.socket = socket;
     }
 
     @MessageMapping("chat.send")
@@ -82,6 +85,8 @@ public class ChatStompController {
         try {
             action.run(userId);
         } catch (AppException exception) {
+            socket.convertAndSendToUser(String.valueOf(userId), "/queue/errors",
+                    Map.of("type", "ERROR", "sessionId", sessionId, "message", exception.getMessage()));
             if (access.isParticipant(sessionId, userId)) {
                 publisher.sendToSession(sessionId, Map.of("type", "ERROR", "message", exception.getMessage()));
             }
