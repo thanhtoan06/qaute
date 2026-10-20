@@ -5,12 +5,15 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -28,7 +31,10 @@ import vn.edu.hcmute.qaute.dto.view.FaqListItem;
 import vn.edu.hcmute.qaute.dto.view.FaqSuggestion;
 import vn.edu.hcmute.qaute.dto.view.TagView;
 import vn.edu.hcmute.qaute.entity.knowledge.Faq;
+import vn.edu.hcmute.qaute.entity.knowledge.FaqBookmark;
 import vn.edu.hcmute.qaute.entity.knowledge.FaqTag;
+import vn.edu.hcmute.qaute.repository.knowledge.FaqBookmarkRepository;
+import vn.edu.hcmute.qaute.repository.knowledge.FaqFeedbackRepository;
 import vn.edu.hcmute.qaute.repository.knowledge.FaqRepository;
 import vn.edu.hcmute.qaute.repository.knowledge.FaqTagRepository;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
@@ -39,13 +45,19 @@ public class FaqQueryServiceImpl implements FaqQueryService {
 
     private final FaqRepository faqRepository;
     private final FaqTagRepository faqTagRepository;
+    private final FaqBookmarkRepository faqBookmarkRepository;
+    private final FaqFeedbackRepository faqFeedbackRepository;
     private final CategoryQueryService categoryQueryService;
 
     public FaqQueryServiceImpl(FaqRepository faqRepository,
                                FaqTagRepository faqTagRepository,
+                               FaqBookmarkRepository faqBookmarkRepository,
+                               FaqFeedbackRepository faqFeedbackRepository,
                                CategoryQueryService categoryQueryService) {
         this.faqRepository = faqRepository;
         this.faqTagRepository = faqTagRepository;
+        this.faqBookmarkRepository = faqBookmarkRepository;
+        this.faqFeedbackRepository = faqFeedbackRepository;
         this.categoryQueryService = categoryQueryService;
     }
 
@@ -78,6 +90,38 @@ public class FaqQueryServiceImpl implements FaqQueryService {
 
         Pageable effectivePageable = resolvePageable(filter, pageable);
         return faqRepository.findAll(spec, effectivePageable).map(this::toListItem);
+    }
+
+    @Override
+    public Page<FaqListItem> listBookmarked(Long userId, Pageable pageable) {
+        if (userId == null) return Page.empty(pageable == null ? Pageable.unpaged() : pageable);
+        Pageable effectivePageable = pageable == null ? PageRequest.of(0, 20) : pageable;
+        Page<FaqBookmark> bookmarkPage = faqBookmarkRepository.findByUserIdOrderByIdDesc(userId, effectivePageable);
+        if (bookmarkPage.isEmpty()) return new PageImpl<>(List.of(), effectivePageable, bookmarkPage.getTotalElements());
+
+        List<Long> faqIds = bookmarkPage.getContent().stream().map(FaqBookmark::getFaqId).toList();
+        Map<Long, Faq> faqsById = faqRepository.findAllById(faqIds).stream()
+                .filter(this::isPublishedNow)
+                .collect(Collectors.toMap(Faq::getId, faq -> faq));
+        List<FaqListItem> items = faqIds.stream().map(faqsById::get).filter(java.util.Objects::nonNull)
+                .map(this::toListItem).toList();
+        return new PageImpl<>(items, effectivePageable, bookmarkPage.getTotalElements());
+    }
+
+    @Override
+    public Set<Long> bookmarkedIds(Long userId, Collection<Long> faqIds) {
+        if (userId == null || faqIds == null || faqIds.isEmpty()) return Set.of();
+        return faqBookmarkRepository.findByUserIdAndFaqIdIn(userId, faqIds).stream()
+                .map(FaqBookmark::getFaqId).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Map<Long, Boolean> myVotes(Long userId, Collection<Long> faqIds) {
+        if (userId == null || faqIds == null || faqIds.isEmpty()) return Map.of();
+        Map<Long, Boolean> votes = new HashMap<>();
+        faqFeedbackRepository.findByUserIdAndFaqIdIn(userId, faqIds)
+                .forEach(feedback -> votes.put(feedback.getFaqId(), feedback.isHelpful()));
+        return Map.copyOf(votes);
     }
 
     @Override
@@ -288,6 +332,11 @@ public class FaqQueryServiceImpl implements FaqQueryService {
                 faq.getUpdatedAt(),
                 tags
         );
+    }
+
+    private boolean isPublishedNow(Faq faq) {
+        return faq.getStatus() == FaqStatus.PUBLISHED
+                && (faq.getPublishAt() == null || !faq.getPublishAt().isAfter(LocalDateTime.now()));
     }
 }
 
