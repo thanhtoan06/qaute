@@ -65,7 +65,7 @@
                                     <a class="text-reset text-decoration-none" href="${ctx}/faq/<c:out value='${faq.slug()}'/>"><c:out value="${faq.title()}"/></a>
                                 </h3>
                                 <button class="btn btn-sm ${bookmarkedIds.contains(faq.id()) ? 'btn-danger' : 'btn-outline-secondary'}" type="button"
-                                        data-faq-bookmark data-faq-id="${faq.id()}" aria-pressed="${bookmarkedIds.contains(faq.id())}"
+                                        data-faq-bookmark data-faq-id="${faq.id()}" data-bookmarked="${bookmarkedIds.contains(faq.id())}" aria-pressed="${bookmarkedIds.contains(faq.id())}"
                                         title="${bookmarkedIds.contains(faq.id()) ? 'Đã lưu' : 'Lưu bài viết'}">
                                     <i class="bi ${bookmarkedIds.contains(faq.id()) ? 'bi-heart-fill' : 'bi-heart'}"></i>
                                 </button>
@@ -97,3 +97,5 @@
         </div></div>
     </c:otherwise>
 </c:choose>
+
+<script src="${ctx}/assets/js/student/faq-bookmark.js"></script>

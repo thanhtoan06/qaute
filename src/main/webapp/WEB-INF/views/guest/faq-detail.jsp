@@ -18,7 +18,16 @@
 <div class="row">
     <div class="col-lg-8">
         <article class="card p-4 mb-4">
-            <h1 class="h1 mb-3"><c:out value="${faq.title()}"/></h1>
+            <div class="d-flex align-items-start gap-2 mb-3">
+                <h1 class="h1 flex-fill mb-0"><c:out value="${faq.title()}"/></h1>
+                <sec:authorize access="hasRole('STUDENT')">
+                    <button class="btn ${bookmarked ? 'btn-danger' : 'btn-outline-secondary'}" type="button"
+                            data-faq-bookmark data-faq-id="${faq.id()}" data-bookmarked="${bookmarked}" aria-pressed="${bookmarked}"
+                            title="${bookmarked ? 'Đã lưu' : 'Lưu bài viết'}">
+                        <i class="bi ${bookmarked ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                    </button>
+                </sec:authorize>
+            </div>
 
             <div class="d-flex flex-wrap align-items-center gap-3 text-secondary small pb-3 mb-3 border-bottom">
                 <c:if test="${not empty faq.categoryPath()}">
@@ -164,4 +173,5 @@
 </div>
 
 <script src="${ctx}/assets/js/student/faq-vote.js"></script>
+<script src="${ctx}/assets/js/student/faq-bookmark.js"></script>
 

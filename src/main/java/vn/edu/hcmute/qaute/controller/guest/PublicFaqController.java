@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.hcmute.qaute.common.constant.FaqSort;
+import vn.edu.hcmute.qaute.common.constant.RoleCode;
 import vn.edu.hcmute.qaute.common.util.TokenUtil;
 import vn.edu.hcmute.qaute.common.web.ClientIpResolver;
 import vn.edu.hcmute.qaute.dto.request.FaqFilter;
@@ -24,6 +25,7 @@ import vn.edu.hcmute.qaute.dto.view.FaqListItem;
 import vn.edu.hcmute.qaute.dto.view.TagView;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
+import vn.edu.hcmute.qaute.service.knowledge.FaqPersonalService;
 import vn.edu.hcmute.qaute.service.knowledge.FaqViewCounter;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
@@ -35,13 +37,16 @@ public class PublicFaqController {
     private final FaqQueryService faqQueryService;
     private final CategoryQueryService categoryQueryService;
     private final FaqViewCounter faqViewCounter;
+    private final FaqPersonalService faqPersonalService;
 
     public PublicFaqController(FaqQueryService faqQueryService,
                                CategoryQueryService categoryQueryService,
-                               FaqViewCounter faqViewCounter) {
+                               FaqViewCounter faqViewCounter,
+                               FaqPersonalService faqPersonalService) {
         this.faqQueryService = faqQueryService;
         this.categoryQueryService = categoryQueryService;
         this.faqViewCounter = faqViewCounter;
+        this.faqPersonalService = faqPersonalService;
     }
 
     @GetMapping("/faq")
@@ -130,11 +135,16 @@ public class PublicFaqController {
         model.addAttribute("faq", faq);
         model.addAttribute("related", related);
         Boolean myVote = null;
-        if (SecurityUtils.currentUser().isPresent()) {
-            Long userId = SecurityUtils.currentUser().get().getId();
+        Boolean bookmarked = false;
+        var student = SecurityUtils.currentUser().filter(user -> user.getRoleCode() == RoleCode.STUDENT);
+        if (student.isPresent()) {
+            Long userId = student.get().getId();
+            faqPersonalService.recordView(userId, faq.id());
+            bookmarked = faqQueryService.bookmarkedIds(userId, List.of(faq.id())).contains(faq.id());
             myVote = faqQueryService.myVotes(userId, List.of(faq.id())).get(faq.id());
         }
         model.addAttribute("myVote", myVote);
+        model.addAttribute("bookmarked", bookmarked);
 
         return "guest/faq-detail";
     }
