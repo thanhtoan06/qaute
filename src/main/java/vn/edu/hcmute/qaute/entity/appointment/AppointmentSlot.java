@@ -20,6 +20,7 @@ import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 @Getter @Setter
 public class AppointmentSlot extends AuditableEntity {
     @Column(name = "manager_id", nullable = false) private Long managerId;
+    @Column(name = "availability_rule_id") private Long availabilityRuleId;
     @Column(name = "start_at", nullable = false) private LocalDateTime startAt;
     @Column(name = "end_at", nullable = false) private LocalDateTime endAt;
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 10) private Modality modality;

@@ -38,6 +38,7 @@ class SlotGenerationServiceTest {
     void generatesOnlyFutureUnblockedMissingSlots() {
         LocalDate day = LocalDate.now().plusDays(1);
         AvailabilityRule rule = new AvailabilityRule();
+        rule.setId(10L);
         rule.setManagerId(7L);
         rule.setDayOfWeek(day.getDayOfWeek().getValue());
         rule.setStartTime(LocalTime.of(9, 0));
@@ -72,6 +73,7 @@ class SlotGenerationServiceTest {
         assertEquals(day.atTime(10, 0), result.get(0).getStartAt());
         assertEquals(SlotStatus.AVAILABLE, result.get(0).getStatus());
         assertEquals(Modality.ONLINE, result.get(0).getModality());
+        assertEquals(10L, result.get(0).getAvailabilityRuleId());
     }
 
     @Test

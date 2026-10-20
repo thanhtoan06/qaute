@@ -7,12 +7,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import vn.edu.hcmute.qaute.common.constant.SlotStatus;
 import vn.edu.hcmute.qaute.entity.appointment.AppointmentSlot;
 
 public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot, Long> {
     Optional<AppointmentSlot> findByManagerIdAndStartAt(Long managerId, LocalDateTime startAt);
     List<AppointmentSlot> findByManagerIdAndStartAtBetweenOrderByStartAtAsc(
             Long managerId, LocalDateTime from, LocalDateTime to);
+
+    @Query("select s from AppointmentSlot s where s.managerId = :managerId "
+            + "and s.startAt < :endAt and s.endAt > :startAt order by s.startAt")
+    List<AppointmentSlot> findOverlapping(@Param("managerId") Long managerId,
+            @Param("startAt") LocalDateTime startAt, @Param("endAt") LocalDateTime endAt);
+
+    long countByManagerIdAndStartAtGreaterThanAndStatus(Long managerId, LocalDateTime startAt, SlotStatus status);
 
     @Modifying
     @Query("update AppointmentSlot s set s.status = vn.edu.hcmute.qaute.common.constant.SlotStatus.BOOKED, "

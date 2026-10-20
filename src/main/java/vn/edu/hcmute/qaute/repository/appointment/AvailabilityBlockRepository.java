@@ -7,4 +7,6 @@ import vn.edu.hcmute.qaute.entity.appointment.AvailabilityBlock;
 
 public interface AvailabilityBlockRepository extends JpaRepository<AvailabilityBlock, Long> {
     List<AvailabilityBlock> findByManagerIdAndEndAtAfterOrderByStartAtAsc(Long managerId, LocalDateTime after);
+    List<AvailabilityBlock> findByManagerIdAndStartAtLessThanAndEndAtGreaterThan(
+            Long managerId, LocalDateTime endAt, LocalDateTime startAt);
 }
