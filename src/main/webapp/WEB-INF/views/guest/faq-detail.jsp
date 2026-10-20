@@ -1,5 +1,6 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <title><c:out value="${faq.title()}"/></title>
 
 <nav aria-label="breadcrumb" class="mb-3">
@@ -40,7 +41,7 @@
                 </span>
                 <span>
                     <i class="bi bi-hand-thumbs-up me-1"></i>
-                    <c:out value="${faq.helpfulCount()}"/> hữu ích
+                    <span data-faq-helpful-count><c:out value="${faq.helpfulCount()}"/></span> hữu ích
                 </span>
             </div>
 
@@ -65,7 +66,7 @@
                 </div>
             </c:if>
 
-            <div class="card p-3 my-4 bg-light text-center border-0">
+            <div id="faq-vote" class="card p-3 my-4 bg-light text-center border-0" data-faq-id="${faq.id()}">
                 <p class="fw-bold mb-2">Bài viết có hữu ích với bạn không?</p>
                 <sec:authorize access="isAnonymous()">
                     <p class="text-secondary small mb-2">Đăng nhập để đánh giá mức độ hữu ích của câu trả lời</p>
@@ -76,14 +77,39 @@
                     </div>
                 </sec:authorize>
                 <sec:authorize access="isAuthenticated()">
-                    <div class="btn-list justify-content-center">
-                        <button type="button" class="btn btn-sm btn-outline-success" disabled>
-                            <i class="bi bi-hand-thumbs-up me-1"></i>Hữu ích (<c:out value="${faq.helpfulCount()}"/>)
+                    <p id="faq-vote-status" class="small text-secondary mb-2 ${myVote != null ? '' : 'd-none'}">
+                        <c:if test="${myVote != null}">Bạn đã bình chọn: <strong>${myVote ? 'Hữu ích' : 'Chưa hữu ích'}</strong>. Bạn có thể thay đổi.</c:if>
+                    </p>
+                    <div class="btn-list justify-content-center mb-2">
+                        <button type="button" class="btn btn-sm ${myVote == true ? 'btn-success' : 'btn-outline-success'}" data-faq-vote-helpful>
+                            <i class="bi bi-hand-thumbs-up me-1"></i>Có (<span data-faq-helpful-count><c:out value="${faq.helpfulCount()}"/></span>)
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
-                            <i class="bi bi-hand-thumbs-down me-1"></i>Chưa hữu ích (<c:out value="${faq.notHelpfulCount()}"/>)
+                        <button type="button" class="btn btn-sm ${myVote == false ? 'btn-secondary' : 'btn-outline-secondary'}" data-faq-vote-not-helpful>
+                            <i class="bi bi-hand-thumbs-down me-1"></i>Không (<span data-faq-not-helpful-count><c:out value="${faq.notHelpfulCount()}"/></span>)
                         </button>
                     </div>
+                    <form id="faq-not-helpful-form" class="text-start mx-auto d-none" style="max-width: 560px" novalidate>
+                        <div class="row g-2">
+                            <div class="col-12 col-md-5">
+                                <label class="form-label" for="faq-vote-reason">Lý do</label>
+                                <select id="faq-vote-reason" class="form-select" required>
+                                    <option value="">Chọn lý do</option>
+                                    <option value="OUTDATED">Thông tin đã cũ</option>
+                                    <option value="UNCLEAR">Nội dung chưa rõ ràng</option>
+                                    <option value="NOT_ANSWER">Chưa trả lời vấn đề</option>
+                                    <option value="OTHER">Lý do khác</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-7">
+                                <label class="form-label" for="faq-vote-comment">Nhận xét</label>
+                                <textarea id="faq-vote-comment" class="form-control" rows="2" maxlength="500" minlength="20" required placeholder="Ít nhất 20 ký tự"></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-2">
+                            <button class="btn btn-link" type="button" data-faq-vote-cancel>Hủy</button>
+                            <button class="btn btn-secondary btn-sm" type="submit">Gửi đánh giá</button>
+                        </div>
+                    </form>
                 </sec:authorize>
             </div>
         </article>
@@ -136,4 +162,6 @@
         </div>
     </div>
 </div>
+
+<script src="${ctx}/assets/js/student/faq-vote.js"></script>
 

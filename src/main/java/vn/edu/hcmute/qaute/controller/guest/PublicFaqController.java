@@ -129,6 +129,12 @@ public class PublicFaqController {
 
         model.addAttribute("faq", faq);
         model.addAttribute("related", related);
+        Boolean myVote = null;
+        if (SecurityUtils.currentUser().isPresent()) {
+            Long userId = SecurityUtils.currentUser().get().getId();
+            myVote = faqQueryService.myVotes(userId, List.of(faq.id())).get(faq.id());
+        }
+        model.addAttribute("myVote", myVote);
 
         return "guest/faq-detail";
     }
