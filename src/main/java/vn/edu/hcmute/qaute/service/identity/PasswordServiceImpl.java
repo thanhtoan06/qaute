@@ -7,12 +7,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
+import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.security.QauteUserDetails;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.email.EmailService;
+import vn.edu.hcmute.qaute.service.governance.AuditService;
 
 @Service
 @Transactional
@@ -25,15 +27,18 @@ public class PasswordServiceImpl implements PasswordService {
     private final PasswordEncoder passwordEncoder;
     private final AuthSessionService authSessionService;
     private final EmailService emailService;
+    private final AuditService auditService;
 
     public PasswordServiceImpl(UserRepository userRepository,
                                PasswordEncoder passwordEncoder,
                                AuthSessionService authSessionService,
-                               EmailService emailService) {
+                               EmailService emailService,
+                               AuditService auditService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authSessionService = authSessionService;
         this.emailService = emailService;
+        this.auditService = auditService;
     }
 
     @Override
@@ -64,6 +69,8 @@ public class PasswordServiceImpl implements PasswordService {
                 .map(QauteUserDetails::getSessionJti)
                 .orElse(null);
         authSessionService.revokeAllExcept(userId, currentJti, "password_changed");
+        auditService.log(AuditActions.AUTH_PASSWORD_CHANGED, "User", userId,
+                "passwordChanged", "passwordChanged");
 
         emailService.sendTemplated(user.getEmail(),
                 "Mật khẩu QAUTE đã được thay đổi",

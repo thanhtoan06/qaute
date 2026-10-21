@@ -39,6 +39,20 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
     @Query("SELECT DISTINCT t.categoryId FROM Ticket t WHERE t.currentAssigneeId = :managerId")
     List<Long> findAssignedCategoryIds(@Param("managerId") Long managerId);
 
+    @Query("SELECT DISTINCT t.categoryId FROM Ticket t WHERE t.studentId = :studentId")
+    List<Long> findDistinctCategoryIdsByStudentId(@Param("studentId") Long studentId);
+
+    @Query("SELECT t FROM Ticket t WHERE t.studentId = :studentId AND t.status IN :statuses ORDER BY t.lastActivityAt DESC, t.id DESC")
+    List<Ticket> findByStudentIdAndStatusInOrderByLastActivityAtDesc(@Param("studentId") Long studentId,
+            @Param("statuses") Collection<TicketStatus> statuses, Pageable pageable);
+
+    @Query("SELECT t.createdAt, t.firstResponseAt FROM Ticket t WHERE t.firstResponseAt IS NOT NULL AND t.firstResponseAt >= :since")
+    List<Object[]> findFirstResponseTimesSince(@Param("since") LocalDateTime since);
+
+    @Modifying
+    @Query("UPDATE Ticket t SET t.createdAt = :createdAt, t.updatedAt = :updatedAt WHERE t.id = :id")
+    void updateTimestamps(@Param("id") Long id, @Param("createdAt") LocalDateTime createdAt, @Param("updatedAt") LocalDateTime updatedAt);
+
     @Modifying
     @Query("UPDATE Ticket t SET t.status = vn.edu.hcmute.qaute.common.constant.TicketStatus.ASSIGNED, "
             + "t.currentAssigneeId = :managerId, t.firstAssignedAt = :now, t.lastActivityAt = :now, "

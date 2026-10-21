@@ -30,7 +30,7 @@
                 <select id="faq-category" class="form-select" name="category">
                     <option value="">Tất cả chuyên mục</option>
                     <c:forEach var="department" items="${tree}">
-                        <optgroup label="${department.name()}">
+                        <optgroup label="<c:out value='${department.name()}'/>">
                             <c:forEach var="root" items="${department.categories()}">
                                 <option value="${root.id()}" ${category eq root.id() ? 'selected' : ''}><c:out value="${root.name()}"/></option>
                                 <c:forEach var="child" items="${root.children()}">

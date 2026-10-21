@@ -82,7 +82,7 @@
                                     <select id="chatCategoryId" class="form-select" required>
                                         <option value="">-- Chọn chuyên mục --</option>
                                         <c:forEach var="department" items="${tree}">
-                                            <optgroup label="${department.name()}">
+                                            <optgroup label="<c:out value='${department.name()}'/>">
                                                 <c:forEach var="root" items="${department.categories()}">
                                                     <option value="${root.id()}"><c:out value="${root.name()}"/></option>
                                                     <c:forEach var="child" items="${root.children()}">
