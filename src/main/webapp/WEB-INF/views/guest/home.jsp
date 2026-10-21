@@ -25,16 +25,105 @@
     </div>
 </div>
 
+<c:set var="totalCategories" value="0"/>
+<c:forEach var="dept" items="${tree}">
+    <c:set var="totalCategories" value="${totalCategories + fn:length(dept.categories())}"/>
+</c:forEach>
+
+<%-- Banner Announcement (T1-62: hiển thị thông báo chung, ghim trước, có link chi tiết) --%>
+<c:if test="${not empty announcements}">
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0"><i class="bi bi-megaphone-fill text-danger me-2"></i>Thông báo chung</h2>
+        </div>
+        <div class="row row-cards">
+            <c:forEach var="ann" items="${announcements}">
+                <div class="col-12 col-md-4">
+                    <div class="card qa-card-hover h-100 shadow-sm border-0 border-top ${ann.pinned() ? 'border-danger' : 'border-primary'} border-3">
+                        <c:if test="${not empty ann.coverUrl()}">
+                            <div class="card-img-top position-relative" style="height: 140px; overflow: hidden;">
+                                <img src="<c:out value='${ann.coverUrl()}'/>" alt="<c:out value='${ann.title()}'/>"
+                                     style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                        </c:if>
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <c:if test="${ann.pinned()}">
+                                    <span class="badge bg-danger-lt"><i class="bi bi-pin-angle-fill me-1"></i>Đã ghim</span>
+                                </c:if>
+                                <c:if test="${not empty ann.publishAt()}">
+                                    <span class="text-secondary small">
+                                        <i class="bi bi-calendar3 me-1"></i>${ann.publishAt().dayOfMonth}/${ann.publishAt().monthValue}/${ann.publishAt().year}
+                                    </span>
+                                </c:if>
+                            </div>
+                            <h3 class="card-title mb-2">
+                                <a href="/announcements/${ann.id()}" class="text-reset text-decoration-none">
+                                    <c:out value="${ann.title()}"/>
+                                </a>
+                            </h3>
+                            <c:if test="${not empty ann.summary()}">
+                                <p class="text-secondary small mb-3 text-truncate">
+                                    <c:out value="${ann.summary()}"/>
+                                </p>
+                            </c:if>
+                            <div class="mt-auto pt-2">
+                                <a href="/announcements/${ann.id()}" class="btn btn-sm btn-outline-primary w-100">
+                                    Xem chi tiết <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </c:forEach>
+        </div>
+    </div>
+</c:if>
+
+<%-- Khối số liệu (chỉ số tổng hợp) --%>
+<div class="card bg-primary-lt border-0 shadow-sm mb-5">
+    <div class="card-body py-4">
+        <div class="row text-center g-3 align-items-center">
+            <div class="col-6 ${not empty medianFirstResponseMinutes ? 'col-md-3' : 'col-md-4'}">
+                <div class="text-secondary small mb-1"><i class="bi bi-question-circle me-1"></i>Câu hỏi giải đáp (FAQ)</div>
+                <div class="h1 fw-bold text-primary mb-0"><c:out value="${totalFaq != null ? totalFaq : 0}"/>+</div>
+                <div class="text-secondary small mt-1">Nội dung hướng dẫn chi tiết</div>
+            </div>
+            <div class="col-6 ${not empty medianFirstResponseMinutes ? 'col-md-3' : 'col-md-4'}">
+                <div class="text-secondary small mb-1"><i class="bi bi-folder2-open me-1"></i>Chuyên mục tư vấn</div>
+                <div class="h1 fw-bold text-primary mb-0"><c:out value="${totalCategories}"/></div>
+                <div class="text-secondary small mt-1">Bao quát các phòng ban</div>
+            </div>
+            <c:if test="${not empty medianFirstResponseMinutes}">
+                <div class="col-6 col-md-3">
+                    <div class="text-secondary small mb-1"><i class="bi bi-lightning-charge me-1"></i>Phản hồi lần đầu</div>
+                    <div class="h1 fw-bold text-success mb-0">
+                        <c:choose>
+                            <c:when test="${medianFirstResponseMinutes < 60}">
+                                ~<fmt:formatNumber value="${medianFirstResponseMinutes}" maxFractionDigits="0"/>'
+                            </c:when>
+                            <c:otherwise>
+                                ~<fmt:formatNumber value="${medianFirstResponseMinutes / 60}" maxFractionDigits="1"/>h
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                    <div class="text-secondary small mt-1">Trung vị trong 30 ngày qua</div>
+                </div>
+            </c:if>
+            <div class="col-6 ${not empty medianFirstResponseMinutes ? 'col-md-3' : 'col-md-4'}">
+                <div class="text-secondary small mb-1"><i class="bi bi-shield-check me-1"></i>Hỗ trợ trực tuyến</div>
+                <div class="h1 fw-bold text-primary mb-0">24/7</div>
+                <div class="text-secondary small mt-1">Chatbot & Tư vấn viên</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="mb-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="mb-0"><i class="bi bi-grid text-primary me-2"></i>Chuyên mục hỗ trợ</h2>
         <a href="/topics" class="text-secondary small">Xem tất cả chủ đề →</a>
     </div>
-
-    <c:set var="totalCategories" value="0"/>
-    <c:forEach var="dept" items="${tree}">
-        <c:set var="totalCategories" value="${totalCategories + fn:length(dept.categories())}"/>
-    </c:forEach>
 
     <c:choose>
         <c:when test="${totalCategories > 0}">

@@ -46,6 +46,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
     List<Ticket> findByStudentIdAndStatusInOrderByLastActivityAtDesc(@Param("studentId") Long studentId,
             @Param("statuses") Collection<TicketStatus> statuses, Pageable pageable);
 
+    @Query("SELECT t.createdAt, t.firstResponseAt FROM Ticket t WHERE t.firstResponseAt IS NOT NULL AND t.firstResponseAt >= :since")
+    List<Object[]> findFirstResponseTimesSince(@Param("since") LocalDateTime since);
+
     @Modifying
     @Query("UPDATE Ticket t SET t.status = vn.edu.hcmute.qaute.common.constant.TicketStatus.ASSIGNED, "
             + "t.currentAssigneeId = :managerId, t.firstAssignedAt = :now, t.lastActivityAt = :now, "

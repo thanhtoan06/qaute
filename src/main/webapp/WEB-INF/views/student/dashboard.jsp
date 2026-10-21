@@ -39,9 +39,23 @@
                     <div class="alert alert-info alert-dismissible shadow-sm mb-2" role="alert">
                         <div class="d-flex align-items-start">
                             <i class="bi bi-megaphone-fill me-3 fs-3 text-info"></i>
-                            <div>
-                                <h4 class="alert-title mb-1"><c:out value="${ann.title}"/></h4>
-                                <div class="text-secondary"><c:out value="${not empty ann.summary ? ann.summary : ann.content}" escapeXml="false"/></div>
+                            <div class="flex-fill">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <c:if test="${ann.pinned()}">
+                                        <span class="badge bg-danger-lt"><i class="bi bi-pin-angle-fill me-1"></i>Đã ghim</span>
+                                    </c:if>
+                                    <h4 class="alert-title mb-0">
+                                        <a href="/announcements/${ann.id()}" class="text-reset text-decoration-none">
+                                            <c:out value="${ann.title()}"/>
+                                        </a>
+                                    </h4>
+                                </div>
+                                <c:if test="${not empty ann.summary()}">
+                                    <div class="text-secondary small mb-1"><c:out value="${ann.summary()}"/></div>
+                                </c:if>
+                                <a href="/announcements/${ann.id()}" class="text-primary small fw-semibold">
+                                    Xem chi tiết <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
                             </div>
                         </div>
                         <a class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></a>

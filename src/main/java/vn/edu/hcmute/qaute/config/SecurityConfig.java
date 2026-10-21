@@ -68,7 +68,7 @@ public class SecurityConfig {
                         // Quyền truy cập đã được kiểm tra ở lượt REQUEST gốc, không kiểm tra lại.
                         .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
                         .requestMatchers("/", "/assets/**", "/faq/**", "/topics/**", "/search",
-                                "/pages/**", "/auth/**", "/error",
+                                "/pages/**", "/auth/**", "/error", "/announcements/**",
                                 "/api/faqs/**", "/api/public/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/media/*/download").permitAll()
