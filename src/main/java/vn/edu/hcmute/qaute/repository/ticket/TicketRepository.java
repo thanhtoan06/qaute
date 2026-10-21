@@ -50,6 +50,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
     List<Object[]> findFirstResponseTimesSince(@Param("since") LocalDateTime since);
 
     @Modifying
+    @Query("UPDATE Ticket t SET t.createdAt = :createdAt, t.updatedAt = :updatedAt WHERE t.id = :id")
+    void updateTimestamps(@Param("id") Long id, @Param("createdAt") LocalDateTime createdAt, @Param("updatedAt") LocalDateTime updatedAt);
+
+    @Modifying
     @Query("UPDATE Ticket t SET t.status = vn.edu.hcmute.qaute.common.constant.TicketStatus.ASSIGNED, "
             + "t.currentAssigneeId = :managerId, t.firstAssignedAt = :now, t.lastActivityAt = :now, "
             + "t.version = t.version + 1 WHERE t.id = :id AND t.status = vn.edu.hcmute.qaute.common.constant.TicketStatus.NEW")
