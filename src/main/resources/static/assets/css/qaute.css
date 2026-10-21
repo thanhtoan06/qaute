@@ -488,6 +488,14 @@
 
 /* Fullscreen on mobile */
 @media (max-width: 767.98px) {
+  /* Preserve a touch-friendly target size on phones without changing desktop density. */
+  .btn:not(.btn-close) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .qa-chat-room {
     position: fixed;
     top: 0;

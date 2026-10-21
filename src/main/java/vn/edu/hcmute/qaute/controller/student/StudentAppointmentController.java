@@ -40,7 +40,7 @@ public class StudentAppointmentController {
                 currentTab = "upcoming";
             }
             Page<AppointmentView> result = appointmentService.listMine(
-                    studentId, currentTab, PageRequest.of(Math.max(0, page), size <= 0 ? 10 : size));
+                    studentId, currentTab, PageRequest.of(Math.max(0, page), Math.min(100, Math.max(1, size))));
             model.addAttribute("appointments", result);
             model.addAttribute("tab", currentTab);
             return "student/appointment-list";
@@ -68,9 +68,7 @@ public class StudentAppointmentController {
                          @RequestParam(required = false) String reason,
                          @RequestParam(required = false) String redirectUrl,
                          RedirectAttributes flash) {
-        String target = redirectUrl != null && !redirectUrl.isBlank()
-                ? "redirect:" + redirectUrl
-                : "redirect:/student/appointments/" + id;
+        String target = "redirect:" + safeRedirectUrl(redirectUrl, id);
         if (reason == null || reason.trim().length() < 10 || reason.trim().length() > 500) {
             flash.addFlashAttribute("flashError", "Lý do hủy phải từ 10 đến 500 ký tự");
             return target;
@@ -134,6 +132,18 @@ public class StudentAppointmentController {
             flash.addFlashAttribute("flashError", e.getMessage());
             return "redirect:/student/appointments/" + id;
         }
+    }
+
+    /**
+     * Forms on both the list and detail page may choose their return location.  Do
+     * not pass an arbitrary client supplied URL to a redirect, otherwise a cancel
+     * request can be used as an open-redirect endpoint.
+     */
+    private String safeRedirectUrl(String redirectUrl, Long appointmentId) {
+        if ("/student/appointments".equals(redirectUrl)) {
+            return redirectUrl;
+        }
+        return "/student/appointments/" + appointmentId;
     }
 }
 

@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.ErrorCode;
+import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.common.constant.UserStatus;
 import vn.edu.hcmute.qaute.common.exception.AppException;
 import vn.edu.hcmute.qaute.common.util.TokenUtil;
@@ -13,6 +14,7 @@ import vn.edu.hcmute.qaute.entity.identity.AccountActivationToken;
 import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.identity.AccountActivationTokenRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
+import vn.edu.hcmute.qaute.service.governance.AuditService;
 
 @Service
 public class AccountActivationService {
@@ -21,15 +23,18 @@ public class AccountActivationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthSessionService authSessionService;
+    private final AuditService auditService;
 
     public AccountActivationService(AccountActivationTokenRepository accountActivationTokenRepository,
                                     UserRepository userRepository,
                                     PasswordEncoder passwordEncoder,
-                                    AuthSessionService authSessionService) {
+                                    AuthSessionService authSessionService,
+                                    AuditService auditService) {
         this.accountActivationTokenRepository = accountActivationTokenRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authSessionService = authSessionService;
+        this.auditService = auditService;
     }
 
     @Transactional(readOnly = true)
@@ -69,6 +74,7 @@ public class AccountActivationService {
                 .orElseThrow(() -> new AppException(ErrorCode.ERR_VALIDATION,
                         "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn"));
 
+        UserStatus previousStatus = user.getStatus();
         LocalDateTime now = LocalDateTime.now();
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         user.setStatus(UserStatus.ACTIVE);
@@ -82,5 +88,7 @@ public class AccountActivationService {
         token.setUsedAt(now);
 
         authSessionService.revokeAllSessions(user.getId(), "activation");
+        auditService.log(AuditActions.AUTH_ACTIVATED, "User", user.getId(),
+                "status=" + previousStatus, "status=ACTIVE");
     }
 }

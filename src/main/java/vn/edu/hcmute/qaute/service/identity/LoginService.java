@@ -8,11 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import vn.edu.hcmute.qaute.common.constant.SettingKeys;
 import vn.edu.hcmute.qaute.common.constant.UserStatus;
+import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.dto.request.auth.LoginForm;
 import vn.edu.hcmute.qaute.dto.view.LoginOutcome;
 import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.service.email.EmailService;
+import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
 @Service
@@ -27,15 +29,17 @@ public class LoginService {
     private final AuthSessionService authSessionService;
     private final SettingsService settingsService;
     private final EmailService emailService;
+    private final AuditService auditService;
 
     public LoginService(UserRepository userRepository, PasswordEncoder passwordEncoder,
                         AuthSessionService authSessionService, SettingsService settingsService,
-                        EmailService emailService) {
+                        EmailService emailService, AuditService auditService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authSessionService = authSessionService;
         this.settingsService = settingsService;
         this.emailService = emailService;
+        this.auditService = auditService;
     }
 
     @Transactional
@@ -69,6 +73,8 @@ public class LoginService {
                                     "fullName", user.getFullName(),
                                     "minutes", String.valueOf(lockMinutes)));
                     authSessionService.recordLogin(user.getId(), identifier, false, ip, shorten(userAgent));
+                    auditService.log(AuditActions.AUTH_LOCKED, "User", user.getId(), "status=ACTIVE",
+                            "lockedUntil=" + user.getLockedUntil());
                     return outcome(LoginOutcome.Kind.LOCKED_TEMP, null, user.getEmail(), null,
                             lockMinutes);
                 }

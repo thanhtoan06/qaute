@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
@@ -150,7 +151,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     @Override
     public Ticket addStudentReply(Long ticketId, Long studentId, String contentHtml, List<Long> assetIds) {
         try {
-            Ticket ticket = findOrThrow(ticketId);
+            Ticket ticket = findOwnedByStudent(ticketId, studentId);
             if (!studentId.equals(ticket.getStudentId())) throw new ForbiddenException("Bạn không sở hữu ticket này");
             if (ticket.getStatus() == TicketStatus.CLOSED || ticket.getStatus() == TicketStatus.CANCELLED) {
                 throw new InvalidTransitionException("Ticket đã kết thúc");
@@ -225,6 +226,13 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
 
     private Ticket findOrThrow(Long id) {
         return tickets.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy ticket"));
+    }
+
+    /** Avoid disclosing the existence of a ticket to a different student. */
+    private Ticket findOwnedByStudent(Long id, Long studentId) {
+        return tickets.findById(id)
+                .filter(ticket -> Objects.equals(ticket.getStudentId(), studentId))
+                .orElseThrow(NotFoundException::new);
     }
 
     private ConflictException mapOptimisticLock(OptimisticLockingFailureException exception) {
@@ -365,7 +373,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     @Override
     public Ticket confirmClose(Long ticketId, Long studentId) {
         try {
-            Ticket ticket = findOrThrow(ticketId);
+            Ticket ticket = findOwnedByStudent(ticketId, studentId);
             if (!studentId.equals(ticket.getStudentId())) {
                 throw new ForbiddenException("Bạn không sở hữu ticket này");
             }
@@ -389,7 +397,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     @Override
     public Ticket reopen(Long ticketId, Long studentId, String reason) {
         try {
-            Ticket ticket = findOrThrow(ticketId);
+            Ticket ticket = findOwnedByStudent(ticketId, studentId);
             if (!studentId.equals(ticket.getStudentId())) {
                 throw new ForbiddenException("Bạn không sở hữu ticket này");
             }
@@ -442,7 +450,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     @Override
     public Ticket cancel(Long ticketId, Long studentId, String reason) {
         try {
-            Ticket ticket = findOrThrow(ticketId);
+            Ticket ticket = findOwnedByStudent(ticketId, studentId);
             if (!studentId.equals(ticket.getStudentId())) {
                 throw new ForbiddenException("Bạn không sở hữu ticket này");
             }

@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.ErrorCode;
+import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.common.constant.OtpPurpose;
 import vn.edu.hcmute.qaute.common.constant.UserStatus;
 import vn.edu.hcmute.qaute.common.exception.AppException;
@@ -19,6 +20,7 @@ import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.identity.PasswordResetTokenRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.service.email.EmailService;
+import vn.edu.hcmute.qaute.service.governance.AuditService;
 
 @Service
 public class PasswordResetService {
@@ -35,19 +37,22 @@ public class PasswordResetService {
     private final AuthSessionService authSessionService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final AuditService auditService;
 
     public PasswordResetService(UserRepository userRepository,
                                 PasswordResetTokenRepository passwordResetTokenRepository,
                                 OtpService otpService,
                                 AuthSessionService authSessionService,
                                 PasswordEncoder passwordEncoder,
-                                EmailService emailService) {
+                                EmailService emailService,
+                                AuditService auditService) {
         this.userRepository = userRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.otpService = otpService;
         this.authSessionService = authSessionService;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.auditService = auditService;
     }
 
     @Transactional
@@ -108,6 +113,8 @@ public class PasswordResetService {
         resetToken.setUsedAt(now);
 
         authSessionService.revokeAllSessions(user.getId(), "password_reset");
+        auditService.log(AuditActions.AUTH_PASSWORD_RESET, "User", user.getId(),
+                "passwordResetRequested", "passwordResetCompleted");
 
         emailService.sendTemplated(user.getEmail(),
                 "Mật khẩu QAUTE đã được đặt lại",
