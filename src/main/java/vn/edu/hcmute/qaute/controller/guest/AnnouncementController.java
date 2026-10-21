@@ -1,8 +1,10 @@
 package vn.edu.hcmute.qaute.controller.guest;
 
+import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import vn.edu.hcmute.qaute.common.constant.AnnouncementAudience;
 import vn.edu.hcmute.qaute.common.constant.RoleCode;
@@ -20,6 +22,14 @@ public class AnnouncementController {
 
     public AnnouncementController(AnnouncementQueryService announcementQueryService) {
         this.announcementQueryService = announcementQueryService;
+    }
+
+    @GetMapping("/announcements")
+    public String listAnnouncements(@RequestParam(defaultValue = "0") int page, Model model) {
+        var p = announcementQueryService.findActivePage(AnnouncementAudience.ALL, page, 5);
+        model.addAttribute("announcements", p.getContent());
+        model.addAttribute("page", p);
+        return "guest/announcements";
     }
 
     @GetMapping("/announcements/{id}")

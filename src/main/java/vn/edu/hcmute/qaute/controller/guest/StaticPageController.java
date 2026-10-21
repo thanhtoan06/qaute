@@ -29,13 +29,14 @@ public class StaticPageController {
         return "guest/guide";
     }
 
-    @GetMapping("/pages/contact")
-    public String contact(Model model) {
-        model.addAttribute("tree", categoryQueryService.getActiveTree());
-        model.addAttribute("contactEmail", settingsService.getString(SettingKeys.SITE_CONTACT_EMAIL));
-        model.addAttribute("contactPhone", settingsService.getString(SettingKeys.SITE_CONTACT_PHONE));
-        model.addAttribute("contactAddress", settingsService.getString(SettingKeys.SITE_CONTACT_ADDRESS));
-        return "guest/contact";
+    @GetMapping("/pages/privacy")
+    public String privacy() {
+        return "guest/privacy";
+    }
+
+    @GetMapping("/pages/terms")
+    public String terms() {
+        return "guest/terms";
     }
 }
 

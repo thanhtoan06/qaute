@@ -1,7 +1,10 @@
 package vn.edu.hcmute.qaute.controller.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,13 +25,28 @@ public class LogoutController {
     }
 
     @PostMapping("/auth/logout")
-    public String logout(HttpServletResponse response, RedirectAttributes redirectAttributes) {
+    public String logout(HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes) {
+        performLogout(request, response);
+        redirectAttributes.addFlashAttribute("flashSuccess", "Bạn đã đăng xuất");
+        return "redirect:/";
+    }
+
+    @GetMapping("/auth/logout")
+    public String logoutGet(HttpServletRequest request, HttpServletResponse response, RedirectAttributes redirectAttributes) {
+        performLogout(request, response);
+        redirectAttributes.addFlashAttribute("flashSuccess", "Bạn đã đăng xuất");
+        return "redirect:/";
+    }
+
+    private void performLogout(HttpServletRequest request, HttpServletResponse response) {
         SecurityUtils.currentUser()
                 .map(QauteUserDetails::getSessionJti)
                 .ifPresent(jti -> authSessionService.revokeByJti(jti, "logout"));
         cookieService.clear(response);
         SecurityContextHolder.clearContext();
-        redirectAttributes.addFlashAttribute("flashSuccess", "Bạn đã đăng xuất");
-        return "redirect:/";
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
     }
 }

@@ -1,5 +1,25 @@
 <%@ page pageEncoding="UTF-8" %>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta21/dist/js/tabler.min.js"></script>
-<script src="/assets/js/common/qaute-common.js"></script>
-<script src="/assets/js/guest/search-suggest.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/common/qaute-common.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/guest/search-suggest.js"></script>
+<script>
+    (function () {
+        var toggles = document.querySelectorAll("[data-qa-sidebar-toggle]");
+        if (!toggles.length) {
+            return;
+        }
+        var page = document.querySelector(".page");
+        if (!page) {
+            return;
+        }
+        toggles.forEach(function (toggle) {
+            toggle.addEventListener("click", function () {
+                var collapsed = page.classList.toggle("qa-sidebar-collapsed");
+                toggle.setAttribute("aria-expanded", String(!collapsed));
+                toggle.setAttribute("aria-label", collapsed
+                    ? "Mở menu" : "Thu gọn menu");
+            });
+        });
+    }());
+</script>

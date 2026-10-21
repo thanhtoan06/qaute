@@ -19,6 +19,7 @@
     var btnNext2  = document.getElementById('btn-next-2');
     var btnPrev3  = document.getElementById('btn-prev-3');
     var dateInput = document.getElementById('dateInput');
+    var quickDateGrid = document.getElementById('quickDateGrid');
     var modalitySelect = document.getElementById('modalitySelect');
     var slotPlaceholder = document.getElementById('slotPlaceholder');
     var slotLoading = document.getElementById('slotLoading');
@@ -37,6 +38,49 @@
     var summaryAdvisor = document.getElementById('summaryAdvisor');
     var summaryModality = document.getElementById('summaryModality');
     var btnSubmit   = document.getElementById('btnSubmit');
+
+    function formatDateValue(date) {
+        return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0')
+            + '-' + String(date.getDate()).padStart(2, '0');
+    }
+
+    function renderQuickDates() {
+        if (!quickDateGrid || !dateInput) return;
+        var date = new Date();
+        var html = '';
+        var count = 0;
+        while (count < 6) {
+            date.setDate(date.getDate() + 1);
+            if (date.getDay() === 0 || date.getDay() === 6) continue;
+            var value = formatDateValue(date);
+            var label = date.toLocaleDateString('vi-VN', {weekday: 'short'}).replace('.', '');
+            var day = String(date.getDate()).padStart(2, '0');
+            var month = String(date.getMonth() + 1).padStart(2, '0');
+            html += '<div class="col"><button type="button" class="btn btn-outline-secondary quick-date-btn w-100"'
+                + ' data-date="' + value + '"><span class="small d-block">' + escH(label)
+                + '</span><strong>' + day + '/' + month + '</strong></button></div>';
+            count++;
+        }
+        quickDateGrid.innerHTML = html;
+        quickDateGrid.querySelectorAll('.quick-date-btn').forEach(function (button) {
+            button.addEventListener('click', function () {
+                quickDateGrid.querySelectorAll('.quick-date-btn').forEach(function (item) {
+                    item.classList.remove('selected', 'text-white');
+                    item.classList.add('btn-outline-secondary');
+                });
+                this.classList.remove('btn-outline-secondary');
+                this.classList.add('selected', 'text-white');
+                dateInput.value = this.getAttribute('data-date');
+                dateInput.dispatchEvent(new Event('change'));
+            });
+        });
+        if (dateInput.value) {
+            var selected = quickDateGrid.querySelector('[data-date="' + dateInput.value + '"]');
+            if (selected) selected.click();
+        } else {
+            quickDateGrid.querySelector('.quick-date-btn').click();
+        }
+    }
 
     // Set min date = today
     var today = new Date().toISOString().slice(0, 10);
@@ -283,6 +327,17 @@
     if (dateInput) dateInput.addEventListener('change', loadSlots);
     if (modalitySelect) modalitySelect.addEventListener('change', function () { if (dateInput && dateInput.value) loadSlots(); });
 
+    document.querySelectorAll('[data-modality-choice]').forEach(function (card) {
+        card.addEventListener('click', function () {
+            document.querySelectorAll('[data-modality-choice]').forEach(function (item) {
+                item.classList.remove('selected');
+            });
+            this.classList.add('selected');
+            modalitySelect.value = this.getAttribute('data-modality-choice');
+            if (dateInput && dateInput.value) loadSlots();
+        });
+    });
+
     if (btnNext2) {
         btnNext2.addEventListener('click', function () {
             if (!selectedSlot) return;
@@ -314,6 +369,7 @@
     }
     charCounter(topicInput, topicCount);
     charCounter(noteInput, noteCount);
+    renderQuickDates();
 
     // ─── Submit guard ─────────────────────────────────────────────────────────
     var form = document.getElementById('apptBookForm');
@@ -342,4 +398,3 @@
     populateDepts();
 
 }(window, document));
-

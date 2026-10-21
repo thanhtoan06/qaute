@@ -15,7 +15,7 @@
             <span class="badge bg-primary-subtle text-primary px-3 py-2 mb-2 rounded-pill fs-6">Hệ thống hỏi đáp & tư vấn sinh viên</span>
             <h1 class="display-6 fw-bold mb-3">Về nền tảng hỗ trợ sinh viên QAUTE</h1>
             <p class="lead text-secondary mx-auto" style="max-width: 750px;">
-                Cầu nối trực tuyến hiện đại, minh bạch và nhanh chóng giữa sinh viên và các phòng ban, khoa, viện tại Trường Đại học Sư phạm Kỹ thuật TP.HCM (HCMUTE).
+                Cầu nối trực tuyến hiện đại, minh bạch và nhanh chóng giữa sinh viên và các phòng ban, khoa, viện tại Trường Đại học Công nghệ Kỹ thuật TP.HCM (HCMUTE).
             </p>
         </div>
 
@@ -165,4 +165,3 @@
         </div>
     </div>
 </div>
-

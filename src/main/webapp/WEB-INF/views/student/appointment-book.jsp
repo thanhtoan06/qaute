@@ -18,8 +18,15 @@
 .advisor-card { cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
 .advisor-card.selected { border-color: var(--tblr-primary) !important; }
 .advisor-card:hover { border-color: rgba(32,107,196,0.3); }
-.slot-btn { min-width: 110px; }
+.advisor-card .card-body { min-height: 118px; }
+.slot-btn { min-width: 110px; min-height: 58px; font-size: 1rem; }
 .slot-btn.selected { background-color: var(--tblr-primary); color: #fff; border-color: var(--tblr-primary); }
+.appointment-choice-card { cursor: pointer; border: 1px solid var(--tblr-border-color); transition: all .2s ease; }
+.appointment-choice-card:hover,
+.appointment-choice-card.selected { border-color: var(--tblr-primary); box-shadow: 0 .5rem 1.25rem rgba(32,107,196,.12); }
+.appointment-choice-card.selected { background: rgba(32,107,196,.04); }
+.quick-date-btn { min-height: 60px; }
+.quick-date-btn.selected { background-color: var(--tblr-primary); color: #fff; border-color: var(--tblr-primary); }
 .dot-online { display:inline-block; width:9px; height:9px; border-radius:50%; background-color:var(--tblr-green); }
 .dot-busy   { display:inline-block; width:9px; height:9px; border-radius:50%; background-color:var(--tblr-orange); }
 .dot-offline{ display:inline-block; width:9px; height:9px; border-radius:50%; background-color:var(--tblr-gray-400); }
@@ -111,19 +118,10 @@
                             <h3 class="card-title">Bước 2: Chọn ngày và khung giờ</h3>
                         </div>
                         <div class="card-body">
-                            <div class="row g-3 mb-4">
-                                <div class="col-12 col-md-6">
-                                    <label class="form-label required">Ngày hẹn</label>
-                                    <input type="date" id="dateInput" class="form-control" value="${form.date}">
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <label class="form-label">Hình thức</label>
-                                    <select id="modalitySelect" class="form-select">
-                                        <option value="">Tất cả hình thức</option>
-                                        <option value="ONLINE">Trực tuyến (Online)</option>
-                                        <option value="IN_PERSON">Trực tiếp (Offline)</option>
-                                    </select>
-                                </div>
+                            <div class="mb-4">
+                                <label class="form-label required">Chọn ngày làm việc</label>
+                                <div id="quickDateGrid" class="row row-cols-2 row-cols-sm-3 row-cols-lg-6 g-2 mb-2"></div>
+                                <input type="date" id="dateInput" class="form-control visually-hidden" value="${form.date}" aria-label="Ngày hẹn">
                             </div>
                             <div id="slotPlaceholder" class="text-center text-secondary py-5">
                                 <i class="bi bi-calendar3 display-5 mb-2 d-block"></i>
@@ -137,6 +135,38 @@
                                 <p>Không có khung giờ trống trong ngày này. Vui lòng chọn ngày khác.</p>
                             </div>
                             <div id="slotGrid" class="row g-2"></div>
+                            <div class="mt-4">
+                                <label class="form-label required">Hình thức tư vấn</label>
+                                <select id="modalitySelect" class="visually-hidden" aria-label="Hình thức tư vấn">
+                                    <option value="">Tất cả hình thức</option>
+                                    <option value="ONLINE">Trực tuyến (Online)</option>
+                                    <option value="IN_PERSON">Trực tiếp (Offline)</option>
+                                </select>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="appointment-choice-card rounded-3 p-3 h-100" data-modality-choice="IN_PERSON">
+                                            <div class="d-flex align-items-start gap-3">
+                                                <i class="bi bi-geo-alt-fill text-primary fs-4"></i>
+                                                <div>
+                                                    <div class="fw-semibold">Trực tiếp tại trường</div>
+                                                    <div class="small text-secondary">Phòng tư vấn HCMUTE</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="appointment-choice-card rounded-3 p-3 h-100" data-modality-choice="ONLINE">
+                                            <div class="d-flex align-items-start gap-3">
+                                                <i class="bi bi-camera-video-fill text-success fs-4"></i>
+                                                <div>
+                                                    <div class="fw-semibold">Trực tuyến (Online)</div>
+                                                    <div class="small text-secondary">Google Meet gửi qua email sinh viên</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-footer d-flex justify-content-between">
                             <button type="button" class="btn btn-outline-secondary" id="btn-prev-2">
@@ -209,4 +239,3 @@ window.APPT_TREE = [<c:forEach var="dept" items="${tree}" varStatus="ds">{id:${d
 window.APPT_CTX = '${ctx}';
 </script>
 <script src="${ctx}/assets/js/student/appointment-book.js"></script>
-

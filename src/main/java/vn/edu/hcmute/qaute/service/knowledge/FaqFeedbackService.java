@@ -48,19 +48,34 @@ public class FaqFeedbackService {
             comment = "";
         }
 
-        FaqFeedback feedback = feedbacks.findByFaqIdAndUserId(faqId, userId)
-                .orElseGet(() -> FaqFeedback.builder().faqId(faqId).userId(userId).build());
+        FaqFeedback existing = feedbacks.findByFaqIdAndUserId(faqId, userId).orElse(null);
+        Boolean previousVote = (existing == null) ? null : existing.isHelpful();
+
+        FaqFeedback feedback = (existing == null)
+                ? FaqFeedback.builder().faqId(faqId).userId(userId).build()
+                : existing;
         feedback.setHelpful(form.isHelpful());
         feedback.setReasonCode(reasonCode);
         feedback.setComment(comment.isBlank() ? null : comment);
         feedbacks.saveAndFlush(feedback);
 
-        int helpful = Math.toIntExact(feedbacks.countByFaqIdAndHelpful(faqId, true));
-        int notHelpful = Math.toIntExact(feedbacks.countByFaqIdAndHelpful(faqId, false));
-        faq.setHelpfulCount(helpful);
-        faq.setNotHelpfulCount(notHelpful);
+        if (previousVote == null) {
+            if (form.isHelpful()) {
+                faq.setHelpfulCount(faq.getHelpfulCount() + 1);
+            } else {
+                faq.setNotHelpfulCount(faq.getNotHelpfulCount() + 1);
+            }
+        } else if (previousVote != form.isHelpful()) {
+            if (previousVote) {
+                faq.setHelpfulCount(Math.max(0, faq.getHelpfulCount() - 1));
+                faq.setNotHelpfulCount(faq.getNotHelpfulCount() + 1);
+            } else {
+                faq.setNotHelpfulCount(Math.max(0, faq.getNotHelpfulCount() - 1));
+                faq.setHelpfulCount(faq.getHelpfulCount() + 1);
+            }
+        }
         faqs.save(faq);
-        return new VoteResult(helpful, notHelpful, form.isHelpful());
+        return new VoteResult(faq.getHelpfulCount(), faq.getNotHelpfulCount(), form.isHelpful());
     }
 
     private boolean isPublishedNow(Faq faq) {

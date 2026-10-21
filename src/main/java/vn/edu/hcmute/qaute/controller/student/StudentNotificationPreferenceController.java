@@ -23,7 +23,7 @@ public class StudentNotificationPreferenceController {
         this.notifications = notifications;
     }
 
-    @GetMapping("/student/notifications/preferences")
+    @GetMapping({"/student/notifications/preferences", "/student/notification-preferences"})
     public String preferences(Model model) {
         model.addAttribute("preferences", notifications.getPreferences(SecurityUtils.requireUserId()));
         return "student/notification-preferences";
