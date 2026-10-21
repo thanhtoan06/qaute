@@ -69,7 +69,7 @@ public class ManagerDashboardService {
                         TicketStatus.IN_PROGRESS, TicketStatus.WAITING_STUDENT)),
                 counts.getOrDefault("waiting", 0L), counts.getOrDefault("slarisk", 0L),
                 appointments.list(managerId, "today", PageRequest.of(0, 1)).getTotalElements(),
-                chats.queueSnapshot(managerId).size(), month.csat().avg(), month.csat().count(),
+                chats.queueCount(managerId), month.csat().avg(), month.csat().count(),
                 month.firstResponse().medianMinutes(), month.firstResponse().samples(),
                 fortnight.perDay(), fortnight.byCategory(), tasks);
     }

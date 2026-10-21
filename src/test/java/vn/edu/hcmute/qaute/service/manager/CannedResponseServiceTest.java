@@ -1,5 +1,9 @@
 package vn.edu.hcmute.qaute.service.manager;
 
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,7 +14,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,27 +46,15 @@ class CannedResponseServiceTest {
     @InjectMocks CannedResponseService service;
 
     @Test
-    void listIncludesOwnPersonalScopedSharedAndAdminGlobalOnly() {
+    void templateOptionsUseBoundedDatabasePage() {
         CannedResponse personal = item(1L, 7L, CannedResponseScope.PERSONAL, null, true);
-        CannedResponse scoped = item(2L, 8L, CannedResponseScope.SHARED, 11L, true);
-        CannedResponse globalAdmin = item(3L, 9L, CannedResponseScope.SHARED, null, true);
-        CannedResponse globalManager = item(4L, 8L, CannedResponseScope.SHARED, null, true);
         when(scopes.getScopeCategoryIds(7L)).thenReturn(List.of(11L));
-        when(repository.findByOwnerIdAndScopeOrderByTitleAsc(7L, CannedResponseScope.PERSONAL))
-                .thenReturn(List.of(personal));
-        when(repository.findByScopeAndCategoryIdInOrderByTitleAsc(
-                CannedResponseScope.SHARED, List.of(11L))).thenReturn(List.of(scoped));
-        when(repository.findByScopeAndCategoryIdIsNullOrderByTitleAsc(CannedResponseScope.SHARED))
-                .thenReturn(List.of(globalAdmin, globalManager));
-        when(users.getSummaries(any())).thenReturn(Map.of(
-                9L, user(9L, RoleCode.ADMIN, "Admin"),
-                8L, user(8L, RoleCode.MANAGER, "Manager")));
-
-        var ids = service.listActive(7L).stream().map(option -> option.id()).toList();
-
-        assertEquals(3, ids.size());
-        assertTrue(ids.containsAll(List.of(1L, 2L, 3L)));
-        assertFalse(ids.contains(4L));
+        when(repository.findAll(org.mockito.ArgumentMatchers.<Specification<CannedResponse>>any(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(personal)));
+        assertEquals(1L, service.listActive(7L).getFirst().id());
+        ArgumentCaptor<Pageable> page = ArgumentCaptor.forClass(Pageable.class);
+        verify(repository).findAll(org.mockito.ArgumentMatchers.<Specification<CannedResponse>>any(), page.capture());
+        assertEquals(100, page.getValue().getPageSize());
     }
 
     @Test

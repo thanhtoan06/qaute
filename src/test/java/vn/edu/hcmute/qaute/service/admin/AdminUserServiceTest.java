@@ -1,5 +1,8 @@
 package vn.edu.hcmute.qaute.service.admin;
 
+import vn.edu.hcmute.qaute.common.constant.AuditActions;
+import static org.mockito.ArgumentMatchers.isNull;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -54,6 +57,14 @@ class AdminUserServiceTest {
     @Mock ObjectProvider<NotificationService> notifications;
     @Mock AuditService audit;
     @InjectMocks AdminUserService service;
+
+    @Test
+    void resendingInvitationWritesAuditWithoutTokenOrPassword() {
+        when(users.findById(4L)).thenReturn(Optional.of(user(4L, RoleCode.STUDENT, UserStatus.PENDING_ACTIVATION, null)));
+        service.resendInvitation(4L, 1L);
+        verify(invitations).sendInvitation(4L);
+        verify(audit).log(eq(AuditActions.USER_INVITATION_RESENT), eq("User"), eq(4L), isNull(), eq("invitationQueued=true"));
+    }
 
     @Test
     void cannotLockOwnAccount() {

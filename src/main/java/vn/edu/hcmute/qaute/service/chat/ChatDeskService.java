@@ -1,12 +1,13 @@
 package vn.edu.hcmute.qaute.service.chat;
 
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -89,11 +90,11 @@ public class ChatDeskService {
     public void accept(Long sessionId, Long managerId) {
         ChatSession session = sessions.findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
+        if (!isActiveAdvisor(managerId, session.getCategoryId())) {
+            throw new NotFoundException("Không tìm thấy phiên chat");
+        }
         if (session.getStatus() != ChatSessionStatus.WAITING) {
             throw new ConflictException("Phiên đã được tư vấn viên khác nhận");
-        }
-        if (!isActiveAdvisor(managerId, session.getCategoryId())) {
-            throw new BadRequestException("Tư vấn viên không thuộc phạm vi chuyên mục");
         }
         // Serialize capacity checks for the same manager across concurrent acceptance requests.
         if (entityManager.find(User.class, managerId, LockModeType.PESSIMISTIC_WRITE) == null) {
@@ -101,6 +102,7 @@ public class ChatDeskService {
         }
         int max = profiles.findByUserId(managerId).map(profile -> profile.getMaxConcurrentChats())
                 .orElseGet(() -> settings.getInt(SettingKeys.CHAT_MAX_CONCURRENT));
+        max = Math.min(max, settings.getInt(SettingKeys.CHAT_MAX_CONCURRENT));
         if (sessions.countByManagerIdAndStatus(managerId, ChatSessionStatus.ACTIVE) >= max) {
             throw new BadRequestException("Bạn đã đạt số phiên chat đồng thời tối đa");
         }
@@ -127,8 +129,15 @@ public class ChatDeskService {
     public void transfer(Long sessionId, Long managerId, Long toManagerId) {
         ChatSession session = sessions.findLockedById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
-        if (session.getStatus() != ChatSessionStatus.ACTIVE || !Objects.equals(session.getManagerId(), managerId)) {
-            throw new InvalidTransitionException("Bạn không phụ trách phiên chat đang hoạt động này");
+        if (!Objects.equals(session.getManagerId(), managerId)) {
+            throw new NotFoundException("Không tìm thấy phiên chat");
+        }
+        if (session.getStatus() != ChatSessionStatus.ACTIVE) {
+            throw new InvalidTransitionException("Phiên chat không còn hoạt động");
+        }
+        if (toManagerId != null && !Objects.equals(managerId, toManagerId)
+                && entityManager.find(User.class, toManagerId, LockModeType.PESSIMISTIC_WRITE) == null) {
+            throw new BadRequestException("Tư vấn viên nhận không sẵn sàng");
         }
         if (Objects.equals(managerId, toManagerId) || toManagerId == null
                 || !availability.eligibleManagerIds(session.getCategoryId()).contains(toManagerId)) {
@@ -159,19 +168,29 @@ public class ChatDeskService {
 
     @Transactional(readOnly = true)
     public List<ChatQueueItem> queueSnapshot(Long managerId) {
+        return queueSnapshot(managerId, 0);
+    }
+
+    @Transactional(readOnly = true)
+    public int queueCount(Long managerId) {
+        List<Long> ids = scopes.getScopeCategoryIds(managerId);
+        return ids.isEmpty() ? 0 : (int) Math.min(Integer.MAX_VALUE,
+                sessions.countByStatusAndCategoryIdIn(ChatSessionStatus.WAITING, ids));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatQueueItem> queueSnapshot(Long managerId, int page) {
         List<Long> categoryIds = scopes.getScopeCategoryIds(managerId);
         if (categoryIds.isEmpty()) {
             return List.of();
         }
-        List<ChatSession> waiting = sessions.findByStatusOrderByStartedAtAsc(ChatSessionStatus.WAITING).stream()
-                .filter(item -> categoryIds.contains(item.getCategoryId()))
-                .sorted(Comparator.comparing(ChatSession::getStartedAt).thenComparing(ChatSession::getId))
-                .toList();
-        Map<Long, Integer> positions = new HashMap<>();
+        List<ChatSession> waiting = sessions.findByStatusAndCategoryIdInOrderByStartedAtAscIdAsc(
+                ChatSessionStatus.WAITING, categoryIds, BoundedPages.of(page, 25)).getContent();
         LocalDateTime now = LocalDateTime.now();
         List<ChatQueueItem> result = new ArrayList<>(waiting.size());
         for (ChatSession session : waiting) {
-            int position = positions.merge(session.getCategoryId(), 1, Integer::sum);
+            int position = (int) sessions.queuePosition(ChatSessionStatus.WAITING, session.getCategoryId(),
+                    session.getStartedAt(), session.getId());
             UserSummary student = users.getSummary(session.getStudentId());
             result.add(new ChatQueueItem(session.getId(), student == null ? "" : student.fullName(),
                     categories.getDisplayPath(session.getCategoryId()), session.getInitialQuestion(),

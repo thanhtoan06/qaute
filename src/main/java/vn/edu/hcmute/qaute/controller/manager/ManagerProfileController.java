@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import vn.edu.hcmute.qaute.common.constant.AvailabilityStatus;
 import vn.edu.hcmute.qaute.common.exception.AppException;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.web.FormErrors;
 import vn.edu.hcmute.qaute.dto.request.manager.ManagerProfileForm;
+import vn.edu.hcmute.qaute.dto.request.manager.ManagerAvatarForm;
+import vn.edu.hcmute.qaute.dto.request.manager.ManagerPresenceForm;
 import vn.edu.hcmute.qaute.dto.request.student.ChangePasswordForm;
 import vn.edu.hcmute.qaute.dto.view.AuthSessionView;
 import vn.edu.hcmute.qaute.dto.view.ManagerProfileView;
@@ -83,9 +83,14 @@ public class ManagerProfileController {
     }
 
     @PostMapping("/avatar")
-    public String avatar(@RequestParam Long assetId, RedirectAttributes redirect) {
+    public String avatar(@Valid @ModelAttribute ManagerAvatarForm form, BindingResult errors,
+                         RedirectAttributes redirect) {
+        if (errors.hasErrors()) {
+            redirect.addFlashAttribute("flashError", "Chọn ảnh đại diện hợp lệ");
+            return "redirect:/manager/profile";
+        }
         try {
-            profiles.updateAvatar(SecurityUtils.requireUserId(), assetId);
+            profiles.updateAvatar(SecurityUtils.requireUserId(), form.getAssetId());
             redirect.addFlashAttribute("flashSuccess", "Đã cập nhật ảnh đại diện");
         } catch (AppException exception) {
             redirect.addFlashAttribute("flashError", exception.getMessage());
@@ -94,15 +99,19 @@ public class ManagerProfileController {
     }
 
     @PostMapping("/status")
-    public String status(@RequestParam AvailabilityStatus status,
-            @RequestParam(required = false) String redirect, RedirectAttributes flash) {
+    public String status(@Valid @ModelAttribute ManagerPresenceForm form, BindingResult errors,
+                         RedirectAttributes flash) {
+        if (errors.hasErrors()) {
+            flash.addFlashAttribute("flashError", "Trạng thái trực không hợp lệ");
+            return "redirect:/manager/profile";
+        }
         try {
-            profiles.setStatus(SecurityUtils.requireUserId(), status);
+            profiles.setStatus(SecurityUtils.requireUserId(), form.getStatus());
             flash.addFlashAttribute("flashSuccess", "Đã cập nhật trạng thái trực");
         } catch (AppException exception) {
             flash.addFlashAttribute("flashError", exception.getMessage());
         }
-        return ManagerTicketActionController.redirectTo(redirect);
+        return ManagerTicketActionController.redirectTo(form.getRedirect());
     }
 
     @GetMapping("/security")

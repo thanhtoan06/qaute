@@ -1,5 +1,9 @@
 package vn.edu.hcmute.qaute.controller.admin;
 
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import jakarta.validation.Valid;
@@ -30,8 +34,11 @@ public class AdminManagerController {
     }
 
     @GetMapping("/admin/managers")
-    public String list(@RequestParam(required = false) String q, Model model) {
-        model.addAttribute("managers", adminManagerScopeService.list(q));
+    public String list(@RequestParam(required = false) String q, @RequestParam(defaultValue="0") int page, Model model) {
+        var results = adminManagerScopeService.page(q, BoundedPages.of(page, 25));
+        model.addAttribute("managers", results.getContent());
+        model.addAttribute("resultPage", results);
+        model.addAttribute("paginationParams", q == null ? "" : "q=" + URLEncoder.encode(q, StandardCharsets.UTF_8));
         model.addAttribute("uncoveredCategories", adminManagerScopeService.uncoveredCategories());
         model.addAttribute("q", q);
         model.addAttribute("pageTitle", "Manager và phạm vi");

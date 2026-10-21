@@ -21,6 +21,7 @@ import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.common.constant.RoleCode;
 import vn.edu.hcmute.qaute.common.constant.TicketPriority;
 import vn.edu.hcmute.qaute.common.util.TextUtil;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
 import vn.edu.hcmute.qaute.dto.request.admin.AdminTicketFilter;
 import vn.edu.hcmute.qaute.dto.view.ManagerTicketDetailView;
 import vn.edu.hcmute.qaute.dto.view.ManagerTicketListItem;
@@ -60,6 +61,7 @@ public class AdminTicketService {
 
     @Transactional(readOnly = true)
     public Page<ManagerTicketListItem> search(AdminTicketFilter filter, Pageable pageable) {
+        pageable = BoundedPages.of(pageable);
         AdminTicketFilter f = filter == null ? new AdminTicketFilter() : filter;
         List<Long> categoryIds = f.getCategoryId() == null ? null : categories.getDescendantIds(f.getCategoryId());
         List<Long> departmentIds = f.getDepartmentId() == null ? null : categoryRepository
@@ -131,6 +133,8 @@ public class AdminTicketService {
 
     @Transactional
     public void reassign(Long ticketId, Long toManagerId, String reason, Long adminId) {
+        requireReason(reason);
+        if (toManagerId == null) throw new vn.edu.hcmute.qaute.common.exception.BadRequestException("Vui lòng chọn tư vấn viên");
         Ticket before = tickets.findById(ticketId).orElseThrow(vn.edu.hcmute.qaute.common.exception.NotFoundException::new);
         String old = state(before, reason);
         Ticket after = workflow.assign(ticketId, toManagerId, adminId, reason);
@@ -139,6 +143,7 @@ public class AdminTicketService {
 
     @Transactional
     public void changePriority(Long ticketId, TicketPriority priority, String reason, Long adminId) {
+        requireReason(reason);
         Ticket before = tickets.findById(ticketId).orElseThrow(vn.edu.hcmute.qaute.common.exception.NotFoundException::new);
         String old = state(before, reason);
         Ticket after = workflow.changePriority(ticketId, adminId, priority, reason);
@@ -147,6 +152,7 @@ public class AdminTicketService {
 
     @Transactional
     public void changeCategory(Long ticketId, Long categoryId, String reason, Long adminId) {
+        requireReason(reason);
         Ticket before = tickets.findById(ticketId).orElseThrow(vn.edu.hcmute.qaute.common.exception.NotFoundException::new);
         String old = state(before, reason);
         Ticket after = workflow.changeCategory(ticketId, adminId, categoryId, reason);
@@ -155,10 +161,16 @@ public class AdminTicketService {
 
     @Transactional
     public void forceClose(Long ticketId, String reason, Long adminId) {
+        requireReason(reason);
         Ticket before = tickets.findById(ticketId).orElseThrow(vn.edu.hcmute.qaute.common.exception.NotFoundException::new);
         String old = state(before, reason);
         Ticket after = workflow.forceClose(ticketId, adminId, reason);
         audit.log(AuditActions.TICKET_FORCE_CLOSED, "ticket", ticketId, old, state(after, reason));
+    }
+
+    private static void requireReason(String reason) {
+        if (reason == null || reason.trim().length() < 10 || reason.trim().length() > 500)
+            throw new vn.edu.hcmute.qaute.common.exception.BadRequestException("Lý do phải từ 10 đến 500 ký tự");
     }
 
     private static String state(Ticket ticket, String reason) {

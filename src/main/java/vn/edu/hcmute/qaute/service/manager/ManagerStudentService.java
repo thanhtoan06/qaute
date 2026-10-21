@@ -1,5 +1,7 @@
 package vn.edu.hcmute.qaute.service.manager;
 
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -49,6 +51,7 @@ public class ManagerStudentService {
     }
 
     public Page<ManagerStudentListItem> search(Long managerId, String q, Pageable pageable) {
+        pageable = BoundedPages.of(pageable);
         List<Long> categoryIds = scopes.getScopeCategoryIds(managerId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> query = cb.createQuery(User.class);
@@ -74,6 +77,11 @@ public class ManagerStudentService {
     }
 
     public ManagerStudentDetailView detail(Long managerId, Long studentId) {
+        return detail(managerId, studentId, BoundedPages.of(0, 15));
+    }
+
+    public ManagerStudentDetailView detail(Long managerId, Long studentId, Pageable requested) {
+        Pageable page = BoundedPages.of(requested);
         List<Long> categoryIds = scopes.getScopeCategoryIds(managerId);
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> accessQuery = cb.createQuery(Long.class);
@@ -86,41 +94,44 @@ public class ManagerStudentService {
         }
 
         StudentSummary student = users.getStudentSummary(studentId);
-        List<Ticket> visibleTickets = categoryIds.isEmpty()
-                ? entityManager.createQuery("select t from Ticket t where t.studentId = :studentId "
-                        + "and t.currentAssigneeId = :managerId order by t.createdAt desc, t.id desc", Ticket.class)
-                        .setParameter("studentId", studentId).setParameter("managerId", managerId).getResultList()
-                : entityManager.createQuery("select t from Ticket t where t.studentId = :studentId "
-                        + "and (t.categoryId in :categoryIds or t.currentAssigneeId = :managerId) "
-                        + "order by t.createdAt desc, t.id desc", Ticket.class)
-                        .setParameter("studentId", studentId).setParameter("managerId", managerId)
-                        .setParameter("categoryIds", categoryIds).getResultList();
-        List<ManagerStudentDetailView.TicketItem> tickets = visibleTickets.stream()
-                .map(t -> new ManagerStudentDetailView.TicketItem(
-                        t.getId(), t.getCode(), t.getTitle(), t.getStatus(), t.getCreatedAt()))
-                .toList();
-
-        List<Object[]> appointmentRows = entityManager.createQuery(
-                "select a, s.startAt from Appointment a, AppointmentSlot s "
-                        + "where a.slotId = s.id and a.studentId = :studentId "
-                        + "and a.managerId = :managerId order by s.startAt desc, a.id desc", Object[].class)
+        String ticketScope = "t.studentId = :studentId and (t.currentAssigneeId = :managerId"
+                + (categoryIds.isEmpty() ? "" : " or t.categoryId in :categoryIds") + ")";
+        TypedQuery<Ticket> ticketQuery = entityManager.createQuery("select t from Ticket t where "
+                + ticketScope + " order by t.createdAt desc, t.id desc", Ticket.class);
+        TypedQuery<Long> ticketCount = entityManager.createQuery("select count(t) from Ticket t where "
+                + ticketScope, Long.class);
+        for (var query : List.of(ticketQuery, ticketCount)) {
+            query.setParameter("studentId", studentId).setParameter("managerId", managerId);
+            if (!categoryIds.isEmpty()) query.setParameter("categoryIds", categoryIds);
+        }
+        Page<ManagerStudentDetailView.TicketItem> tickets = new PageImpl<>(ticketQuery
+                .setFirstResult((int) page.getOffset()).setMaxResults(page.getPageSize()).getResultList()
+                .stream().map(t -> new ManagerStudentDetailView.TicketItem(t.getId(), t.getCode(),
+                        t.getTitle(), t.getStatus(), t.getCreatedAt())).toList(), page, ticketCount.getSingleResult());
+        String appointmentWhere = " from Appointment a, AppointmentSlot s where a.slotId = s.id "
+                + "and a.studentId = :studentId and a.managerId = :managerId";
+        List<ManagerStudentDetailView.AppointmentItem> appointmentRows = entityManager.createQuery(
+                "select a, s.startAt" + appointmentWhere + " order by s.startAt desc, a.id desc", Object[].class)
                 .setParameter("studentId", studentId).setParameter("managerId", managerId)
-                .getResultList();
-        List<ManagerStudentDetailView.AppointmentItem> appointments = appointmentRows.stream()
-                .map(row -> {
+                .setFirstResult((int) page.getOffset()).setMaxResults(page.getPageSize()).getResultList()
+                .stream().map(row -> {
                     Appointment a = (Appointment) row[0];
-                    return new ManagerStudentDetailView.AppointmentItem(
-                            a.getId(), a.getTopic(), a.getStatus(), (LocalDateTime) row[1]);
+                    return new ManagerStudentDetailView.AppointmentItem(a.getId(), a.getTopic(),
+                            a.getStatus(), (LocalDateTime) row[1]);
                 }).toList();
-
-        List<ManagerStudentDetailView.ChatItem> chats = entityManager.createQuery(
-                "select s from ChatSession s where s.studentId = :studentId "
-                        + "and s.managerId = :managerId order by s.startedAt desc, s.id desc", ChatSession.class)
+        long appointmentCount = entityManager.createQuery("select count(a)" + appointmentWhere, Long.class)
+                .setParameter("studentId", studentId).setParameter("managerId", managerId).getSingleResult();
+        Page<ManagerStudentDetailView.AppointmentItem> appointments = new PageImpl<>(appointmentRows, page, appointmentCount);
+        String chatWhere = " from ChatSession s where s.studentId = :studentId and s.managerId = :managerId";
+        List<ManagerStudentDetailView.ChatItem> chatRows = entityManager.createQuery("select s" + chatWhere
+                + " order by s.startedAt desc, s.id desc", ChatSession.class)
                 .setParameter("studentId", studentId).setParameter("managerId", managerId)
-                .getResultList().stream()
-                .map(s -> new ManagerStudentDetailView.ChatItem(
-                        s.getId(), s.getInitialQuestion(), s.getStatus(), s.getStartedAt()))
-                .toList();
+                .setFirstResult((int) page.getOffset()).setMaxResults(page.getPageSize()).getResultList()
+                .stream().map(chat -> new ManagerStudentDetailView.ChatItem(chat.getId(), chat.getInitialQuestion(),
+                        chat.getStatus(), chat.getStartedAt())).toList();
+        long chatCount = entityManager.createQuery("select count(s)" + chatWhere, Long.class)
+                .setParameter("studentId", studentId).setParameter("managerId", managerId).getSingleResult();
+        Page<ManagerStudentDetailView.ChatItem> chats = new PageImpl<>(chatRows, page, chatCount);
         audit.log(AuditActions.VIEW_STUDENT_PROFILE, "user", studentId, null, null);
         return new ManagerStudentDetailView(student, tickets, appointments, chats);
     }

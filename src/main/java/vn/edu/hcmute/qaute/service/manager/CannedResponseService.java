@@ -1,13 +1,17 @@
 package vn.edu.hcmute.qaute.service.manager;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import vn.edu.hcmute.qaute.entity.identity.User;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.HtmlUtils;
@@ -54,21 +58,41 @@ public class CannedResponseService {
 
     @Transactional(readOnly = true)
     public List<CannedResponseView> list(Long managerId) {
-        List<CannedResponse> visible = visible(managerId);
-        Map<Long, String> paths = new LinkedHashMap<>();
-        visible.stream().map(CannedResponse::getCategoryId).filter(id -> id != null)
-                .distinct().forEach(id -> paths.put(id, categories.getDisplayPath(id)));
-        return visible.stream().map(item -> new CannedResponseView(item.getId(), item.getTitle(),
-                sanitizeTemplate(item.getBodyHtml()), item.getScope(), item.getCategoryId(),
-                paths.getOrDefault(item.getCategoryId(), ""), item.isActive(), item.getUsageCount(),
-                managerId.equals(item.getOwnerId()))).toList();
+        return page(managerId, BoundedPages.of(0, 100)).getContent();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CannedResponseView> page(Long managerId, Pageable requested) {
+        return visiblePage(managerId, requested, false).map(item -> new CannedResponseView(
+                item.getId(), item.getTitle(), sanitizeTemplate(item.getBodyHtml()), item.getScope(),
+                item.getCategoryId(), item.getCategoryId() == null ? "" : categories.getDisplayPath(item.getCategoryId()),
+                item.isActive(), item.getUsageCount(), managerId.equals(item.getOwnerId())));
     }
 
     @Transactional(readOnly = true)
     public List<CannedResponseOption> listActive(Long managerId) {
-        return visible(managerId).stream().filter(CannedResponse::isActive)
-                .map(item -> new CannedResponseOption(item.getId(), item.getTitle(), item.getScope()))
-                .toList();
+        return visiblePage(managerId, BoundedPages.of(0, 100), true).stream()
+                .map(item -> new CannedResponseOption(item.getId(), item.getTitle(), item.getScope())).toList();
+    }
+
+    private Page<CannedResponse> visiblePage(Long managerId, Pageable requested, boolean activeOnly) {
+        List<Long> categoryIds = scopes.getScopeCategoryIds(managerId);
+        Specification<CannedResponse> spec = (root, query, cb) -> {
+            var adminOwner = query.subquery(Long.class);
+            var owner = adminOwner.from(User.class);
+            adminOwner.select(owner.get("id")).where(cb.equal(owner.get("id"), root.get("ownerId")),
+                    cb.equal(owner.get("role").get("code"), RoleCode.ADMIN));
+            var sharedCategory = categoryIds == null || categoryIds.isEmpty() ? cb.disjunction()
+                    : root.get("categoryId").in(categoryIds);
+            var shared = cb.and(cb.equal(root.get("scope"), CannedResponseScope.SHARED),
+                    cb.or(sharedCategory, cb.and(cb.isNull(root.get("categoryId")), cb.exists(adminOwner))));
+            var own = cb.equal(root.get("ownerId"), managerId);
+            var personal = cb.and(own, cb.equal(root.get("scope"), CannedResponseScope.PERSONAL));
+            return cb.and(cb.or(personal, shared), activeOnly ? cb.isTrue(root.get("active"))
+                    : cb.or(own, cb.isTrue(root.get("active"))));
+        };
+        Pageable page = BoundedPages.of(requested);
+        return repository.findAll(spec, PageRequest.of(page.getPageNumber(), page.getPageSize(), Sort.by("title", "id")));
     }
 
     @Transactional(readOnly = true)
@@ -138,31 +162,6 @@ public class CannedResponseService {
                 .replace("{{category}}", escape(categories.getDisplayPath(ticket.getCategoryId())));
         repository.incrementUsageCount(item.getId());
         return html;
-    }
-
-    private List<CannedResponse> visible(Long managerId) {
-        List<Long> scopeIds = scopes.getScopeCategoryIds(managerId);
-        Map<Long, CannedResponse> candidates = new LinkedHashMap<>();
-        repository.findByOwnerIdAndScopeOrderByTitleAsc(managerId, CannedResponseScope.PERSONAL)
-                .forEach(item -> candidates.put(item.getId(), item));
-        if (scopeIds != null && !scopeIds.isEmpty()) {
-            repository.findByScopeAndCategoryIdInOrderByTitleAsc(CannedResponseScope.SHARED, scopeIds)
-                    .forEach(item -> candidates.put(item.getId(), item));
-        }
-        List<CannedResponse> global = repository.findByScopeAndCategoryIdIsNullOrderByTitleAsc(
-                CannedResponseScope.SHARED);
-        Set<Long> ownerIds = global.stream().map(CannedResponse::getOwnerId).collect(Collectors.toSet());
-        Map<Long, UserSummary> owners = ownerIds.isEmpty() ? Map.of() : users.getSummaries(ownerIds);
-        for (CannedResponse item : global) {
-            UserSummary owner = owners.get(item.getOwnerId());
-            if (owner != null && owner.role() == RoleCode.ADMIN) candidates.put(item.getId(), item);
-        }
-        List<CannedResponse> result = new ArrayList<>();
-        for (CannedResponse item : candidates.values()) {
-            if (item.isActive() || managerId.equals(item.getOwnerId())) result.add(item);
-        }
-        result.sort(Comparator.comparing(CannedResponse::getTitle, String.CASE_INSENSITIVE_ORDER));
-        return result;
     }
 
     private boolean canView(CannedResponse item, Long managerId, List<Long> scopeIds) {

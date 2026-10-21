@@ -1,5 +1,11 @@
 package vn.edu.hcmute.qaute.service.admin;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
 import jakarta.persistence.EntityManager;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +47,17 @@ public class AdminTagService {
                         counts.getOrDefault(tag.getId(), 0L))).toList();
     }
 
+    public Page<AdminTagView> page(Pageable requested) {
+        Page<FaqTag> page = tags.findAll(PageRequest.of(BoundedPages.of(requested).getPageNumber(),
+                BoundedPages.of(requested).getPageSize(), Sort.by("name", "id")));
+        return page.map(tag -> {
+            Number count = (Number) entityManager.createNativeQuery(
+                    "SELECT COUNT(*) FROM faq_tag_map WHERE tag_id = :id")
+                    .setParameter("id", tag.getId()).getSingleResult();
+            return new AdminTagView(tag.getId(), tag.getName(), tag.getSlug(), count.longValue());
+        });
+    }
+
     @Transactional
     public void create(String name) {
         String cleaned = cleanName(name);
@@ -78,6 +95,7 @@ public class AdminTagService {
 
     @Transactional
     public void merge(Long sourceId, Long targetId) {
+        if (sourceId == null || targetId == null) throw new BadRequestException("Chọn thẻ nguồn và thẻ đích");
         if (sourceId.equals(targetId)) throw new BadRequestException("Chọn thẻ đích khác thẻ nguồn");
         FaqTag source = require(sourceId);
         FaqTag target = require(targetId);

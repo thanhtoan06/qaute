@@ -1,5 +1,7 @@
 package vn.edu.hcmute.qaute.service.admin;
 
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
 import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -105,7 +107,7 @@ public class AdminFaqService {
                         revision.getVersionNo(), revision.getChangeNote(),
                         revision.getChangedBy(), revision.getCreatedAt())).toList();
         return new AdminFaqReviewView(faq.getId(), faq.getTitle(), faq.getSlug(),
-                faq.getSummary(), faq.getBodyHtml(), categories.getDisplayPath(faq.getCategoryId()),
+                faq.getSummary(), HtmlSanitizerUtil.sanitize(faq.getBodyHtml()), categories.getDisplayPath(faq.getCategoryId()),
                 authorName, faq.getStatus(), faq.isFeatured(), faq.getPublishAt(),
                 faq.getPublishedAt(), faq.getTags().stream().map(FaqTag::getName).sorted().toList(),
                 notes);
@@ -119,6 +121,14 @@ public class AdminFaqService {
         Map<Long, String> editorNames = new HashMap<>();
         users.findAllById(editorIds).forEach(user -> editorNames.put(user.getId(), user.getFullName()));
         return history.stream().map(revision -> toRevisionView(revision, editorNames)).toList();
+    }
+
+    public Page<FaqRevisionView> revisionHistory(Long id, Pageable requested) {
+        requireFaq(id);
+        Page<FaqRevision> page = revisions.findByFaqIdOrderByVersionNoDesc(id, BoundedPages.of(requested));
+        Map<Long, String> names = namesFor(page.stream().map(FaqRevision::getChangedBy)
+                .filter(java.util.Objects::nonNull).distinct().toList());
+        return page.map(item -> toRevisionView(item, names));
     }
 
     public FaqRevisionView revision(Long id, int versionNo) {

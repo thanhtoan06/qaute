@@ -1,5 +1,7 @@
 package vn.edu.hcmute.qaute.controller.manager;
 
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
 import jakarta.validation.Valid;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,9 +40,11 @@ public class ManagerCannedResponseController {
     }
 
     @GetMapping("/manager/canned-responses")
-    public String list(@RequestParam(name = "edit", required = false) Long editId, Model model) {
+    public String list(@RequestParam(name = "edit", required = false) Long editId, @RequestParam(defaultValue="0") int page, Model model) {
         Long managerId = SecurityUtils.requireUserId();
-        model.addAttribute("items", service.list(managerId));
+        var results = service.page(managerId, BoundedPages.of(page, 25));
+        model.addAttribute("items", results.getContent());
+        model.addAttribute("resultPage", results);
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", editId == null ? new CannedResponseForm()
                     : service.getForm(editId, managerId));

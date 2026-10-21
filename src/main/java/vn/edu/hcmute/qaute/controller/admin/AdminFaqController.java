@@ -1,5 +1,11 @@
 package vn.edu.hcmute.qaute.controller.admin;
 
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
+import vn.edu.hcmute.qaute.dto.request.admin.UserActionForm;
+import vn.edu.hcmute.qaute.dto.request.admin.FaqSubmitForm;
+import vn.edu.hcmute.qaute.dto.request.admin.FaqPublishForm;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
@@ -19,7 +25,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.hcmute.qaute.common.constant.FaqStatus;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
@@ -116,15 +121,15 @@ public class AdminFaqController {
     }
 
     @GetMapping("/admin/faq/{id}/revisions")
-    public String revisions(@PathVariable Long id, Model model) {
-        revisionPage(id, model);
+    public String revisions(@PathVariable Long id, @RequestParam(defaultValue="0") int page, Model model) {
+        revisionPage(id, page, model);
         return "admin/faq-revisions";
     }
 
     @GetMapping("/admin/faq/{id}/revisions/compare")
     public String compareRevisions(@PathVariable Long id, @RequestParam int a, @RequestParam int b,
                                    Model model) {
-        revisionPage(id, model);
+        revisionPage(id, 0, model);
         FaqRevisionView left = faqs.revision(id, a);
         FaqRevisionView right = faqs.revision(id, b);
         model.addAttribute("left", left);
@@ -135,7 +140,7 @@ public class AdminFaqController {
 
     @GetMapping("/admin/faq/{id}/revisions/{versionNo}")
     public String revision(@PathVariable Long id, @PathVariable int versionNo, Model model) {
-        revisionPage(id, model);
+        revisionPage(id, 0, model);
         model.addAttribute("selected", faqs.revision(id, versionNo));
         return "admin/faq-revisions";
     }
@@ -152,16 +157,19 @@ public class AdminFaqController {
         return "redirect:/admin/faq/" + id + "/revisions";
     }
 
-    private void revisionPage(Long id, Model model) {
+    private void revisionPage(Long id, int page, Model model) {
         AdminFaqReviewView faq = faqs.review(id);
         model.addAttribute("faq", faq);
-        model.addAttribute("history", faqs.revisionHistory(id));
+        var history = faqs.revisionHistory(id, BoundedPages.of(page, 25));
+        model.addAttribute("history", history.getContent());
+        model.addAttribute("historyPage", history);
         model.addAttribute("pageTitle", "Phiên bản FAQ");
     }
 
     @PostMapping("/admin/faq/{id}/submit")
-    public String submit(@PathVariable Long id, @ModelAttribute FaqForm form,
+    public String submit(@PathVariable Long id, @Valid @ModelAttribute FaqSubmitForm form, BindingResult errors,
                          RedirectAttributes redirect) {
+        if (errors.hasErrors()) return invalid(errors, redirect);
         return action(id, redirect, () -> faqs.submitForReview(id, SecurityUtils.requireUserId(),
                         form.isConfirmedNoPersonalInfo()),
                 "Đã gửi FAQ chờ duyệt");
@@ -169,10 +177,11 @@ public class AdminFaqController {
 
     @PostMapping("/admin/faq/{id}/approve")
     public String approve(@PathVariable Long id,
-                          @RequestParam(required = false, defaultValue = "false") boolean direct,
-                          @RequestParam(required = false)
-                          @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime publishAt,
+                          @Valid @ModelAttribute FaqPublishForm form, BindingResult errors,
                           RedirectAttributes redirect) {
+        if (errors.hasErrors()) return invalid(errors, redirect);
+        LocalDateTime publishAt = form.getPublishAt();
+        boolean direct = form.isDirect();
         return action(id, redirect, () -> {
             if (direct) faqs.publishDirect(id, SecurityUtils.requireUserId(), publishAt);
             else faqs.approve(id, SecurityUtils.requireUserId(), publishAt);
@@ -180,15 +189,19 @@ public class AdminFaqController {
     }
 
     @PostMapping("/admin/faq/{id}/reject")
-    public String reject(@PathVariable Long id, @RequestParam(required = false) String reason,
-                         RedirectAttributes redirect) {
+    public String reject(@PathVariable Long id, @Valid @ModelAttribute UserActionForm form,
+                         BindingResult errors, RedirectAttributes redirect) {
+        if (errors.hasErrors()) return invalid(errors, redirect);
+        String reason = form.getReason();
         return action(id, redirect, () -> faqs.reject(id, SecurityUtils.requireUserId(), reason),
                 "Đã từ chối FAQ và trả về bản nháp");
     }
 
     @PostMapping("/admin/faq/{id}/archive")
-    public String archive(@PathVariable Long id, @RequestParam(required = false) String reason,
-                          RedirectAttributes redirect) {
+    public String archive(@PathVariable Long id, @Valid @ModelAttribute UserActionForm form,
+                          BindingResult errors, RedirectAttributes redirect) {
+        if (errors.hasErrors()) return invalid(errors, redirect);
+        String reason = form.getReason();
         return action(id, redirect, () -> faqs.archive(id, SecurityUtils.requireUserId(), reason),
                 "Đã lưu trữ FAQ");
     }
@@ -203,6 +216,11 @@ public class AdminFaqController {
     public String featured(@PathVariable Long id, RedirectAttributes redirect) {
         return action(id, redirect, () -> faqs.toggleFeatured(id, SecurityUtils.requireUserId()),
                 "Đã cập nhật trạng thái nổi bật");
+    }
+
+    private String invalid(BindingResult errors, RedirectAttributes redirect) {
+        redirect.addFlashAttribute("flashError", errors.getAllErrors().getFirst().getDefaultMessage());
+        return "redirect:/admin/faq";
     }
 
     private String action(Long id, RedirectAttributes redirect, Runnable operation, String success) {

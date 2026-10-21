@@ -33,3 +33,5 @@
     </tr></c:forEach></c:otherwise></c:choose></tbody>
   </table></div>
 </div>
+
+<qa:pagination page="${resultPage}" baseUrl="${ctx}/admin/faq/synonyms"/>

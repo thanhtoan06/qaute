@@ -1,5 +1,10 @@
 package vn.edu.hcmute.qaute.service.chat;
 
+import vn.edu.hcmute.qaute.common.constant.SettingKeys;
+import vn.edu.hcmute.qaute.common.constant.ChatSessionStatus;
+import vn.edu.hcmute.qaute.common.exception.NotFoundException;
+import static org.mockito.Mockito.verifyNoInteractions;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -67,9 +72,28 @@ class ChatDeskServiceTest {
         when(entityManager.find(User.class, 7L, LockModeType.PESSIMISTIC_WRITE)).thenReturn(new User());
         ManagerProfile profile = new ManagerProfile();
         profile.setMaxConcurrentChats(3);
+        when(settings.getInt(SettingKeys.CHAT_MAX_CONCURRENT)).thenReturn(3);
         when(profiles.findByUserId(7L)).thenReturn(Optional.of(profile));
         assertThrows(ConflictException.class, () -> service.accept(8L, 7L));
         verify(messaging, never()).systemMessage(any(), any());
+    }
+
+    @Test
+    void outOfScopeSessionIsHiddenEvenWhenAlreadyAccepted() {
+        ChatSession session = new ChatSession(); session.setCategoryId(99L);
+        session.setStatus(ChatSessionStatus.ACTIVE);
+        when(sessions.findById(8L)).thenReturn(Optional.of(session));
+        assertThrows(NotFoundException.class, () -> service.accept(8L, 7L));
+        verifyNoInteractions(messaging, entityManager);
+    }
+
+    @Test
+    void cannotTransferAnotherManagersChat() {
+        ChatSession session = new ChatSession(); session.setManagerId(99L);
+        session.setStatus(ChatSessionStatus.ACTIVE);
+        when(sessions.findLockedById(8L)).thenReturn(Optional.of(session));
+        assertThrows(NotFoundException.class, () -> service.transfer(8L, 7L, 9L));
+        verifyNoInteractions(availability, messaging, entityManager);
     }
 
     @Test

@@ -1,5 +1,15 @@
 package vn.edu.hcmute.qaute.service.report;
 
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import vn.edu.hcmute.qaute.security.QauteUserDetails;
+import vn.edu.hcmute.qaute.common.constant.RoleCode;
+import vn.edu.hcmute.qaute.common.exception.ForbiddenException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,8 +42,12 @@ class TicketReportServiceTest {
     @Mock CategoryQueryService categories;
     @InjectMocks TicketReportService service;
 
+    @AfterEach
+    void clearSecurity() { SecurityContextHolder.clearContext(); }
+
     @Test
     void calculatesSamplePercentilesAndFillsEmptyDays() {
+        authenticate(1L, RoleCode.ADMIN);
         ReportScope scope = new ReportScope(9L, Set.of(3L));
         ReportRange range = new ReportRange(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 3));
         LocalDateTime created = range.from().atStartOfDay();
@@ -65,6 +79,34 @@ class TicketReportServiceTest {
         assertArrayEquals(new long[]{0, 0, 1, 1, 1}, report.csat().distribution());
         assertEquals(2, report.workload().get(0).open());
         assertEquals(3, report.workload().get(0).resolvedInRange());
+    }
+
+    @Test
+    void managerCannotRequestGlobalOrAnotherManagersTicketReport() {
+        authenticate(9L, RoleCode.MANAGER);
+        when(scopes.getScopeCategoryIds(9L)).thenReturn(List.of(2L, 3L));
+        ReportScope allowed = new ReportScope(9L, Set.of(3L));
+        ReportRange range = new ReportRange(LocalDate.now().minusDays(2), LocalDate.now());
+        when(queries.slaCounts(allowed, range)).thenReturn(new long[]{0, 0});
+        when(queries.backlog(org.mockito.ArgumentMatchers.eq(allowed), any())).thenReturn(new long[]{0, 0, 0, 0});
+        when(queries.resolvedAndReopened(allowed, range)).thenReturn(new long[]{0, 0});
+        service.build(new ReportScope(99L, Set.of(3L, 88L)), range);
+        verify(queries).createdPerDay(allowed, range);
+        verify(queries).latestCreated(allowed, range, 5000);
+    }
+
+    @Test
+    void studentCannotCallTicketReportsDirectly() {
+        authenticate(9L, RoleCode.STUDENT);
+        assertThrows(ForbiddenException.class, () -> service.build(new ReportScope(null, null),
+                new ReportRange(LocalDate.now(), LocalDate.now())));
+        verifyNoInteractions(queries);
+    }
+
+    private void authenticate(Long id, RoleCode role) {
+        QauteUserDetails user = new QauteUserDetails(id, "user@example.com", "User", role, "test", true);
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
     }
 
     private Ticket ticket(LocalDateTime created, int responseMinutes, int resolutionMinutes, long pausedSeconds) {

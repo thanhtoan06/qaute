@@ -19,7 +19,7 @@
       <td>${item.usageCount()}</td>
       <td><c:if test="${item.mine()}"><div class="d-flex gap-1"><a class="btn btn-sm btn-outline-primary" href="${ctx}/manager/canned-responses?edit=${item.id()}">Sửa</a><form method="post" action="${ctx}/manager/canned-responses/${item.id()}/delete"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/><button class="btn btn-sm btn-outline-danger" type="submit" onclick="return confirm('Xóa mẫu trả lời này?')">Xóa</button></form></div></c:if></td>
     </tr></c:forEach></c:otherwise></c:choose></tbody>
-  </table></div></div></div>
+  </table></div><div class="card-body"><qa:pagination page="${resultPage}" baseUrl="${ctx}/manager/canned-responses"/></div></div></div>
 
   <div class="col-12 col-xl-5"><div class="card"><div class="card-header"><h3 class="card-title">${empty form.id ? 'Tạo mẫu mới' : 'Sửa mẫu trả lời'}</h3></div><div class="card-body">
     <form method="post" action="${ctx}/manager/canned-responses" id="canned-response-form" novalidate>

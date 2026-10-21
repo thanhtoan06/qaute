@@ -196,6 +196,10 @@ public class ManagerScheduleService {
                 || form.getMeetingLink() != null && form.getMeetingLink().length() > 300) {
             throw new BadRequestException("Địa điểm hoặc liên kết quá dài");
         }
+        String meetingLink = trimToNull(form.getMeetingLink());
+        if (meetingLink != null && !meetingLink.matches("^https://[^\\s]+$")) {
+            throw new BadRequestException("Liên kết họp phải dùng HTTPS");
+        }
         Modality modality = form.getModality();
         if ((modality == Modality.IN_PERSON || modality == Modality.BOTH)
                 && trimToNull(form.getLocation()) == null) {

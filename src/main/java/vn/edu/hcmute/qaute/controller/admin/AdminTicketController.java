@@ -1,5 +1,12 @@
 package vn.edu.hcmute.qaute.controller.admin;
 
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+import vn.edu.hcmute.qaute.dto.request.manager.AssignForm;
+import vn.edu.hcmute.qaute.dto.request.manager.PriorityForm;
+import vn.edu.hcmute.qaute.dto.request.manager.CategoryChangeForm;
+import vn.edu.hcmute.qaute.dto.request.admin.UserActionForm;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -75,35 +82,51 @@ public class AdminTicketController {
     }
 
     @PostMapping("/admin/tickets/{id}/reassign")
-    public String reassign(@PathVariable Long id, @RequestParam(required = false) Long toManagerId,
-            @RequestParam(required = false) String reason, RedirectAttributes flash) {
+    public String reassign(@PathVariable Long id, @Valid @ModelAttribute AssignForm form,
+            BindingResult errors, RedirectAttributes flash) {
+        if (errors.hasErrors()) return invalid(id, errors, flash);
+        Long toManagerId = form.getToManagerId();
+        String reason = form.getReason();
         return run(id, reason, toManagerId, flash,
                 () -> service.reassign(id, toManagerId, reason, SecurityUtils.requireUserId()),
                 "Đã phân công yêu cầu");
     }
 
     @PostMapping("/admin/tickets/{id}/priority")
-    public String priority(@PathVariable Long id, @RequestParam(required = false) TicketPriority priority,
-            @RequestParam(required = false) String reason, RedirectAttributes flash) {
+    public String priority(@PathVariable Long id, @Valid @ModelAttribute PriorityForm form,
+            BindingResult errors, RedirectAttributes flash) {
+        if (errors.hasErrors()) return invalid(id, errors, flash);
+        TicketPriority priority = form.getPriority();
+        String reason = form.getReason();
         return run(id, reason, priority, flash,
                 () -> service.changePriority(id, priority, reason, SecurityUtils.requireUserId()),
                 "Đã đổi mức ưu tiên");
     }
 
     @PostMapping("/admin/tickets/{id}/category")
-    public String category(@PathVariable Long id, @RequestParam(required = false) Long newCategoryId,
-            @RequestParam(required = false) String reason, RedirectAttributes flash) {
+    public String category(@PathVariable Long id, @Valid @ModelAttribute CategoryChangeForm form,
+            BindingResult errors, RedirectAttributes flash) {
+        if (errors.hasErrors()) return invalid(id, errors, flash);
+        Long newCategoryId = form.getNewCategoryId();
+        String reason = form.getReason();
         return run(id, reason, newCategoryId, flash,
                 () -> service.changeCategory(id, newCategoryId, reason, SecurityUtils.requireUserId()),
                 "Đã đổi chuyên mục");
     }
 
     @PostMapping("/admin/tickets/{id}/force-close")
-    public String forceClose(@PathVariable Long id, @RequestParam(required = false) String reason,
-            RedirectAttributes flash) {
+    public String forceClose(@PathVariable Long id, @Valid @ModelAttribute UserActionForm form,
+            BindingResult errors, RedirectAttributes flash) {
+        if (errors.hasErrors()) return invalid(id, errors, flash);
+        String reason = form.getReason();
         return run(id, reason, Boolean.TRUE, flash,
                 () -> service.forceClose(id, reason, SecurityUtils.requireUserId()),
                 "Đã đóng yêu cầu");
+    }
+
+    private static String invalid(Long id, BindingResult errors, RedirectAttributes flash) {
+        flash.addFlashAttribute("flashError", errors.getAllErrors().getFirst().getDefaultMessage());
+        return "redirect:/admin/tickets/" + id;
     }
 
     private static String run(Long id, String reason, Object choice, RedirectAttributes flash,
