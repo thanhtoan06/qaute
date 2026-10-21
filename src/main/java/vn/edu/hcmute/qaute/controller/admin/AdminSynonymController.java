@@ -1,5 +1,12 @@
 package vn.edu.hcmute.qaute.controller.admin;
 
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import vn.edu.hcmute.qaute.dto.request.admin.SynonymForm;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,8 +27,10 @@ public class AdminSynonymController {
     }
 
     @GetMapping("/admin/faq/synonyms")
-    public String list(@RequestParam(required = false) String term, Model model) {
-        model.addAttribute("synonyms", synonyms.list());
+    public String list(@RequestParam(required = false) String term, @RequestParam(defaultValue="0") int page, Model model) {
+        var results = synonyms.page(BoundedPages.of(page, 25));
+        model.addAttribute("synonyms", results.getContent());
+        model.addAttribute("resultPage", results);
         model.addAttribute("noResultQueries", synonyms.noResultQueries());
         model.addAttribute("prefillTerm", term == null ? "" : term);
         model.addAttribute("pageTitle", "Từ đồng nghĩa FAQ");
@@ -29,10 +38,10 @@ public class AdminSynonymController {
     }
 
     @PostMapping("/admin/faq/synonyms")
-    public String create(@RequestParam(required = false) String term,
-                         @RequestParam(required = false) String synonym,
-                         RedirectAttributes redirect) {
-        return action(redirect, () -> synonyms.create(term, synonym), "Đã thêm cặp từ đồng nghĩa");
+    public String create(@Valid @ModelAttribute SynonymForm form, BindingResult errors,
+                          RedirectAttributes redirect) {
+        if (errors.hasErrors()) return invalid(errors, redirect);
+        return action(redirect, () -> synonyms.create(form.getTerm(), form.getSynonym()), "Đã thêm cặp từ đồng nghĩa");
     }
 
     @PostMapping("/admin/faq/synonyms/{id}/toggle")
@@ -43,6 +52,11 @@ public class AdminSynonymController {
     @PostMapping("/admin/faq/synonyms/{id}/delete")
     public String delete(@PathVariable Long id, RedirectAttributes redirect) {
         return action(redirect, () -> synonyms.delete(id), "Đã xóa cặp từ đồng nghĩa");
+    }
+
+    private String invalid(BindingResult errors, RedirectAttributes redirect) {
+        redirect.addFlashAttribute("flashError", errors.getAllErrors().getFirst().getDefaultMessage());
+        return "redirect:/admin/faq/synonyms";
     }
 
     private String action(RedirectAttributes redirect, Runnable operation, String success) {

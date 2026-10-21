@@ -165,7 +165,8 @@ public class ServiceReportService {
     }
 
     private void validateRange(ReportRange range) {
-        if (range == null || range.from() == null || range.to() == null || range.from().isAfter(range.to()))
+        if (range == null || range.from() == null || range.to() == null || range.from().isAfter(range.to())
+                || java.time.temporal.ChronoUnit.DAYS.between(range.from(), range.to()) > 365)
             throw new BadRequestException("Khoảng báo cáo không hợp lệ");
     }
 

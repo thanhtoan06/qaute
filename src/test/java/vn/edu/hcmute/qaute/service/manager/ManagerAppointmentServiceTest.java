@@ -1,5 +1,8 @@
 package vn.edu.hcmute.qaute.service.manager;
 
+import vn.edu.hcmute.qaute.service.ticket.TicketAccessService;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +37,7 @@ class ManagerAppointmentServiceTest {
     @Mock AppointmentRepository appointments;
     @Mock AppointmentSlotRepository slots;
     @Mock TicketRepository tickets;
+    @Mock TicketAccessService ticketAccess;
     @Mock UserLookupService users;
     @Mock CategoryQueryService categories;
     @Mock NotificationService notifications;
@@ -73,6 +77,17 @@ class ManagerAppointmentServiceTest {
         when(slots.findById(2L)).thenReturn(Optional.of(slot(LocalDateTime.now().plusHours(1))));
         assertThrows(InvalidTransitionException.class, () -> service.markNoShow(1L, 7L));
         verify(appointments, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void ownedAppointmentDoesNotExposeLinkedTicketOutsideScope() {
+        Appointment appointment = appointment(); appointment.setTicketId(99L);
+        when(appointments.findById(1L)).thenReturn(Optional.of(appointment));
+        when(slots.findById(2L)).thenReturn(Optional.of(slot(LocalDateTime.now().plusHours(2))));
+        var view = service.detail(1L, 7L);
+        assertNull(view.ticketId());
+        assertNull(view.ticketCode());
+        verify(tickets, never()).findById(99L);
     }
 
     private Appointment appointment() {

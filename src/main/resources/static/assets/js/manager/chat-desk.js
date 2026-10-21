@@ -3,7 +3,7 @@
     const root = document.getElementById('chat-desk');
     if (!root) return;
     const el = id => document.getElementById(id);
-    const state = {client: null, active: null, mine: new Map(), queue: [], subscriptions: new Map(), lastIds: new Map(), lastRead: new Map(), unread: new Map(), seen: new Map(), typingTimer: null, audio: null};
+    const state = {client: null, active: null, mine: new Map(), queue: [], queuePage: 0, subscriptions: new Map(), lastIds: new Map(), lastRead: new Map(), unread: new Map(), seen: new Map(), typingTimer: null, audio: null};
     const toast = (message, type) => Qaute.toast(message, type || 'info');
     const api = (url, options) => Qaute.fetchJson(url, options).then(result => result.data);
     const button = (label, click, className) => {
@@ -25,6 +25,9 @@
     }
     function renderQueue() {
         const box = el('chat-queue'); box.replaceChildren(); el('chat-queue-count').textContent = state.queue.length;
+        el('chat-queue-prev').disabled = state.queuePage === 0;
+        el('chat-queue-next').disabled = state.queue.length < 25;
+        el('chat-queue-page').textContent = 'Trang ' + (state.queuePage + 1);
         if (!state.queue.length) box.append(text('div', 'Chưa có sinh viên chờ.', 'list-group-item text-secondary'));
         state.queue.forEach(item => {
             const row = document.createElement('div'); row.className = 'list-group-item';
@@ -47,8 +50,14 @@
             box.append(row);
         });
     }
+    document.getElementById('chat-queue-prev').addEventListener('click', function () {
+        if (state.queuePage > 0) { state.queuePage--; loadQueue().catch(error => toast(error.message, 'danger')); }
+    });
+    document.getElementById('chat-queue-next').addEventListener('click', function () {
+        state.queuePage++; loadQueue().catch(error => toast(error.message, 'danger'));
+    });
     async function loadQueue() {
-        state.queue = await api('/api/chat/queue') || []; renderQueue();
+        state.queue = await api('/api/chat/queue?page=' + state.queuePage) || []; renderQueue();
     }
     async function loadMine(preferred) {
         const items = (await api('/api/chat/mine') || []).map(item => ({...item,
@@ -73,7 +82,7 @@
                 batch = await api('/api/chat/sessions/' + id + '/messages?afterId=' + after) || [];
                 batch.forEach(message => addMessage(message, true));
                 after = state.lastIds.get(id) || after;
-            } while (batch.length === 200);
+        } while (batch.length === 100);
         } catch (error) { toast(error.message, 'danger'); }
     }
     function select(id) {
@@ -175,7 +184,8 @@
                     if (event.type === 'CHAT_ACCEPTED') { await loadMine(event.sessionId); return; }
                     if (event.type === 'QUEUE_UPDATED') {
                         const old = new Set(state.queue.map(item => item.id));
-                        state.queue = event.waiting || []; renderQueue();
+                        if (state.queuePage === 0) { state.queue = event.waiting || []; renderQueue(); }
+                        else { loadQueue().catch(error => toast(error.message, 'danger')); }
                         if (state.queue.some(item => !old.has(item.id))) { beep(); toast('Có sinh viên mới trong hàng chờ.'); }
                     }
                 });

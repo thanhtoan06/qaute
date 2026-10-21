@@ -88,9 +88,10 @@ public class AdminSlaController {
     }
 
     @PostMapping("/admin/sla/hours")
-    public String saveHours(@ModelAttribute("hoursForm") BusinessHoursForm hoursForm,
-                            Model model, RedirectAttributes redirect) {
+    public String saveHours(@Valid @ModelAttribute("hoursForm") BusinessHoursForm hoursForm,
+                            BindingResult result, Model model, RedirectAttributes redirect) {
         try {
+            if (result.hasErrors()) throw new BadRequestException("Kiểm tra ngày và khoảng giờ làm việc");
             sla.saveBusinessHours(hoursForm, SecurityUtils.requireUserId());
             redirect.addFlashAttribute("flashSuccess", "Đã lưu giờ làm việc");
             return "redirect:/admin/sla?tab=hours";

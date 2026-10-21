@@ -166,6 +166,7 @@ public class AdminUserService {
             throw new BadRequestException("Chỉ tài khoản chờ kích hoạt mới được gửi lại lời mời");
         }
         invitations.sendInvitation(id);
+        audit.log(AuditActions.USER_INVITATION_RESENT, "User", id, null, "invitationQueued=true");
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)

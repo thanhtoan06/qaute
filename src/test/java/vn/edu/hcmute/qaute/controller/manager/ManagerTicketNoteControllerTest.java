@@ -1,5 +1,8 @@
 package vn.edu.hcmute.qaute.controller.manager;
 
+import vn.edu.hcmute.qaute.dto.request.admin.TagNameForm;
+import org.springframework.validation.BeanPropertyBindingResult;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,7 +55,8 @@ class ManagerTicketNoteControllerTest {
                 .when(service).addTag(42L, 7L, "quá nhiều");
         var flash = new RedirectAttributesModelMap();
 
-        assertEquals("redirect:/manager/tickets/42", controller.addTag(42L, "quá nhiều", flash));
+        TagNameForm form = new TagNameForm(); form.setName("quá nhiều");
+        assertEquals("redirect:/manager/tickets/42", controller.addTag(42L, form, new BeanPropertyBindingResult(form, "form"), flash));
         assertEquals("Tối đa 6 tag", flash.getFlashAttributes().get("flashError"));
     }
 

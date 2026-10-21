@@ -187,5 +187,6 @@
 </div>
 
 <%@ include file="/WEB-INF/views/common/scripts.jspf" %>
+<script src="${pageContext.request.contextPath}/assets/js/tv2-layout.js" defer></script>
 </body>
 </html>

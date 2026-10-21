@@ -1,5 +1,7 @@
 package vn.edu.hcmute.qaute.repository.manager;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
 import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import vn.edu.hcmute.qaute.common.constant.CannedResponseScope;
 import vn.edu.hcmute.qaute.entity.manager.CannedResponse;
 
-public interface CannedResponseRepository extends JpaRepository<CannedResponse, Long> {
+public interface CannedResponseRepository extends JpaRepository<CannedResponse, Long>, JpaSpecificationExecutor<CannedResponse> {
     List<CannedResponse> findByOwnerIdAndScopeOrderByTitleAsc(Long ownerId, CannedResponseScope scope);
     List<CannedResponse> findByScopeAndCategoryIdInOrderByTitleAsc(
             CannedResponseScope scope, Collection<Long> categoryIds);

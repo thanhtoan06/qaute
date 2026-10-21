@@ -49,6 +49,11 @@ public interface ChatSessionRepository extends JpaRepository<ChatSession, Long> 
 
     List<ChatSession> findByStatusOrderByStartedAtAsc(ChatSessionStatus status);
 
+    Page<ChatSession> findByStatusAndCategoryIdInOrderByStartedAtAscIdAsc(
+            ChatSessionStatus status, Collection<Long> categoryIds, Pageable pageable);
+
+    long countByStatusAndCategoryIdIn(ChatSessionStatus status, Collection<Long> categoryIds);
+
     List<ChatSession> findByStatusAndLastMessageAtBeforeOrderByLastMessageAtAsc(
             ChatSessionStatus status, LocalDateTime cutoff);
 

@@ -1,12 +1,18 @@
 package vn.edu.hcmute.qaute.controller.manager;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import vn.edu.hcmute.qaute.dto.request.manager.TicketNoteForm;
+import vn.edu.hcmute.qaute.dto.request.admin.TagNameForm;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.hcmute.qaute.common.exception.AppException;
@@ -24,9 +30,10 @@ public class ManagerTicketNoteController {
     }
 
     @PostMapping("/manager/tickets/{id}/notes")
-    public String addNote(@PathVariable Long id, @RequestParam String contentHtml,
+    public String addNote(@PathVariable Long id, @Valid @ModelAttribute TicketNoteForm form, BindingResult errors,
             RedirectAttributes flash) {
-        return run(id, flash, () -> service.addNote(id, SecurityUtils.requireUserId(), contentHtml),
+        if (errors.hasErrors()) return invalid(id, errors, flash);
+        return run(id, flash, () -> service.addNote(id, SecurityUtils.requireUserId(), form.getContentHtml()),
                 "Đã thêm ghi chú nội bộ");
     }
 
@@ -55,9 +62,10 @@ public class ManagerTicketNoteController {
     }
 
     @PostMapping("/manager/tickets/{id}/tags")
-    public String addTag(@PathVariable Long id, @RequestParam String name,
+    public String addTag(@PathVariable Long id, @Valid @ModelAttribute TagNameForm form, BindingResult errors,
             RedirectAttributes flash) {
-        return run(id, flash, () -> service.addTag(id, SecurityUtils.requireUserId(), name),
+        if (errors.hasErrors()) return invalid(id, errors, flash);
+        return run(id, flash, () -> service.addTag(id, SecurityUtils.requireUserId(), form.getName()),
                 "Đã thêm tag");
     }
 
@@ -77,11 +85,16 @@ public class ManagerTicketNoteController {
     @PutMapping("/api/manager/tickets/{id}/draft")
     @ResponseBody
     public ApiResponse<TicketDraftView> saveDraft(@PathVariable Long id,
-            @RequestBody DraftRequest request) {
+            @Valid @RequestBody DraftRequest request) {
         return ApiResponse.ok(service.saveDraft(id, SecurityUtils.requireUserId(), request.contentHtml()));
     }
 
-    public record DraftRequest(String contentHtml) { }
+    public record DraftRequest(@Size(max=20000, message="Bản nháp không quá 20000 ký tự") String contentHtml) { }
+
+    private String invalid(Long id, BindingResult errors, RedirectAttributes flash) {
+        flash.addFlashAttribute("flashError", errors.getAllErrors().getFirst().getDefaultMessage());
+        return redirect(id);
+    }
 
     private String run(Long ticketId, RedirectAttributes flash, Runnable action, String success) {
         try {

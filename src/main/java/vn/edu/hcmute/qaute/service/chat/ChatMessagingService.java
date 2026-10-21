@@ -177,8 +177,8 @@ public class ChatMessagingService {
     }
 
     private void requireParticipant(ChatSession session, Long userId) {
-        if (!Objects.equals(session.getStudentId(), userId)
-                && !Objects.equals(session.getManagerId(), userId)) {
+        if (userId == null || (!Objects.equals(session.getStudentId(), userId)
+                && !Objects.equals(session.getManagerId(), userId))) {
             throw new NotFoundException("Không tìm thấy phiên chat");
         }
     }

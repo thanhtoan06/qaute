@@ -1,5 +1,7 @@
 package vn.edu.hcmute.qaute.service.chat;
 
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
@@ -133,7 +135,7 @@ public class ChatServiceImpl implements ChatService {
         events.publishEvent(new ChatQueueChangedEvent(session.getCategoryId()));
         notifications.notifyUsers(eligible, NotificationType.CHAT_WAITING_NEW,
                 "Sinh viên đang chờ tư vấn", session.getInitialQuestion(),
-                "/manager/chat/queue", "CHAT_SESSION", session.getId());
+                "/manager/chat", "CHAT_SESSION", session.getId());
         return toView(session, List.of(), true, "Đang chờ tư vấn viên tiếp nhận.");
     }
 
@@ -163,12 +165,16 @@ public class ChatServiceImpl implements ChatService {
     public List<ChatMessageView> messages(Long sessionId, Long userId, Long afterId) {
         ChatSession session = sessions.findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
-        if (!Objects.equals(session.getStudentId(), userId)
-                && !Objects.equals(session.getManagerId(), userId)) {
+        if (userId == null || (!Objects.equals(session.getStudentId(), userId)
+                && !Objects.equals(session.getManagerId(), userId))) {
             throw new NotFoundException("Không tìm thấy phiên chat");
         }
-        List<ChatMessage> page = messages.findTop200BySessionIdAndIdGreaterThanOrderByIdAsc(
-                sessionId, afterId == null ? 0L : Math.max(0L, afterId));
+        long cursor = afterId == null ? 0L : Math.max(0L, afterId);
+        // Keep the TV1 student contract; the Manager desk paginates at 100 messages.
+        List<ChatMessage> page = vn.edu.hcmute.qaute.security.SecurityUtils.hasRole(
+                vn.edu.hcmute.qaute.common.constant.RoleCode.MANAGER)
+                ? messages.findTop100BySessionIdAndIdGreaterThanOrderByIdAsc(sessionId, cursor)
+                : messages.findTop200BySessionIdAndIdGreaterThanOrderByIdAsc(sessionId, cursor);
         Set<Long> senderIds = page.stream().map(ChatMessage::getSenderId)
                 .filter(Objects::nonNull).collect(java.util.stream.Collectors.toSet());
         Map<Long, UserSummary> summaries = senderIds.isEmpty() ? Map.of() : users.getSummaries(senderIds);
@@ -195,7 +201,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional(readOnly = true)
     public Page<ChatHistoryItem> history(Long studentId, Pageable p) {
-        return sessions.findByStudentIdOrderByIdDesc(studentId, p).map(session -> {
+        return sessions.findByStudentIdOrderByIdDesc(studentId, BoundedPages.of(p)).map(session -> {
             UserSummary manager = session.getManagerId() == null ? null : users.getSummary(session.getManagerId());
             String categoryName = categories.findCategory(session.getCategoryId()).map(CategoryView::name).orElse("");
             return new ChatHistoryItem(session.getId(), session.getStartedAt(), session.getEndedAt(),
@@ -207,8 +213,8 @@ public class ChatServiceImpl implements ChatService {
     public Long createTicketFromChat(Long sessionId, Long userId) {
         ChatSession session = sessions.findLockedById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
-        if (!Objects.equals(userId, session.getStudentId())
-                && !Objects.equals(userId, session.getManagerId())) {
+        if (userId == null || (!Objects.equals(userId, session.getStudentId())
+                && !Objects.equals(userId, session.getManagerId()))) {
             throw new NotFoundException("Không tìm thấy phiên chat");
         }
         if (session.getTicketId() != null) {

@@ -42,6 +42,7 @@ import vn.edu.hcmute.qaute.service.notification.NotificationService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
 
 @Service
 @Transactional
@@ -153,6 +154,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional(readOnly = true)
     public Page<AppointmentView> listMine(Long studentId, String tab, Pageable pageable) {
+        pageable = BoundedPages.of(pageable);
         LocalDateTime now = LocalDateTime.now();
         Page<Appointment> result = switch (tab == null ? "upcoming" : tab) {
             case "upcoming" -> appointments.findUpcoming(studentId, now, pageable);

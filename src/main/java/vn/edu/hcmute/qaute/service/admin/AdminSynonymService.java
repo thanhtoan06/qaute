@@ -1,5 +1,10 @@
 package vn.edu.hcmute.qaute.service.admin;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -33,6 +38,12 @@ public class AdminSynonymService {
 
     public List<SearchSynonym> list() {
         return synonyms.findAllByOrderByTermAscSynonymAsc();
+    }
+
+    public Page<SearchSynonym> page(Pageable requested) {
+        Pageable bounded = BoundedPages.of(requested);
+        return synonyms.findAll(PageRequest.of(bounded.getPageNumber(), bounded.getPageSize(),
+                Sort.by("term", "synonym", "id")));
     }
 
     public List<NoResultQueryView> noResultQueries() {

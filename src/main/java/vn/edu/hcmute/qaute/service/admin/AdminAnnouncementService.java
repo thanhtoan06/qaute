@@ -13,6 +13,7 @@ import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.exception.InvalidTransitionException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.common.util.HtmlSanitizerUtil;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
 import vn.edu.hcmute.qaute.dto.request.admin.AnnouncementForm;
 import vn.edu.hcmute.qaute.entity.governance.Announcement;
 import vn.edu.hcmute.qaute.repository.governance.AnnouncementRepository;
@@ -35,7 +36,7 @@ public class AdminAnnouncementService {
     public Page<Announcement> list(AnnouncementStatus status, Pageable pageable) {
         Specification<Announcement> filter = (root, query, cb) -> status == null
                 ? cb.conjunction() : cb.equal(root.get("status"), status);
-        return announcements.findAll(filter, pageable);
+        return announcements.findAll(filter, BoundedPages.of(pageable));
     }
 
     public AnnouncementForm getForm(Long id) {

@@ -25,41 +25,44 @@
 </div></div>
 
 <ul class="nav nav-tabs mb-3" role="tablist">
-  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#student-tickets" type="button" role="tab">Yêu cầu <span class="badge bg-secondary-lt ms-1">${fn:length(detail.tickets())}</span></button></li>
-  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#student-appointments" type="button" role="tab">Lịch hẹn <span class="badge bg-secondary-lt ms-1">${fn:length(detail.appointments())}</span></button></li>
-  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#student-chats" type="button" role="tab">Chat <span class="badge bg-secondary-lt ms-1">${fn:length(detail.chats())}</span></button></li>
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#student-tickets" type="button" role="tab">Yêu cầu <span class="badge bg-secondary-lt ms-1">${detail.tickets().totalElements}</span></button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#student-appointments" type="button" role="tab">Lịch hẹn <span class="badge bg-secondary-lt ms-1">${detail.appointments().totalElements}</span></button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#student-chats" type="button" role="tab">Chat <span class="badge bg-secondary-lt ms-1">${detail.chats().totalElements}</span></button></li>
 </ul>
 <div class="tab-content">
   <div class="tab-pane fade show active" id="student-tickets" role="tabpanel">
     <div class="card"><div class="table-responsive"><table class="table table-vcenter card-table">
       <thead><tr><th>Mã</th><th>Tiêu đề</th><th>Trạng thái</th><th>Ngày tạo</th><th></th></tr></thead>
-      <tbody><c:choose><c:when test="${empty detail.tickets()}"><tr><td colspan="5" class="text-center text-secondary py-4">Không có yêu cầu trong phạm vi của bạn.</td></tr></c:when>
-      <c:otherwise><c:forEach var="ticket" items="${detail.tickets()}"><tr>
+      <tbody><c:choose><c:when test="${empty detail.tickets().content}"><tr><td colspan="5" class="text-center text-secondary py-4">Không có yêu cầu trong phạm vi của bạn.</td></tr></c:when>
+      <c:otherwise><c:forEach var="ticket" items="${detail.tickets().content}"><tr>
         <td><c:out value="${ticket.code()}"/></td><td><c:out value="${ticket.title()}"/></td>
         <td><qa:statusBadge status="${ticket.status()}"/></td><td><c:out value="${ticket.createdAt()}"/></td>
         <td><a class="btn btn-sm btn-outline-primary" href="${ctx}/manager/tickets/${ticket.id()}">Mở</a></td>
       </tr></c:forEach></c:otherwise></c:choose></tbody>
     </table></div></div>
+    <qa:pagination page="${detail.tickets()}" baseUrl="${ctx}/manager/students/${detail.student().user().id()}"/>
   </div>
   <div class="tab-pane fade" id="student-appointments" role="tabpanel">
     <div class="card"><div class="table-responsive"><table class="table table-vcenter card-table">
       <thead><tr><th>Thời gian</th><th>Chủ đề</th><th>Trạng thái</th><th></th></tr></thead>
-      <tbody><c:choose><c:when test="${empty detail.appointments()}"><tr><td colspan="4" class="text-center text-secondary py-4">Chưa có lịch hẹn với bạn.</td></tr></c:when>
-      <c:otherwise><c:forEach var="appointment" items="${detail.appointments()}"><tr>
+      <tbody><c:choose><c:when test="${empty detail.appointments().content}"><tr><td colspan="4" class="text-center text-secondary py-4">Chưa có lịch hẹn với bạn.</td></tr></c:when>
+      <c:otherwise><c:forEach var="appointment" items="${detail.appointments().content}"><tr>
         <td><c:out value="${appointment.startAt()}"/></td><td><c:out value="${appointment.topic()}"/></td>
         <td><c:out value="${appointment.status()}"/></td>
         <td><a class="btn btn-sm btn-outline-primary" href="${ctx}/manager/appointments/${appointment.id()}">Mở</a></td>
       </tr></c:forEach></c:otherwise></c:choose></tbody>
     </table></div></div>
+    <qa:pagination page="${detail.appointments()}" baseUrl="${ctx}/manager/students/${detail.student().user().id()}"/>
   </div>
   <div class="tab-pane fade" id="student-chats" role="tabpanel">
     <div class="card"><div class="table-responsive"><table class="table table-vcenter card-table">
       <thead><tr><th>Bắt đầu</th><th>Câu hỏi</th><th>Trạng thái</th></tr></thead>
-      <tbody><c:choose><c:when test="${empty detail.chats()}"><tr><td colspan="3" class="text-center text-secondary py-4">Chưa có phiên chat với bạn.</td></tr></c:when>
-      <c:otherwise><c:forEach var="chat" items="${detail.chats()}"><tr>
+      <tbody><c:choose><c:when test="${empty detail.chats().content}"><tr><td colspan="3" class="text-center text-secondary py-4">Chưa có phiên chat với bạn.</td></tr></c:when>
+      <c:otherwise><c:forEach var="chat" items="${detail.chats().content}"><tr>
         <td><c:out value="${chat.startedAt()}"/></td><td><c:out value="${chat.question()}"/></td>
         <td><c:out value="${chat.status()}"/></td>
       </tr></c:forEach></c:otherwise></c:choose></tbody>
     </table></div></div>
+    <qa:pagination page="${detail.chats()}" baseUrl="${ctx}/manager/students/${detail.student().user().id()}"/>
   </div>
 </div>

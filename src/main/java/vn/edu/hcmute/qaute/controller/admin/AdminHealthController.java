@@ -8,13 +8,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.admin.SystemHealthService;
+import vn.edu.hcmute.qaute.service.governance.AuditService;
+import vn.edu.hcmute.qaute.common.constant.AuditActions;
 
 @Controller
 public class AdminHealthController {
     private final SystemHealthService health;
+    private final AuditService audit;
 
-    public AdminHealthController(SystemHealthService health) {
+    public AdminHealthController(SystemHealthService health, AuditService audit) {
         this.health = health;
+        this.audit = audit;
     }
 
     @GetMapping("/admin/health")
@@ -29,6 +33,8 @@ public class AdminHealthController {
     public String testEmail(RedirectAttributes redirect) {
         try {
             health.queueTestEmail(SecurityUtils.requireUser().getEmail());
+            audit.log(AuditActions.SYSTEM_TEST_EMAIL_QUEUED, "User", SecurityUtils.requireUserId(),
+                    null, "testEmailQueued=true");
             redirect.addFlashAttribute("flashSuccess",
                     "Đã thêm thư thử vào hàng đợi. Hãy làm mới trang để xem trạng thái gửi.");
         } catch (BadRequestException exception) {

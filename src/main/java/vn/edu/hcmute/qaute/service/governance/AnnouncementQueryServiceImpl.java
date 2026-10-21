@@ -1,5 +1,7 @@
 package vn.edu.hcmute.qaute.service.governance;
 
+import vn.edu.hcmute.qaute.common.util.HtmlSanitizerUtil;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +31,7 @@ public class AnnouncementQueryServiceImpl implements AnnouncementQueryService {
     @Override
     public List<AnnouncementView> findActiveFor(AnnouncementAudience audience, int limit) {
         if (limit <= 0) return List.of();
-        return announcements.findAll(active(audience, LocalDateTime.now()), PageRequest.of(0, limit,
+        return announcements.findAll(active(audience, LocalDateTime.now()), PageRequest.of(0, Math.min(limit, 100),
                 Sort.by(Sort.Order.desc("pinned"), Sort.Order.desc("publishAt"), Sort.Order.desc("id"))))
                 .map(this::view).getContent();
     }
@@ -50,7 +52,7 @@ public class AnnouncementQueryServiceImpl implements AnnouncementQueryService {
     }
 
     private AnnouncementView view(Announcement a) {
-        return new AnnouncementView(a.getId(), a.getTitle(), a.getSummary(), a.getBodyHtml(),
+        return new AnnouncementView(a.getId(), a.getTitle(), a.getSummary(), HtmlSanitizerUtil.sanitize(a.getBodyHtml()),
                 a.getCoverAssetId() == null ? null : media.publicUrl(a.getCoverAssetId()),
                 a.isPinned(), a.getPublishAt());
     }

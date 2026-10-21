@@ -1,5 +1,8 @@
 package vn.edu.hcmute.qaute.controller.admin;
 
+import org.springframework.web.bind.annotation.RequestParam;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -35,8 +38,10 @@ public class AdminDepartmentController {
     }
 
     @GetMapping("/admin/departments")
-    public String list(Model model) {
-        model.addAttribute("departments", adminDepartmentService.list());
+    public String list(@RequestParam(defaultValue="0") int page, Model model) {
+        var results = adminDepartmentService.page(BoundedPages.of(page, 25));
+        model.addAttribute("departments", results.getContent());
+        model.addAttribute("resultPage", results);
         model.addAttribute("pageTitle", "Phòng ban");
         return "admin/department-list";
     }

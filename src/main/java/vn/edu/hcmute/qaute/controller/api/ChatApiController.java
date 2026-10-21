@@ -98,8 +98,8 @@ public class ChatApiController {
     }
 
     @GetMapping("/queue")
-    public ApiResponse<List<ChatQueueItem>> queue() {
-        return ApiResponse.ok(desk.queueSnapshot(requireManager()));
+    public ApiResponse<List<ChatQueueItem>> queue(@RequestParam(defaultValue="0") int page) {
+        return ApiResponse.ok(desk.queueSnapshot(requireManager(), page));
     }
 
     @GetMapping("/mine")
