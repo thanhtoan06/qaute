@@ -58,19 +58,21 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         User user = findActiveUser(userId);
         String jti = TokenUtil.randomToken(32);
         String refreshToken = TokenUtil.randomToken(REFRESH_TOKEN_BYTES);
-        int accessMaxAge = settingsService.getInt(SettingKeys.AUTH_ACCESS_TTL_MINUTES) * 60;
-        int refreshMaxAge = refreshMaxAgeSeconds(remember);
+        int accessTtlSeconds = settingsService.getInt(SettingKeys.AUTH_ACCESS_TTL_MINUTES) * 60;
+        int refreshTtlSeconds = refreshMaxAgeSeconds(remember);
         AuthSession session = authSessionRepository.save(AuthSession.builder()
                 .userId(userId)
                 .jti(jti)
                 .refreshTokenHash(TokenUtil.sha256Hex(refreshToken))
                 .deviceInfo(deviceInfo)
                 .ip(ip)
-                .expiresAt(LocalDateTime.now().plusSeconds(refreshMaxAge))
+                .expiresAt(LocalDateTime.now().plusSeconds(refreshTtlSeconds))
                 .remember(remember)
                 .build());
         String accessToken = jwtService.createAccessToken(user.getId(), user.getRole().getCode(), session.getJti());
-        return new SessionTokens(accessToken, refreshToken, accessMaxAge, refreshMaxAge);
+        int accessCookieMaxAge = remember ? accessTtlSeconds : -1;
+        int refreshCookieMaxAge = remember ? refreshTtlSeconds : -1;
+        return new SessionTokens(accessToken, refreshToken, accessCookieMaxAge, refreshCookieMaxAge);
     }
 
     @Override

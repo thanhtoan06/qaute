@@ -40,11 +40,18 @@
       </button>
       <h1 class="navbar-brand navbar-brand-autodark">
         <a href="${ctx}/manager/dashboard" class="text-decoration-none">
-          <i class="bi bi-mortarboard-fill me-2"></i>QAUTE <small class="text-secondary">Manager</small>
+          <img src="${ctx}/assets/images/hcmute-logo.png" alt="Logo HCMUTE" class="qa-role-logo">
+          <span>QAUTE</span> <small class="text-secondary">Manager</small>
         </a>
       </h1>
       <div class="collapse navbar-collapse" id="qa-sidebar-menu">
         <ul class="navbar-nav pt-lg-3">
+          <li class="nav-item">
+            <a class="nav-link" href="${ctx}/" aria-label="Quay về trang chủ Guest">
+              <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-globe2"></i></span>
+              <span class="nav-link-title">Trang chủ</span>
+            </a>
+          </li>
           <li class="nav-item ${activePath == '/manager/dashboard' ? 'active' : ''}">
             <a class="nav-link" href="${ctx}/manager/dashboard">
               <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-speedometer2"></i></span>
@@ -112,6 +119,14 @@
 
   <header class="navbar navbar-expand-md d-print-none">
     <div class="container-xl">
+      <button class="btn qa-sidebar-toggle" type="button" data-qa-sidebar-toggle
+              aria-controls="qa-sidebar-menu" aria-expanded="true" aria-label="Thu gọn hoặc mở menu">
+        <i class="bi bi-list"></i>
+      </button>
+      <a href="${ctx}/manager/dashboard" class="qa-topbar-brand d-lg-none">
+        <img src="${ctx}/assets/images/hcmute-logo.png" alt="Logo HCMUTE">
+        <strong>QA<span>UTE</span></strong>
+      </a>
       <div class="navbar-nav flex-row ms-auto align-items-center gap-3">
 
         <c:if test="${not empty mgrStatus}">

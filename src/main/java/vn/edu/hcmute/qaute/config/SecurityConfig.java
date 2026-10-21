@@ -3,6 +3,7 @@ package vn.edu.hcmute.qaute.config;
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,6 +23,9 @@ import vn.edu.hcmute.qaute.security.JwtService;
 import vn.edu.hcmute.qaute.security.QauteAccessDeniedHandler;
 import vn.edu.hcmute.qaute.security.TokenAuthenticationService;
 import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
+import vn.edu.hcmute.qaute.security.GoogleSsoSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 @Configuration
 @EnableMethodSecurity
@@ -46,7 +50,9 @@ public class SecurityConfig {
             TokenAuthenticationService tokenAuthenticationService,
             JwtService jwtService,
             AuthSessionService authSessionService,
-            com.fasterxml.jackson.databind.ObjectMapper objectMapper) throws Exception {
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper,
+            ObjectProvider<ClientRegistrationRepository> clientRegistrations,
+            ObjectProvider<GoogleSsoSuccessHandler> googleSuccessHandlers) throws Exception {
         CookieCsrfTokenRepository csrfRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
 
@@ -54,8 +60,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfRepository)
                         .csrfTokenRequestHandler(csrfHandler)
-                        .ignoringRequestMatchers("/ws/**", "/api/public/**"))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .ignoringRequestMatchers("/ws/**", "/api/public/**", "/auth/logout"))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .formLogin(login -> login.disable())
                 .httpBasic(basic -> basic.disable())
                 .logout(logout -> logout.disable())
@@ -69,7 +75,7 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
                         .requestMatchers("/", "/assets/**", "/faq/**", "/topics/**", "/search",
                                 "/pages/**", "/auth/**", "/error", "/announcements/**",
-                                "/api/faqs/**", "/api/public/**")
+                                "/api/faqs/**", "/api/public/**", "/oauth2/**", "/login/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/media/*/download").permitAll()
                         .requestMatchers("/student/**").hasRole("STUDENT")
@@ -93,6 +99,12 @@ public class SecurityConfig {
                                         + "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:; "
                                         + "img-src 'self' data: https://res.cloudinary.com; connect-src 'self' ws: wss:; "
                                         + "frame-ancestors 'self'")));
+        if (clientRegistrations.getIfAvailable() != null && googleSuccessHandlers.getIfAvailable() != null) {
+            http.oauth2Login(oauth -> oauth
+                    .successHandler(googleSuccessHandlers.getIfAvailable())
+                    .failureHandler(new SimpleUrlAuthenticationFailureHandler(
+                            "/auth/login?oauthError=Google%20kh%C3%B4ng%20x%C3%A1c%20th%E1%BB%B1c%20%C4%91%C6%B0%E1%BB%A3c")));
+        }
         return http.build();
     }
 }

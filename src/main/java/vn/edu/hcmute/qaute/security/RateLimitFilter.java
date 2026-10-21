@@ -59,8 +59,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if ("POST".equals(method) && "/auth/login".equals(path)) {
             return new Limit("login", 10, Duration.ofMinutes(1));
         }
-        if ("POST".equals(method) && ("/auth/register".equals(path)
-                || "/auth/forgot-password".equals(path)
+        if ("POST".equals(method) && ("/auth/forgot-password".equals(path)
                 || "/auth/resend-otp".equals(path)
                 || "/auth/reset-password/verify".equals(path))) {
             return new Limit("auth-action", 5, Duration.ofHours(1));

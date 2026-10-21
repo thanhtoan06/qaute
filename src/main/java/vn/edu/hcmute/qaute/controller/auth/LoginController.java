@@ -3,17 +3,15 @@ package vn.edu.hcmute.qaute.controller.auth;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.hcmute.qaute.common.constant.RoleCode;
 import vn.edu.hcmute.qaute.common.web.ClientIpResolver;
 import vn.edu.hcmute.qaute.common.web.FormErrors;
@@ -29,6 +27,8 @@ public class LoginController {
 
     private final LoginService loginService;
     private final CookieService cookieService;
+    @Value("${qaute.auth.google.enabled:false}")
+    private boolean googleSsoEnabled;
 
     public LoginController(LoginService loginService, CookieService cookieService) {
         this.loginService = loginService;
@@ -47,6 +47,8 @@ public class LoginController {
         }
         model.addAttribute("returnUrl", returnUrl);
         model.addAttribute("verified", verified);
+        model.addAttribute("googleSsoEnabled", googleSsoEnabled);
+        model.addAttribute("oauthError", "");
         return "auth/login";
     }
 
@@ -55,11 +57,12 @@ public class LoginController {
                         BindingResult bindingResult,
                         @RequestParam(defaultValue = "") String returnUrl,
                         Model model, HttpServletRequest request,
-                        HttpServletResponse response, RedirectAttributes redirectAttributes) {
+                        HttpServletResponse response) {
         if (SecurityUtils.currentUser().isPresent()) {
             return dashboardRedirect();
         }
         model.addAttribute("returnUrl", returnUrl);
+        model.addAttribute("googleSsoEnabled", googleSsoEnabled);
         if (bindingResult.hasErrors()) {
             model.addAttribute("errors", FormErrors.of(bindingResult));
             return "auth/login";
@@ -72,12 +75,8 @@ public class LoginController {
                 cookieService.writeTokens(request, response, outcome.tokens());
                 yield "redirect:" + safeRedirect(returnUrl, outcome.redirectRole());
             }
-            case NEED_VERIFY -> {
-                redirectAttributes.addFlashAttribute("flashError",
-                        "Tài khoản chưa được xác thực, vui lòng nhập mã OTP");
-                yield "redirect:/auth/verify-otp?email="
-                        + URLEncoder.encode(outcome.email(), StandardCharsets.UTF_8);
-            }
+            case NEED_VERIFY -> showError(model,
+                    "Tài khoản chưa được kích hoạt, vui lòng liên hệ quản trị viên");
             case LOCKED_ADMIN -> showError(model, "Tài khoản đang bị khóa, vui lòng liên hệ quản trị");
             case LOCKED_TEMP -> showError(model,
                     "Tài khoản bị khóa tạm thời, thử lại sau "

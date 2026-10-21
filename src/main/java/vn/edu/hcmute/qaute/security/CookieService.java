@@ -27,6 +27,7 @@ public class CookieService {
     public void clear(HttpServletResponse response) {
         response.addHeader("Set-Cookie", cookie(ACCESS_COOKIE, "", "/", 0, false, "Lax").toString());
         response.addHeader("Set-Cookie", cookie(REFRESH_COOKIE, "", "/auth", 0, false, "Strict").toString());
+        response.addHeader("Set-Cookie", cookie(REFRESH_COOKIE, "", "/", 0, false, "Lax").toString());
     }
 
     public Optional<String> getAccessToken(HttpServletRequest request) {
@@ -45,7 +46,7 @@ public class CookieService {
     }
 
     private ResponseCookie cookie(String name, String value, String path, int maxAge,
-                                  boolean secure, String sameSite) {
+                                   boolean secure, String sameSite) {
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .secure(secure)

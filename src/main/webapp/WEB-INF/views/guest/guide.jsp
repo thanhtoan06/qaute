@@ -23,20 +23,20 @@
             <div class="accordion-item mb-3 border rounded shadow-none">
                 <h2 class="accordion-header" id="headingOne">
                     <button class="accordion-button fs-4 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                        <i class="bi bi-person-check me-3 text-primary"></i>1. Đăng ký tài khoản & Xác thực OTP
+                        <i class="bi bi-box-arrow-in-right me-3 text-primary"></i>1. Đăng nhập hệ thống
                     </button>
                 </h2>
                 <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#guideAccordion">
                     <div class="accordion-body pt-0 text-secondary">
-                        <p>Để sử dụng đầy đủ các tính năng như gửi yêu cầu, trò chuyện trực tuyến và đặt lịch hẹn, sinh viên cần đăng ký tài khoản hệ thống:</p>
+                        <p>Để sử dụng đầy đủ các tính năng như gửi yêu cầu, trò chuyện trực tuyến và đặt lịch hẹn, sinh viên sử dụng tài khoản do quản trị viên cấp:</p>
                         <ol class="mb-3">
-                            <li class="mb-2"><strong>Truy cập trang đăng ký:</strong> Nhấn nút "Đăng ký" ở góc trên bên phải thanh điều hướng hoặc truy cập đường dẫn <code>/auth/register</code>.</li>
-                            <li class="mb-2"><strong>Điền thông tin sinh viên:</strong> Nhập chính xác Mã số sinh viên (MSSV), Họ và tên, Email sinh viên (định dạng <code>@student.hcmute.edu.vn</code>) và Mật khẩu đăng nhập.</li>
-                            <li class="mb-2"><strong>Xác thực mã OTP:</strong> Hệ thống sẽ tự động gửi mã OTP gồm 6 chữ số đến hộp thư điện tử của bạn. Nhập mã này tại trang xác thực để kích hoạt tài khoản.</li>
+                            <li class="mb-2"><strong>Đăng nhập bằng MSSV:</strong> Nhập MSSV và mật khẩu được cấp trên trang đăng nhập.</li>
+                            <li class="mb-2"><strong>Đăng nhập bằng Google:</strong> Sinh viên có thể dùng email <code>@student.hcmute.edu.vn</code> nếu Google SSO đã được bật.</li>
+                            <li class="mb-2"><strong>Cần hỗ trợ tài khoản:</strong> Liên hệ quản trị viên để tạo, cập nhật hoặc khóa tài khoản.</li>
                         </ol>
                         <div class="alert alert-info py-2 px-3 small d-flex align-items-center mb-0">
                             <i class="bi bi-info-circle-fill me-2 fs-5"></i>
-                            <div>Mã OTP có thời hạn hiệu lực trong 5 phút. Nếu không nhận được email, vui lòng kiểm tra hộp thư Rác (Spam) hoặc nhấn "Gửi lại mã OTP".</div>
+                            <div>Tài khoản và quyền truy cập được quản lý tập trung bởi quản trị viên QAUTE.</div>
                         </div>
                     </div>
                 </div>
@@ -158,4 +158,3 @@
         </div>
     </div>
 </div>
-

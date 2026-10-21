@@ -1,0 +1,571 @@
+<%@ page pageEncoding="UTF-8" %>
+<%-- =========================================================================
+     FLOATING DRAGGABLE CHATBOT WIDGET (QAUTE HCMUTE)
+     ========================================================================= --%>
+<div id="qaute-chatbot-widget" class="qaute-chatbot-root">
+    <%-- Khung Chat Popup --%>
+    <div id="qaute-chat-panel" class="qaute-chat-panel shadow-lg" style="display: none;">
+        <%-- Header --%>
+        <div class="qaute-chat-header d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+                <div class="position-relative">
+                    <img src="${pageContext.request.contextPath}/assets/images/chatbot-ute.png"
+                         alt="Bot UTE" class="rounded-circle bg-white p-0.5"
+                          style="width: 36px; height: 36px; object-fit: contain;"
+                         onerror="this.src='${pageContext.request.contextPath}/assets/images/hcmute-logo.png';">
+                    <span class="qaute-online-dot"></span>
+                </div>
+                <div>
+                    <div class="qaute-chat-title">Trợ lý ảo QAUTE</div>
+                    <div class="qaute-chat-status">Trực tuyến 24/7 • Sẵn sàng hỗ trợ</div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <button type="button" class="qaute-chat-btn-header" onclick="toggleQauteChatbot(false)" title="Thu nhỏ">
+                    <i class="bi bi-dash-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <%-- Tin nhắn --%>
+        <div id="qaute-chat-body" class="qaute-chat-body">
+            <div class="qaute-msg-row qaute-msg-bot">
+                <div class="qaute-bot-avatar">
+                    <img src="${pageContext.request.contextPath}/assets/images/chatbot-ute.png" alt="Bot"
+                         onerror="this.src='${pageContext.request.contextPath}/assets/images/hcmute-logo.png';">
+                </div>
+                <div class="qaute-bubble qaute-bubble-bot">
+                    Xin chào! Mình là <strong>Trợ lý ảo QAUTE</strong>. Bạn cần hỗ trợ thông tin gì về học vụ, học phí, học bổng hay quy chế trường HCMUTE?
+                    <div class="qaute-msg-time">Vừa xong</div>
+                </div>
+            </div>
+
+            <%-- Gợi ý câu hỏi nhanh --%>
+            <div class="qaute-pills-wrap">
+                <div class="qaute-pills-label">Câu hỏi thường gặp:</div>
+                <div class="qaute-pills-list">
+                    <button type="button" class="qaute-chat-pill" onclick="sendWidgetQuickMessage('Hạn đóng học phí học kỳ này?')">Hạn đóng học phí?</button>
+                    <button type="button" class="qaute-chat-pill" onclick="sendWidgetQuickMessage('Điều kiện xét học bổng khuyến khích?')">Điều kiện học bổng</button>
+                    <button type="button" class="qaute-chat-pill" onclick="sendWidgetQuickMessage('Thủ tục xin bảo lưu kết quả học tập?')">Thủ tục bảo lưu</button>
+                    <button type="button" class="qaute-chat-pill" onclick="sendWidgetQuickMessage('Chuẩn đầu ra tiếng Anh tốt nghiệp?')">Chuẩn đầu ra ngoại ngữ</button>
+                </div>
+            </div>
+        </div>
+
+        <%-- Form nhập câu hỏi --%>
+        <form id="qaute-chat-form" onsubmit="handleWidgetChatSubmit(event)" class="qaute-chat-footer">
+            <input type="text" id="qaute-chat-input" class="qaute-chat-input"
+                   placeholder="Nhập câu hỏi tại đây..." autocomplete="off">
+            <button type="submit" class="qaute-chat-send-btn" title="Gửi tin nhắn">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </form>
+    </div>
+
+    <%-- Floating Button tròn (Draggable) --%>
+    <div id="qaute-chat-trigger" class="qaute-chat-trigger" title="Nhấn để trò chuyện với Trợ lý QAUTE (Có thể kéo thả di chuyển)">
+        <div class="qaute-trigger-pulse"></div>
+        <img src="${pageContext.request.contextPath}/assets/images/chatbot-ute.png" alt="Chatbot UTE"
+             class="qaute-trigger-img"
+             onerror="this.src='${pageContext.request.contextPath}/assets/images/hcmute-logo.png';">
+        <span class="qaute-trigger-badge">Hỗ trợ</span>
+    </div>
+</div>
+
+<style>
+    /* Root container */
+    .qaute-chatbot-root {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9999;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Floating Trigger Button */
+    .qaute-chat-trigger {
+        width: 62px;
+        height: 62px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+        box-shadow: 0 8px 24px rgba(192, 57, 43, 0.4), 0 2px 6px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        position: relative;
+        user-select: none;
+        touch-action: none;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+    }
+    .qaute-chat-trigger:active {
+        cursor: grabbing;
+        transform: scale(0.94);
+    }
+    .qaute-chat-trigger:hover {
+        transform: scale(1.08);
+        box-shadow: 0 12px 30px rgba(192, 57, 43, 0.5);
+    }
+    .qaute-trigger-img {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 50%;
+        background: #fff;
+        padding: 2px;
+        pointer-events: none;
+    }
+    .qaute-trigger-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background: #22c55e;
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 10px;
+        border: 2px solid #fff;
+        line-height: 1;
+        pointer-events: none;
+    }
+    .qaute-trigger-pulse {
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        background: rgba(231, 76, 60, 0.4);
+        animation: qautePulse 2s infinite ease-out;
+        z-index: -1;
+        pointer-events: none;
+    }
+    @keyframes qautePulse {
+        0% { transform: scale(0.95); opacity: 0.8; }
+        70% { transform: scale(1.35); opacity: 0; }
+        100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    /* Chat Panel Popover */
+    .qaute-chat-panel {
+        position: absolute;
+        bottom: 74px;
+        right: 0;
+        width: 420px;
+        max-width: calc(100vw - 32px);
+        height: 620px;
+        max-height: calc(100vh - 120px);
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid rgba(0,0,0,0.08);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: qauteSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 10000;
+    }
+    @keyframes qauteSlideUp {
+        from { opacity: 0; transform: translateY(16px) scale(0.96); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Chat Header */
+    .qaute-chat-header {
+        background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+        color: #fff;
+        padding: 12px 16px;
+        flex-shrink: 0;
+    }
+    .qaute-chat-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        line-height: 1.2;
+    }
+    .qaute-chat-status {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.8);
+    }
+    .qaute-online-dot {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 10px;
+        height: 10px;
+        background: #22c55e;
+        border: 2px solid #fff;
+        border-radius: 50%;
+    }
+    .qaute-chat-btn-header {
+        background: rgba(255,255,255,0.18);
+        border: none;
+        color: #fff;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .qaute-chat-btn-header:hover {
+        background: rgba(255,255,255,0.32);
+    }
+
+    /* Chat Body */
+    .qaute-chat-body {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 14px 14px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: #f8fafc;
+    }
+    .qaute-chat-body::-webkit-scrollbar { width: 5px; }
+    .qaute-chat-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    /* Messages */
+    .qaute-msg-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        max-width: 88%;
+    }
+    .qaute-msg-bot {
+        align-self: flex-start;
+    }
+    .qaute-msg-user {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+    .qaute-bot-avatar img {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+    }
+    .qaute-bubble {
+        padding: 10px 14px;
+        border-radius: 16px;
+        font-size: 0.86rem;
+        line-height: 1.45;
+        word-break: break-word;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .qaute-bubble-bot {
+        background: #ffffff;
+        color: #1e293b;
+        border-bottom-left-radius: 4px;
+        border: 1px solid #e2e8f0;
+    }
+    .qaute-bubble-user {
+        background: #c0392b;
+        color: #ffffff;
+        border-bottom-right-radius: 4px;
+    }
+    .qaute-msg-time {
+        font-size: 0.68rem;
+        margin-top: 4px;
+        opacity: 0.65;
+        text-align: right;
+    }
+
+    /* Suggestion Pills */
+    .qaute-pills-wrap {
+        margin-top: 4px;
+        padding: 6px 0;
+    }
+    .qaute-pills-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .qaute-pills-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .qaute-chat-pill {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #c0392b;
+        font-size: 0.76rem;
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.18s;
+        text-align: left;
+    }
+    .qaute-chat-pill:hover {
+        background: #fdf2f1;
+        border-color: #c0392b;
+        transform: translateY(-1px);
+    }
+
+    /* Footer / Input */
+    .qaute-chat-footer {
+        padding: 10px 12px;
+        background: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    .qaute-chat-input {
+        flex: 1;
+        border: 1px solid #cbd5e1;
+        border-radius: 20px;
+        padding: 8px 14px;
+        font-size: 0.86rem;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .qaute-chat-input:focus {
+        border-color: #c0392b;
+    }
+    .qaute-chat-send-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #c0392b;
+        color: #ffffff;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: background 0.18s, transform 0.15s;
+        flex-shrink: 0;
+    }
+    .qaute-chat-send-btn:hover {
+        background: #a93226;
+        transform: scale(1.05);
+    }
+
+    /* Typing Dots */
+    .qaute-typing {
+        display: inline-flex;
+        gap: 4px;
+        padding: 8px 12px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        width: fit-content;
+    }
+    .qaute-typing-dot {
+        width: 6px;
+        height: 6px;
+        background: #94a3b8;
+        border-radius: 50%;
+        animation: qauteBounce 1.4s infinite ease-in-out both;
+    }
+    .qaute-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .qaute-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes qauteBounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1.0); }
+    }
+</style>
+
+<script>
+(function() {
+    var root = document.getElementById('qaute-chatbot-widget');
+    var trigger = document.getElementById('qaute-chat-trigger');
+    var panel = document.getElementById('qaute-chat-panel');
+    var input = document.getElementById('qaute-chat-input');
+    var body = document.getElementById('qaute-chat-body');
+
+    if (!trigger || !panel) return;
+
+    // --- TOGGLE CHAT WINDOW ---
+    window.toggleQauteChatbot = function(forceState) {
+        var isVisible = panel.style.display !== 'none';
+        var nextState = typeof forceState === 'boolean' ? forceState : !isVisible;
+        if (nextState) {
+            panel.style.display = 'flex';
+            setTimeout(function() { input.focus(); }, 100);
+            body.scrollTop = body.scrollHeight;
+        } else {
+            panel.style.display = 'none';
+        }
+    };
+    window.openQauteChatbot = function() {
+        window.toggleQauteChatbot(true);
+    };
+
+    // --- DRAGGABLE TRIGGER BUTTON ---
+    var isDragging = false;
+    var startX, startY;
+    var origX, origY;
+    var hasMoved = false;
+
+    function getCoord(e) {
+        if (e.touches && e.touches.length > 0) {
+            return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+    }
+
+    function onDragStart(e) {
+        // Only left mouse or single touch
+        if (e.type === 'mousedown' && e.button !== 0) return;
+        var c = getCoord(e);
+        startX = c.x;
+        startY = c.y;
+
+        var rect = root.getBoundingClientRect();
+        origX = rect.left;
+        origY = rect.top;
+
+        hasMoved = false;
+        isDragging = true;
+
+        document.addEventListener('mousemove', onDragMove, { passive: false });
+        document.addEventListener('mouseup', onDragEnd);
+        document.addEventListener('touchmove', onDragMove, { passive: false });
+        document.addEventListener('touchend', onDragEnd);
+    }
+
+    function onDragMove(e) {
+        if (!isDragging) return;
+        var c = getCoord(e);
+        var dx = c.x - startX;
+        var dy = c.y - startY;
+
+        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+            hasMoved = true;
+        }
+
+        if (hasMoved) {
+            e.preventDefault();
+            var newLeft = origX + dx;
+            var newTop = origY + dy;
+
+            // Constrain inside viewport
+            var maxLeft = window.innerWidth - root.offsetWidth - 10;
+            var maxTop = window.innerHeight - root.offsetHeight - 10;
+            newLeft = Math.max(10, Math.min(newLeft, maxLeft));
+            newTop = Math.max(10, Math.min(newTop, maxTop));
+
+            root.style.left = newLeft + 'px';
+            root.style.top = newTop + 'px';
+            root.style.right = 'auto';
+            root.style.bottom = 'auto';
+
+            // Reposition panel if near top/bottom boundary
+            if (newTop < 550) {
+                panel.style.bottom = 'auto';
+                panel.style.top = '74px';
+            } else {
+                panel.style.top = 'auto';
+                panel.style.bottom = '74px';
+            }
+            if (newLeft < 380) {
+                panel.style.right = 'auto';
+                panel.style.left = '0';
+            } else {
+                panel.style.left = 'auto';
+                panel.style.right = '0';
+            }
+        }
+    }
+
+    function onDragEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+
+        document.removeEventListener('mousemove', onDragMove);
+        document.removeEventListener('mouseup', onDragEnd);
+        document.removeEventListener('touchmove', onDragMove);
+        document.removeEventListener('touchend', onDragEnd);
+
+        // If not dragged significantly, treat as Click
+        if (!hasMoved) {
+            window.toggleQauteChatbot();
+        }
+    }
+
+    trigger.addEventListener('mousedown', onDragStart);
+    trigger.addEventListener('touchstart', onDragStart, { passive: true });
+
+    // --- CHAT MESSAGING ---
+    window.sendWidgetQuickMessage = function(text) {
+        input.value = text;
+        window.handleWidgetChatSubmit(new Event('submit'));
+    };
+
+    window.handleWidgetChatSubmit = function(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        var text = (input.value || '').trim();
+        if (!text) return;
+
+        var now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+        // Add user bubble
+        var userHtml = '<div class="qaute-msg-row qaute-msg-user">' +
+            '<div class="qaute-bubble qaute-bubble-user">' + escapeHtml(text) +
+            '<div class="qaute-msg-time">' + now + '</div></div></div>';
+        body.insertAdjacentHTML('beforeend', userHtml);
+        input.value = '';
+        body.scrollTop = body.scrollHeight;
+
+        // Add typing indicator
+        var typingId = 'qaute-typing-' + Date.now();
+        var typingHtml = '<div id="' + typingId + '" class="qaute-msg-row qaute-msg-bot">' +
+            '<div class="qaute-bot-avatar"><img src="/assets/images/chatbot-ute.png" alt="Bot" onerror="this.src=\'/assets/images/hcmute-logo.png\';"></div>' +
+            '<div class="qaute-typing"><span class="qaute-typing-dot"></span><span class="qaute-typing-dot"></span><span class="qaute-typing-dot"></span></div>' +
+            '</div>';
+        body.insertAdjacentHTML('beforeend', typingHtml);
+        body.scrollTop = body.scrollHeight;
+
+        // Call backend API
+        fetch('/api/public/chat/message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            var el = document.getElementById(typingId);
+            if (el) el.remove();
+
+            var reply = res && res.data && res.data.reply ? res.data.reply : 'QAUTE đã ghi nhận câu hỏi của bạn. Nếu bạn cần hỗ trợ chi tiết hơn, vui lòng gửi yêu cầu hỗ trợ (Ticket).';
+            var linkHtml = '';
+            if (res && res.data && res.data.faqSlug) {
+                linkHtml = '<div class="mt-2"><a href="/faq/' + res.data.faqSlug + '" class="btn btn-sm btn-outline-danger rounded-pill py-0.5 px-2" style="font-size: 0.74rem;">Xem chi tiết bài viết →</a></div>';
+            }
+
+            var botHtml = '<div class="qaute-msg-row qaute-msg-bot">' +
+                '<div class="qaute-bot-avatar"><img src="/assets/images/chatbot-ute.png" alt="Bot" onerror="this.src=\'/assets/images/hcmute-logo.png\';"></div>' +
+                '<div class="qaute-bubble qaute-bubble-bot">' + reply + linkHtml +
+                '<div class="qaute-msg-time">' + now + '</div></div></div>';
+            body.insertAdjacentHTML('beforeend', botHtml);
+            body.scrollTop = body.scrollHeight;
+        })
+        .catch(function() {
+            var el = document.getElementById(typingId);
+            if (el) el.remove();
+            var errHtml = '<div class="qaute-msg-row qaute-msg-bot">' +
+                '<div class="qaute-bot-avatar"><img src="/assets/images/chatbot-ute.png" alt="Bot"></div>' +
+                '<div class="qaute-bubble qaute-bubble-bot text-danger">Có lỗi kết nối tạm thời. Vui lòng thử lại sau giây lát.' +
+                '<div class="qaute-msg-time">' + now + '</div></div></div>';
+            body.insertAdjacentHTML('beforeend', errHtml);
+            body.scrollTop = body.scrollHeight;
+        });
+    };
+
+    function escapeHtml(str) {
+        var p = document.createElement('p');
+        p.textContent = str;
+        return p.innerHTML;
+    }
+})();
+</script>
+

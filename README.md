@@ -17,10 +17,5 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev,demo
 | Tư vấn viên | manager2@qaute.edu.vn | Manager@12345 |
 | Tư vấn viên | manager3@qaute.edu.vn | Manager@12345 |
 | Tư vấn viên | manager4@qaute.edu.vn | Manager@12345 |
-| Sinh viên | 24162101 đến 24162115 | Student@12345 |
+| Sinh viên | 24162101 đến 24162130 | Student@12345 |
 
-Có thể bật profile khi chạy file JAR bằng:
-
-```bash
-java -jar qaute.jar --spring.profiles.active=dev,demo
-```
