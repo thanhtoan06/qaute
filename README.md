@@ -10,12 +10,11 @@ Bật dữ liệu demo bằng profile `demo`:
 mvn spring-boot:run -Dspring-boot.run.profiles=dev,demo
 ```
 
-| Vai trò | Email hoặc MSSV | Mật khẩu |
-|---|---|---|
-| Quản trị viên | admin@qaute.edu.vn | Admin@12345 |
-| Tư vấn viên | manager1@qaute.edu.vn | Manager@12345 |
-| Tư vấn viên | manager2@qaute.edu.vn | Manager@12345 |
-| Tư vấn viên | manager3@qaute.edu.vn | Manager@12345 |
-| Tư vấn viên | manager4@qaute.edu.vn | Manager@12345 |
-| Sinh viên | 24162101 đến 24162130 | Student@12345 |
-
+| Vai trò         | Email hoặc MSSV        | Mật khẩu    |
+| ---------------- | ----------------------- | ------------- |
+| Quản trị viên | admin@qaute.edu.vn      | Admin@12345   |
+| Tư vấn viên   | manager1@qaute.edu.vn   | Manager@12345 |
+| Tư vấn viên   | manager2@qaute.edu.vn   | Manager@12345 |
+| Tư vấn viên   | manager3@qaute.edu.vn   | Manager@12345 |
+| Tư vấn viên   | manager4@qaute.edu.vn   | Manager@12345 |
+| Sinh viên       | 24162101 đến 24162130 | Student@12345 |
