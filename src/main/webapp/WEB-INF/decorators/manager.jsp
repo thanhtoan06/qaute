@@ -5,6 +5,7 @@
     Content pageContent = (Content) request.getAttribute("org.sitemesh.content.Content");
 %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ include file="/WEB-INF/views/common/tv2-workspace-user.jspf" %>
 
 <c:set var="rawUri" value="${not empty requestScope['jakarta.servlet.forward.request_uri'] ? requestScope['jakarta.servlet.forward.request_uri'] : pageContext.request.requestURI}"/>
 <c:set var="currentPath" value="${fn:startsWith(rawUri, ctx) ? fn:substring(rawUri, fn:length(ctx), fn:length(rawUri)) : rawUri}"/>
@@ -26,13 +27,16 @@
 <head>
   <meta charset="UTF-8">
   <%@ include file="/WEB-INF/views/common/head-assets.jspf" %>
+  <link rel="stylesheet" href="${ctx}/assets/css/tv2-workspace.css">
   <title><%= pageContent.getExtractedProperties().getChild("title").getValue() %> - QAUTE</title>
   <%= pageContent.getExtractedProperties().getChild("head").getValue() %>
 </head>
-<body>
+<body class="qa-workspace qa-workspace--manager">
+<a class="qa-workspace-skip" href="#workspace-main">Chuyển đến nội dung</a>
+<button class="qa-workspace-overlay" type="button" data-workspace-close hidden aria-label="Đóng menu điều hướng"></button>
 <div class="page">
 
-  <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
+  <aside class="qa-workspace-sidebar" id="workspace-sidebar" data-bs-theme="dark" aria-label="Điều hướng tư vấn viên">
     <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#qa-sidebar-menu"
               aria-controls="qa-sidebar-menu" aria-expanded="false" aria-label="Mở menu">
@@ -41,11 +45,17 @@
       <h1 class="navbar-brand navbar-brand-autodark">
         <a href="${ctx}/manager/dashboard" class="text-decoration-none">
           <img src="${ctx}/assets/images/hcmute-logo.png" alt="Logo HCMUTE" class="qa-role-logo">
-          <span>QAUTE</span> <small class="text-secondary">Manager</small>
+          <span class="qa-workspace-brand-copy">QA<span>UTE</span><small>CỔNG HỖ TRỢ SINH VIÊN</small></span>
         </a>
       </h1>
+      <a class="qa-workspace-user-card" href="${ctx}/manager/profile">
+        <span class="qa-workspace-avatar"><c:out value="${workspaceInitial}"/></span>
+        <span class="qa-workspace-user-copy"><strong><c:out value="${workspaceName}"/></strong><small>Tư vấn viên</small></span>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      </a>
       <div class="collapse navbar-collapse" id="qa-sidebar-menu">
         <ul class="navbar-nav pt-lg-3">
+          <li class="qa-workspace-nav-label">KHÔNG GIAN LÀM VIỆC</li>
           <li class="nav-item">
             <a class="nav-link" href="${ctx}/" aria-label="Quay về trang chủ Guest">
               <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-globe2"></i></span>
@@ -67,7 +77,7 @@
           <li class="nav-item ${activePath == '/manager/chat' ? 'active' : ''}">
             <a class="nav-link" href="${ctx}/manager/chat">
               <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-chat-dots"></i></span>
-              <span class="nav-link-title">Chat desk</span>
+              <span class="nav-link-title">Tư vấn trực tuyến</span>
             </a>
           </li>
           <li class="nav-item ${activePath == '/manager/schedule' ? 'active' : ''}">
@@ -88,6 +98,7 @@
               <span class="nav-link-title">Sinh viên</span>
             </a>
           </li>
+          <li class="qa-workspace-nav-label">TRI THỨC & CÁ NHÂN</li>
           <li class="nav-item ${activePath == '/manager/canned-responses' ? 'active' : ''}">
             <a class="nav-link" href="${ctx}/manager/canned-responses">
               <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-chat-left-text"></i></span>
@@ -114,26 +125,30 @@
           </li>
         </ul>
       </div>
+      <div class="qa-workspace-sidebar-footer"><span class="qa-workspace-role-dot"></span>Không gian tư vấn viên<a href="${ctx}/guide" aria-label="Hướng dẫn sử dụng"><i class="bi bi-question-circle"></i></a></div>
     </div>
   </aside>
 
-  <header class="navbar navbar-expand-md d-print-none">
+  <header class="navbar navbar-expand-md d-print-none qa-workspace-topbar">
     <div class="container-xl">
-      <button class="btn qa-sidebar-toggle" type="button" data-qa-sidebar-toggle
-              aria-controls="qa-sidebar-menu" aria-expanded="true" aria-label="Thu gọn hoặc mở menu">
+      <button class="btn qa-sidebar-toggle" type="button" data-workspace-toggle
+              aria-controls="workspace-sidebar" aria-expanded="true" aria-label="Thu gọn hoặc mở menu">
         <i class="bi bi-list"></i>
       </button>
       <a href="${ctx}/manager/dashboard" class="qa-topbar-brand d-lg-none">
         <img src="${ctx}/assets/images/hcmute-logo.png" alt="Logo HCMUTE">
         <strong>QA<span>UTE</span></strong>
       </a>
+      <div class="qa-workspace-location"><small>KHÔNG GIAN TƯ VẤN</small><strong><c:out value="${workspacePageTitle}"/></strong></div>
       <div class="navbar-nav flex-row ms-auto align-items-center gap-3">
 
         <c:if test="${not empty mgrStatus}">
-          <form method="post" action="${ctx}/manager/profile/status" class="m-0">
+          <div class="dropdown qa-workspace-presence">
+            <button class="btn qa-presence-toggle dropdown-toggle" data-bs-toggle="dropdown" type="button" aria-expanded="false"><span class="qa-presence-dot qa-presence-dot--${mgrStatus}"></span><c:choose><c:when test="${mgrStatus == 'ONLINE'}">Trực tuyến</c:when><c:when test="${mgrStatus == 'BUSY'}">Đang bận</c:when><c:otherwise>Ngoại tuyến</c:otherwise></c:choose></button>
+            <form method="post" action="${ctx}/manager/profile/status" class="dropdown-menu dropdown-menu-end p-2">
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <input type="hidden" name="redirect" value="<c:out value='${currentPath}'/>"/>
-            <div class="btn-group btn-group-sm" role="group" aria-label="Trạng thái trực">
+            <div class="d-grid gap-1" role="group" aria-label="Trạng thái trực">
               <button type="submit" name="status" value="ONLINE"
                       class="btn qa-status-online ${mgrStatus == 'ONLINE' ? 'active' : ''}"
                       aria-pressed="${mgrStatus == 'ONLINE'}" title="Sẵn sàng nhận yêu cầu và chat">Trực tuyến</button>
@@ -144,15 +159,16 @@
                       class="btn qa-status-offline ${mgrStatus == 'OFFLINE' ? 'active' : ''}"
                       aria-pressed="${mgrStatus == 'OFFLINE'}" title="Không trực">Ngoại tuyến</button>
             </div>
-          </form>
+            </form>
+          </div>
         </c:if>
 
         <div class="nav-item dropdown">
           <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Mở menu người dùng">
-            <span class="avatar avatar-sm bg-blue-lt"><i class="bi bi-person-fill"></i></span>
+            <span class="qa-workspace-avatar qa-workspace-avatar--small"><c:out value="${workspaceInitial}"/></span>
             <div class="d-none d-xl-block ps-2">
-              <div><sec:authentication property="principal.fullName"/></div>
-              <div class="mt-1 small text-secondary">Manager</div>
+              <div><c:out value="${workspaceName}"/></div>
+              <div class="mt-1 small text-secondary">Tư vấn viên</div>
             </div>
           </a>
           <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
@@ -169,17 +185,17 @@
     </div>
   </header>
 
-  <div class="page-wrapper">
+  <main class="page-wrapper" id="workspace-main" tabindex="-1">
     <div class="page-body">
-      <div class="container-xl">
+      <div class="container-xl qa-workspace-container">
         <qa:alert/>
         <%= pageContent.getExtractedProperties().getChild("body").getValue() %>
       </div>
     </div>
     <footer class="footer footer-transparent d-print-none">
-      <div class="container-xl text-center text-secondary small">&copy; QAUTE - Student Support Hub (HCMUTE)</div>
+      <div class="container-xl qa-workspace-footer"><span>&copy; QAUTE · Cổng hỗ trợ sinh viên</span><a href="${ctx}/guide">Hướng dẫn sử dụng <i class="bi bi-arrow-up-right"></i></a></div>
     </footer>
-  </div>
+  </main>
 </div>
 
 <%@ include file="/WEB-INF/views/common/scripts.jspf" %>

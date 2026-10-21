@@ -2,9 +2,9 @@
 <title>Danh sách người dùng</title>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-  <h2 class="page-title mb-0">Danh sách người dùng</h2>
-  <div class="d-flex align-items-center gap-3"><span class="text-secondary small">${users.totalElements} tài khoản</span>
+<div class="qa-page-heading">
+  <div><span class="qa-page-eyebrow">Quản trị tài khoản</span><h1 class="page-title mb-0">Danh sách người dùng</h1><p>Quản lý thông tin và quyền truy cập của ${users.totalElements} tài khoản.</p></div>
+  <div class="qa-page-heading-actions">
     <a class="btn btn-outline-primary" href="${ctx}/admin/users/import"><i class="bi bi-upload me-1"></i>Nhập CSV</a>
     <a class="btn btn-primary" href="${ctx}/admin/users/new"><i class="bi bi-plus-lg me-1"></i>Thêm người dùng</a></div>
 </div>
@@ -105,8 +105,8 @@
                     <c:otherwise><span class="badge bg-yellow-lt">Chờ xác minh</span></c:otherwise>
                   </c:choose>
                 </td>
-                <td><c:choose><c:when test="${not empty item.lastLoginAt()}"><c:out value="${item.lastLoginAt()}"/></c:when><c:otherwise><span class="text-secondary">Chưa đăng nhập</span></c:otherwise></c:choose></td>
-                <td><c:out value="${item.createdAt()}"/></td>
+                <td><c:choose><c:when test="${not empty item.lastLoginAt()}"><time datetime="${item.lastLoginAt()}" data-workspace-datetime><c:out value="${item.lastLoginAt()}"/></time></c:when><c:otherwise><span class="text-secondary">Chưa đăng nhập</span></c:otherwise></c:choose></td>
+                <td><time datetime="${item.createdAt()}" data-workspace-datetime><c:out value="${item.createdAt()}"/></time></td>
                 <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="${ctx}/admin/users/${item.id()}">Chi tiết</a></td>
               </tr>
             </c:forEach>

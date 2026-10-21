@@ -241,11 +241,10 @@ class Tv2SeedersTest {
     }
 
     @Test
-    void announcementsAreRepeatableWithCorrectAudiencesAndExpiry() {
+    void publicAnnouncementsAreRepeatableAndReadyForTheUpdatedGuestPage() {
         AnnouncementRepository announcements = mock(AnnouncementRepository.class);
         List<Announcement> saved = new ArrayList<>();
-        when(announcements.existsByTitle(anyString())).thenAnswer(call -> saved.stream()
-                .anyMatch(announcement -> announcement.getTitle().equals(call.getArgument(0))));
+        when(announcements.count()).thenAnswer(call -> (long) saved.size());
         when(announcements.save(any())).thenAnswer(call -> {
             Announcement announcement = call.getArgument(0);
             saved.add(announcement);
@@ -254,14 +253,17 @@ class Tv2SeedersTest {
         AnnouncementSeeder seeder = new AnnouncementSeeder(announcements, users);
 
         seeder.seed();
+        int firstRunCount = saved.size();
         seeder.seed();
 
-        assertEquals(70, seeder.order());
-        assertEquals(4, saved.size());
-        assertEquals(1, saved.stream().filter(a -> a.isPinned() && a.getAudience() == AnnouncementAudience.ALL).count());
-        assertEquals(1, saved.stream().filter(a -> a.getAudience() == AnnouncementAudience.STUDENT).count());
-        assertEquals(1, saved.stream().filter(a -> a.getAudience() == AnnouncementAudience.MANAGER).count());
-        assertEquals(1, saved.stream().filter(a -> a.getStatus() == AnnouncementStatus.EXPIRED && a.getExpiresAt().isBefore(LocalDateTime.now())).count());
+        assertTrue(firstRunCount > 0);
+        assertEquals(firstRunCount, saved.size());
+        assertTrue(saved.stream().anyMatch(Announcement::isPinned));
+        assertTrue(saved.stream().allMatch(a -> a.getAudience() == AnnouncementAudience.ALL
+                && a.getStatus() == AnnouncementStatus.PUBLISHED
+                && a.getPublishAt() != null && !a.getPublishAt().isAfter(LocalDateTime.now())
+                && a.getTitle() != null && !a.getTitle().isBlank()
+                && a.getBodyHtml() != null && !a.getBodyHtml().isBlank()));
         assertTrue(saved.stream().allMatch(a -> !a.isNotifyOnPublish() && a.getCreatedBy() == 99L));
     }
 

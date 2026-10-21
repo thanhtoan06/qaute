@@ -3,6 +3,12 @@
     const root = document.getElementById('chat-desk');
     if (!root) return;
     const el = id => document.getElementById(id);
+    function connectionStatus(connected) {
+        const badge = el('chat-connection-status');
+        if (!badge) return;
+        badge.className = 'badge ' + (connected ? 'bg-green-lt' : 'bg-orange-lt');
+        badge.textContent = connected ? 'Đã kết nối' : 'Đang kết nối lại…';
+    }
     const state = {client: null, active: null, mine: new Map(), queue: [], queuePage: 0, subscriptions: new Map(), lastIds: new Map(), lastRead: new Map(), unread: new Map(), seen: new Map(), typingTimer: null, audio: null};
     const toast = (message, type) => Qaute.toast(message, type || 'info');
     const api = (url, options) => Qaute.fetchJson(url, options).then(result => result.data);
@@ -178,6 +184,7 @@
         state.client = new StompJs.Client({webSocketFactory: () => new SockJS('/ws'),
             connectHeaders: {'X-XSRF-TOKEN': Qaute.csrfToken()}, reconnectDelay: 3000,
             onConnect: () => {
+                connectionStatus(true);
                 state.subscriptions.clear();
                 state.client.subscribe('/user/queue/chat-queue', async frame => {
                     const event = JSON.parse(frame.body);
@@ -192,7 +199,8 @@
                 state.client.subscribe('/user/queue/errors', frame => toast(JSON.parse(frame.body).message, 'danger'));
                 loadMine().catch(error => toast(error.message, 'danger'));
                 loadQueue().catch(error => toast(error.message, 'danger'));
-            }, onStompError: () => toast('Kết nối chat gặp lỗi.', 'danger')});
+            }, onWebSocketClose: () => connectionStatus(false),
+            onStompError: () => { connectionStatus(false); toast('Kết nối chat gặp lỗi.', 'danger'); }});
         state.client.activate();
     }
     el('chat-compose').addEventListener('submit', event => {

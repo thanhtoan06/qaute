@@ -1,6 +1,7 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
-<title>Chat desk</title>
+<title>Tư vấn trực tuyến</title>
+<div class="qa-page-heading"><div><span class="qa-page-eyebrow">Kết nối sinh viên</span><h1 class="page-title mb-0">Tư vấn trực tuyến</h1><p>Tiếp nhận hội thoại và đồng hành cùng sinh viên trong thời gian thực.</p></div><span id="chat-connection-status" class="badge bg-secondary-lt" role="status">Đang kết nối…</span></div>
 <div id="chat-desk" class="row g-3" style="min-height:70vh">
   <div class="col-12 col-lg-3">
     <div class="card mb-3"><div class="card-header"><h2 class="card-title">Hàng chờ <span id="chat-queue-count" class="badge bg-blue-lt">0</span></h2></div>
@@ -25,5 +26,6 @@
     <div class="card-header"><h2 class="card-title">Ticket gần đây</h2></div><div id="chat-recent-tickets" class="list-group list-group-flush"></div></div></div>
 </div>
 <div class="modal fade" id="chat-transfer-modal" tabindex="-1" aria-labelledby="chat-transfer-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h3 id="chat-transfer-label" class="modal-title">Chuyển hội thoại</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div><div class="modal-body"><label for="chat-transfer-target" class="form-label">Tư vấn viên nhận</label><select id="chat-transfer-target" class="form-select"></select></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button id="chat-transfer-confirm" type="button" class="btn btn-primary">Chuyển</button></div></div></div></div>
-<%@ include file="/WEB-INF/views/common/ws-scripts.jspf" %>
-<script src="${pageContext.request.contextPath}/assets/js/manager/chat-desk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js" defer></script>
+<script src="${pageContext.request.contextPath}/assets/js/manager/chat-desk.js" defer></script>

@@ -8,11 +8,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("dev,demo")
+@ActiveProfiles({"dev", "demo"})
 public class HomeControllerDebugTest {
 
     @Autowired
@@ -21,7 +21,7 @@ public class HomeControllerDebugTest {
     @Test
     void testHome() throws Exception {
         mockMvc.perform(get("/"))
-                .andDo(print());
+                .andExpect(status().isOk());
     }
 }
 

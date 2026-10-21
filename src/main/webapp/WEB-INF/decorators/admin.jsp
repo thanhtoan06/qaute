@@ -5,6 +5,7 @@
     Content pageContent = (Content) request.getAttribute("org.sitemesh.content.Content");
 %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ include file="/WEB-INF/views/common/tv2-workspace-user.jspf" %>
 
 <c:set var="rawUri" value="${not empty requestScope['jakarta.servlet.forward.request_uri'] ? requestScope['jakarta.servlet.forward.request_uri'] : pageContext.request.requestURI}"/>
 <c:set var="currentPath" value="${fn:startsWith(rawUri, ctx) ? fn:substring(rawUri, fn:length(ctx), fn:length(rawUri)) : rawUri}"/>
@@ -29,13 +30,16 @@
 <head>
   <meta charset="UTF-8">
   <%@ include file="/WEB-INF/views/common/head-assets.jspf" %>
+  <link rel="stylesheet" href="${ctx}/assets/css/tv2-workspace.css">
   <title><%= pageContent.getExtractedProperties().getChild("title").getValue() %> - QAUTE</title>
   <%= pageContent.getExtractedProperties().getChild("head").getValue() %>
 </head>
-<body>
+<body class="qa-workspace qa-workspace--admin">
+<a class="qa-workspace-skip" href="#workspace-main">Chuyển đến nội dung</a>
+<button class="qa-workspace-overlay" type="button" data-workspace-close hidden aria-label="Đóng menu điều hướng"></button>
 <div class="page">
 
-  <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
+  <aside class="qa-workspace-sidebar" id="workspace-sidebar" data-bs-theme="dark" aria-label="Điều hướng quản trị viên">
     <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#qa-sidebar-menu"
               aria-controls="qa-sidebar-menu" aria-expanded="false" aria-label="Mở menu">
@@ -44,11 +48,17 @@
       <h1 class="navbar-brand navbar-brand-autodark">
         <a href="${ctx}/admin/dashboard" class="text-decoration-none">
           <img src="${ctx}/assets/images/hcmute-logo.png" alt="Logo HCMUTE" class="qa-role-logo">
-          <span>QAUTE</span> <small class="text-secondary">Admin</small>
+          <span class="qa-workspace-brand-copy">QA<span>UTE</span><small>CỔNG HỖ TRỢ SINH VIÊN</small></span>
         </a>
       </h1>
+      <a class="qa-workspace-user-card" href="${ctx}/admin/dashboard">
+        <span class="qa-workspace-avatar"><c:out value="${workspaceInitial}"/></span>
+        <span class="qa-workspace-user-copy"><strong><c:out value="${workspaceName}"/></strong><small>Quản trị viên</small></span>
+        <i class="bi bi-shield-check" aria-hidden="true"></i>
+      </a>
       <div class="collapse navbar-collapse" id="qa-sidebar-menu">
         <ul class="navbar-nav pt-lg-3">
+          <li class="qa-workspace-nav-label">QUẢN TRỊ HỆ THỐNG</li>
 
           <li class="nav-item">
             <a class="nav-link" href="${ctx}/" aria-label="Quay về trang chủ Guest">
@@ -143,26 +153,28 @@
 
         </ul>
       </div>
+      <div class="qa-workspace-sidebar-footer"><span class="qa-workspace-role-dot"></span>Không gian quản trị<a href="${ctx}/guide" aria-label="Hướng dẫn sử dụng"><i class="bi bi-question-circle"></i></a></div>
     </div>
   </aside>
 
-  <header class="navbar navbar-expand-md d-print-none">
+  <header class="navbar navbar-expand-md d-print-none qa-workspace-topbar">
     <div class="container-xl">
-      <button class="btn qa-sidebar-toggle" type="button" data-qa-sidebar-toggle
-              aria-controls="qa-sidebar-menu" aria-expanded="true" aria-label="Thu gọn hoặc mở menu">
+      <button class="btn qa-sidebar-toggle" type="button" data-workspace-toggle
+              aria-controls="workspace-sidebar" aria-expanded="true" aria-label="Thu gọn hoặc mở menu">
         <i class="bi bi-list"></i>
       </button>
       <a href="${ctx}/admin/dashboard" class="qa-topbar-brand d-lg-none">
         <img src="${ctx}/assets/images/hcmute-logo.png" alt="Logo HCMUTE">
         <strong>QA<span>UTE</span></strong>
       </a>
+      <div class="qa-workspace-location"><small>KHÔNG GIAN QUẢN TRỊ</small><strong><c:out value="${workspacePageTitle}"/></strong></div>
       <div class="navbar-nav flex-row ms-auto align-items-center gap-3">
 
         <div class="nav-item dropdown">
           <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Mở menu người dùng">
-            <span class="avatar avatar-sm bg-blue-lt"><i class="bi bi-person-fill"></i></span>
+            <span class="qa-workspace-avatar qa-workspace-avatar--small"><c:out value="${workspaceInitial}"/></span>
             <div class="d-none d-xl-block ps-2">
-              <div><sec:authentication property="principal.fullName"/></div>
+              <div><c:out value="${workspaceName}"/></div>
               <div class="mt-1 small text-secondary">Quản trị viên</div>
             </div>
           </a>
@@ -177,7 +189,7 @@
     </div>
   </header>
 
-  <div class="page-wrapper">
+  <main class="page-wrapper" id="workspace-main" tabindex="-1">
 
     <c:if test="${not empty requestScope.pageTitle}">
       <div class="page-header d-print-none">
@@ -191,15 +203,15 @@
     </c:if>
 
     <div class="page-body">
-      <div class="container-xl">
+      <div class="container-xl qa-workspace-container">
         <qa:alert/>
         <%= pageContent.getExtractedProperties().getChild("body").getValue() %>
       </div>
     </div>
     <footer class="footer footer-transparent d-print-none">
-      <div class="container-xl text-center text-secondary small">&copy; QAUTE - Student Support Hub (HCMUTE)</div>
+      <div class="container-xl qa-workspace-footer"><span>&copy; QAUTE · Cổng hỗ trợ sinh viên</span><a href="${ctx}/guide">Hướng dẫn sử dụng <i class="bi bi-arrow-up-right"></i></a></div>
     </footer>
-  </div>
+  </main>
 </div>
 
 <%@ include file="/WEB-INF/views/common/scripts.jspf" %>

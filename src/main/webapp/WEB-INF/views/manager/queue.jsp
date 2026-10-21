@@ -2,9 +2,9 @@
 <title>Hàng đợi yêu cầu</title>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-  <h2 class="page-title mb-0">Hàng đợi yêu cầu</h2>
-  <span class="text-secondary small">Ưu tiên theo SLA, mức độ và thời gian tạo</span>
+<div class="qa-page-heading">
+  <div><span class="qa-page-eyebrow">Quản lý tư vấn</span><h1 class="page-title mb-0">Hàng đợi yêu cầu</h1><p>Theo dõi, tiếp nhận và xử lý các yêu cầu trong phạm vi của bạn.</p></div>
+  <a class="btn btn-outline-primary" href="${ctx}/manager/chat"><i class="bi bi-chat-dots me-2"></i>Tư vấn trực tuyến</a>
 </div>
 
 <div class="nav nav-tabs mb-3" role="tablist" aria-label="Hàng đợi yêu cầu">
@@ -28,22 +28,17 @@
   <div class="d-flex gap-2"><button class="btn btn-primary" type="submit">Lọc</button><a class="btn btn-outline-secondary" href="${ctx}/manager/queue?tab=${filter.tab}">Bỏ lọc</a></div>
 </form>
 
-<div class="card"><div class="table-responsive"><table class="table table-vcenter card-table qa-admin-table">
-  <thead><tr><th>Mã</th><th>Tiêu đề</th><th>Sinh viên</th><th>Chuyên mục</th><th>Ưu tiên</th><th>Trạng thái</th><th>SLA</th><th>Người phụ trách</th><th>Tuổi</th><th>Đề nghị gấp</th><th>Hoạt động cuối</th><th>Thao tác</th></tr></thead>
-  <tbody><c:choose><c:when test="${empty tickets.content}"><tr><td colspan="12"><qa:emptyState icon="bi-inbox" title="Không có yêu cầu phù hợp" message="Hãy thử đổi điều kiện lọc hoặc chọn tab khác."/></td></tr></c:when>
+<div class="card"><div class="table-responsive"><table class="table table-vcenter card-table qa-admin-table qa-queue-table">
+  <thead><tr><th>Yêu cầu tư vấn</th><th>Sinh viên</th><th>Chuyên mục</th><th>Tình trạng</th><th>Người phụ trách</th><th>Thời gian</th><th>Thao tác</th></tr></thead>
+  <tbody><c:choose><c:when test="${empty tickets.content}"><tr><td colspan="7"><qa:emptyState icon="bi-inbox" title="Không có yêu cầu phù hợp" message="Hãy thử đổi điều kiện lọc hoặc chọn tab khác."/></td></tr></c:when>
   <c:otherwise><c:forEach var="item" items="${tickets.content}"><tr>
-    <td class="fw-semibold"><c:out value="${item.code()}"/></td>
-    <td><c:out value="${item.title()}"/></td>
+    <td class="qa-ticket-cell"><span class="qa-ticket-code"><c:out value="${item.code()}"/></span><a class="qa-ticket-title" href="${ctx}/manager/tickets/${item.id()}"><c:out value="${item.title()}"/></a><c:if test="${item.urgentRequested()}"><span class="badge bg-red-lt"><i class="bi bi-lightning-charge me-1"></i>SV đề nghị gấp</span></c:if></td>
     <td><c:out value="${item.studentName()}"/></td>
     <td><c:out value="${item.categoryPath()}"/></td>
-    <td><qa:priorityBadge priority="${item.priority()}"/></td>
-    <td><qa:statusBadge status="${item.status()}"/></td>
-    <td><qa:slaBadge sla="${item.slaStatus()}"/></td>
+    <td><div class="qa-queue-status"><qa:priorityBadge priority="${item.priority()}"/><qa:statusBadge status="${item.status()}"/><qa:slaBadge sla="${item.slaStatus()}"/></div></td>
     <td><c:out value="${item.assigneeName()}"/><c:if test="${item.mine()}"><span class="badge bg-blue-lt ms-1">Tôi</span></c:if></td>
-    <td>${item.ageHours()} giờ</td>
-    <td><c:if test="${item.urgentRequested()}"><span class="badge bg-red-lt">SV đề nghị gấp</span></c:if></td>
-    <td><c:out value="${item.lastActivityAt()}"/></td>
-    <td><div class="d-flex flex-wrap gap-1">
+    <td><span class="text-nowrap">Đã tạo ${item.ageHours()} giờ</span><div class="small text-secondary mt-1"><time datetime="${item.lastActivityAt()}" data-workspace-datetime><c:out value="${item.lastActivityAt()}"/></time></div></td>
+    <td><div class="d-flex flex-wrap gap-1 qa-queue-actions">
       <a class="btn btn-sm btn-outline-secondary" href="${ctx}/manager/tickets/${item.id()}">Mở</a>
       <c:if test="${item.status() eq 'NEW'}">
         <form method="post" action="${ctx}/manager/tickets/${item.id()}/claim" class="m-0">

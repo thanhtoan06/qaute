@@ -9,8 +9,9 @@
   function list(id, items, map) {
     const container = el(id);
     if (!items?.length) {
-      const empty = document.createElement('div'); empty.className = 'list-group-item text-secondary';
-      empty.textContent = 'Không có cảnh báo.'; container.append(empty); return;
+      const empty = document.createElement('div'); empty.className = 'list-group-item qa-dashboard-empty';
+      const icon = document.createElement('i'); icon.className = 'bi bi-check2-circle'; icon.setAttribute('aria-hidden', 'true');
+      empty.append(icon, document.createTextNode('Chưa có mục cần chú ý.')); container.append(empty); return;
     }
     items.forEach(item => {
       const data = map(item);
@@ -26,9 +27,20 @@
 
   function chart(id, type, labels, values, color) {
     if (!window.Chart) return;
+    const horizontal = type === 'bar';
+    const gradient = el(id).getContext('2d').createLinearGradient(0, 0, 0, 280);
+    gradient.addColorStop(0, 'rgba(32, 107, 196, 0.14)');
+    gradient.addColorStop(1, 'rgba(32, 107, 196, 0.01)');
     new Chart(el(id), {type, data: {labels, datasets: [{label: 'Giá trị', data: values,
-      borderColor: color, backgroundColor: color, tension: 0.25}]},
-      options: {responsive: true, maintainAspectRatio: false, scales: {y: {beginAtZero: true}}}});
+      borderColor: color, backgroundColor: horizontal ? color : gradient,
+      fill: !horizontal, borderWidth: horizontal ? 0 : 2.5, borderRadius: 5,
+      maxBarThickness: 26, pointRadius: 2, pointHoverRadius: 5, tension: 0.35}]},
+      options: {responsive: true, maintainAspectRatio: false, indexAxis: horizontal ? 'y' : 'x',
+        plugins: {legend: {display: false}, tooltip: {backgroundColor: '#0b1f3a', padding: 12, cornerRadius: 8}},
+        scales: {
+          x: {grid: {display: horizontal, color: '#eef2f7'}, border: {display: false}, ticks: {color: '#8a99ac', maxTicksLimit: 7, precision: 0, font: {size: 10}}},
+          y: {beginAtZero: true, grid: {display: !horizontal, color: '#eef2f7'}, border: {display: false}, ticks: {color: '#8a99ac', font: {size: 10}}}
+        }}});
   }
 
   Qaute.fetchJson(root.dataset.api).then(response => {
@@ -54,10 +66,10 @@
     list('adm-alert-audit', d.recentActivity,
       item => ({title: item.action, detail: item.at ? new Date(item.at).toLocaleString('vi-VN') : ''}));
     el('adm-dashboard-content').classList.remove('d-none');
-    chart('adm-d-chart-daily', 'line', d.daily30.map(item => item.day),
+    chart('adm-d-chart-daily', 'line', d.daily30.map(item => new Date(item.day + 'T00:00:00').toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'})),
       d.daily30.map(item => item.count), '#206bc4');
     chart('adm-d-chart-departments', 'bar', d.departments.map(item => item.departmentName),
-      d.departments.map(item => item.tickets), '#2fb344');
+      d.departments.map(item => item.tickets), '#61b59a');
     chart('adm-d-chart-frt', 'line', d.frtWeekly.map(item => item.weekStart),
       d.frtWeekly.map(item => item.minutes), '#f59f00');
   }).catch(error => {
