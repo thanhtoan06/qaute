@@ -14,6 +14,8 @@ import vn.edu.hcmute.qaute.common.constant.AppointmentStatus;
 import vn.edu.hcmute.qaute.entity.appointment.Appointment;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long>, JpaSpecificationExecutor<Appointment> {
+    boolean existsByStudentIdAndTopic(Long studentId, String topic);
+
     List<Appointment> findBySlotIdInAndStatusIn(Collection<Long> slotIds, Collection<AppointmentStatus> statuses);
     List<Appointment> findBySlotIdIn(Collection<Long> slotIds);
 

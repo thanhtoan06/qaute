@@ -16,6 +16,8 @@ import vn.edu.hcmute.qaute.common.constant.ChatSessionStatus;
 import vn.edu.hcmute.qaute.entity.chat.ChatSession;
 
 public interface ChatSessionRepository extends JpaRepository<ChatSession, Long> {
+    boolean existsByStudentIdAndInitialQuestion(Long studentId, String initialQuestion);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select s from ChatSession s where s.id = :id")
     Optional<ChatSession> findLockedById(@Param("id") Long id);
