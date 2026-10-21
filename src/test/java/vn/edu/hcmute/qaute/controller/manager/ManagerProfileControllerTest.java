@@ -6,6 +6,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import vn.edu.hcmute.qaute.dto.request.manager.ManagerPresenceForm;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,11 +38,9 @@ class ManagerProfileControllerTest {
     @Test
     void statusChangesReturnToInternalManagerPage() {
         authenticate();
-        assertEquals("redirect:/manager/faq", controller.status(AvailabilityStatus.BUSY,
-                "/manager/faq", new RedirectAttributesModelMap()));
+        assertEquals("redirect:/manager/faq", status(AvailabilityStatus.BUSY, "/manager/faq"));
         verify(profiles).setStatus(7L, AvailabilityStatus.BUSY);
-        assertEquals("redirect:/manager/queue", controller.status(AvailabilityStatus.ONLINE,
-                "https://evil.example/manager/faq", new RedirectAttributesModelMap()));
+        assertEquals("redirect:/manager/queue", status(AvailabilityStatus.ONLINE, "https://evil.example/manager/faq"));
     }
 
     @Test
@@ -54,6 +54,11 @@ class ManagerProfileControllerTest {
                 new RedirectAttributesModelMap()));
 
         verify(sessions, never()).revokeSession(10L, 7L);
+    }
+
+    private String status(AvailabilityStatus status, String redirect) {
+        ManagerPresenceForm form = new ManagerPresenceForm(); form.setStatus(status); form.setRedirect(redirect);
+        return controller.status(form, new BeanPropertyBindingResult(form, "form"), new RedirectAttributesModelMap());
     }
 
     private static void authenticate() {

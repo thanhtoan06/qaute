@@ -91,3 +91,5 @@
     </table>
   </div>
 </div>
+
+<qa:pagination page="${resultPage}" baseUrl="${pageContext.request.contextPath}/admin/departments"/>

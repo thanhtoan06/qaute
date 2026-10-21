@@ -105,3 +105,5 @@
     </table>
   </div>
 </div>
+
+<qa:pagination page="${resultPage}" baseUrl="${ctx}/admin/managers" params="${paginationParams}"/>

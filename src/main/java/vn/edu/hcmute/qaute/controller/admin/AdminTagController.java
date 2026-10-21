@@ -1,5 +1,13 @@
 package vn.edu.hcmute.qaute.controller.admin;
 
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import vn.edu.hcmute.qaute.dto.request.admin.TagNameForm;
+import vn.edu.hcmute.qaute.dto.request.admin.TagMergeForm;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,32 +28,42 @@ public class AdminTagController {
     }
 
     @GetMapping("/admin/faq/tags")
-    public String list(Model model) {
-        model.addAttribute("tags", tags.list());
+    public String list(@RequestParam(defaultValue="0") int page, Model model) {
+        var results = tags.page(BoundedPages.of(page, 25));
+        model.addAttribute("tags", results.getContent());
+        model.addAttribute("resultPage", results);
         model.addAttribute("pageTitle", "Quản lý thẻ FAQ");
         return "admin/tags";
     }
 
     @PostMapping("/admin/faq/tags")
-    public String create(@RequestParam(required = false) String name, RedirectAttributes redirect) {
-        return action(redirect, () -> tags.create(name), "Đã thêm thẻ");
+    public String create(@Valid @ModelAttribute TagNameForm form, BindingResult errors, RedirectAttributes redirect) {
+        if (errors.hasErrors()) return invalid(errors, redirect);
+        return action(redirect, () -> tags.create(form.getName()), "Đã thêm thẻ");
     }
 
     @PostMapping("/admin/faq/tags/{id}/rename")
-    public String rename(@PathVariable Long id, @RequestParam(required = false) String name,
+    public String rename(@PathVariable Long id, @Valid @ModelAttribute TagNameForm form, BindingResult errors,
                          RedirectAttributes redirect) {
-        return action(redirect, () -> tags.rename(id, name), "Đã đổi tên thẻ");
+        if (errors.hasErrors()) return invalid(errors, redirect);
+        return action(redirect, () -> tags.rename(id, form.getName()), "Đã đổi tên thẻ");
     }
 
     @PostMapping("/admin/faq/tags/{id}/merge")
-    public String merge(@PathVariable Long id, @RequestParam Long targetId,
+    public String merge(@PathVariable Long id, @Valid @ModelAttribute TagMergeForm form, BindingResult errors,
                         RedirectAttributes redirect) {
-        return action(redirect, () -> tags.merge(id, targetId), "Đã gộp thẻ");
+        if (errors.hasErrors()) return invalid(errors, redirect);
+        return action(redirect, () -> tags.merge(id, form.getTargetId()), "Đã gộp thẻ");
     }
 
     @PostMapping("/admin/faq/tags/{id}/delete")
     public String delete(@PathVariable Long id, RedirectAttributes redirect) {
         return action(redirect, () -> tags.delete(id), "Đã xóa thẻ");
+    }
+
+    private String invalid(BindingResult errors, RedirectAttributes redirect) {
+        redirect.addFlashAttribute("flashError", errors.getAllErrors().getFirst().getDefaultMessage());
+        return "redirect:/admin/faq/tags";
     }
 
     private String action(RedirectAttributes redirect, Runnable operation, String success) {

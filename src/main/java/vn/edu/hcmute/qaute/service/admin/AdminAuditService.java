@@ -22,6 +22,7 @@ import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.common.util.CsvUtil;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
 import vn.edu.hcmute.qaute.common.util.TextUtil;
 import vn.edu.hcmute.qaute.dto.request.admin.AuditFilter;
 import vn.edu.hcmute.qaute.dto.view.AuditLogView;
@@ -46,7 +47,7 @@ public class AdminAuditService {
     }
 
     public Page<AuditLogView> search(AuditFilter filter, Pageable pageable) {
-        Page<AuditLog> page = logs.findAll(specification(filter), pageable);
+        Page<AuditLog> page = logs.findAll(specification(filter), BoundedPages.of(pageable));
         Map<Long, UserSummary> actors = summaries(page.getContent());
         return page.map(log -> view(log, actors));
     }
@@ -147,6 +148,8 @@ public class AdminAuditService {
         result.put(AuditActions.USER_FORCE_RESET, "Buộc đặt lại mật khẩu");
         result.put(AuditActions.USER_SESSION_REVOKED, "Thu hồi phiên đăng nhập");
         result.put(AuditActions.USER_IMPORTED, "Nhập sinh viên từ CSV");
+        result.put(AuditActions.USER_INVITATION_RESENT, "Gửi lại lời mời kích hoạt");
+        result.put(AuditActions.SYSTEM_TEST_EMAIL_QUEUED, "Gửi email kiểm tra hệ thống");
         result.put(AuditActions.VIEW_STUDENT_PROFILE, "Xem hồ sơ sinh viên");
         result.put(AuditActions.REPORT_EXPORT, "Xuất báo cáo CSV");
         result.put(AuditActions.TICKET_REASSIGNED, "Phân công lại yêu cầu");

@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import vn.edu.hcmute.qaute.security.SecurityUtils;
+import vn.edu.hcmute.qaute.common.constant.RoleCode;
+import vn.edu.hcmute.qaute.common.exception.ForbiddenException;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.TicketStatus;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
@@ -50,9 +53,11 @@ public class TicketReportService {
 
     public TicketReport build(ReportScope scope, ReportRange range) {
         if (scope == null || range == null || range.from() == null || range.to() == null
-                || range.from().isAfter(range.to())) {
+                || range.from().isAfter(range.to())
+                || java.time.temporal.ChronoUnit.DAYS.between(range.from(), range.to()) > 365) {
             throw new BadRequestException("Khoảng báo cáo không hợp lệ");
         }
+        scope = effectiveScope(scope);
         List<DailyCount> perDay = daily(queries.createdPerDay(scope, range), range);
         List<NamedCount> byCategory = queries.createdByCategory(scope, range).stream()
                 .map(row -> new NamedCount(categories.getDisplayPath(((Number) row[0]).longValue()), number(row[1])))
@@ -75,6 +80,15 @@ public class TicketReportService {
                 new SlaStats(slaCounts[0], slaCounts[1], percent(slaCounts[1], slaCounts[0])),
                 new BacklogStats(backlog[0], backlog[1], backlog[2], backlog[3]),
                 percent(resolved[1], resolved[0]), csat(queries.reviews(scope, range)), workload(scope, range));
+    }
+
+    private ReportScope effectiveScope(ReportScope requested) {
+        if (SecurityUtils.hasRole(RoleCode.ADMIN)) return requested;
+        if (!SecurityUtils.hasRole(RoleCode.MANAGER)) throw new ForbiddenException();
+        Long managerId = SecurityUtils.requireUserId();
+        Set<Long> allowed = new HashSet<>(scopes.getScopeCategoryIds(managerId));
+        if (requested.categoryIds() != null) allowed.retainAll(requested.categoryIds());
+        return new ReportScope(managerId, allowed);
     }
 
     private List<DailyCount> daily(List<Object[]> rows, ReportRange range) {

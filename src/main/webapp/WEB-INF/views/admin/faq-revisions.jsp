@@ -9,8 +9,8 @@
 
 <div class="card mb-3"><div class="card-body">
   <form method="get" action="${ctx}/admin/faq/${faq.id()}/revisions/compare" class="row g-2 align-items-end">
-    <div class="col-sm-5"><label class="form-label" for="version-a">Phiên bản A</label><select class="form-select" id="version-a" name="a" required><c:forEach var="item" items="${history}"><option value="${item.versionNo()}" ${not empty left and left.versionNo() eq item.versionNo() ? 'selected' : ''}>Phiên bản ${item.versionNo()}</option></c:forEach></select></div>
-    <div class="col-sm-5"><label class="form-label" for="version-b">Phiên bản B</label><select class="form-select" id="version-b" name="b" required><c:forEach var="item" items="${history}"><option value="${item.versionNo()}" ${not empty right and right.versionNo() eq item.versionNo() ? 'selected' : ''}>Phiên bản ${item.versionNo()}</option></c:forEach></select></div>
+    <div class="col-sm-5"><label class="form-label" for="version-a">Phiên bản A</label><input class="form-control" id="version-a" name="a" type="number" min="1" required aria-label="Số phiên bản A"/></div>
+    <div class="col-sm-5"><label class="form-label" for="version-b">Phiên bản B</label><input class="form-control" id="version-b" name="b" type="number" min="1" required aria-label="Số phiên bản B"/></div>
     <div class="col-sm-2"><button class="btn btn-outline-primary w-100" type="submit" ${empty history ? 'disabled' : ''}>So sánh</button></div>
   </form>
 </div></div>
@@ -41,3 +41,5 @@
     </div></td>
   </tr></c:forEach></c:otherwise></c:choose></tbody>
 </table></div></div>
+
+<qa:pagination page="${historyPage}" baseUrl="${ctx}/admin/faq/${faq.id()}/revisions"/>

@@ -1,5 +1,7 @@
 package vn.edu.hcmute.qaute.controller.manager;
 
+import vn.edu.hcmute.qaute.dto.request.admin.FaqSubmitForm;
+
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -91,9 +93,10 @@ public class ManagerFaqController {
     }
 
     @PostMapping("/manager/faq/{id}/submit")
-    public String submit(@PathVariable Long id, @ModelAttribute FaqForm form,
+    public String submit(@PathVariable Long id, @Valid @ModelAttribute FaqSubmitForm form, BindingResult errors,
             RedirectAttributes redirect) {
         try {
+            if (errors.hasErrors()) throw new BadRequestException("Dữ liệu xác nhận không hợp lệ");
             faqs.submit(id, SecurityUtils.requireUserId(), form.isConfirmedNoPersonalInfo());
             redirect.addFlashAttribute("flashSuccess", "Đã gửi FAQ chờ duyệt");
             return "redirect:/manager/faq";

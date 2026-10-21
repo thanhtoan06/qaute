@@ -1,5 +1,11 @@
 package vn.edu.hcmute.qaute.service.admin;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +60,14 @@ public class AdminDepartmentService {
     }
 
     @Transactional(readOnly = true)
+    public Page<DepartmentListItem> page(Pageable requested) {
+        Pageable page = BoundedPages.of(requested);
+        return departmentRepository.findAll(PageRequest.of(page.getPageNumber(), page.getPageSize(),
+                Sort.by("sortOrder", "name", "id"))).map(department ->
+                toListItem(department, categoryRepository.countByDepartmentId(department.getId())));
+    }
+
+    @Transactional(readOnly = true)
     public DepartmentForm get(Long id) {
         return toForm(requireDepartment(id));
     }
@@ -82,6 +96,7 @@ public class AdminDepartmentService {
             throw new DuplicateException("code", "Mã phòng ban đã được sử dụng");
         }
         String before = summarize(department);
+        if (department.isActive() && !form.isActive()) ensureCanDisable(department.getId());
         applyForm(department, form, code);
         Department saved = departmentRepository.save(department);
         auditService.log(AuditActions.DEPARTMENT_UPDATED, "department", saved.getId(),
@@ -96,21 +111,23 @@ public class AdminDepartmentService {
     public void toggleActive(Long id, Long actorId) {
         Department department = requireDepartment(id);
         boolean before = department.isActive();
-        if (before) {
-            List<Long> categoryIds = categoryRepository
-                    .findByDepartmentIdOrderBySortOrderAscNameAsc(id).stream()
-                    .map(Category::getId)
-                    .toList();
-            long openTickets = ticketUsageGuard.countOpenTicketsByCategoryIds(categoryIds);
-            if (openTickets > 0) {
-                throw new BadRequestException("Còn " + openTickets
-                        + " yêu cầu đang xử lý, hãy chuyển sang chuyên mục khác trước");
-            }
-        }
+        if (before) ensureCanDisable(id);
         department.setActive(!before);
         departmentRepository.save(department);
         auditService.log(AuditActions.DEPARTMENT_TOGGLED, "department", id,
                 "active=" + before, "active=" + (!before));
+    }
+
+    private void ensureCanDisable(Long id) {
+        List<Long> categoryIds = categoryRepository
+                .findByDepartmentIdOrderBySortOrderAscNameAsc(id).stream()
+                .map(Category::getId)
+                .toList();
+        long openTickets = ticketUsageGuard.countOpenTicketsByCategoryIds(categoryIds);
+        if (openTickets > 0) {
+            throw new BadRequestException("Còn " + openTickets
+                    + " yêu cầu đang xử lý, hãy chuyển sang chuyên mục khác trước");
+        }
     }
 
     private Department requireDepartment(Long id) {

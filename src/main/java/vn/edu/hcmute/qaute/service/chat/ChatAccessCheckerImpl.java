@@ -14,6 +14,7 @@ public class ChatAccessCheckerImpl implements ChatAccessChecker {
 
     @Override
     public boolean isParticipant(Long sessionId, Long userId) {
+        if (sessionId == null || userId == null) return false;
         return sessions.findById(sessionId).map(session -> Objects.equals(session.getStudentId(), userId)
                 || Objects.equals(session.getManagerId(), userId)).orElse(false);
     }

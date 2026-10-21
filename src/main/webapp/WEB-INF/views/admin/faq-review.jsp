@@ -61,7 +61,7 @@
     <div class="card"><div class="card-body">
       <h3 class="card-title">Lịch sử ghi chú</h3>
       <c:choose><c:when test="${empty faq.revisions()}"><p class="text-secondary mb-0">Chưa có phiên bản lưu.</p></c:when>
-      <c:otherwise><div class="list-group list-group-flush"><c:forEach var="revision" items="${faq.revisions()}"><div class="list-group-item px-0"><div class="fw-semibold">Phiên bản ${revision.versionNo()}</div><div class="small text-secondary"><c:out value="${revision.createdAt()}"/> · Người sửa #<c:out value="${revision.changedBy()}"/></div><c:if test="${not empty revision.changeNote()}"><p class="mb-0 mt-1"><c:out value="${revision.changeNote()}"/></p></c:if></div></c:forEach></div></c:otherwise></c:choose>
+      <c:otherwise><div class="list-group list-group-flush" data-tv2-pageable><c:forEach var="revision" items="${faq.revisions()}"><div class="list-group-item px-0"><div class="fw-semibold">Phiên bản ${revision.versionNo()}</div><div class="small text-secondary"><c:out value="${revision.createdAt()}"/> · Người sửa #<c:out value="${revision.changedBy()}"/></div><c:if test="${not empty revision.changeNote()}"><p class="mb-0 mt-1"><c:out value="${revision.changeNote()}"/></p></c:if></div></c:forEach></div></c:otherwise></c:choose>
     </div></div>
   </div>
 </div>

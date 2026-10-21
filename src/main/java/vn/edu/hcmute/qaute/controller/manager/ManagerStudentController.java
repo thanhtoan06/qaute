@@ -1,5 +1,7 @@
 package vn.edu.hcmute.qaute.controller.manager;
 
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import org.springframework.data.domain.PageRequest;
@@ -34,8 +36,8 @@ public class ManagerStudentController {
     }
 
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
-        model.addAttribute("detail", students.detail(SecurityUtils.requireUserId(), id));
+    public String detail(@PathVariable Long id, @RequestParam(defaultValue="0") int page, Model model) {
+        model.addAttribute("detail", students.detail(SecurityUtils.requireUserId(), id, BoundedPages.of(page, 15)));
         model.addAttribute("pageTitle", "Hồ sơ sinh viên");
         return "manager/student-detail";
     }

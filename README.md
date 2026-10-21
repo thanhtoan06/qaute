@@ -37,3 +37,20 @@ Các seeder chạy sau dữ liệu tài khoản, tổ chức, FAQ và ticket. L�
 Có thể kiểm tra tại `/manager/schedule`, `/manager/appointments`, `/manager/students`, `/admin/announcements` và các trang báo cáo. Chat mẫu là lịch sử đã kết thúc nên không xuất hiện trong hàng chờ đang trực.
 
 Ba seeder TV2 chỉ chạy với profile `demo`, nhận diện từng bản ghi đã có và không tạo trùng khi khởi động lại. Các quy tắc hiện có được giữ nguyên; bộ sinh slot tiếp tục bổ sung khung giờ tương lai còn thiếu. Thông báo mẫu không gửi email/thông báo đẩy; các liên kết họp là địa chỉ minh họa.
+
+## Kiểm tra nhanh Manager/Admin
+
+Thực hiện trên dữ liệu demo, dùng các tài khoản ở bảng trên. Ghi lại mã ticket/FAQ để đối chiếu kết quả và audit.
+
+1. **Đăng nhập Manager:** dùng `manager1@qaute.edu.vn`, mở dashboard và hàng đợi. Thử mở URL ticket, lịch hẹn hoặc API chat của Manager khác ngoài phạm vi: phải nhận 404.
+2. **Nhận ticket:** chọn yêu cầu NEW trong phạm vi rồi bấm “Nhận”. Yêu cầu xuất hiện ở “Của tôi”; dùng cửa sổ khác thử nhận lại cùng ticket và kiểm tra thông báo xung đột.
+3. **Trả lời:** mở workspace, nhập nội dung, đính kèm tệp của mình và gửi. Kiểm tra nội dung, tệp tải về và nháp được xóa; ghi chú nội bộ chỉ xuất hiện ở tab riêng.
+4. **Giải quyết:** nhập tóm tắt giải pháp hợp lệ rồi đánh dấu đã giải quyết. Kiểm tra trạng thái và timeline; thử thao tác với lý do quá ngắn hoặc sửa ID sang ticket ngoài quyền xem.
+5. **Chat desk:** đặt Manager ONLINE, mở thêm cửa sổ sinh viên để yêu cầu tư vấn. Nhận phiên, gửi tin/tệp, kiểm tra đang gõ/đã xem, chuyển hoặc kết thúc; thử tải lại để đồng bộ. Thu nhỏ dưới 992px: ba khối xếp thành một cột.
+6. **Lịch làm việc:** thêm quy tắc, kiểm tra slot trong tuần; thêm/bỏ khung chặn. Dùng tài khoản sinh viên đặt lịch rồi xác nhận Manager khác không xem được lịch đó.
+7. **Đăng nhập Admin:** kiểm tra danh sách người dùng và các trang cấu hình. Thử tự khóa/vô hiệu hóa chính mình và hạ vai trò Admin cuối cùng đang ACTIVE: hệ thống phải từ chối. Gửi POST thiếu CSRF qua công cụ phát triển: phải nhận 403.
+8. **Duyệt FAQ:** tạo bản nháp, gửi duyệt và duyệt/từ chối với lý do hợp lệ. Kiểm tra lịch sử phiên bản và nội dung xem trước; nội dung HTML nguy hiểm phải bị loại bỏ.
+9. **Đổi SLA:** lưu chính sách bốn mức ưu tiên, giờ làm việc và ngày nghỉ; thử giờ chồng lấn hoặc thời gian giải quyết nhỏ hơn phản hồi đầu tiên. Chỉ dữ liệu hợp lệ được lưu; ticket mới dùng chính sách mới.
+10. **Xem audit:** mở `/admin/audit-logs`, lọc các thao tác vừa thực hiện, xem trước/sau và xuất CSV. Kiểm tra dấu tiếng Việt, ô bắt đầu bằng `= + - @` được vô hiệu hóa công thức và có bản ghi `REPORT_EXPORT` sau xuất.
+
+Chi tiết rà soát T2-50 và phạm vi kiểm chứng: [Rà soát Manager/Admin](docs/RA_SOAT_TV2_T2_50.md).

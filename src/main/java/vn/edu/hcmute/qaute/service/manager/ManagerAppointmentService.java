@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.AppointmentStatus;
 import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.common.constant.NotificationType;
+import vn.edu.hcmute.qaute.common.constant.RoleCode;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.exception.InvalidTransitionException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
@@ -25,6 +26,8 @@ import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.notification.NotificationService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
+import vn.edu.hcmute.qaute.service.ticket.TicketAccessService;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
 
 @Service
 @Transactional
@@ -36,10 +39,11 @@ public class ManagerAppointmentService {
     private final CategoryQueryService categories;
     private final NotificationService notifications;
     private final AuditService audit;
+    private final TicketAccessService ticketAccess;
 
     public ManagerAppointmentService(AppointmentRepository appointments, AppointmentSlotRepository slots,
             TicketRepository tickets, UserLookupService users, CategoryQueryService categories,
-            NotificationService notifications, AuditService audit) {
+            NotificationService notifications, AuditService audit, TicketAccessService ticketAccess) {
         this.appointments = appointments;
         this.slots = slots;
         this.tickets = tickets;
@@ -47,10 +51,12 @@ public class ManagerAppointmentService {
         this.categories = categories;
         this.notifications = notifications;
         this.audit = audit;
+        this.ticketAccess = ticketAccess;
     }
 
     @Transactional(readOnly = true)
     public Page<ManagerAppointmentView> list(Long managerId, String tab, Pageable pageable) {
+        pageable = BoundedPages.of(pageable);
         LocalDateTime today = LocalDate.now().atStartOfDay();
         Page<Appointment> result = switch (tab == null ? "today" : tab) {
             case "today" -> appointments.findManagerToday(managerId, today, today.plusDays(1), pageable);
@@ -130,12 +136,15 @@ public class ManagerAppointmentService {
         LocalDateTime now = LocalDateTime.now();
         boolean confirmed = appointment.getStatus() == AppointmentStatus.CONFIRMED;
         boolean started = !slot.getStartAt().isAfter(now);
-        String ticketCode = appointment.getTicketId() == null ? null
-                : tickets.findById(appointment.getTicketId()).map(Ticket::getCode).orElse(null);
+        Long ticketId = appointment.getTicketId();
+        boolean visibleTicket = ticketId != null
+                && ticketAccess.canView(ticketId, appointment.getManagerId(), RoleCode.MANAGER);
+        String ticketCode = !visibleTicket ? null
+                : tickets.findById(ticketId).map(Ticket::getCode).orElse(null);
         return new ManagerAppointmentView(appointment.getId(), slot.getId(), appointment.getStudentId(),
                 users.getStudentSummary(appointment.getStudentId()), appointment.getCategoryId(),
                 appointment.getCategoryId() == null ? "" : categories.getDisplayPath(appointment.getCategoryId()),
-                appointment.getTicketId(), ticketCode, appointment.getTopic(), appointment.getNote(),
+                visibleTicket ? ticketId : null, ticketCode, appointment.getTopic(), appointment.getNote(),
                 appointment.getModality(), slot.getLocation(), slot.getMeetingLink(), slot.getStartAt(),
                 slot.getEndAt(), appointment.getStatus(), appointment.getOutcomeSummary(),
                 appointment.getStudentVisibleSummary(), appointment.getCancelReason(),

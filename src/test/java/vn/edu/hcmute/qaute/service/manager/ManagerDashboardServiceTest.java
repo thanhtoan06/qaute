@@ -54,10 +54,11 @@ class ManagerDashboardServiceTest {
         when(queries.oldUnassignedInScope(eq(List.of(11L, 12L)), any(), eq(5))).thenReturn(List.of());
         when(queries.nextAppointments(eq(7L), any(), eq(3))).thenReturn(List.of());
         when(appointments.list(eq(7L), eq("today"), any(Pageable.class))).thenReturn(Page.empty());
-        when(chats.queueSnapshot(7L)).thenReturn(List.of());
+        when(chats.queueCount(7L)).thenReturn(101);
 
         var dashboard = service.get(7L);
 
+        assertEquals(101, dashboard.waitingChats());
         assertEquals(3, dashboard.unassigned());
         assertEquals(4, dashboard.mine());
         assertEquals(2, dashboard.waitingStudent());

@@ -1,5 +1,14 @@
 package vn.edu.hcmute.qaute.service.admin;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
+import vn.edu.hcmute.qaute.common.util.TextUtil;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,7 +82,25 @@ public class AdminManagerScopeService {
     /** Danh sách toàn bộ Manager, có thể lọc không phân biệt hoa thường theo tên hoặc email. */
     @Transactional(readOnly = true)
     public List<ManagerListItem> list(String keyword) {
-        List<User> managers = userRepository.searchByRoleAndKeyword(RoleCode.MANAGER, clean(keyword));
+        return page(keyword, BoundedPages.of(0, 100)).getContent();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ManagerListItem> page(String keyword, Pageable requested) {
+        Specification<User> spec = (root, query, cb) -> {
+            var role = cb.equal(root.get("role").get("code"), RoleCode.MANAGER);
+            if (keyword == null || keyword.isBlank()) return role;
+            String pattern = "%" + TextUtil.escapeLike(keyword.trim().toLowerCase(java.util.Locale.ROOT)) + "%";
+            return cb.and(role, cb.or(cb.like(cb.lower(root.get("fullName")), pattern, '\\'),
+                    cb.like(cb.lower(root.get("email")), pattern, '\\')));
+        };
+        Pageable page = BoundedPages.of(requested);
+        Page<User> managers = userRepository.findAll(spec, PageRequest.of(page.getPageNumber(),
+                page.getPageSize(), Sort.by("fullName", "id")));
+        return new PageImpl<>(summaries(managers.getContent()), managers.getPageable(), managers.getTotalElements());
+    }
+
+    private List<ManagerListItem> summaries(List<User> managers) {
         if (managers.isEmpty()) {
             return List.of();
         }

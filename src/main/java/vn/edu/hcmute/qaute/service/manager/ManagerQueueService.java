@@ -22,6 +22,7 @@ import vn.edu.hcmute.qaute.common.constant.SlaStatus;
 import vn.edu.hcmute.qaute.common.constant.TicketPriority;
 import vn.edu.hcmute.qaute.common.constant.TicketStatus;
 import vn.edu.hcmute.qaute.common.util.TextUtil;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
 import vn.edu.hcmute.qaute.dto.request.manager.QueueFilter;
 import vn.edu.hcmute.qaute.dto.view.ManagerTicketListItem;
 import vn.edu.hcmute.qaute.dto.view.UserSummary;
@@ -51,6 +52,7 @@ public class ManagerQueueService {
     }
 
     public Page<ManagerTicketListItem> list(Long managerId, QueueFilter filter, Pageable pageable) {
+        pageable = BoundedPages.of(pageable);
         QueueFilter safeFilter = filter == null ? new QueueFilter() : filter;
         String tab = tab(safeFilter.getTab());
         boolean explicitSort = safeFilter.getSort() != null && SORT_FIELDS.contains(safeFilter.getSort());
