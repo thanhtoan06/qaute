@@ -107,7 +107,7 @@ public class LoginController {
 
     private String dashboardRedirect() {
         return SecurityUtils.currentUser().map(QauteUserDetails::getRoleCode)
-                .map(this::dashboardPath).orElse("redirect:/");
+                .map(role -> "redirect:" + dashboardPath(role)).orElse("redirect:/");
     }
 
     private String dashboardPath(RoleCode role) {
