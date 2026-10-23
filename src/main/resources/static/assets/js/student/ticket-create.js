@@ -9,15 +9,15 @@
     let summernoteEditor = null;
 
     function init() {
-        initCategoryTree();
-        initRichText();
-        initFileUploader();
-        initWizardNavigation();
-        initFaqSuggestions();
-        initCharCounters();
-        initUrgentToggle();
-        initDraftStorage();
-        initFormSubmit();
+        try { initCategoryTree(); } catch (e) { console.error('initCategoryTree failed', e); }
+        try { initRichText(); } catch (e) { console.error('initRichText failed', e); }
+        try { initFileUploader(); } catch (e) { console.error('initFileUploader failed', e); }
+        try { initWizardNavigation(); } catch (e) { console.error('initWizardNavigation failed', e); }
+        try { initFaqSuggestions(); } catch (e) { console.error('initFaqSuggestions failed', e); }
+        try { initCharCounters(); } catch (e) { console.error('initCharCounters failed', e); }
+        try { initUrgentToggle(); } catch (e) { console.error('initUrgentToggle failed', e); }
+        try { initDraftStorage(); } catch (e) { console.error('initDraftStorage failed', e); }
+        try { initFormSubmit(); } catch (e) { console.error('initFormSubmit failed', e); }
     }
 
     // --- 1. Category Tree & Cascade Select ---
@@ -219,7 +219,14 @@
     function initFileUploader() {
         if (window.Qaute && typeof window.Qaute.initUploader === 'function') {
             fileUploader = window.Qaute.initUploader('#fileUploaderContainer', 'TICKET_ATTACHMENT', 5);
+            return;
         }
+        console.warn('File uploader is not available; retrying after scripts load.');
+        window.setTimeout(function () {
+            if (!fileUploader && window.Qaute && typeof window.Qaute.initUploader === 'function') {
+                fileUploader = window.Qaute.initUploader('#fileUploaderContainer', 'TICKET_ATTACHMENT', 5);
+            }
+        }, 0);
     }
 
     // --- 4. Urgent Toggle ---
@@ -476,13 +483,23 @@
         }
 
         if (reviewFiles) {
-            const names = fileUploader && typeof fileUploader.getFileNames === 'function'
-                ? fileUploader.getFileNames()
+            const items = fileUploader && typeof fileUploader.getPreviewItems === 'function'
+                ? fileUploader.getPreviewItems()
                 : [];
-            if (names.length > 0) {
-                reviewFiles.innerHTML = '<ul class="mb-0 ps-3">' +
-                    names.map(name => '<li>' + window.Qaute.escapeHtml(name) + '</li>').join('') +
-                    '</ul>';
+            if (items.length > 0) {
+                reviewFiles.innerHTML = '<div class="d-flex flex-wrap gap-2">' +
+                    items.map(function (item) {
+                        const name = window.Qaute && typeof window.Qaute.escapeHtml === 'function'
+                            ? window.Qaute.escapeHtml(item.name)
+                            : String(item.name || '');
+                        if (item.previewUrl) {
+                            return '<div class="text-center" style="width:72px;">' +
+                                '<img src="' + item.previewUrl + '" alt="' + name + '" class="rounded border" style="width:72px;height:72px;object-fit:cover;">' +
+                                '<div class="small text-truncate">' + name + '</div></div>';
+                        }
+                        return '<span class="badge bg-secondary-lt text-secondary">' + name + '</span>';
+                    }).join('') +
+                    '</div>';
             } else {
                 reviewFiles.textContent = 'Không có tệp đính kèm';
             }

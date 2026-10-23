@@ -238,7 +238,23 @@
                         <!-- Tệp đính kèm -->
                         <div class="mb-4">
                             <label class="form-label">Tệp đính kèm (Hình ảnh, tài liệu minh chứng)</label>
-                            <div id="fileUploaderContainer"></div>
+                            <div id="fileUploaderContainer">
+                                <div class="qa-uploader">
+                                    <div class="card card-dashed text-center p-3 mb-2 uploader-dropzone" style="cursor: pointer; border-style: dashed; border-width: 2px;">
+                                        <div class="py-2">
+                                            <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-2 d-block"></i>
+                                            <div class="fw-semibold">Kéo thả tệp vào đây hoặc <span class="text-primary text-decoration-underline">chọn tệp từ máy tính</span></div>
+                                            <small class="text-secondary d-block mt-1">Định dạng: JPG, JPEG, PNG, WEBP, GIF, PDF, DOCX, XLSX, PPTX, TXT (Tối đa 10MB/tệp, tối đa 5 tệp)</small>
+                                            <button type="button" class="btn btn-primary btn-sm mt-2 uploader-pick-btn">
+                                                <i class="bi bi-paperclip me-1"></i>Chọn tệp để tải lên
+                                            </button>
+                                        </div>
+                                        <input type="file" multiple class="d-none uploader-file-input" accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.docx,.xlsx,.pptx,.txt">
+                                    </div>
+                                    <div class="uploader-file-list d-flex flex-column gap-2"></div>
+                                    <div class="uploader-hidden-inputs"></div>
+                                </div>
+                            </div>
                             <qa:formError field="assetIds"/>
                         </div>
 
@@ -349,7 +365,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.js"></script>
-<script src="/assets/js/common/richtext.js"></script>
-<script src="/assets/js/common/file-uploader.js"></script>
-<script src="/assets/js/student/ticket-create.js"></script>
+<script src="/assets/js/common/richtext.js?v=20261023b"></script>
+<script src="/assets/js/common/file-uploader.js?v=20261023b"></script>
+<script src="/assets/js/student/ticket-create.js?v=20261023b"></script>
 

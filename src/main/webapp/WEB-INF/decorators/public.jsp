@@ -288,7 +288,6 @@
                 <ul class="list-unstyled d-flex flex-column gap-2">
                     <li><a href="/pages/about">Giới thiệu</a></li>
                     <li><a href="/pages/guide">Hướng dẫn sử dụng</a></li>
-                    <li><a href="/pages/contact">Liên hệ</a></li>
                     <li><a href="/pages/privacy">Chính sách bảo mật</a></li>
                 </ul>
             </div>
@@ -306,11 +305,6 @@
         <div class="footer-bottom">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <span>© <fmt:formatDate value="<%=new java.util.Date()%>" pattern="yyyy"/> QAUTE – Trường ĐH Công nghệ Kỹ thuật TP.HCM</span>
-                <div class="d-flex gap-3">
-                    <a href="/pages/privacy">Bảo mật</a>
-                    <a href="/pages/terms">Điều khoản</a>
-                    <a href="/pages/contact">Hỗ trợ</a>
-                </div>
             </div>
         </div>
     </div>

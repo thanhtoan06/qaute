@@ -13,6 +13,20 @@
 
     const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
+    function escapeHtml(value) {
+        if (window.Qaute && typeof window.Qaute.escapeHtml === 'function') {
+            return window.Qaute.escapeHtml(value);
+        }
+        const element = document.createElement('div');
+        element.textContent = value == null ? '' : String(value);
+        return element.innerHTML;
+    }
+
+    function isImageName(name) {
+        const ext = String(name || '').split('.').pop().toLowerCase();
+        return ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext);
+    }
+
     window.Qaute.initUploader = function (container, purpose, maxCount) {
         const root = typeof container === 'string' ? document.querySelector(container) : container;
         if (!root) {
@@ -25,27 +39,37 @@
 
         const allowedExts = ALLOWED_EXTENSIONS[purpose] || ALLOWED_EXTENSIONS['TICKET_ATTACHMENT'];
 
-        // Render uploader template
-        root.innerHTML =
-            '<div class="qa-uploader">' +
-                '<div class="card card-dashed text-center p-3 mb-2 uploader-dropzone" style="cursor: pointer; border-style: dashed; border-width: 2px;">' +
-                    '<div class="py-2">' +
-                        '<i class="bi bi-cloud-arrow-up fs-1 text-primary mb-2 d-block"></i>' +
-                        '<div class="fw-semibold">Kéo thả tệp vào đây hoặc <span class="text-primary text-decoration-underline">chọn tệp từ máy tính</span></div>' +
-                        '<small class="text-secondary d-block mt-1">' +
-                            'Định dạng: ' + allowedExts.join(', ').toUpperCase() + ' (Tối đa ' + (MAX_FILE_SIZE_BYTES / (1024 * 1024)) + 'MB/tệp, tối đa ' + maxCount + ' tệp)' +
-                        '</small>' +
+        if (!root.querySelector('.qa-uploader')) {
+            root.innerHTML =
+                '<div class="qa-uploader">' +
+                    '<div class="card card-dashed text-center p-3 mb-2 uploader-dropzone" style="cursor: pointer; border-style: dashed; border-width: 2px;">' +
+                        '<div class="py-2">' +
+                            '<i class="bi bi-cloud-arrow-up fs-1 text-primary mb-2 d-block"></i>' +
+                            '<div class="fw-semibold">Kéo thả tệp vào đây hoặc <span class="text-primary text-decoration-underline">chọn tệp từ máy tính</span></div>' +
+                            '<small class="text-secondary d-block mt-1">' +
+                                'Định dạng: ' + allowedExts.join(', ').toUpperCase() + ' (Tối đa ' + (MAX_FILE_SIZE_BYTES / (1024 * 1024)) + 'MB/tệp, tối đa ' + maxCount + ' tệp)' +
+                            '</small>' +
+                            '<button type="button" class="btn btn-primary btn-sm mt-2 uploader-pick-btn"><i class="bi bi-paperclip me-1"></i>Chọn tệp để tải lên</button>' +
+                        '</div>' +
+                        '<input type="file" multiple class="d-none uploader-file-input" accept="' + allowedExts.map(ext => '.' + ext).join(',') + '">' +
                     '</div>' +
-                    '<input type="file" multiple class="d-none uploader-file-input" accept="' + allowedExts.map(ext => '.' + ext).join(',') + '">' +
-                '</div>' +
-                '<div class="uploader-file-list d-flex flex-column gap-2"></div>' +
-                '<div class="uploader-hidden-inputs"></div>' +
-            '</div>';
+                    '<div class="uploader-file-list d-flex flex-column gap-2"></div>' +
+                    '<div class="uploader-hidden-inputs"></div>' +
+                '</div>';
+        }
 
         const dropzone = root.querySelector('.uploader-dropzone');
         const fileInput = root.querySelector('.uploader-file-input');
         const fileList = root.querySelector('.uploader-file-list');
         const hiddenInputs = root.querySelector('.uploader-hidden-inputs');
+        if (!dropzone || !fileInput || !fileList || !hiddenInputs) {
+            console.warn('Uploader markup is incomplete.');
+            return null;
+        }
+        if (root.dataset.qauteUploader === '1' && root._qauteUploader) {
+            return root._qauteUploader;
+        }
+        root.dataset.qauteUploader = '1';
 
         const state = {
             files: [], // { uid, name, size, assetId, status: 'uploading'|'success'|'error', progress: 0 }
@@ -78,7 +102,19 @@
             return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
         }
 
-        dropzone.addEventListener('click', function () {
+        const pickBtn = root.querySelector('.uploader-pick-btn');
+        if (pickBtn) {
+            pickBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileInput.click();
+            });
+        }
+
+        dropzone.addEventListener('click', function (e) {
+            if (e.target && e.target.closest && e.target.closest('.uploader-pick-btn')) {
+                return;
+            }
             fileInput.click();
         });
 
@@ -143,7 +179,7 @@
                 };
                 state.files.push(item);
 
-                renderFileItem(item);
+                renderFileItem(item, file);
                 uploadFile(file, item);
             });
         }
@@ -154,8 +190,8 @@
             el.innerHTML =
                 '<div class="d-flex align-items-center text-truncate me-2">' +
                     '<i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>' +
-                    '<span class="fw-medium text-truncate me-2">' + window.Qaute.escapeHtml(name) + '</span>' +
-                    '<span class="text-danger">(' + window.Qaute.escapeHtml(errorMsg) + ')</span>' +
+                    '<span class="fw-medium text-truncate me-2">' + escapeHtml(name) + '</span>' +
+                    '<span class="text-danger">(' + escapeHtml(errorMsg) + ')</span>' +
                 '</div>' +
                 '<button type="button" class="btn btn-sm btn-link text-danger p-0 ms-auto" aria-label="Đóng">' +
                     '<i class="bi bi-x-lg"></i>' +
@@ -166,15 +202,24 @@
             fileList.appendChild(el);
         }
 
-        function renderFileItem(item) {
+        function renderFileItem(item, file) {
             const el = document.createElement('div');
             el.className = 'border rounded p-2 bg-white small position-relative file-item-' + item.uid;
+            let thumbHtml = '<i class="bi ' + getFileIcon(item.name) + ' fs-2 me-2"></i>';
+            if (file && isImageName(item.name)) {
+                try {
+                    item.previewUrl = URL.createObjectURL(file);
+                    thumbHtml = '<img src="' + item.previewUrl + '" alt="" class="rounded border me-2 flex-shrink-0" style="width:56px;height:56px;object-fit:cover;">';
+                } catch (err) {
+                    item.previewUrl = null;
+                }
+            }
             el.innerHTML =
                 '<div class="d-flex justify-content-between align-items-center mb-1">' +
                     '<div class="d-flex align-items-center text-truncate me-2">' +
-                        '<i class="bi ' + getFileIcon(item.name) + ' fs-4 me-2"></i>' +
+                        thumbHtml +
                         '<div class="text-truncate">' +
-                            '<div class="fw-medium text-truncate">' + window.Qaute.escapeHtml(item.name) + '</div>' +
+                            '<div class="fw-medium text-truncate">' + escapeHtml(item.name) + '</div>' +
                             '<div class="text-secondary small">' + formatSize(item.size) + '</div>' +
                         '</div>' +
                     '</div>' +
@@ -235,10 +280,14 @@
                             if (el) {
                                 const bar = el.querySelector('.upload-progress-bar');
                                 const status = el.querySelector('.upload-status');
+                                const previewImg = el.querySelector('img');
                                 if (bar) bar.remove();
                                 if (status) {
                                     status.innerHTML = '<i class="bi bi-check-circle-fill text-success me-1"></i>Hoàn tất';
                                     status.className = 'text-success small';
+                                }
+                                if (previewImg && res.data.publicUrl) {
+                                    previewImg.src = res.data.publicUrl;
                                 }
                             }
                             // Add hidden input
@@ -275,6 +324,7 @@
                 const token = window.Qaute.csrfToken();
                 if (token) {
                     xhr.setRequestHeader(window.Qaute.csrfHeader(), token);
+                    formData.append('_csrf', token);
                 }
             }
             xhr.send(formData);
@@ -289,7 +339,7 @@
                 const status = el.querySelector('.upload-status');
                 if (bar) bar.remove();
                 if (status) {
-                    status.innerHTML = '<i class="bi bi-exclamation-circle-fill text-danger me-1"></i>' + window.Qaute.escapeHtml(message);
+                    status.innerHTML = '<i class="bi bi-exclamation-circle-fill text-danger me-1"></i>' + escapeHtml(message);
                     status.className = 'text-danger small';
                 }
             }
@@ -301,6 +351,9 @@
                 const item = state.files[index];
                 if (item.xhr && item.status === 'uploading') {
                     item.xhr.abort();
+                }
+                if (item.previewUrl) {
+                    try { URL.revokeObjectURL(item.previewUrl); } catch (e) {}
                 }
                 state.files.splice(index, 1);
             }
@@ -315,7 +368,7 @@
             state.isUploading = state.files.some(f => f.status === 'uploading');
         }
 
-        return {
+        const api = {
             getAssetIds: function () {
                 return state.files
                     .filter(f => f.status === 'success' && f.assetId)
@@ -323,8 +376,15 @@
             },
             getFileNames: function () {
                 return state.files
-                    .filter(f => f.status === 'success')
+                    .filter(f => f.status === 'success' || f.status === 'uploading')
                     .map(f => f.name);
+            },
+            getPreviewItems: function () {
+                return state.files
+                    .filter(f => f.status !== 'error')
+                    .map(function (f) {
+                        return { name: f.name, previewUrl: f.previewUrl || '', status: f.status };
+                    });
             },
             getFilesCount: function () {
                 return state.files.filter(f => f.status === 'success').length;
@@ -333,6 +393,8 @@
                 return state.isUploading;
             }
         };
+        root._qauteUploader = api;
+        return api;
     };
 })(window, document);
 

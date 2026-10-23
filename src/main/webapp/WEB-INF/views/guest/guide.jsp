@@ -152,7 +152,6 @@
             <h3 class="h4 mb-2">Bạn vẫn còn câu hỏi chưa rõ?</h3>
             <p class="text-secondary mb-3">Tra cứu thông tin liên hệ các phòng ban chuyên trách hoặc liên hệ trực tiếp với chúng tôi.</p>
             <div class="d-flex justify-content-center gap-2">
-                <a href="/pages/contact" class="btn btn-primary">Xem thông tin liên hệ</a>
                 <a href="/faq" class="btn btn-outline-primary">Tìm kiếm FAQ</a>
             </div>
         </div>
