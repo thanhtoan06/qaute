@@ -333,16 +333,18 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 
 ## Tài khoản demo
 
-| Vai trò       | Email hoặc MSSV       | Mật khẩu |
-| Quản trị viên | admin@qaute.edu.vn    | Admin@12345 |
-| Tư vấn viên   | manager1@qaute.edu.vn | Manager@12345 |
-| Tư vấn viên   | manager2@qaute.edu.vn | Manager@12345 |
-| Tư vấn viên   | manager3@qaute.edu.vn | Manager@12345 |
-| Tư vấn viên   | manager4@qaute.edu.vn | Manager@12345 |
-| Sinh viên     | 24162101              | Student@12345 |
-| Sinh viên     | 24162102              | Student@12345 |
-| Sinh viên     | 24162103              | Student@12345 |
-| ...           | 24162130              | Student@12345 |
+| Vai trò | Email hoặc MSSV | Mật khẩu |
+| :--- | :--- | :--- |
+| Quản trị viên | admin@qaute.edu.vn | Admin@12345 |
+| Tư vấn viên | manager1@qaute.edu.vn | Manager@12345 |
+| Tư vấn viên | manager2@qaute.edu.vn | Manager@12345 |
+| Tư vấn viên | manager3@qaute.edu.vn | Manager@12345 |
+| Tư vấn viên | manager4@qaute.edu.vn | Manager@12345 |
+| Sinh viên | 24162101 | Student@12345 |
+| Sinh viên | 24162102 | Student@12345 |
+| Sinh viên | 24162103 | Student@12345 |
+| ... | ... | ... |
+| Sinh viên | 24162130 | Student@12345 |
 
 ---
 
