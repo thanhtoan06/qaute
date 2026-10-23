@@ -96,8 +96,8 @@ public class SecurityConfig {
                         .contentSecurityPolicy(csp -> csp.policyDirectives(
                                 "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
                                         + "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
-                                        + "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:; "
-                                        + "img-src 'self' data: https://res.cloudinary.com; connect-src 'self' ws: wss:; "
+                                        +                                 "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:; "
+                                        + "img-src 'self' data: blob: https://res.cloudinary.com; connect-src 'self' ws: wss:; "
                                         + "frame-ancestors 'self'")));
         if (clientRegistrations.getIfAvailable() != null && googleSuccessHandlers.getIfAvailable() != null) {
             http.oauth2Login(oauth -> oauth

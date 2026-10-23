@@ -571,7 +571,7 @@
 
     <%-- User card --%>
     <a href="${ctx}/student/profile" class="stu-user-card">
-        <div class="stu-user-avatar"><c:out value="${avatarInitial}"/></div>
+        <c:choose><c:when test="${not empty studentAvatarUrl}"><img class="stu-user-avatar" src="<c:out value='${studentAvatarUrl}'/>" alt="Avatar" style="object-fit:cover;"/></c:when><c:otherwise><div class="stu-user-avatar"><c:out value="${avatarInitial}"/></div></c:otherwise></c:choose>
         <div class="overflow-hidden">
             <div class="stu-user-name text-truncate"><c:out value="${studentName}"/></div>
             <div class="stu-user-role">Sinh viên</div>
@@ -725,7 +725,7 @@
         <%-- User dropdown --%>
         <div class="dropdown">
             <a href="#" class="stu-topbar-user" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="u-avatar"><c:out value="${avatarInitial}"/></div>
+                <c:choose><c:when test="${not empty studentAvatarUrl}"><img class="u-avatar" src="<c:out value='${studentAvatarUrl}'/>" alt="Avatar" style="object-fit:cover;"/></c:when><c:otherwise><div class="u-avatar"><c:out value="${avatarInitial}"/></div></c:otherwise></c:choose>
                 <div class="u-name d-none d-lg-block"><c:out value="${studentName}"/></div>
                 <i class="bi bi-chevron-down ms-1 text-muted" style="font-size:.7rem;"></i>
             </a>

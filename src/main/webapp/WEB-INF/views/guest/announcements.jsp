@@ -21,6 +21,11 @@
       <c:if test="${page.hasPrevious()}">
         <li class="page-item"><a class="page-link" href="/announcements?page=${page.number-1}">Trước</a></li>
       </c:if>
+      <c:forEach var="i" begin="0" end="${page.totalPages - 1}">
+        <li class="page-item ${i == page.number ? 'active' : ''}">
+          <a class="page-link" href="/announcements?page=${i}">${i + 1}</a>
+        </li>
+      </c:forEach>
       <c:if test="${page.hasNext()}">
         <li class="page-item"><a class="page-link" href="/announcements?page=${page.number+1}">Sau</a></li>
       </c:if>
