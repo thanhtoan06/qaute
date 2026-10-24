@@ -19,9 +19,13 @@ import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.identity.OtpCodeRepository;
 import vn.edu.hcmute.qaute.service.email.EmailService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class OtpService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OtpService.class);
 
     private final OtpCodeRepository otpCodeRepository;
     private final SettingsService settingsService;
@@ -73,6 +77,9 @@ public class OtpService {
                 .attempts(0)
                 .build();
         otpCodeRepository.save(code);
+
+        LOG.info("[OTP ISSUED] Email: {}, Mục đích: {}, Mã OTP: {} (hiệu lực {} phút)",
+                user.getEmail(), purpose, otp, ttlMinutes);
 
         emailService.sendTemplated(user.getEmail(), "Mã xác thực QAUTE", templateName,
                 Map.of("fullName", user.getFullName(), "otp", otp,

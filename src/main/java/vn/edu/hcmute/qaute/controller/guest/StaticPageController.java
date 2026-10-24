@@ -29,6 +29,15 @@ public class StaticPageController {
         return "guest/guide";
     }
 
+    @GetMapping("/pages/contact")
+    public String contact(Model model) {
+        model.addAttribute("tree", categoryQueryService.getActiveTree());
+        model.addAttribute("contactAddress", settingsService.getString(SettingKeys.SITE_CONTACT_ADDRESS));
+        model.addAttribute("contactPhone", settingsService.getString(SettingKeys.SITE_CONTACT_PHONE));
+        model.addAttribute("contactEmail", settingsService.getString(SettingKeys.SITE_CONTACT_EMAIL));
+        return "guest/contact";
+    }
+
     @GetMapping("/pages/privacy")
     public String privacy() {
         return "guest/privacy";
@@ -39,4 +48,3 @@ public class StaticPageController {
         return "guest/terms";
     }
 }
-

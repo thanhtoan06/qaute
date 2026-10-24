@@ -1,167 +1,94 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <title>Giới thiệu về QAUTE</title>
+<style>
+.qaute-about-page{--qa-ink:#132747;--qa-muted:#6b7890;--qa-primary:#3158d8;--qa-teal:#11b9b0;--qa-line:#e4eaf4;color:var(--qa-ink);padding-bottom:clamp(1.5rem,4vw,4rem);isolation:isolate;position:relative}
+.qaute-about-page *{box-sizing:border-box}.qaute-about-page a{text-decoration:none}
+.qaute-about-page .qa-about-breadcrumb{margin-bottom:1.25rem;font-size:.88rem}.qaute-about-page .breadcrumb{margin:0;--bs-breadcrumb-divider:'›';gap:.2rem}.qaute-about-page .breadcrumb-item a{color:#526582}.qaute-about-page .breadcrumb-item.active{color:var(--qa-primary);font-weight:700}
+.qaute-about-page .qa-about-hero{position:relative;display:flex;align-items:center;min-height:400px;overflow:hidden;border-radius:28px;padding:2rem;margin-bottom:2rem;background:radial-gradient(ellipse at 88% 12%,rgba(26,211,202,.25),transparent 30%),radial-gradient(ellipse at 5% 100%,rgba(82,113,255,.35),transparent 36%),linear-gradient(128deg,#0b1937,#142f6c 53%,#1a4f92);box-shadow:0 28px 75px rgba(19,42,92,.22)}
+.qaute-about-page .qa-about-hero:before{content:"";position:absolute;width:480px;height:480px;right:-150px;top:-230px;border:1px solid rgba(255,255,255,.16);border-radius:50%;box-shadow:0 0 0 35px rgba(255,255,255,.035),0 0 0 75px rgba(255,255,255,.025),0 0 0 120px rgba(255,255,255,.018);animation:qaute-orbit 24s linear infinite;pointer-events:none}
+.qaute-about-page .qa-about-hero:after{content:"";position:absolute;width:190px;height:190px;left:46%;bottom:-130px;border:1px solid rgba(99,244,228,.35);border-radius:50%;box-shadow:0 0 0 22px rgba(99,244,228,.045),0 0 55px rgba(28,223,205,.12);pointer-events:none}
+.qaute-about-page .qa-about-hero-grid{position:relative;z-index:1;display:grid;width:100%;grid-template-columns:minmax(0,1fr) minmax(220px,280px);align-items:center;gap:2rem}
+.qaute-about-page .qa-about-eyebrow{display:inline-flex;align-items:center;gap:.65rem;padding:.58rem .9rem;border:1px solid rgba(179,220,255,.27);border-radius:999px;background:rgba(255,255,255,.08);color:#d5f4ff;font-size:.76rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;backdrop-filter:blur(12px)}
+.qaute-about-page .qa-about-eyebrow i{color:#69f1dd;font-size:1.05rem}.qaute-about-page .qa-about-hero h1{max-width:760px;margin:.9rem 0 .7rem;font-size:clamp(2rem,3.5vw,2.5rem);line-height:1.08;font-weight:850}
+.qaute-about-page .qa-about-hero h1 span{display:block;background:linear-gradient(90deg,#fff,#a9f6ed 53%,#a7c4ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.qaute-about-page .qa-about-hero-copy{max-width:690px;margin:0;color:rgba(238,245,255,.82);font-size:clamp(1rem,1.5vw,1.17rem);line-height:1.85}
+.qaute-about-page .qa-about-hero-actions{display:flex;flex-wrap:wrap;gap:.85rem;margin-top:1.3rem}.qaute-about-page .qa-about-hero-actions .btn{display:inline-flex;align-items:center;justify-content:center;gap:.55rem;padding:.85rem 1.15rem;border-radius:13px;font-weight:750;transition:transform .25s,box-shadow .25s,background .25s}
+.qaute-about-page .qa-about-btn-light{border:1px solid rgba(255,255,255,.55);background:#fff;color:#17356e;box-shadow:0 9px 25px #0002}.qaute-about-page .qa-about-btn-light:hover{transform:translateY(-3px);background:#effffc;color:#102a5e}
+.qaute-about-page .qa-about-btn-glass{border:1px solid #ffffff47;background:#ffffff12;color:#fff;backdrop-filter:blur(10px)}.qaute-about-page .qa-about-btn-glass:hover{transform:translateY(-3px);background:#ffffff26;color:#fff}
+.qaute-about-page .qa-about-hero-art{position:relative;isolation:isolate;display:flex;justify-content:center;align-items:center;width:100%;min-width:0;min-height:300px}
+.qaute-about-page .qa-about-orbit{position:absolute;width:min(100%,260px);aspect-ratio:1;border:1px solid #c4e7ff38;border-radius:50%;pointer-events:none;animation:qaute-orbit 28s linear infinite}
+.qaute-about-page .qa-about-orbit:before,.qaute-about-page .qa-about-orbit:after{content:"";position:absolute;border:1px solid #c4e7ff22;border-radius:50%;inset:12px}.qaute-about-page .qa-about-orbit:after{inset:30px}
+.qaute-about-page .qa-about-orbit-dot{position:absolute;top:15%;right:14%;width:10px;height:10px;background:#6bf4df;border-radius:50%;box-shadow:0 0 0 5px #6bf4df1f,0 0 20px #6bf4df}
+.qaute-about-page .qa-about-campus-mark{position:relative;z-index:1;display:grid;place-items:center;width:130px;aspect-ratio:1;border:1px solid #ffffff4d;border-radius:50%;background:linear-gradient(145deg,#ffffff3d,#ffffff0b);box-shadow:inset 0 1px 0 #ffffff4d,0 20px 50px #0003;backdrop-filter:blur(17px);animation:qaAboutFloat 7s ease-in-out infinite}
+.qaute-about-page .qa-about-campus-mark:before{content:"";position:absolute;inset:10px;border:1px dashed #ffffff45;border-radius:inherit}.qaute-about-page .qa-about-campus-mark i{font-size:3.5rem;color:#fff;text-shadow:0 8px 28px #0004}
+.qaute-about-page .qa-about-section{margin-bottom:clamp(3rem,6vw,5.2rem)}.qaute-about-page .qa-about-section-heading{text-align:center;max-width:760px;margin:0 auto 2.25rem}
+.qaute-about-page .qa-about-kicker{display:inline-flex;align-items:center;gap:.5rem;margin-bottom:.8rem;color:var(--qa-primary);font-size:.76rem;font-weight:850;letter-spacing:.16em;text-transform:uppercase}
+.qaute-about-page .qa-about-kicker:before,.qaute-about-page .qa-about-kicker:after{content:"";width:23px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--qa-teal),var(--qa-primary))}
+.qaute-about-page .qa-about-section-heading h2{margin:0 0 .7rem;font-size:clamp(1.8rem,3.5vw,2.65rem);line-height:1.18;font-weight:850;letter-spacing:-.035em;color:var(--qa-ink)}.qaute-about-page .qa-about-section-heading p{margin:0;color:var(--qa-muted);font-size:1.02rem;line-height:1.75}
+.qaute-about-page .qa-about-mission{position:relative;overflow:hidden;border:1px solid #e4eaf7;border-radius:28px;background:linear-gradient(135deg,#fff,#f7f9ff 56%,#f0fbfa);box-shadow:0 18px 55px #1c386f14}
+.qaute-about-page .qa-about-mission:before{content:"";position:absolute;top:-110px;right:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,#3e68e21c,transparent 69%);pointer-events:none}.qaute-about-page .qa-about-mission:after{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#3158d8,#11b9b0)}
+.qaute-about-page .qa-about-mission-body{position:relative;z-index:1;padding:clamp(1.35rem,4vw,3.2rem)}.qaute-about-page .qa-about-mission-copy h2{margin:0 0 1rem;color:var(--qa-ink);font-size:clamp(1.75rem,3vw,2.35rem);font-weight:850;letter-spacing:-.035em}.qaute-about-page .qa-about-mission-copy h2 span{color:var(--qa-primary)}.qaute-about-page .qa-about-mission-copy>p{color:var(--qa-muted);line-height:1.85;margin-bottom:1.5rem}
+.qaute-about-page .qa-about-pillar{display:flex;align-items:flex-start;gap:.85rem;padding:.8rem .75rem;border-radius:14px;transition:background .25s,transform .25s}.qaute-about-page .qa-about-pillar:hover{background:#ffffffd9;transform:translateX(4px)}
+.qaute-about-page .qa-about-pillar-icon{flex:0 0 38px;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#e0fbf5,#e2eaff);color:#087f9b;font-size:1.15rem}.qaute-about-page .qa-about-pillar strong{color:var(--qa-ink)}.qaute-about-page .qa-about-pillar div:last-child{color:#5c6b84;line-height:1.7}
+.qaute-about-page .qa-about-campus-panel{position:relative;overflow:hidden;height:100%;min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;border:1px solid #ffffffeb;border-radius:24px;background:radial-gradient(circle at 82% 8%,#11b9b02b,transparent 30%),radial-gradient(circle at 7% 91%,#3158d824,transparent 32%),linear-gradient(145deg,#fff,#f1f5ff);box-shadow:inset 0 1px 0 #fff,0 13px 35px #27417514}
+.qaute-about-page .qa-about-campus-icon{position:relative;display:grid;place-items:center;width:110px;height:110px;margin-bottom:1.4rem;border-radius:30px;background:linear-gradient(145deg,#345fe5,#152e8c);color:#fff;font-size:3.4rem;box-shadow:0 16px 30px #3158d847;transform:rotate(-4deg);transition:transform .35s,box-shadow .35s}.qaute-about-page .qa-about-campus-panel:hover .qa-about-campus-icon{transform:rotate(0) translateY(-5px);box-shadow:0 23px 35px #3158d84d}
+.qaute-about-page .qa-about-campus-icon:after{content:"";position:absolute;inset:-9px;border:1px solid #3158d833;border-radius:36px;transform:rotate(7deg)}.qaute-about-page .qa-about-campus-panel h3{font-weight:850;letter-spacing:-.025em;color:var(--qa-ink)}.qaute-about-page .qa-about-campus-panel p{max-width:390px;color:var(--qa-muted);font-size:.94rem;line-height:1.8}
+.qaute-about-page .qa-about-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:.65rem;margin-top:.4rem}.qaute-about-page .qa-about-actions .btn{border-radius:11px;font-weight:750;padding:.7rem .9rem;transition:transform .25s,box-shadow .25s}.qaute-about-page .qa-about-actions .btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px #22479121}
+.qaute-about-page .qa-about-feature{position:relative;height:100%;min-height:235px;overflow:hidden;padding:1.65rem;border:1px solid var(--qa-line);border-radius:22px;background:linear-gradient(145deg,#fff,#fbfcff);box-shadow:0 7px 23px #1b34670b;transition:transform .32s,box-shadow .32s,border-color .32s}
+.qaute-about-page .qa-about-feature:before{content:"";position:absolute;right:-44px;top:-51px;width:135px;height:135px;border-radius:50%;background:var(--qa-feature-glow,#3158d814);transition:transform .4s}.qaute-about-page .qa-about-feature:after{content:"";position:absolute;left:0;top:1.7rem;bottom:1.7rem;width:3px;border-radius:0 6px 6px 0;background:var(--qa-feature-color,#3158d8);transform:scaleY(.35);opacity:.65;transition:transform .3s,opacity .3s}
+.qaute-about-page .qa-about-feature:hover{transform:translateY(-8px);border-color:#3158d840;box-shadow:0 22px 42px #1d376f21}.qaute-about-page .qa-about-feature:hover:before{transform:scale(1.25)}.qaute-about-page .qa-about-feature:hover:after{transform:scaleY(1);opacity:1}
+.qaute-about-page .qa-about-feature-icon{position:relative;z-index:1;display:grid;place-items:center;width:59px;height:59px;margin-bottom:1.3rem;border:1px solid #ffffffbf;border-radius:18px;background:var(--qa-feature-bg,#e9efff);color:var(--qa-feature-color,#3158d8);font-size:1.65rem;box-shadow:0 9px 20px #192f5f14;transition:transform .32s}.qaute-about-page .qa-about-feature:hover .qa-about-feature-icon{transform:rotate(-7deg) scale(1.07)}
+.qaute-about-page .qa-about-feature h3{position:relative;z-index:1;margin:0 0 .65rem;color:var(--qa-ink);font-size:1.12rem;font-weight:820;letter-spacing:-.018em}.qaute-about-page .qa-about-feature p{position:relative;z-index:1;margin:0;color:var(--qa-muted);font-size:.94rem;line-height:1.8}.qaute-about-page .qa-about-feature-index{position:absolute;z-index:1;right:1.15rem;bottom:.8rem;color:#e8edf7;font-size:2.4rem;font-weight:900;line-height:1;letter-spacing:-.06em;transition:color .3s}.qaute-about-page .qa-about-feature:hover .qa-about-feature-index{color:#dce6ff}
+.qaute-about-page .qa-feature-green{--qa-feature-color:#0f9b68;--qa-feature-bg:#e4fbef;--qa-feature-glow:#0f9b681a}.qaute-about-page .qa-feature-cyan{--qa-feature-color:#078bb5;--qa-feature-bg:#e2f8ff;--qa-feature-glow:#078bb51a}.qaute-about-page .qa-feature-amber{--qa-feature-color:#b77908;--qa-feature-bg:#fff5d9;--qa-feature-glow:#b779081f}.qaute-about-page .qa-feature-rose{--qa-feature-color:#d84c65;--qa-feature-bg:#fff0f3;--qa-feature-glow:#d84c651a}.qaute-about-page .qa-feature-violet{--qa-feature-color:#7051c6;--qa-feature-bg:#f0eaff;--qa-feature-glow:#7051c61a}
+.qaute-about-page .qa-about-process{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem}.qaute-about-page .qa-about-process:before{content:"";position:absolute;top:35px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,#4b6ff0,#27c6b6);opacity:.35}
+.qaute-about-page .qa-about-step{position:relative;z-index:1;min-width:0;text-align:center;padding:0 .25rem}.qaute-about-page .qa-about-step-number{display:grid;place-items:center;width:70px;height:70px;margin:0 auto 1.2rem;border:6px solid #f7f9fd;border-radius:24px;background:linear-gradient(145deg,#4268ef,#1e3fae);color:#fff;font-size:1.45rem;font-weight:900;box-shadow:0 9px 22px #3158d833;transform:rotate(-3deg);transition:transform .3s,box-shadow .3s,border-radius .3s}.qaute-about-page .qa-about-step:nth-child(even) .qa-about-step-number{background:linear-gradient(145deg,#24c8b8,#07878c)}.qaute-about-page .qa-about-step:hover .qa-about-step-number{transform:rotate(0) translateY(-5px) scale(1.05);border-radius:50%}.qaute-about-page .qa-about-step h3{margin:0 0 .55rem;color:var(--qa-ink);font-size:1rem;font-weight:800;line-height:1.45}.qaute-about-page .qa-about-step p{margin:0;color:var(--qa-muted);font-size:.87rem;line-height:1.75}
+.qaute-about-page .qa-about-cta{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2rem;padding:clamp(1.8rem,5vw,3.5rem);border:1px solid #91b3ff38;border-radius:30px;background:radial-gradient(circle at 94% 0,#11b9b03d,transparent 31%),radial-gradient(circle at 0 100%,#607cff38,transparent 35%),linear-gradient(120deg,#0d1b3b,#173876 62%,#145a7c);color:#fff;box-shadow:0 23px 55px #132a5c2e}
+.qaute-about-page .qa-about-cta:before{content:"";position:absolute;right:-110px;bottom:-210px;width:420px;height:420px;border:1px solid #ffffff26;border-radius:50%;box-shadow:0 0 0 32px #ffffff06,0 0 0 70px #ffffff05}.qaute-about-page .qa-about-cta-copy,.qaute-about-page .qa-about-cta-actions{position:relative;z-index:1}.qaute-about-page .qa-about-cta-label{display:inline-flex;align-items:center;gap:.45rem;margin-bottom:.9rem;color:#8bf4e4;font-size:.76rem;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
+.qaute-about-page .qa-about-cta h2{margin:0 0 .8rem;color:#fff;font-size:clamp(1.85rem,3.7vw,2.85rem);font-weight:850;letter-spacing:-.035em;line-height:1.15}.qaute-about-page .qa-about-cta p{max-width:660px;margin:0;color:#edf5ffC7;line-height:1.8}.qaute-about-page .qa-about-cta-actions{display:flex;flex-direction:column;gap:.75rem;min-width:220px}.qaute-about-page .qa-about-cta-actions .btn{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.92rem 1rem;border-radius:13px;font-weight:800;white-space:nowrap;transition:transform .25s,box-shadow .25s}.qaute-about-page .qa-about-cta-actions .btn:hover{transform:translateY(-3px);box-shadow:0 12px 24px #0003}.qaute-about-page .qa-about-cta-primary{border:1px solid #fff;background:#fff;color:#17356e}.qaute-about-page .qa-about-cta-secondary{border:1px solid #ffffff4d;background:#ffffff12;color:#fff}
+@keyframes qaAboutFloat{0%,100%{translate:0 0}50%{translate:0 -8px}}@keyframes qaute-orbit{to{rotate:360deg}}
+@media(max-width:1199.98px){.qaute-about-page .qa-about-hero-grid{grid-template-columns:minmax(0,1fr) 250px;gap:1.25rem}}
+@media(max-width:991.98px){.qaute-about-page .qa-about-hero{min-height:400px;padding:2rem}.qaute-about-page .qa-about-hero-grid{grid-template-columns:minmax(0,1fr) 220px;gap:1rem}.qaute-about-page .qa-about-hero-art{min-height:280px}.qaute-about-page .qa-about-orbit{width:210px}.qaute-about-page .qa-about-campus-mark{width:130px}.qaute-about-page .qa-about-campus-mark i{font-size:3.5rem}.qaute-about-page .qa-about-process{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:2rem}.qaute-about-page .qa-about-process:before{display:none}.qaute-about-page .qa-about-cta{grid-template-columns:minmax(0,1fr)}.qaute-about-page .qa-about-cta-actions{flex-direction:row;flex-wrap:wrap;min-width:0}.qaute-about-page .qa-about-cta-actions .btn{flex:1 1 200px}}
+@media(max-width:767.98px){.qaute-about-page .qa-about-hero{min-height:0;padding:1.5rem 1.25rem}.qaute-about-page .qa-about-hero-grid{grid-template-columns:minmax(0,1fr);gap:0}.qaute-about-page .qa-about-hero-art{min-height:250px;margin-top:1.25rem}.qaute-about-page .qa-about-orbit{width:220px}.qaute-about-page .qa-about-hero h1{font-size:1.8rem;margin:.7rem 0 .55rem}.qaute-about-page .qa-about-hero-copy{font-size:.9rem;line-height:1.65}.qaute-about-page .qa-about-hero-actions{gap:.6rem;margin-top:.75rem}.qaute-about-page .qa-about-hero-actions .btn{flex:1 1 125px;width:auto;padding:.55rem .7rem;font-size:.78rem}}
+@media(max-width:575.98px){.qaute-about-page .qa-about-hero-art{min-height:235px}.qaute-about-page .qa-about-orbit{width:195px}.qaute-about-page .qa-about-campus-panel{min-height:300px;padding:1.4rem}.qaute-about-page .qa-about-feature{min-height:0;padding:1.35rem}.qaute-about-page .qa-about-process{grid-template-columns:repeat(2,minmax(0,1fr));gap:1.7rem .85rem}.qaute-about-page .qa-about-step-number{width:61px;height:61px;border-width:5px;border-radius:21px}.qaute-about-page .qa-about-step h3{font-size:.92rem}.qaute-about-page .qa-about-step p{font-size:.82rem}.qaute-about-page .qa-about-cta{padding:1.6rem 1.25rem;border-radius:23px}.qaute-about-page .qa-about-cta-actions{flex-direction:column}.qaute-about-page .qa-about-cta-actions .btn{width:100%;flex-basis:auto}}
+@media(prefers-reduced-motion:reduce){.qaute-about-page *,.qaute-about-page *:before,.qaute-about-page *:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+</style>
 
-<nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Giới thiệu</li>
-    </ol>
-</nav>
+<div class="qaute-about-page">
+<nav aria-label="breadcrumb" class="qa-about-breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="/">Trang chủ</a></li><li class="breadcrumb-item active" aria-current="page">Giới thiệu</li></ol></nav>
+<section class="qa-about-hero"><div class="qa-about-hero-grid"><div>
+<span class="qa-about-eyebrow"><i class="bi bi-stars"></i> Hệ thống hỏi đáp &amp; tư vấn sinh viên</span>
+<h1>Về nền tảng hỗ trợ sinh viên <span>QAUTE</span></h1>
+<p class="qa-about-hero-copy">Cầu nối trực tuyến hiện đại, minh bạch và nhanh chóng giữa sinh viên và các phòng ban, khoa, viện tại Trường Đại học Công nghệ Kỹ thuật TP.HCM (HCMUTE).</p>
+<div class="qa-about-hero-actions"><a href="/faq" class="btn qa-about-btn-light"><i class="bi bi-search"></i> Khám phá FAQ <i class="bi bi-arrow-up-right"></i></a><a href="/topics" class="btn qa-about-btn-glass"><i class="bi bi-grid-1x2"></i> Xem chủ đề hỗ trợ</a></div>
+</div><div class="qa-about-hero-art" aria-hidden="true">
+<div class="qa-about-orbit"><span class="qa-about-orbit-dot"></span></div><div class="qa-about-campus-mark"><i class="bi bi-mortarboard"></i></div>
+</div></div></section>
 
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="text-center mb-5">
-            <span class="badge bg-primary-subtle text-primary px-3 py-2 mb-2 rounded-pill fs-6">Hệ thống hỏi đáp & tư vấn sinh viên</span>
-            <h1 class="display-6 fw-bold mb-3">Về nền tảng hỗ trợ sinh viên QAUTE</h1>
-            <p class="lead text-secondary mx-auto" style="max-width: 750px;">
-                Cầu nối trực tuyến hiện đại, minh bạch và nhanh chóng giữa sinh viên và các phòng ban, khoa, viện tại Trường Đại học Công nghệ Kỹ thuật TP.HCM (HCMUTE).
-            </p>
-        </div>
+<section class="qa-about-section qa-about-mission"><div class="qa-about-mission-body"><div class="row align-items-stretch g-4 g-xl-5">
+<div class="col-lg-7 qa-about-mission-copy"><span class="qa-about-kicker">Định hướng phát triển</span><h2>Mục tiêu <span>phát triển</span></h2><p>QAUTE được xây dựng nhằm chuẩn hóa và số hóa toàn diện quy trình tiếp nhận, giải quyết thắc mắc, kiến nghị và các thủ tục hành chính học vụ cho người học.</p>
+<div class="qa-about-pillar"><div class="qa-about-pillar-icon"><i class="bi bi-stopwatch"></i></div><div><strong>Rút ngắn thời gian xử lý:</strong> Cam kết thời gian phản hồi rõ ràng theo chuẩn cam kết chất lượng dịch vụ (SLA).</div></div>
+<div class="qa-about-pillar"><div class="qa-about-pillar-icon"><i class="bi bi-eye"></i></div><div><strong>Minh bạch tiến độ:</strong> Sinh viên dễ dàng theo dõi chi tiết từng trạng thái xử lý của yêu cầu.</div></div>
+<div class="qa-about-pillar"><div class="qa-about-pillar-icon"><i class="bi bi-robot"></i></div><div><strong>Hỗ trợ 24/7 thông minh:</strong> Tự động gợi ý câu trả lời từ kho tri thức và hỏi đáp thường gặp (FAQ) phong phú.</div></div></div>
+<div class="col-lg-5"><div class="qa-about-campus-panel"><div class="qa-about-campus-icon"><i class="bi bi-mortarboard"></i></div><h3 class="h4 mb-2">Đồng hành cùng sinh viên HCMUTE</h3><p>Mọi câu hỏi về học phần, học phí, học bổng, rèn luyện, ký túc xá và các thủ tục sinh viên đều được tiếp nhận và xử lý tận tâm.</p><div class="qa-about-actions"><a href="/faq" class="btn btn-outline-primary"><i class="bi bi-search me-1"></i>Khám phá FAQ</a><a href="/topics" class="btn btn-primary"><i class="bi bi-grid me-1"></i>Xem chủ đề hỗ trợ</a></div></div></div>
+</div></div></section>
 
-        <div class="card mb-5 border-0 shadow-sm overflow-hidden">
-            <div class="card-body p-4 p-md-5">
-                <div class="row align-items-center g-4">
-                    <div class="col-md-6">
-                        <h2 class="h2 text-primary mb-3">Mục tiêu phát triển</h2>
-                        <p class="text-secondary mb-3">
-                            QAUTE được xây dựng nhằm chuẩn hóa và số hóa toàn diện quy trình tiếp nhận, giải quyết thắc mắc, kiến nghị và các thủ tục hành chính học vụ cho người học.
-                        </p>
-                        <ul class="list-unstyled mb-0">
-                            <li class="d-flex align-items-start mb-3">
-                                <i class="bi bi-check-circle-fill text-success fs-5 me-2 mt-1"></i>
-                                <div><strong>Rút ngắn thời gian xử lý:</strong> Cam kết thời gian phản hồi rõ ràng theo chuẩn cam kết chất lượng dịch vụ (SLA).</div>
-                            </li>
-                            <li class="d-flex align-items-start mb-3">
-                                <i class="bi bi-check-circle-fill text-success fs-5 me-2 mt-1"></i>
-                                <div><strong>Minh bạch tiến độ:</strong> Sinh viên dễ dàng theo dõi chi tiết từng trạng thái xử lý của yêu cầu.</div>
-                            </li>
-                            <li class="d-flex align-items-start">
-                                <i class="bi bi-check-circle-fill text-success fs-5 me-2 mt-1"></i>
-                                <div><strong>Hỗ trợ 24/7 thông minh:</strong> Tự động gợi ý câu trả lời từ kho tri thức và hỏi đáp thường gặp (FAQ) phong phú.</div>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-4 bg-light rounded-3 text-center border">
-                            <div class="display-4 text-primary mb-2"><i class="bi bi-mortarboard"></i></div>
-                            <h3 class="h4 mb-2">Đồng hành cùng sinh viên HCMUTE</h3>
-                            <p class="text-secondary small mb-3">
-                                Mọi câu hỏi về học phần, học phí, học bổng, rèn luyện, ký túc xá và các thủ tục sinh viên đều được tiếp nhận và xử lý tận tâm.
-                            </p>
-                            <a href="/faq" class="btn btn-outline-primary btn-sm me-2">Khám phá FAQ</a>
-                            <a href="/topics" class="btn btn-primary btn-sm">Xem chủ đề hỗ trợ</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<section class="qa-about-section"><div class="qa-about-section-heading"><span class="qa-about-kicker">Một nền tảng, nhiều tiện ích</span><h2>Tính năng chính</h2><p>Những tiện ích vượt trội mà hệ thống QAUTE mang lại cho người học</p></div><div class="row g-3 g-xl-4">
+<div class="col-md-6 col-lg-4"><div class="qa-about-feature"><div class="qa-about-feature-icon"><i class="bi bi-search"></i></div><h3>Tra cứu &amp; Tìm kiếm thông minh</h3><p>Tìm kiếm FAQ theo ngôn ngữ tự nhiên, gợi ý từ khóa tức thì và mở rộng từ đồng nghĩa tiện lợi.</p><span class="qa-about-feature-index">01</span></div></div>
+<div class="col-md-6 col-lg-4"><div class="qa-about-feature qa-feature-green"><div class="qa-about-feature-icon"><i class="bi bi-ticket-perforated"></i></div><h3>Gửi Ticket yêu cầu hỗ trợ</h3><p>Tạo yêu cầu gửi đúng phòng ban thụ lý, đính kèm tài liệu minh chứng và theo dõi tiến trình.</p><span class="qa-about-feature-index">02</span></div></div>
+<div class="col-md-6 col-lg-4"><div class="qa-about-feature qa-feature-cyan"><div class="qa-about-feature-icon"><i class="bi bi-chat-dots"></i></div><h3>Tư vấn trực tuyến (Chat)</h3><p>Trò chuyện trực tiếp cùng chuyên viên tư vấn trực ca để giải đáp các vấn đề cấp bách.</p><span class="qa-about-feature-index">03</span></div></div>
+<div class="col-md-6 col-lg-4"><div class="qa-about-feature qa-feature-amber"><div class="qa-about-feature-icon"><i class="bi bi-calendar-check"></i></div><h3>Đặt lịch hẹn trực tiếp</h3><p>Chủ động chọn khung giờ hẹn làm việc trực tiếp tại văn phòng khoa/phòng ban để tránh xếp hàng.</p><span class="qa-about-feature-index">04</span></div></div>
+<div class="col-md-6 col-lg-4"><div class="qa-about-feature qa-feature-rose"><div class="qa-about-feature-icon"><i class="bi bi-bell"></i></div><h3>Thông báo đa kênh</h3><p>Nhận thông báo cập nhật tiến độ yêu cầu ngay trên trang cá nhân và gửi qua hộp thư điện tử sinh viên.</p><span class="qa-about-feature-index">05</span></div></div>
+<div class="col-md-6 col-lg-4"><div class="qa-about-feature qa-feature-violet"><div class="qa-about-feature-icon"><i class="bi bi-star"></i></div><h3>Đánh giá chất lượng phục vụ</h3><p>Chấm điểm độ hài lòng và góp ý phản hồi sau khi yêu cầu được hoàn tất nhằm nâng cao chất lượng.</p><span class="qa-about-feature-index">06</span></div></div>
+</div></section>
 
-        <div class="mb-5">
-            <div class="text-center mb-4">
-                <h2 class="h2 mb-2">Tính năng chính</h2>
-                <p class="text-secondary">Những tiện ích vượt trội mà hệ thống QAUTE mang lại cho người học</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 p-3 shadow-none border">
-                        <div class="fs-1 text-primary mb-2"><i class="bi bi-search"></i></div>
-                        <h3 class="h5 mb-2">Tra cứu & Tìm kiếm thông minh</h3>
-                        <p class="text-secondary small mb-0">Tìm kiếm FAQ theo ngôn ngữ tự nhiên, gợi ý từ khóa tức thì và mở rộng từ đồng nghĩa tiện lợi.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 p-3 shadow-none border">
-                        <div class="fs-1 text-success mb-2"><i class="bi bi-ticket-perforated"></i></div>
-                        <h3 class="h5 mb-2">Gửi Ticket yêu cầu hỗ trợ</h3>
-                        <p class="text-secondary small mb-0">Tạo yêu cầu gửi đúng phòng ban thụ lý, đính kèm tài liệu minh chứng và theo dõi tiến trình.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 p-3 shadow-none border">
-                        <div class="fs-1 text-info mb-2"><i class="bi bi-chat-dots"></i></div>
-                        <h3 class="h5 mb-2">Tư vấn trực tuyến (Chat)</h3>
-                        <p class="text-secondary small mb-0">Trò chuyện trực tiếp cùng chuyên viên tư vấn trực ca để giải đáp các vấn đề cấp bách.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 p-3 shadow-none border">
-                        <div class="fs-1 text-warning mb-2"><i class="bi bi-calendar-check"></i></div>
-                        <h3 class="h5 mb-2">Đặt lịch hẹn trực tiếp</h3>
-                        <p class="text-secondary small mb-0">Chủ động chọn khung giờ hẹn làm việc trực tiếp tại văn phòng khoa/phòng ban để tránh xếp hàng.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 p-3 shadow-none border">
-                        <div class="fs-1 text-danger mb-2"><i class="bi bi-bell"></i></div>
-                        <h3 class="h5 mb-2">Thông báo đa kênh</h3>
-                        <p class="text-secondary small mb-0">Nhận thông báo cập nhật tiến độ yêu cầu ngay trên trang cá nhân và gửi qua hộp thư điện tử sinh viên.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 p-3 shadow-none border">
-                        <div class="fs-1 text-secondary mb-2"><i class="bi bi-star"></i></div>
-                        <h3 class="h5 mb-2">Đánh giá chất lượng phục vụ</h3>
-                        <p class="text-secondary small mb-0">Chấm điểm độ hài lòng và góp ý phản hồi sau khi yêu cầu được hoàn tất nhằm nâng cao chất lượng.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<section class="qa-about-section"><div class="qa-about-section-heading"><span class="qa-about-kicker">Từ câu hỏi đến lời giải đáp</span><h2>Quy trình hỗ trợ 5 bước</h2><p>Chu trình xử lý yêu cầu nhanh chóng, minh bạch và khép kín</p></div><div class="qa-about-process">
+<div class="qa-about-step"><div class="qa-about-step-number">1</div><h3>Tra cứu hoặc Đặt câu hỏi</h3><p>Tìm câu trả lời trong FAQ hoặc tạo yêu cầu hỗ trợ mới.</p></div>
+<div class="qa-about-step"><div class="qa-about-step-number">2</div><h3>Tiếp nhận &amp; Phân loại</h3><p>Hệ thống phân luồng yêu cầu đến đúng phòng ban chức năng.</p></div>
+<div class="qa-about-step"><div class="qa-about-step-number">3</div><h3>Xử lý &amp; Phản hồi</h3><p>Cán bộ chuyên trách xử lý và giải đáp theo chuẩn thời gian SLA.</p></div>
+<div class="qa-about-step"><div class="qa-about-step-number">4</div><h3>Nhận kết quả</h3><p>Sinh viên nhận thông tin giải quyết chi tiết trên hệ thống và email.</p></div>
+<div class="qa-about-step"><div class="qa-about-step-number">5</div><h3>Đóng &amp; Đánh giá</h3><p>Sinh viên xác nhận hoàn thành và đánh giá mức độ hài lòng.</p></div>
+</div></section>
 
-        <div class="mb-5">
-            <div class="text-center mb-4">
-                <h2 class="h2 mb-2">Quy trình hỗ trợ 5 bước</h2>
-                <p class="text-secondary">Chu trình xử lý yêu cầu nhanh chóng, minh bạch và khép kín</p>
-            </div>
-
-            <div class="row g-3">
-                <div class="col-md">
-                    <div class="card h-100 text-center p-3 border">
-                        <div class="avatar bg-primary-subtle text-primary rounded-circle mx-auto mb-3" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.25rem;">1</div>
-                        <h3 class="h6 mb-2">Tra cứu hoặc Đặt câu hỏi</h3>
-                        <p class="text-secondary small mb-0">Tìm câu trả lời trong FAQ hoặc tạo yêu cầu hỗ trợ mới.</p>
-                    </div>
-                </div>
-                <div class="col-md">
-                    <div class="card h-100 text-center p-3 border">
-                        <div class="avatar bg-primary-subtle text-primary rounded-circle mx-auto mb-3" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.25rem;">2</div>
-                        <h3 class="h6 mb-2">Tiếp nhận & Phân loại</h3>
-                        <p class="text-secondary small mb-0">Hệ thống phân luồng yêu cầu đến đúng phòng ban chức năng.</p>
-                    </div>
-                </div>
-                <div class="col-md">
-                    <div class="card h-100 text-center p-3 border">
-                        <div class="avatar bg-primary-subtle text-primary rounded-circle mx-auto mb-3" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.25rem;">3</div>
-                        <h3 class="h6 mb-2">Xử lý & Phản hồi</h3>
-                        <p class="text-secondary small mb-0">Cán bộ chuyên trách xử lý và giải đáp theo chuẩn thời gian SLA.</p>
-                    </div>
-                </div>
-                <div class="col-md">
-                    <div class="card h-100 text-center p-3 border">
-                        <div class="avatar bg-primary-subtle text-primary rounded-circle mx-auto mb-3" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.25rem;">4</div>
-                        <h3 class="h6 mb-2">Nhận kết quả</h3>
-                        <p class="text-secondary small mb-0">Sinh viên nhận thông tin giải quyết chi tiết trên hệ thống và email.</p>
-                    </div>
-                </div>
-                <div class="col-md">
-                    <div class="card h-100 text-center p-3 border">
-                        <div class="avatar bg-primary-subtle text-primary rounded-circle mx-auto mb-3" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.25rem;">5</div>
-                        <h3 class="h6 mb-2">Đóng & Đánh giá</h3>
-                        <p class="text-secondary small mb-0">Sinh viên xác nhận hoàn thành và đánh giá mức độ hài lòng.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="qa-cta-section text-center p-5 rounded-3 mb-4">
-            <h2 class="h2 mb-2">Bạn đã sẵn sàng đặt câu hỏi?</h2>
-            <p class="text-secondary mb-4 mx-auto" style="max-width: 600px;">
-                Đăng nhập tài khoản sinh viên HCMUTE để gửi yêu cầu hoặc tra cứu ngay hàng trăm câu hỏi thường gặp đã được giải đáp.
-            </p>
-            <div class="d-flex justify-content-center gap-3">
-                <a href="/faq" class="btn btn-outline-primary btn-lg">Tra cứu câu hỏi FAQ</a>
-                <a href="/auth/login" class="btn btn-primary btn-lg">Đăng nhập tài khoản</a>
-            </div>
-        </div>
-    </div>
+<section class="qa-about-cta"><div class="qa-about-cta-copy"><span class="qa-about-cta-label"><i class="bi bi-chat-square-heart"></i> QAUTE luôn sẵn sàng hỗ trợ</span><h2>Bạn đã sẵn sàng đặt câu hỏi?</h2><p>Đăng nhập tài khoản sinh viên HCMUTE để gửi yêu cầu hoặc tra cứu ngay hàng trăm câu hỏi thường gặp đã được giải đáp.</p></div><div class="qa-about-cta-actions"><a href="/faq" class="btn qa-about-cta-secondary"><i class="bi bi-search"></i>Tra cứu câu hỏi FAQ</a><a href="/auth/login" class="btn qa-about-cta-primary"><i class="bi bi-box-arrow-in-right"></i>Đăng nhập tài khoản <i class="bi bi-arrow-up-right"></i></a></div></section>
 </div>

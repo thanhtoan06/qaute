@@ -124,7 +124,22 @@ public class PasswordResetService {
                         "time", now.format(TIME_FORMATTER)));
     }
 
-    private Optional<User> findActiveUser(String identifier) {
+    public Optional<String> getMaskedEmail(String identifier) {
+        return findActiveUser(identifier).map(u -> maskEmail(u.getEmail()));
+    }
+
+    public static String maskEmail(String email) {
+        if (email == null || !email.contains("@")) return email;
+        int atIdx = email.indexOf('@');
+        String name = email.substring(0, atIdx);
+        String domain = email.substring(atIdx);
+        if (name.length() <= 3) {
+            return name.charAt(0) + "***" + domain;
+        }
+        return name.substring(0, 2) + "***" + name.substring(name.length() - 2) + domain;
+    }
+
+    public Optional<User> findActiveUser(String identifier) {
         if (identifier == null || identifier.isBlank()) {
             return Optional.empty();
         }

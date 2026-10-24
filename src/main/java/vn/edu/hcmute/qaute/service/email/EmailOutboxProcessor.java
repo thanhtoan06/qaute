@@ -31,22 +31,25 @@ public class EmailOutboxProcessor {
     private final ObjectMapper objectMapper;
     private final JobExecutionTemplate jobExecutionTemplate;
     private final String mailUsername;
+    private final String mailFromName;
 
     public EmailOutboxProcessor(EmailOutboxRepository emailOutboxRepository,
                                 EmailTemplateRenderer templateRenderer,
                                 JavaMailSender mailSender,
                                 ObjectMapper objectMapper,
                                 JobExecutionTemplate jobExecutionTemplate,
-                                @Value("${spring.mail.username:}") String mailUsername) {
+                                @Value("${spring.mail.username:}") String mailUsername,
+                                @Value("${app.mail.from-name:QAUTE - Tư vấn Sinh viên HCMUTE}") String mailFromName) {
         this.emailOutboxRepository = emailOutboxRepository;
         this.templateRenderer = templateRenderer;
         this.mailSender = mailSender;
         this.objectMapper = objectMapper;
         this.jobExecutionTemplate = jobExecutionTemplate;
         this.mailUsername = mailUsername;
+        this.mailFromName = mailFromName;
     }
 
-    @Scheduled(fixedDelay = 30000)
+    @Scheduled(fixedDelay = 5000)
     @Transactional
     public void processScheduled() {
         jobExecutionTemplate.run("email-outbox", this::processPending);
@@ -73,7 +76,11 @@ public class EmailOutboxProcessor {
                 MimeMessage mimeMessage = mailSender.createMimeMessage();
                 MimeMessageHelper helper = new MimeMessageHelper(
                         mimeMessage, false, "UTF-8");
-                helper.setFrom(mailUsername);
+                if (mailFromName != null && !mailFromName.isBlank()) {
+                    helper.setFrom(mailUsername, mailFromName);
+                } else {
+                    helper.setFrom(mailUsername);
+                }
                 helper.setTo(message.getToEmail());
                 helper.setSubject(message.getSubject());
                 helper.setText(html, true);
