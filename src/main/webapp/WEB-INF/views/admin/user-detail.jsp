@@ -66,6 +66,7 @@
 </div>
 
 <div id="actions" class="mt-3 d-flex flex-wrap gap-2">
+  <a class="btn btn-outline-secondary" href="${ctx}/admin/users/${user.id()}/password"><i class="bi bi-key me-1"></i>Đổi mật khẩu</a>
   <a class="btn btn-outline-primary" href="${ctx}/admin/users/${user.id()}/security"><i class="bi bi-shield-lock me-1"></i>Bảo mật</a>
   <a class="btn btn-primary" href="${ctx}/admin/users/${user.id()}/edit"><i class="bi bi-pencil me-1"></i>Sửa</a>
   <c:if test="${user.status() == 'PENDING_ACTIVATION'}">

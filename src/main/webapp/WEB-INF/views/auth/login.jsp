@@ -14,6 +14,12 @@
     </div>
 </c:if>
 
+<c:if test="${param.passwordChanged eq 'true'}">
+    <div class="alert alert-success py-2 small" role="status">
+        Đã đổi mật khẩu và đăng xuất các phiên cũ. Vui lòng đăng nhập bằng mật khẩu mới.
+    </div>
+</c:if>
+
 <c:if test="${not empty errors['global']}">
     <div class="alert alert-danger d-flex align-items-center gap-2 py-2 small">
         <i class="bi bi-exclamation-triangle-fill"></i>

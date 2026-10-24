@@ -146,6 +146,7 @@ public class AdminAuditService {
         result.put(AuditActions.USER_REACTIVATED, "Kích hoạt lại tài khoản");
         result.put(AuditActions.USER_ROLE_CHANGED, "Đổi vai trò");
         result.put(AuditActions.USER_FORCE_RESET, "Buộc đặt lại mật khẩu");
+        result.put(AuditActions.USER_PASSWORD_CHANGED, "Admin đổi mật khẩu người dùng");
         result.put(AuditActions.USER_SESSION_REVOKED, "Thu hồi phiên đăng nhập");
         result.put(AuditActions.USER_IMPORTED, "Nhập sinh viên từ CSV");
         result.put(AuditActions.USER_INVITATION_RESENT, "Gửi lại lời mời kích hoạt");
