@@ -22,8 +22,8 @@ public class UserSeeder implements DemoSeeder {
 
     private static final String ADMIN_EMAIL = "admin@qaute.edu.vn";
 
-    /** MSSV dải seed: 24162101 – 24162130 (30 sinh viên). */
-    private static final int STUDENT_MSSV_START = 24162101;
+    /** MSSV dải seed: 111111 – 111130 (20 sinh viên). */
+    private static final int STUDENT_MSSV_START = 111111;
 
     /** 12 manager mới, mỗi tài khoản phụ trách một nhóm phòng ban. */
     private static final String[] MANAGER_EMAILS = {
@@ -57,36 +57,26 @@ public class UserSeeder implements DemoSeeder {
     };
 
     private static final String[] STUDENT_NAMES = {
-        /* 24162101 */ "Nguyễn Minh Anh",
-        /* 24162102 */ "Trần Quốc Bảo",
-        /* 24162103 */ "Lê Thị Cẩm",
-        /* 24162104 */ "Phạm Đức Duy",
-        /* 24162105 */ "Hoàng Thu Hà",
-        /* 24162106 */ "Vũ Gia Hân",
-        /* 24162107 */ "Đặng Hữu Khang",
-        /* 24162108 */ "Bùi Ngọc Lan",
-        /* 24162109 */ "Đỗ Tuấn Minh",
-        /* 24162110 */ "Ngô Thảo Nguyên",
-        /* 24162111 */ "Dương Anh Phúc",
-        /* 24162112 */ "Lý Khánh Quỳnh",
-        /* 24162113 */ "Võ Thành Sang",
-        /* 24162114 */ "Phan Mỹ Tâm",
-        /* 24162115 */ "Trương Văn Uy",
-        /* 24162116 */ "Nguyễn Thế Vinh",
-        /* 24162117 */ "Đinh Thị Xuân",
-        /* 24162118 */ "Cao Minh Yến",
-        /* 24162119 */ "Hồ Quang Hải",
-        /* 24162120 */ "Mai Thùy Linh",
-        /* 24162121 */ "Tô Đức Mạnh",
-        /* 24162122 */ "Châu Ngọc Nhi",
-        /* 24162123 */ "Lê Văn Phong",
-        /* 24162124 */ "Trịnh Hải Quân",
-        /* 24162125 */ "Huỳnh Thị Sen",
-        /* 24162126 */ "Phan Văn Thịnh",
-        /* 24162127 */ "Ngô Minh Tuấn",
-        /* 24162128 */ "Đoàn Thị Út",
-        /* 24162129 */ "Lê Thanh Toàn",
-        /* 24162130 */ "Hà Quốc Toản"
+        /* 111111 */ "Nguyễn Minh Anh",
+        /* 111112 */ "Trần Quốc Bảo",
+        /* 111113 */ "Lê Thị Cẩm",
+        /* 111114 */ "Phạm Đức Duy",
+        /* 111115 */ "Hoàng Thu Hà",
+        /* 111116 */ "Vũ Gia Hân",
+        /* 111117 */ "Đặng Hữu Khang",
+        /* 111118 */ "Bùi Ngọc Lan",
+        /* 111119 */ "Đỗ Tuấn Minh",
+        /* 111120 */ "Ngô Thảo Nguyên",
+        /* 111121 */ "Dương Anh Phúc",
+        /* 111122 */ "Lý Khánh Quỳnh",
+        /* 111123 */ "Võ Thành Sang",
+        /* 111124 */ "Phan Mỹ Tâm",
+        /* 111125 */ "Trương Văn Uy",
+        /* 111126 */ "Nguyễn Thế Vinh",
+        /* 111127 */ "Đinh Thị Xuân",
+        /* 111128 */ "Cao Minh Yến",
+        /* 111129 */ "Hồ Quang Hải",
+        /* 111130 */ "Mai Thùy Linh"
     };
 
     private final UserRepository userRepository;
@@ -166,10 +156,10 @@ public class UserSeeder implements DemoSeeder {
                     "Không có khoa đang hoạt động để seed sinh viên");
         }
 
-        // Student accounts: 24162101 → 24162130.
+        // Student accounts: 111111 → 111130.
         for (int i = 0; i < STUDENT_NAMES.length; i++) {
             String mssv = String.valueOf(STUDENT_MSSV_START + i);
-            String email = mssv + "@student.hcmute.edu.vn";
+            String email = mssv + "@qaute.edu.vn";
 
             if (userRepository.findByEmailIgnoreCase(email).isPresent()
                     || userRepository.findByMssv(mssv).isPresent()) {
@@ -189,8 +179,8 @@ public class UserSeeder implements DemoSeeder {
             studentProfileRepository.save(StudentProfile.builder()
                     .userId(student.getId())
                     .facultyId(faculty.getId())
-                    .classCode("241" + faculty.getCode().toUpperCase() + "A")
-                    .cohort("2024")
+                    .classCode("111" + faculty.getCode().toUpperCase() + "A")
+                    .cohort("2026")
                     .program("Đại học chính quy")
                     .build());
         }
