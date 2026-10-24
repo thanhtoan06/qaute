@@ -48,6 +48,22 @@ mvn -DskipTests package
 Kiểm thử cần MySQL vì có test tích hợp. Kết quả đạt khi Maven báo `BUILD SUCCESS`, không có failure/error.
 File đóng gói nằm tại `target/qaute-0.0.1-SNAPSHOT.war`.
 
+### Kiểm tra đổi mật khẩu và hồ sơ Admin
+
+1. Đăng nhập Admin, mở **Người dùng**, chọn **Đổi mật khẩu** ở dòng người dùng hoặc trang chi tiết. Nhập mật khẩu mới và xác nhận (8–64 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt; tối đa 72 byte UTF-8).
+2. Thử mật khẩu yếu hoặc xác nhận khác nhau: trang báo lỗi, không thay đổi mật khẩu. Sau khi đổi thành công, mật khẩu cũ, các phiên/token đăng nhập và liên kết khôi phục cũ của người dùng bị vô hiệu hóa. Trạng thái và vai trò tài khoản được giữ nguyên. Nếu Admin chọn chính mình ở danh sách này thì phải đăng nhập lại.
+3. Vào **Hồ sơ admin** (`/admin/profile`) từ sidebar/menu tài khoản: sửa họ tên, email, điện thoại hoặc chọn ảnh đại diện. Email trùng với tài khoản khác bị từ chối; ảnh được cắt vuông 400 × 400 trước khi tải lên.
+4. Trong **Đổi mật khẩu của tôi**, nhập mật khẩu hiện tại, mật khẩu mới và xác nhận. Nhập sai mật khẩu hiện tại phải báo lỗi; đổi đúng sẽ đăng xuất các thiết bị khác, giữ phiên hiện tại.
+5. Đăng nhập Student hoặc Manager rồi mở `/admin/profile` hay `/admin/users/<id>/password`: phải bị từ chối. Kiểm tra `/admin/audit-logs`: có hành động đổi mật khẩu/cập nhật hồ sơ, không có mật khẩu hoặc hash trong dữ liệu trước/sau.
+
+Kiểm thử riêng các chức năng này:
+
+```powershell
+mvn "-Dtest=AdminUserPasswordServiceTest,AdminAccountAuthorizationTest,AdminProfileServiceTest,AdminProfileControllerTest" test
+```
+
+Không cần migration hoặc cài thêm dependency cho hai chức năng này; dùng các cột User, BCrypt và cơ chế phiên sẵn có.
+
 ## Tài khoản demo
 
 Bật dữ liệu demo bằng profile `demo`:

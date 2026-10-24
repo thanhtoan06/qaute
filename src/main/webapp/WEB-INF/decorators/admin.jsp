@@ -10,7 +10,7 @@
 <c:set var="rawUri" value="${not empty requestScope['jakarta.servlet.forward.request_uri'] ? requestScope['jakarta.servlet.forward.request_uri'] : pageContext.request.requestURI}"/>
 <c:set var="currentPath" value="${fn:startsWith(rawUri, ctx) ? fn:substring(rawUri, fn:length(ctx), fn:length(rawUri)) : rawUri}"/>
 
-<c:set var="menuPaths" value="/admin/dashboard,/admin/users,/admin/users/import,/admin/departments,/admin/categories,/admin/managers,/admin/faq,/admin/faq/tags,/admin/faq/synonyms,/admin/tickets,/admin/sla,/admin/settings,/admin/announcements,/admin/audit-logs,/admin/reports,/admin/health"/>
+<c:set var="menuPaths" value="/admin/dashboard,/admin/users,/admin/users/import,/admin/departments,/admin/categories,/admin/managers,/admin/faq,/admin/faq/tags,/admin/faq/synonyms,/admin/tickets,/admin/sla,/admin/settings,/admin/announcements,/admin/audit-logs,/admin/reports,/admin/health,/admin/profile"/>
 <c:set var="activePath" value=""/>
 <c:forTokens items="${menuPaths}" delims="," var="menuPath">
   <c:if test="${currentPath == menuPath or fn:startsWith(currentPath, menuPath.concat('/'))}">
@@ -51,7 +51,7 @@
           <span class="qa-workspace-brand-copy">QA<span>UTE</span><small>CỔNG HỖ TRỢ SINH VIÊN</small></span>
         </a>
       </h1>
-      <a class="qa-workspace-user-card" href="${ctx}/admin/dashboard">
+      <a class="qa-workspace-user-card" href="${ctx}/admin/profile">
         <span class="qa-workspace-avatar"><c:out value="${workspaceInitial}"/></span>
         <span class="qa-workspace-user-copy"><strong><c:out value="${workspaceName}"/></strong><small>Quản trị viên</small></span>
         <i class="bi bi-shield-check" aria-hidden="true"></i>
@@ -151,6 +151,12 @@
             </div>
           </li>
 
+          <li class="nav-item ${activePath == '/admin/profile' ? 'active' : ''}">
+            <a class="nav-link" href="${ctx}/admin/profile">
+              <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="bi bi-person-circle"></i></span>
+              <span class="nav-link-title">Hồ sơ admin</span>
+            </a>
+          </li>
         </ul>
       </div>
       <div class="qa-workspace-sidebar-footer"><span class="qa-workspace-role-dot"></span>Không gian quản trị<a href="${ctx}/guide" aria-label="Hướng dẫn sử dụng"><i class="bi bi-question-circle"></i></a></div>
@@ -179,6 +185,7 @@
             </div>
           </a>
           <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+            <a class="dropdown-item" href="${ctx}/admin/profile"><i class="bi bi-person-circle me-2"></i>Hồ sơ admin</a>
             <form method="post" action="${ctx}/auth/logout" class="m-0">
               <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
               <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</button>
