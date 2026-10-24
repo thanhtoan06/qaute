@@ -6,7 +6,7 @@ QAUTE là website tư vấn sinh viên HCMUTE, hỗ trợ tra cứu câu hỏi t
 
 ## Giới thiệu website
 
-QAUTE (Question & Answer Utility for Technical Education) là hệ thống tư vấn trực tuyến dành cho sinh viên Đại học Công nghệ Kỹ thuật TP.HCM (HCMUTE). Website được phát triển nhằm giải quyết các vấn đề thường gặp của sinh viên trong quá trình học tập, từ những câu hỏi cơ bản về quy định nhà trường, đăng ký tín chỉ, học phí, cho đến các vấn đề chuyên sâu liên quan đến từng ngành học.
+QAUTE là hệ thống tư vấn trực tuyến dành cho sinh viên Đại học Công nghệ Kỹ thuật TP.HCM (HCMUTE). Website được phát triển nhằm giải quyết các vấn đề thường gặp của sinh viên trong quá trình học tập, từ những câu hỏi cơ bản về quy định nhà trường, đăng ký tín chỉ, học phí, cho đến các vấn đề chuyên sâu liên quan đến từng ngành học.
 
 Hệ thống hoạt động như một cầu nối giữa sinh viên và đội ngũ tư vấn viên (Manager), giúp sinh viên có thể nhanh chóng tìm kiếm câu trả lời cho các thắc mắc thông qua hệ thống FAQ (Câu hỏi thường gặp), gửi yêu cầu tư vấn qua hệ thống Ticket, trò chuyện trực tiếp với tư vấn viên qua Chat thời gian thực, hoặc đặt lịch hẹn để được tư vấn trực tiếp. Đối với nhà trường, hệ thống cung cấp công cụ quản lý toàn diện cho Quản trị viên (Admin) và Tư vấn viên (Manager), giúp theo dõi, phân tích và cải thiện chất lượng dịch vụ tư vấn.
 
@@ -30,6 +30,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 ### 1. Guest (Khách - Chưa đăng nhập)
 
 #### 1.1. Trang chủ
+
 - Xem danh mục FAQ theo cấu trúc cây
 - Xem FAQ nổi bật (featured)
 - Xem FAQ xem nhiều nhất
@@ -39,6 +40,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Xem thông tin liên hệ
 
 #### 1.2. Tra cứu FAQ công khai
+
 - Tìm kiếm FAQ theo từ khóa
 - Lọc FAQ theo danh mục
 - Lọc FAQ theo tag
@@ -48,11 +50,13 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Phân trang danh sách FAQ
 
 #### 1.3. Xem thông báo công khai
+
 - Xem danh sách thông báo công khai
 - Xem chi tiết thông báo
 - Phân trang thông báo
 
 #### 1.4. Đăng nhập
+
 - Đăng nhập bằng email hoặc MSSV
 - Đăng nhập bằng Google OAuth2 (nếu được bật)
 - Quên mật khẩu: gửi OTP qua email để đặt lại
@@ -62,11 +66,13 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 ### 2. Student (Sinh viên)
 
 #### 2.1. Dashboard cá nhân
+
 - Xem tổng quan: số ticket, số chat, số lịch hẹn
 - Xem thông báo mới
 - Truy cập nhanh đến các chức năng
 
 #### 2.2. FAQ
+
 - Tra cứu FAQ với đầy đủ tính năng công khai
 - Bookmark (lưu lại) FAQ yêu thích
 - Xem danh sách FAQ đã bookmark
@@ -77,6 +83,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Xem FAQ theo tab: mới nhất, xem nhiều, hữu ích, đã lưu
 
 #### 2.3. Ticket
+
 - Tạo ticket mới với đầy đủ thông tin
 - Chọn danh mục/phòng ban
 - Chọn mức độ ưu tiên
@@ -89,6 +96,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Phản hồi ticket
 
 #### 2.4. Chat
+
 - Bắt đầu phiên chat mới
 - Chọn danh mục vấn đề
 - Nhập câu hỏi ban đầu
@@ -100,6 +108,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Hủy phiên chat
 
 #### 2.5. Lịch hẹn
+
 - Xem lịch làm việc của các tư vấn viên
 - Chọn tư vấn viên theo danh mục
 - Xem các khung giờ trống
@@ -112,6 +121,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Nhận thông báo nhắc lịch hẹn
 
 #### 2.6. Thông báo
+
 - Nhận thông báo về: ticket mới, phản hồi ticket, chat mới, lịch hẹn, FAQ được duyệt
 - Xem danh sách thông báo
 - Lọc thông báo đã đọc/chưa đọc
@@ -123,6 +133,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Tùy chọn thông báo: tắt/bật loại thông báo muốn nhận
 
 #### 2.7. Quản lý hồ sơ
+
 - Xem và cập nhật thông tin cá nhân (họ tên, email, số điện thoại)
 - Thay đổi mật khẩu
 - Upload avatar (ảnh đại diện)
@@ -135,12 +146,14 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 ### 3. Manager (Tư vấn viên)
 
 #### 3.1. Dashboard cá nhân
+
 - Xem tổng quan: số ticket đã xử lý, số chat đã xử lý, số lịch hẹn
 - Xem ticket đang chờ xử lý
 - Xem chat đang chờ
 - Xem thống kê hiệu suất cá nhân
 
 #### 3.2. Xử lý Ticket
+
 - Xem hàng đợi ticket theo phạm vi quản lý
 - Lọc ticket theo: danh mục, ưu tiên, trạng thái, manager phụ trách, độ tuổi ticket
 - Nhận ticket để xử lý
@@ -155,6 +168,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Xem lịch sử thay đổi ticket
 
 #### 3.3. Chat Desk
+
 - Xem hàng chờ chat theo phạm vi quản lý
 - Lọc theo danh mục
 - Nhận phiên chat
@@ -167,6 +181,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Kiểm tra sức chứa (số phiên chat tối đa)
 
 #### 3.4. Quản lý FAQ
+
 - Tạo FAQ mới trong phạm vi chuyên môn
 - Chỉnh sửa FAQ bản nháp
 - Gửi FAQ chờ duyệt
@@ -176,6 +191,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Xem FAQ theo trạng thái
 
 #### 3.5. Quản lý Lịch hẹn
+
 - Xem lịch làm việc cá nhân theo tuần
 - Xem các lịch hẹn đã đặt
 - Xem lịch hẹn theo trạng thái: sắp tới, đã hoàn tất, vắng mặt, đã hủy
@@ -186,6 +202,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Xem thông tin sinh viên đặt lịch
 
 #### 3.6. Quản lý Lịch làm việc
+
 - Xem lịch làm việc theo tuần/lưới 7 ngày
 - Tạo quy tắc lịch làm việc (ví dụ: thứ 2-6, 8h-17h)
 - Thiết lập thời gian mỗi slot (ví dụ: 30 phút)
@@ -195,6 +212,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Tự động tạo khung giờ dựa trên quy tắc
 
 #### 3.7. Hồ sơ sinh viên 360
+
 - Xem thông tin cá nhân sinh viên
 - Xem lịch sử ticket của sinh viên
 - Xem lịch sử chat của sinh viên
@@ -204,6 +222,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Kiểm tra quyền truy cập trước khi xem
 
 #### 3.8. Mẫu trả lời nhanh
+
 - Tạo mẫu trả lời nhanh
 - Chỉnh sửa mẫu trả lời
 - Xóa mẫu trả lời
@@ -213,12 +232,14 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Sử dụng mẫu khi chat
 
 #### 3.9. Báo cáo cá nhân
+
 - Xem thống kê ticket đã xử lý
 - Xem thống kê chat đã xử lý
 - Xem thống kê lịch hẹn
 - Xuất báo cáo ra file CSV
 
 #### 3.10. Quản lý hồ sơ cá nhân
+
 - Xem và cập nhật thông tin cá nhân
 - Thay đổi mật khẩu
 - Upload avatar
@@ -230,11 +251,13 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 ### 4. Admin (Quản trị viên)
 
 #### 4.1. Dashboard toàn hệ thống
+
 - Xem tổng quan toàn hệ thống: số user, số ticket, số FAQ, số chat, số lịch hẹn
 - Xem thống kê theo thời gian
 - Xem hoạt động gần đây
 
 #### 4.2. Quản lý người dùng
+
 - Tạo tài khoản mới (Admin, Manager, Student)
 - Chỉnh sửa thông tin tài khoản
 - Khóa/mở khóa tài khoản
@@ -248,6 +271,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Quản lý Manager Scope: phân công Manager quản lý theo phòng ban/danh mục
 
 #### 4.3. Quản lý FAQ toàn hệ thống
+
 - Duyệt hoặc từ chối FAQ do Manager đề xuất
 - Tạo/sửa/xóa FAQ toàn hệ thống
 - Quản lý phiên bản FAQ
@@ -257,6 +281,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Xuất FAQ ra file CSV
 
 #### 4.4. Quản lý Ticket toàn hệ thống
+
 - Xem tất cả ticket toàn hệ thống
 - Can thiệp ticket bất kỳ
 - Chuyển ticket bất kỳ
@@ -265,23 +290,27 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Xuất báo cáo ticket ra file CSV
 
 #### 4.5. Quản lý phòng ban
+
 - Tạo, chỉnh sửa, xóa phòng ban
 - Cấu trúc cây phòng ban
 - Bật/tắt phòng ban
 - Kiểm tra ticket đang mở trước khi tắt
 
 #### 4.6. Quản lý danh mục
+
 - Tạo, chỉnh sửa, xóa danh mục FAQ/ticket
 - Cấu trúc cây danh mục
 - Gán danh mục cho phòng ban
 
 #### 4.7. Quản lý SLA
+
 - Cấu hình thời gian phản hồi theo loại vấn đề
 - Cấu hình thời gian xử lý theo mức độ ưu tiên
 - Tạo/sửa/xóa cấu hình SLA
 - Theo dõi vi phạm SLA
 
 #### 4.8. Quản lý Settings
+
 - Cấu hình thông tin website: tên, email liên hệ, số điện thoại
 - Cấu hình giới hạn upload file
 - Cấu hình giới hạn chat
@@ -290,11 +319,13 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Cấu hình Cloudinary (nếu dùng)
 
 #### 4.9. Quản lý Tag và Synonym
+
 - Tạo, chỉnh sửa, xóa tag
 - Quản lý từ đồng nghĩa (synonym) để cải thiện tìm kiếm
 - Gán tag cho FAQ
 
 #### 4.10. Quản lý thông báo công khai
+
 - Tạo thông báo công khai
 - Chọn đối tượng: tất cả, sinh viên, manager
 - Upload ảnh bìa
@@ -304,6 +335,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Xem danh sách thông báo
 
 #### 4.11. Audit Log
+
 - Ghi log tất cả thao tác quan trọng
 - Xem lịch sử hoạt động
 - Lọc theo người dùng, hành động, thời gian
@@ -311,12 +343,14 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Ghi log: tạo user, khóa user, can thiệp ticket, duyệt FAQ, v.v.
 
 #### 4.12. Health Check
+
 - Kiểm tra kết nối database
 - Kiểm tra kết nối email
 - Kiểm tra dịch vụ hệ thống
 - Gửi email test
 
 #### 4.13. Báo cáo toàn hệ thống
+
 - Thống kê ticket theo trạng thái, danh mục, manager
 - Thống kê thời gian phản hồi và xử lý
 - Thống kê chat và đánh giá
@@ -325,6 +359,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Xuất tất cả báo cáo ra file CSV
 
 #### 4.14. Quản lý Media
+
 - Xem danh sách file đã upload
 - Xóa file không dùng
 - Kiểm tra dung lượng lưu trữ
@@ -333,20 +368,28 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 
 ## Tài khoản demo
 
-| Vai trò | Email hoặc MSSV | Mật khẩu |
-| :--- | :--- | :--- |
-| Quản trị viên | admin@qaute.edu.vn | Admin@12345 |
-| Tư vấn viên | manager1@qaute.edu.vn | Manager@12345 |
-| Tư vấn viên | manager2@qaute.edu.vn | Manager@12345 |
-| Tư vấn viên | manager3@qaute.edu.vn | Manager@12345 |
-| Tư vấn viên | manager4@qaute.edu.vn | Manager@12345 |
-| Sinh viên | 24162101 | Student@12345 |
-| Sinh viên | 24162102 | Student@12345 |
-| Sinh viên | 24162103 | Student@12345 |
-| ... | ... | ... |
-| Sinh viên | 24162130 | Student@12345 |
 
----
+
+| Vai trò         | Email hoặc MSSV              | Mật khẩu    |
+| :--------------- | :---------------------------- | :------------ |
+| Quản trị viên | admin@qaute.edu.vn            | Admin@12345   |
+| Tư vấn viên   | manager.daotao@qaute.edu.vn   | Manager@12345 |
+| Tư vấn viên   | manager.ctsv@qaute.edu.vn     | Manager@12345 |
+| Tư vấn viên   | manager.taichinh@qaute.edu.vn | Manager@12345 |
+| Tư vấn viên   | manager.ktx@qaute.edu.vn      | Manager@12345 |
+| Tư vấn viên   | manager.cntt@qaute.edu.vn     | Manager@12345 |
+| Tư vấn viên   | manager.thuvien@qaute.edu.vn  | Manager@12345 |
+| Tư vấn viên   | manager.qhdn@qaute.edu.vn     | Manager@12345 |
+| Tư vấn viên   | manager.khcn@qaute.edu.vn     | Manager@12345 |
+| Tư vấn viên   | manager.yte@qaute.edu.vn      | Manager@12345 |
+| Tư vấn viên   | manager.csvc@qaute.edu.vn     | Manager@12345 |
+| Tư vấn viên   | manager.qlcl@qaute.edu.vn     | Manager@12345 |
+| Tư vấn viên   | manager.saudh@qaute.edu.vn    | Manager@12345 |
+| Sinh viên       | 24162101                      | Student@12345 |
+| Sinh viên       | 24162102                      | Student@12345 |
+| Sinh viên       | 24162103                      | Student@12345 |
+| ...              | ...                           | ...           |
+| Sinh viên       | 24162130                      | Student@12345 |
 
 ## Chạy ứng dụng trên Windows
 
@@ -368,6 +411,7 @@ Chỉ chạy một phiên QAUTE trên cổng 8090; không chạy thêm từ VS C
 Sau khi chạy ứng dụng thành công, hãy truy cập các đường dẫn sau để kiểm tra chức năng:
 
 ### Trang công khai (không cần đăng nhập)
+
 - Trang chủ: `http://localhost:8090/`
 - FAQ công khai: `http://localhost:8090/faq`
 - Thông báo công khai: `http://localhost:8090/announcements`

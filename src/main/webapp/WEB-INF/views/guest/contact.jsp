@@ -1,176 +1,366 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <title>Thông tin liên hệ</title>
+<style>
+.qaute-contact-page { --contact-navy: #10234b; --contact-blue: #3563e9; --contact-teal: #12b8a6; --contact-muted: #6b7890; --contact-border: rgba(111, 132, 173, .16); --contact-shadow: 0 14px 38px rgba(28, 48, 91, .075); color: #172746; padding-bottom: 2rem; }
+.qaute-contact-page .contact-breadcrumb { display: flex; align-items: center; gap: .45rem; margin-bottom: 1.25rem; font-size: .88rem; }
+.qaute-contact-page .contact-breadcrumb .breadcrumb { margin: 0; flex-wrap: wrap; }
+.qaute-contact-page .contact-breadcrumb a { color: #64748b; text-decoration: none; transition: color .25s ease; }
+.qaute-contact-page .contact-breadcrumb a:hover { color: var(--contact-blue); }
+.qaute-contact-page .contact-hero { isolation: isolate; padding: clamp(2rem, 5vw, 4.25rem); margin-bottom: 2rem; background: radial-gradient(ellipse at 90% 5%, rgba(35, 211, 195, .28), transparent 34%), radial-gradient(ellipse at 0% 100%, rgba(70, 111, 255, .34), transparent 42%), linear-gradient(125deg, #101e42 0%, #172f63 52%, #164f75 100%); box-shadow: 0 24px 60px rgba(18, 39, 83, .2); }
+.qaute-contact-page .contact-hero::before, .qaute-contact-page .contact-hero::after { content: ""; position: absolute; z-index: -1; pointer-events: none; border: 1px solid rgba(255, 255, 255, .13); border-radius: 50%; }
+.qaute-contact-page .contact-hero::before { width: 370px; height: 370px; right: -100px; top: -175px; box-shadow: 0 0 0 28px rgba(255,255,255,.025), 0 0 0 58px rgba(255,255,255,.025); animation: qaute-orbit 20s linear infinite; }
+.qaute-contact-page .contact-hero::after { width: 240px; height: 240px; right: 10%; bottom: -175px; border-color: rgba(57, 226, 206, .28); box-shadow: 0 0 0 22px rgba(57, 226, 206, .035); animation: qaute-orbit 16s linear infinite reverse; }
+.qaute-contact-page .contact-hero-content { position: relative; z-index: 1; max-width: 790px; }
+.qaute-contact-page .contact-eyebrow { display: inline-flex; align-items: center; gap: .6rem; padding: .55rem .9rem; margin-bottom: 1.25rem; color: #d9fffb; background: rgba(255, 255, 255, .09); border: 1px solid rgba(255, 255, 255, .2); border-radius: 999px; backdrop-filter: blur(10px); font-size: .78rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.qaute-contact-page .contact-eyebrow i { color: #65f0dd; font-size: 1rem; }
+.qaute-contact-page .contact-hero h1 { max-width: 760px; margin: 0 0 1rem; font-size: clamp(2rem, 4vw, 3.55rem); font-weight: 850; line-height: 1.12; }
+.qaute-contact-page .contact-hero h1 span { color: #7de8dd; background: linear-gradient(90deg, #8ff5e5, #a4c5ff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.qaute-contact-page .contact-hero p { max-width: 690px; margin: 0; color: rgba(241, 247, 255, .78); font-size: clamp(.98rem, 1.5vw, 1.12rem); line-height: 1.9; }
+.qaute-contact-page .contact-hero-bottom { display: flex; align-items: center; flex-wrap: wrap; gap: .7rem; margin-top: 1.8rem; }
+.qaute-contact-page .contact-hero-pill { display: inline-flex; align-items: center; gap: .5rem; padding: .65rem .9rem; color: #eaf5ff; border: 1px solid rgba(255, 255, 255, .16); border-radius: 12px; background: rgba(255, 255, 255, .07); font-size: .84rem; }
+.qaute-contact-page .contact-hero-pill i { color: #7de8dd; }
+.qaute-contact-page .contact-section-heading { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.35rem; }
+.qaute-contact-page .contact-section-kicker { display: inline-flex; align-items: center; gap: .45rem; margin-bottom: .6rem; color: var(--contact-blue); font-size: .75rem; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
+.qaute-contact-page .contact-section-heading h2 { margin: 0 0 .5rem; color: var(--contact-navy); font-size: clamp(1.45rem, 2.5vw, 2rem); font-weight: 850; letter-spacing: -.035em; }
+.qaute-contact-page .contact-section-heading p { max-width: 720px; margin: 0; color: var(--contact-muted); line-height: 1.75; }
+.qaute-contact-page .contact-info-card { position: relative; isolation: isolate; height: 100%; overflow: hidden; padding: 1.65rem; background: linear-gradient(155deg, #fff 0%, #fbfdff 100%); border: 1px solid var(--contact-border); border-radius: 22px; box-shadow: var(--contact-shadow); transition: transform .32s ease, box-shadow .32s ease, border-color .32s ease; }
+.qaute-contact-page .contact-info-card::before { content: ""; position: absolute; z-index: -1; top: -60px; right: -60px; width: 150px; height: 150px; border-radius: 50%; background: var(--contact-glow, rgba(53, 99, 233, .07)); filter: blur(2px); transition: transform .4s ease; }
+.qaute-contact-page .contact-info-card:hover { transform: translateY(-7px); border-color: rgba(53, 99, 233, .28); box-shadow: 0 24px 48px rgba(28, 48, 91, .13); }
+.qaute-contact-page .contact-info-card:hover::before { transform: scale(1.35); }
+.qaute-contact-page .contact-info-card.contact-address { --contact-glow: rgba(65, 105, 240, .11); }
+.qaute-contact-page .contact-info-card.contact-phone { --contact-glow: rgba(20, 184, 125, .11); }
+.qaute-contact-page .contact-info-card.contact-email { --contact-glow: rgba(13, 182, 207, .12); }
+.qaute-contact-page .contact-info-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.3rem; }
+.qaute-contact-page .contact-icon { display: inline-flex; flex: 0 0 56px; width: 56px; height: 56px; align-items: center; justify-content: center; border-radius: 18px; font-size: 1.55rem; box-shadow: inset 0 1px 0 rgba(255,255,255,.65); transition: transform .3s ease; }
+.qaute-contact-page .contact-info-card:hover .contact-icon { transform: rotate(-5deg) scale(1.06); }
+.qaute-contact-page .contact-icon.icon-blue { color: #3159d8; background: linear-gradient(145deg, #e9efff, #dce8ff); }
+.qaute-contact-page .contact-icon.icon-green { color: #098b65; background: linear-gradient(145deg, #e0fbef, #c9f5df); }
+.qaute-contact-page .contact-icon.icon-cyan { color: #087f9d; background: linear-gradient(145deg, #e0faff, #c9f3fa); }
+.qaute-contact-page .contact-info-title { margin: 0 0 .3rem; color: var(--contact-navy); font-size: 1.1rem; font-weight: 800; }
+.qaute-contact-page .contact-info-subtitle { color: var(--contact-muted); font-size: .83rem; }
+.qaute-contact-page .contact-info-divider { height: 1px; margin-bottom: 1.05rem; background: linear-gradient(90deg, rgba(53,99,233,.2), rgba(53,99,233,0)); }
+.qaute-contact-page .contact-info-value { position: relative; color: #566680; font-size: .96rem; line-height: 1.85; overflow-wrap: anywhere; }
+.qaute-contact-page .contact-info-value a { transition: color .2s ease; }
+.qaute-contact-page .contact-info-value a:hover { color: #234dd0 !important; }
+.qaute-contact-page .contact-info-value .contact-main-value { display: inline-flex; align-items: center; gap: .45rem; color: var(--contact-navy); font-size: clamp(1.05rem, 1.6vw, 1.3rem); font-weight: 850; text-decoration: none; overflow-wrap: anywhere; }
+.qaute-contact-page .contact-info-value .contact-meta { display: flex; align-items: start; gap: .45rem; margin-top: .65rem; color: #7b8799; font-size: .8rem; line-height: 1.65; }
+.qaute-contact-page .contact-info-value .contact-meta i { margin-top: .18rem; color: var(--contact-blue); }
+.qaute-contact-page .contact-directory { margin-top: 3.25rem; }
+.qaute-contact-page .contact-directory-topline { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+.qaute-contact-page .contact-directory-mark { display: inline-flex; align-items: center; gap: .5rem; padding: .55rem .8rem; color: #3456b7; background: #eef3ff; border: 1px solid #e0e9ff; border-radius: 12px; font-size: .8rem; font-weight: 750; }
+.qaute-contact-page .contact-department-card { height: 100%; overflow: hidden; background: #fff; border: 1px solid var(--contact-border); border-radius: 22px; box-shadow: 0 12px 32px rgba(28, 48, 91, .055); transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease; }
+.qaute-contact-page .contact-department-card:hover { transform: translateY(-6px); border-color: rgba(53, 99, 233, .3); box-shadow: 0 22px 44px rgba(28, 48, 91, .12); }
+.qaute-contact-page .contact-department-header { position: relative; display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding: 1.35rem 1.4rem; background: radial-gradient(circle at 100% 0%, rgba(72, 112, 234, .09), transparent 35%), linear-gradient(145deg, #f8faff, #f1f6ff); border-bottom: 1px solid #e9effb; }
+.qaute-contact-page .contact-department-title-wrap { display: flex; align-items: start; gap: .85rem; min-width: 0; }
+.qaute-contact-page .contact-department-icon { display: inline-flex; flex: 0 0 46px; width: 46px; height: 46px; align-items: center; justify-content: center; color: #3159d8; background: linear-gradient(145deg, #e3ebff, #d2e0ff); border-radius: 15px; font-size: 1.3rem; }
+.qaute-contact-page .contact-department-title { margin: .05rem 0 0; color: var(--contact-navy); font-size: 1.08rem; font-weight: 850; line-height: 1.55; overflow-wrap: anywhere; }
+.qaute-contact-page .contact-department-code { flex-shrink: 0; padding: .42rem .6rem; color: #536785; background: rgba(255, 255, 255, .8); border: 1px solid #dae4f4; border-radius: 9px; font-size: .72rem; font-weight: 800; }
+.qaute-contact-page .contact-department-body { padding: 1.4rem; }
+.qaute-contact-page .contact-department-description { margin-bottom: 1.2rem; color: #64748b; font-size: .91rem; line-height: 1.8; }
+.qaute-contact-page .contact-details-list { display: grid; gap: .8rem; padding: 0; margin: 0 0 1.25rem; list-style: none; }
+.qaute-contact-page .contact-details-item { display: flex; align-items: start; gap: .8rem; padding: .8rem; background: #f8faff; border: 1px solid #edf1f8; border-radius: 13px; transition: background .25s ease, border-color .25s ease; }
+.qaute-contact-page .contact-details-item:hover { background: #f1f6ff; border-color: #dce7ff; }
+.qaute-contact-page .contact-details-icon { display: inline-flex; flex: 0 0 34px; width: 34px; height: 34px; align-items: center; justify-content: center; background: #fff; border: 1px solid #e4eaf5; border-radius: 10px; font-size: .98rem; }
+.qaute-contact-page .contact-details-icon.location { color: #e05265; }
+.qaute-contact-page .contact-details-icon.email { color: #3866e7; }
+.qaute-contact-page .contact-details-icon.phone { color: #099568; }
+.qaute-contact-page .contact-details-content { min-width: 0; color: #52627c; font-size: .85rem; line-height: 1.75; overflow-wrap: anywhere; }
+.qaute-contact-page .contact-details-content strong { display: block; margin-bottom: .1rem; color: #233554; font-size: .8rem; font-weight: 800; }
+.qaute-contact-page .contact-details-content a { color: #3159d8; text-decoration: none; overflow-wrap: anywhere; transition: color .2s ease; }
+.qaute-contact-page .contact-details-content a:hover { color: #173ca9; text-decoration: underline; }
+.qaute-contact-page .contact-categories { padding-top: 1.1rem; border-top: 1px solid #e9eef7; }
+.qaute-contact-page .contact-categories-heading { display: flex; align-items: center; gap: .5rem; margin-bottom: .8rem; color: #61718c; font-size: .8rem; font-weight: 800; }
+.qaute-contact-page .contact-categories-heading i { color: #3563e9; font-size: 1rem; }
+.qaute-contact-page .contact-category-tag { display: inline-flex; align-items: center; gap: .4rem; max-width: 100%; padding: .5rem .7rem; color: #405779; background: #f4f7ff; border: 1px solid #e0e8fa; border-radius: 10px; font-size: .76rem; font-weight: 700; text-decoration: none; overflow-wrap: anywhere; transition: transform .2s ease, color .2s ease, background .2s ease, border-color .2s ease; }
+.qaute-contact-page .contact-category-tag::before { content: ""; width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: #4c73e8; }
+.qaute-contact-page .contact-category-tag:hover { transform: translateY(-2px); color: #234dd0; background: #e9efff; border-color: #cbd9ff; }
+.qaute-contact-page .contact-empty-state { padding: 2.5rem 1.5rem; background: linear-gradient(145deg, #fbfcff, #f1f6ff); border: 1px dashed #c8d6f2; border-radius: 22px; }
+.qaute-contact-page .contact-empty-state-icon { display: inline-flex; width: 68px; height: 68px; align-items: center; justify-content: center; margin-bottom: 1rem; color: #3963d8; background: #e8efff; border-radius: 22px; font-size: 1.9rem; }
+.qaute-contact-page .contact-empty-state h3 { color: var(--contact-navy); font-weight: 850; }
+.qaute-contact-page .contact-footer-note { display: flex; align-items: start; gap: .9rem; margin-top: 2rem; padding: 1.2rem 1.35rem; color: #536581; background: linear-gradient(100deg, #edf5ff, #edfbf8); border: 1px solid #e0edf7; border-radius: 17px; font-size: .88rem; line-height: 1.8; }
+.qaute-contact-page .contact-footer-note i { flex: 0 0 auto; margin-top: .12rem; color: #168c9b; font-size: 1.2rem; }
+@media (max-width: 767.98px) {
+  .qaute-contact-page .contact-hero { padding: 2rem 1.4rem; border-radius: 22px; }
+  .qaute-contact-page .contact-hero::before { right: -220px; }
+  .qaute-contact-page .contact-hero-bottom { align-items: stretch; flex-direction: column; }
+  .qaute-contact-page .contact-hero-pill { width: fit-content; max-width: 100%; }
+  .qaute-contact-page .contact-info-card { padding: 1.35rem; border-radius: 19px; }
+  .qaute-contact-page .contact-directory { margin-top: 2.5rem; }
+  .qaute-contact-page .contact-department-header { padding: 1.15rem; }
+  .qaute-contact-page .contact-department-body { padding: 1.15rem; }
+}
+@media (max-width: 420px) {
+  .qaute-contact-page .contact-department-header { flex-direction: column; }
+  .qaute-contact-page .contact-department-code { margin-left: 3.8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qaute-contact-page *, .qaute-contact-page *::before, .qaute-contact-page *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+</style>
 
-<nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Liên hệ</li>
-    </ol>
-</nav>
 
-<div class="mb-4 pb-2 border-bottom">
-    <h1 class="h2 mb-1">Thông tin liên hệ</h1>
-    <p class="text-secondary mb-0">Địa chỉ, đường dây nóng và thông tin liên hệ của các đơn vị phòng ban hỗ trợ sinh viên tại HCMUTE</p>
-</div>
 
-<div class="row g-4 mb-5">
-    <div class="col-md-4">
-        <div class="card h-100 p-4 border shadow-sm">
-            <div class="d-flex align-items-center mb-3">
-                <div class="avatar bg-primary-subtle text-primary rounded-circle me-3" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-                    <i class="bi bi-geo-alt"></i>
-                </div>
-                <div>
-                    <h3 class="h5 mb-0">Địa chỉ trường</h3>
-                    <div class="small text-secondary">Trụ sở chính</div>
-                </div>
+
+<div class="qaute-contact-page">
+    <nav aria-label="breadcrumb" class="contact-breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Liên hệ</li>
+        </ol>
+    </nav>
+
+    <section class="contact-hero">
+        <div class="contact-hero-content">
+            <div class="contact-eyebrow">
+                <i class="bi bi-buildings"></i>
+                QAUTE · STUDENT SUPPORT
             </div>
-            <div class="text-secondary">
-                <c:choose>
-                    <c:when test="${not empty contactAddress}">
-                        <c:out value="${contactAddress}"/>
-                    </c:when>
-                    <c:otherwise>
-                        Số 1 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh
-                    </c:otherwise>
-                </c:choose>
+            <h1>Kết nối với <span>đúng nơi</span>, nhận hỗ trợ kịp thời.</h1>
+            <p>
+                Thông tin liên hệ của các đơn vị và phòng ban hỗ trợ sinh viên HCMUTE được tập hợp tại đây, giúp bạn thuận tiện tra cứu địa chỉ, số điện thoại, email và lĩnh vực phụ trách.
+            </p>
+            <div class="contact-hero-bottom">
+                <span class="contact-hero-pill"><i class="bi bi-geo-alt-fill"></i> Thông tin địa điểm</span>
+                <span class="contact-hero-pill"><i class="bi bi-headset"></i> Kênh hỗ trợ trực tiếp</span>
+                <span class="contact-hero-pill"><i class="bi bi-diagram-3-fill"></i> Danh bạ phòng ban</span>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div class="col-md-4">
-        <div class="card h-100 p-4 border shadow-sm">
-            <div class="d-flex align-items-center mb-3">
-                <div class="avatar bg-success-subtle text-success rounded-circle me-3" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-                    <i class="bi bi-telephone"></i>
+    <section aria-label="Thông tin liên hệ chính">
+        <div class="contact-section-heading">
+            <div>
+                <div class="contact-section-kicker">
+                    <i class="bi bi-info-circle-fill"></i>
+                    CONTACT INFORMATION
                 </div>
-                <div>
-                    <h3 class="h5 mb-0">Đường dây nóng</h3>
-                    <div class="small text-secondary">Tổng đài hỗ trợ</div>
-                </div>
-            </div>
-            <div class="text-secondary">
-                <c:choose>
-                    <c:when test="${not empty contactPhone}">
-                        <a href="tel:<c:out value='${contactPhone}'/>" class="text-decoration-none text-dark fw-bold fs-5">
-                            <c:out value="${contactPhone}"/>
-                        </a>
-                    </c:when>
-                    <c:otherwise>
-                        <span class="text-dark fw-bold fs-5">(028) 3896 8641</span>
-                    </c:otherwise>
-                </c:choose>
-                <div class="small text-secondary mt-1">Giờ hành chính (07:30 - 17:00)</div>
+                <h2>Thông tin liên hệ chính</h2>
+                <p>Các kênh liên hệ tổng quan dành cho sinh viên và người cần hỗ trợ.</p>
             </div>
         </div>
-    </div>
 
-    <div class="col-md-4">
-        <div class="card h-100 p-4 border shadow-sm">
-            <div class="d-flex align-items-center mb-3">
-                <div class="avatar bg-info-subtle text-info rounded-circle me-3" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-                    <i class="bi bi-envelope"></i>
-                </div>
-                <div>
-                    <h3 class="h5 mb-0">Hộp thư hỗ trợ</h3>
-                    <div class="small text-secondary">Tiếp nhận ý kiến</div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="contact-info-card contact-address">
+                    <div class="contact-info-top">
+                        <div class="contact-icon icon-blue">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="contact-info-title">Địa chỉ trường</h3>
+                            <div class="contact-info-subtitle">Trụ sở chính</div>
+                        </div>
+                    </div>
+                    <div class="contact-info-divider"></div>
+                    <div class="contact-info-value">
+                        <c:choose>
+                            <c:when test="${not empty contactAddress}">
+                                <c:out value="${contactAddress}"/>
+                            </c:when>
+                            <c:otherwise>
+                                Số 1 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
                 </div>
             </div>
-            <div class="text-secondary">
-                <c:choose>
-                    <c:when test="${not empty contactEmail}">
-                        <a href="mailto:<c:out value='${contactEmail}'/>" class="text-decoration-none text-primary fw-semibold">
-                            <c:out value="${contactEmail}"/>
-                        </a>
-                    </c:when>
-                    <c:otherwise>
-                        <a href="mailto:hotrosinhvien@hcmute.edu.vn" class="text-decoration-none text-primary fw-semibold">
-                            hotrosinhvien@hcmute.edu.vn
-                        </a>
-                    </c:otherwise>
-                </c:choose>
-                <div class="small text-secondary mt-1">Phản hồi trong vòng 24 - 48 giờ làm việc</div>
+
+            <div class="col-md-4">
+                <div class="contact-info-card contact-phone">
+                    <div class="contact-info-top">
+                        <div class="contact-icon icon-green">
+                            <i class="bi bi-telephone-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="contact-info-title">Đường dây nóng</h3>
+                            <div class="contact-info-subtitle">Tổng đài hỗ trợ</div>
+                        </div>
+                    </div>
+                    <div class="contact-info-divider"></div>
+                    <div class="contact-info-value">
+                        <c:choose>
+                            <c:when test="${not empty contactPhone}">
+                                <a href="tel:<c:out value='${contactPhone}'/>" class="contact-main-value">
+                                    <i class="bi bi-telephone-outbound-fill"></i>
+                                    <c:out value="${contactPhone}"/>
+                                </a>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="contact-main-value">(028) 3896 8641</span>
+                            </c:otherwise>
+                        </c:choose>
+                        <div class="contact-meta">
+                            <i class="bi bi-clock-fill"></i>
+                            <span>Giờ hành chính (07:30 - 17:00)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="contact-info-card contact-email">
+                    <div class="contact-info-top">
+                        <div class="contact-icon icon-cyan">
+                            <i class="bi bi-envelope-at-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="contact-info-title">Hộp thư hỗ trợ</h3>
+                            <div class="contact-info-subtitle">Tiếp nhận ý kiến</div>
+                        </div>
+                    </div>
+                    <div class="contact-info-divider"></div>
+                    <div class="contact-info-value">
+                        <c:choose>
+                            <c:when test="${not empty contactEmail}">
+                                <a href="mailto:<c:out value='${contactEmail}'/>" class="contact-main-value">
+                                    <c:out value="${contactEmail}"/>
+                                </a>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="mailto:hotrosinhvien@hcmute.edu.vn" class="contact-main-value">
+                                    hotrosinhvien@hcmute.edu.vn
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
+                        <div class="contact-meta">
+                            <i class="bi bi-reply-all-fill"></i>
+                            <span>Phản hồi trong vòng 24 - 48 giờ làm việc</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<div class="mb-4">
-    <h2 class="h3 mb-1">Danh bạ các đơn vị & phòng ban chuyên trách</h2>
-    <p class="text-secondary mb-4">Liên hệ trực tiếp theo từng mảng công việc để được giải quyết nhanh nhất</p>
+    <section class="contact-directory">
+        <div class="contact-directory-topline">
+            <div class="contact-section-heading mb-0">
+                <div>
+                    <div class="contact-section-kicker">
+                        <i class="bi bi-diagram-3-fill"></i>
+                        DEPARTMENT DIRECTORY
+                    </div>
+                    <h2>Danh bạ các đơn vị &amp; phòng ban</h2>
+                    <p>Liên hệ trực tiếp theo từng mảng công việc để được giải quyết nhanh nhất.</p>
+                </div>
+            </div>
+            <div class="contact-directory-mark">
+                <i class="bi bi-buildings-fill"></i>
+                Đơn vị hỗ trợ sinh viên
+            </div>
+        </div>
 
-    <c:choose>
-        <c:when test="${empty tree}">
-            <qa:emptyState icon="bi-building" title="Chưa có dữ liệu đơn vị" message="Hiện tại chưa có thông tin phòng ban nào được công khai."/>
-        </c:when>
-        <c:otherwise>
-            <div class="row g-4">
-                <c:forEach var="dept" items="${tree}">
-                    <div class="col-lg-6">
-                        <div class="card h-100 shadow-sm border">
-                            <div class="card-header bg-light-subtle py-3 d-flex justify-content-between align-items-center">
-                                <h3 class="h4 card-title mb-0 text-primary">
-                                    <i class="bi bi-building me-2"></i><c:out value="${dept.name()}"/>
-                                </h3>
-                                <c:if test="${not empty dept.code()}">
-                                    <span class="badge bg-secondary-subtle text-secondary border">
-                                        <c:out value="${dept.code()}"/>
-                                    </span>
-                                </c:if>
-                            </div>
-                            <div class="card-body">
-                                <c:if test="${not empty dept.description()}">
-                                    <p class="text-secondary small mb-3">
-                                        <c:out value="${dept.description()}"/>
-                                    </p>
-                                </c:if>
-
-                                <div class="list-group list-group-flush mb-3">
-                                    <c:if test="${not empty dept.location()}">
-                                        <div class="list-group-item px-0 py-2 d-flex align-items-center small">
-                                            <i class="bi bi-geo-alt-fill text-danger me-2 fs-5"></i>
-                                            <div>
-                                                <strong>Văn phòng:</strong> <c:out value="${dept.location()}"/>
-                                            </div>
+        <c:choose>
+            <c:when test="${empty tree}">
+                <div class="contact-empty-state text-center">
+                    <div class="contact-empty-state-icon">
+                        <i class="bi bi-building-slash"></i>
+                    </div>
+                    <qa:emptyState icon="bi-building" title="Chưa có dữ liệu đơn vị" message="Hiện tại chưa có thông tin phòng ban nào được công khai."/>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div class="row g-4">
+                    <c:forEach var="dept" items="${tree}">
+                        <div class="col-lg-6">
+                            <div class="contact-department-card">
+                                <div class="contact-department-header">
+                                    <div class="contact-department-title-wrap">
+                                        <div class="contact-department-icon">
+                                            <i class="bi bi-building-fill"></i>
                                         </div>
+                                        <h3 class="contact-department-title">
+                                            <c:out value="${dept.name()}"/>
+                                        </h3>
+                                    </div>
+                                    <c:if test="${not empty dept.code()}">
+                                        <span class="contact-department-code">
+                                            <c:out value="${dept.code()}"/>
+                                        </span>
                                     </c:if>
-                                    <c:if test="${not empty dept.email()}">
-                                        <div class="list-group-item px-0 py-2 d-flex align-items-center small">
-                                            <i class="bi bi-envelope-fill text-primary me-2 fs-5"></i>
-                                            <div>
-                                                <strong>Email:</strong> <a href="mailto:<c:out value='${dept.email()}'/>" class="text-decoration-none"><c:out value="${dept.email()}"/></a>
+                                </div>
+
+                                <div class="contact-department-body">
+                                    <c:if test="${not empty dept.description()}">
+                                        <p class="contact-department-description">
+                                            <c:out value="${dept.description()}"/>
+                                        </p>
+                                    </c:if>
+
+                                    <ul class="contact-details-list">
+                                        <c:if test="${not empty dept.location()}">
+                                            <li class="contact-details-item">
+                                                <span class="contact-details-icon location">
+                                                    <i class="bi bi-geo-alt-fill"></i>
+                                                </span>
+                                                <div class="contact-details-content">
+                                                    <strong>Văn phòng</strong>
+                                                    <c:out value="${dept.location()}"/>
+                                                </div>
+                                            </li>
+                                        </c:if>
+
+                                        <c:if test="${not empty dept.email()}">
+                                            <li class="contact-details-item">
+                                                <span class="contact-details-icon email">
+                                                    <i class="bi bi-envelope-fill"></i>
+                                                </span>
+                                                <div class="contact-details-content">
+                                                    <strong>Email</strong>
+                                                    <a href="mailto:<c:out value='${dept.email()}'/>">
+                                                        <c:out value="${dept.email()}"/>
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        </c:if>
+
+                                        <c:if test="${not empty dept.phone()}">
+                                            <li class="contact-details-item">
+                                                <span class="contact-details-icon phone">
+                                                    <i class="bi bi-telephone-fill"></i>
+                                                </span>
+                                                <div class="contact-details-content">
+                                                    <strong>Điện thoại</strong>
+                                                    <a href="tel:<c:out value='${dept.phone()}'/>">
+                                                        <c:out value="${dept.phone()}"/>
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        </c:if>
+                                    </ul>
+
+                                    <c:if test="${not empty dept.categories()}">
+                                        <div class="contact-categories">
+                                            <div class="contact-categories-heading">
+                                                <i class="bi bi-grid-fill"></i>
+                                                Lĩnh vực tiếp nhận hỗ trợ
                                             </div>
-                                        </div>
-                                    </c:if>
-                                    <c:if test="${not empty dept.phone()}">
-                                        <div class="list-group-item px-0 py-2 d-flex align-items-center small">
-                                            <i class="bi bi-telephone-fill text-success me-2 fs-5"></i>
-                                            <div>
-                                                <strong>Điện thoại:</strong> <a href="tel:<c:out value='${dept.phone()}'/>" class="text-decoration-none"><c:out value="${dept.phone()}"/></a>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <c:forEach var="cat" items="${dept.categories()}">
+                                                    <a href="/faq?category=<c:out value='${cat.id()}'/>"
+                                                       class="contact-category-tag"
+                                                       title="Xem câu hỏi FAQ">
+                                                        <c:out value="${cat.name()}"/>
+                                                    </a>
+                                                </c:forEach>
                                             </div>
                                         </div>
                                     </c:if>
                                 </div>
-
-                                <c:if test="${not empty dept.categories()}">
-                                    <div class="pt-2 border-top">
-                                        <div class="small fw-semibold text-secondary mb-2">Lĩnh vực tiếp nhận hỗ trợ:</div>
-                                        <div class="d-flex flex-wrap gap-1">
-                                            <c:forEach var="cat" items="${dept.categories()}">
-                                                <a href="/faq?category=<c:out value='${cat.id()}'/>" class="badge bg-light text-dark border text-decoration-none" title="Xem câu hỏi FAQ">
-                                                    <c:out value="${cat.name()}"/>
-                                                </a>
-                                            </c:forEach>
-                                        </div>
-                                    </div>
-                                </c:if>
                             </div>
                         </div>
-                    </div>
-                </c:forEach>
-            </div>
-        </c:otherwise>
-    </c:choose>
-</div>
+                    </c:forEach>
+                </div>
+            </c:otherwise>
+        </c:choose>
 
+        <div class="contact-footer-note">
+            <i class="bi bi-lightbulb-fill"></i>
+            <div>
+                <strong>Bạn chưa biết cần liên hệ đơn vị nào?</strong>
+                Hãy tra cứu mục FAQ để tìm câu trả lời cho những thắc mắc thường gặp hoặc xác định lĩnh vực phù hợp trước khi liên hệ phòng ban.
+            </div>
+        </div>
+    </section>
+</div>
