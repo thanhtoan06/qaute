@@ -370,26 +370,22 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 
 
 
-| Vai trò         | Email hoặc MSSV              | Mật khẩu    |
-| :--------------- | :---------------------------- | :------------ |
-| Quản trị viên | admin@qaute.edu.vn            | Admin@12345   |
-| Tư vấn viên   | manager.daotao@qaute.edu.vn   | Manager@12345 |
-| Tư vấn viên   | manager.ctsv@qaute.edu.vn     | Manager@12345 |
-| Tư vấn viên   | manager.taichinh@qaute.edu.vn | Manager@12345 |
-| Tư vấn viên   | manager.ktx@qaute.edu.vn      | Manager@12345 |
-| Tư vấn viên   | manager.cntt@qaute.edu.vn     | Manager@12345 |
-| Tư vấn viên   | manager.thuvien@qaute.edu.vn  | Manager@12345 |
-| Tư vấn viên   | manager.qhdn@qaute.edu.vn     | Manager@12345 |
-| Tư vấn viên   | manager.khcn@qaute.edu.vn     | Manager@12345 |
-| Tư vấn viên   | manager.yte@qaute.edu.vn      | Manager@12345 |
-| Tư vấn viên   | manager.csvc@qaute.edu.vn     | Manager@12345 |
-| Tư vấn viên   | manager.qlcl@qaute.edu.vn     | Manager@12345 |
-| Tư vấn viên   | manager.saudh@qaute.edu.vn    | Manager@12345 |
-| Sinh viên       | 24162101                      | Student@12345 |
-| Sinh viên       | 24162102                      | Student@12345 |
-| Sinh viên       | 24162103                      | Student@12345 |
-| ...              | ...                           | ...           |
-| Sinh viên       | 24162130                      | Student@12345 |
+| Vai trò         | Email hoặc MSSV                                    | Mật khẩu        |
+| ---------------- | --------------------------------------------------- | ----------------- |
+| Quản trị viên | `admin@qaute.edu.vn`                              | `Admin@12345`   |
+| Tư vấn viên   | `manager.daotao@qaute.edu.vn`                     | `Manager@12345` |
+| Tư vấn viên   | `manager.ctsv@qaute.edu.vn`                       | `Manager@12345` |
+| Tư vấn viên   | `manager.taichinh@qaute.edu.vn`                   | `Manager@12345` |
+| Tư vấn viên   | `manager.ktx@qaute.edu.vn`                        | `Manager@12345` |
+| Tư vấn viên   | `manager.cntt@qaute.edu.vn`                       | `Manager@12345` |
+| Tư vấn viên   | `manager.thuvien@qaute.edu.vn`                    | `Manager@12345` |
+| Tư vấn viên   | `manager.qhdn@qaute.edu.vn`                       | `Manager@12345` |
+| Tư vấn viên   | `manager.khcn@qaute.edu.vn`                       | `Manager@12345` |
+| Tư vấn viên   | `manager.yte@qaute.edu.vn`                        | `Manager@12345` |
+| Tư vấn viên   | `manager.csvc@qaute.edu.vn`                       | `Manager@12345` |
+| Tư vấn viên   | `manager.qlcl@qaute.edu.vn`                       | `Manager@12345` |
+| Tư vấn viên   | `manager.saudh@qaute.edu.vn`                      | `Manager@12345` |
+| Sinh viên       | `111111@qaute.edu.vn` ... `111130@qaute.edu.vn` | `Student@12345` |
 
 ## Chạy ứng dụng trên Windows
 
