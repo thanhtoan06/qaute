@@ -74,16 +74,11 @@ public class OrgSeeder implements DemoSeeder {
     }
 
     /**
-     * Nạp dữ liệu tổ chức từ database demo trống.
-     * DAOTAO là mốc kiểm tra dữ liệu đã được nạp.
+     * Bổ sung dữ liệu tổ chức demo còn thiếu, giữ nguyên dữ liệu đã tồn tại.
      */
     @Override
     @Transactional
     public void seed() {
-        if (departmentRepository.existsByCode(DAOTAO)) {
-            return;
-        }
-
         // =====================================================
         // 1. TẠO 12 PHÒNG BAN
         // =====================================================
@@ -722,14 +717,14 @@ public class OrgSeeder implements DemoSeeder {
             String email,
             String location,
             int sortOrder) {
-        return departmentRepository.save(Department.builder()
+        return departmentRepository.findByCode(code).orElseGet(() -> departmentRepository.save(Department.builder()
                 .code(code)
                 .name(name)
                 .email(email)
                 .location(location)
                 .sortOrder(sortOrder)
                 .active(true)
-                .build());
+                .build()));
     }
 
     private Category saveRootCategory(
@@ -738,7 +733,7 @@ public class OrgSeeder implements DemoSeeder {
             Department department,
             String icon,
             int sortOrder) {
-        return categoryRepository.save(Category.builder()
+        return categoryRepository.findByCode(code).orElseGet(() -> categoryRepository.save(Category.builder()
                 .departmentId(department.getId())
                 .depth(1)
                 .code(code)
@@ -746,7 +741,7 @@ public class OrgSeeder implements DemoSeeder {
                 .icon(icon)
                 .sortOrder(sortOrder)
                 .active(true)
-                .build());
+                .build()));
     }
 
     private void saveChildCategory(
@@ -754,6 +749,9 @@ public class OrgSeeder implements DemoSeeder {
             String name,
             Category parent,
             int sortOrder) {
+        if (categoryRepository.existsByCode(code)) {
+            return;
+        }
         categoryRepository.save(Category.builder()
                 .departmentId(parent.getDepartmentId())
                 .parentId(parent.getId())
@@ -770,7 +768,7 @@ public class OrgSeeder implements DemoSeeder {
             Department congTacSinhVien,
             Department taiChinh,
             Department kyTucXa) {
-        managerProfileRepository.saveAll(List.of(
+        saveMissingProfiles(List.of(
                 profile(manager(1), "CB001", daoTao, AvailabilityStatus.ONLINE),
                 profile(manager(2), "CB002", congTacSinhVien, AvailabilityStatus.ONLINE),
                 profile(manager(3), "CB003", taiChinh, AvailabilityStatus.OFFLINE),
@@ -786,7 +784,7 @@ public class OrgSeeder implements DemoSeeder {
             Department coSoVatChat,
             Department khaoThi,
             Department sauDaiHoc) {
-        managerProfileRepository.saveAll(List.of(
+        saveMissingProfiles(List.of(
                 profile(manager(5), "CB005", cntt, AvailabilityStatus.ONLINE),
                 profile(manager(6), "CB006", thuVien, AvailabilityStatus.OFFLINE),
                 profile(manager(7), "CB007", qhDoanhNghiep, AvailabilityStatus.ONLINE),
@@ -804,7 +802,7 @@ public class OrgSeeder implements DemoSeeder {
         User manager4 = manager(4);
 
         // Giữ nguyên 9 phân công nghiệp vụ gốc.
-        managerCategoryRepository.saveAll(List.of(
+        saveMissingAssignments(List.of(
                 assignment(manager1, "DT_DKHP", ManagerCategoryLevel.PRIMARY),
                 assignment(manager1, "DT_HOCVU", ManagerCategoryLevel.PRIMARY),
                 assignment(manager1, "DT_TOTNGHIEP", ManagerCategoryLevel.PRIMARY),
@@ -830,7 +828,7 @@ public class OrgSeeder implements DemoSeeder {
         User manager11 = manager(11);
         User manager12 = manager(12);
 
-        managerCategoryRepository.saveAll(List.of(
+        saveMissingAssignments(List.of(
                 // Phòng Đào tạo: chuyên mục con.
                 assignment(manager1, "DT_DKHP_SAI", ManagerCategoryLevel.PRIMARY),
                 assignment(manager1, "DT_DKHP_HUY", ManagerCategoryLevel.PRIMARY),
@@ -917,6 +915,24 @@ public class OrgSeeder implements DemoSeeder {
                 assignment(manager12, "SDH_TUYENSINH_HOSO", ManagerCategoryLevel.SECONDARY),
                 assignment(manager12, "SDH_HOSO_BOSUNG", ManagerCategoryLevel.SECONDARY)
         ));
+    }
+
+    private void saveMissingProfiles(List<ManagerProfile> profiles) {
+        for (ManagerProfile profile : profiles) {
+            if (managerProfileRepository.findByUserId(profile.getUserId()).isEmpty()) {
+                managerProfileRepository.save(profile);
+            }
+        }
+    }
+
+    private void saveMissingAssignments(List<ManagerCategory> assignments) {
+        for (ManagerCategory assignment : assignments) {
+            boolean exists = managerCategoryRepository.findByManagerId(assignment.getManagerId()).stream()
+                    .anyMatch(current -> current.getCategoryId().equals(assignment.getCategoryId()));
+            if (!exists) {
+                managerCategoryRepository.save(assignment);
+            }
+        }
     }
 
     private ManagerProfile profile(
