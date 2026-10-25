@@ -1,7 +1,7 @@
 (function (window, document) {
     'use strict';
 
-    const Qaute = {};
+    const Qaute = window.Qaute || {};
 
     Qaute.csrfToken = function () {
         const element = document.querySelector('meta[name="_csrf"]');

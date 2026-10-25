@@ -1,7 +1,7 @@
 <%@ page pageEncoding="UTF-8" %>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta21/dist/js/tabler.min.js"></script>
-<script src="${pageContext.request.contextPath}/assets/js/common/qaute-common.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/common/qaute-common.js?v=20261023b"></script>
 <script src="${pageContext.request.contextPath}/assets/js/guest/search-suggest.js"></script>
 <script>
     (function () {

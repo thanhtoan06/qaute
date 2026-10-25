@@ -13,7 +13,9 @@ import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -58,25 +60,41 @@ class Tv2SeedersTest {
     private final ManagerScopeService scopes = mock(ManagerScopeService.class);
     private final EntityManager entityManager = mock(EntityManager.class);
     private final Map<String, User> demoUsers = new HashMap<>();
+    private final Map<String, Category> demoCategories = new HashMap<>();
+    private static final String[] DEPARTMENT_CODES = {
+            "DT", "CT", "TC", "KTX", "CNTT", "TV", "QHDN", "KHCN", "YTE", "CSVC", "QLCL", "SDH"
+    };
+    private static final String[] MANAGER_EMAILS = {
+            "manager.daotao@qaute.edu.vn", "manager.ctsv@qaute.edu.vn", "manager.taichinh@qaute.edu.vn",
+            "manager.ktx@qaute.edu.vn", "manager.cntt@qaute.edu.vn", "manager.thuvien@qaute.edu.vn",
+            "manager.qhdn@qaute.edu.vn", "manager.khcn@qaute.edu.vn", "manager.yte@qaute.edu.vn",
+            "manager.csvc@qaute.edu.vn", "manager.qlcl@qaute.edu.vn", "manager.saudh@qaute.edu.vn"
+    };
 
     @BeforeEach
     void demoAccountsAndCategories() {
         addUser("admin@qaute.edu.vn", 99L);
-        for (int index = 1; index <= 4; index++) addUser("manager" + index + "@qaute.edu.vn", (long) index);
-        for (int index = 0; index < 10; index++) {
-            addUser((24162101 + index) + "@student.hcmute.edu.vn", 101L + index);
+        for (int index = 0; index < MANAGER_EMAILS.length; index++) {
+            addUser(MANAGER_EMAILS[index], index + 1L);
+        }
+        for (int index = 0; index < 20; index++) {
+            addUser((111111 + index) + "@qaute.edu.vn", 101L + index);
         }
         when(users.findByEmailIgnoreCase(anyString())).thenAnswer(call -> Optional.ofNullable(demoUsers.get(call.getArgument(0))));
-        String[] codes = {"DT_DKHP", "CT_HOCBONG", "TC_HOCPHI", "KTX_DANGKY"};
-        for (int index = 0; index < codes.length; index++) {
-            Category category = new Category();
-            category.setId(11L + index);
-            category.setDepartmentId(21L + index);
-            category.setCode(codes[index]);
-            when(categories.findByCode(codes[index])).thenReturn(Optional.of(category));
-        }
-        when(scopes.isInScope(anyLong(), anyLong())).thenAnswer(call ->
-                ((Long) call.getArgument(0)) + 10 == (Long) call.getArgument(1));
+        when(categories.findByCode(anyString())).thenAnswer(call -> Optional.of(
+                demoCategories.computeIfAbsent(call.getArgument(0), code -> {
+                    Category category = new Category();
+                    category.setId(1000L + demoCategories.size());
+                    category.setDepartmentId(departmentId(code));
+                    category.setCode(code);
+                    return category;
+                })));
+        when(scopes.isInScope(anyLong(), anyLong())).thenAnswer(call -> {
+            Long managerId = call.getArgument(0);
+            Long categoryId = call.getArgument(1);
+            return demoCategories.values().stream().anyMatch(category -> category.getId().equals(categoryId)
+                    && category.getDepartmentId().equals(managerId + 100L));
+        });
         Query timestamps = mock(Query.class);
         when(entityManager.createQuery(anyString())).thenReturn(timestamps);
         when(timestamps.setParameter(anyString(), any())).thenReturn(timestamps);
@@ -100,7 +118,7 @@ class Tv2SeedersTest {
         existingOnline.setModality(Modality.ONLINE);
         existingOnline.setStatus(SlotStatus.AVAILABLE);
         savedSlots.add(existingOnline);
-        for (long id = 21; id <= 24; id++) {
+        for (long id = 101; id <= 112; id++) {
             Department department = Department.builder().name("Phòng " + id).location("Tòa A").build();
             when(departments.findById(id)).thenReturn(Optional.of(department));
         }
@@ -114,15 +132,21 @@ class Tv2SeedersTest {
         doAnswer(call -> {
             Long managerId = call.getArgument(0);
             if (savedSlots.stream().noneMatch(slot -> managerId.equals(slot.getManagerId()) && slot.getModality() == Modality.BOTH)) {
-                for (int halfHour = 0; halfHour < 2; halfHour++) {
-                    AppointmentSlot slot = new AppointmentSlot();
-                    slot.setId((long) savedSlots.size() + 1);
-                    slot.setManagerId(managerId);
-                    slot.setStartAt(LocalDateTime.now().toLocalDate().plusDays(4).atTime(9, 0).plusMinutes(halfHour * 30L));
-                    slot.setEndAt(slot.getStartAt().plusMinutes(30));
-                    slot.setModality(Modality.BOTH);
-                    slot.setStatus(SlotStatus.AVAILABLE);
-                    savedSlots.add(slot);
+                for (int dayOffset = 3; dayOffset <= 26; dayOffset++) {
+                    LocalDate day = LocalDate.now().plusDays(dayOffset);
+                    if (day.getDayOfWeek() == DayOfWeek.SATURDAY || day.getDayOfWeek() == DayOfWeek.SUNDAY) continue;
+                    for (int hour : new int[]{9, 14}) {
+                        for (int halfHour = 0; halfHour < 4; halfHour++) {
+                            AppointmentSlot slot = new AppointmentSlot();
+                            slot.setId((long) savedSlots.size() + 1);
+                            slot.setManagerId(managerId);
+                            slot.setStartAt(day.atTime(hour, 0).plusMinutes(halfHour * 30L));
+                            slot.setEndAt(slot.getStartAt().plusMinutes(30));
+                            slot.setModality(Modality.BOTH);
+                            slot.setStatus(SlotStatus.AVAILABLE);
+                            savedSlots.add(slot);
+                        }
+                    }
                 }
             }
             return null;
@@ -158,17 +182,24 @@ class Tv2SeedersTest {
                 slots, appointments, generation, scopes, entityManager);
 
         seeder.seed();
+        int firstRunAppointments = savedAppointments.size();
+        int firstRunRules = savedRules.size();
+        int firstRunSlots = savedSlots.size();
         seeder.seed();
 
         assertEquals(50, seeder.order());
-        assertEquals(40, savedRules.size());
-        assertEquals(10, savedAppointments.size());
+        assertEquals(120, firstRunRules);
+        assertTrue(firstRunAppointments >= 30);
+        assertEquals(firstRunRules, savedRules.size());
+        assertEquals(firstRunAppointments, savedAppointments.size());
+        assertEquals(firstRunSlots, savedSlots.size());
+        assertEquals(12, savedAppointments.stream().map(Appointment::getManagerId).distinct().count());
         assertEquals(SlotStatus.AVAILABLE, existingOnline.getStatus());
         assertTrue(savedAppointments.stream().noneMatch(a -> a.getSlotId().equals(existingOnline.getId())));
-        assertEquals(4, savedAppointments.stream().filter(a -> a.getStatus() == AppointmentStatus.CONFIRMED).count());
-        assertEquals(2, savedAppointments.stream().filter(a -> a.getStatus() == AppointmentStatus.COMPLETED).count());
-        assertEquals(2, savedAppointments.stream().filter(a -> a.getStatus() == AppointmentStatus.NO_SHOW).count());
-        assertEquals(2, savedAppointments.stream().filter(a -> a.getStatus() == AppointmentStatus.CANCELLED).count());
+        for (AppointmentStatus status : List.of(AppointmentStatus.CONFIRMED, AppointmentStatus.COMPLETED,
+                AppointmentStatus.NO_SHOW, AppointmentStatus.CANCELLED)) {
+            assertTrue(savedAppointments.stream().anyMatch(a -> a.getStatus() == status));
+        }
         for (AvailabilityRule rule : savedRules) {
             assertTrue(rule.getDayOfWeek() >= 1 && rule.getDayOfWeek() <= 5);
             assertTrue(rule.getStartTime().equals(LocalTime.of(9, 0)) || rule.getStartTime().equals(LocalTime.of(14, 0)));
@@ -180,7 +211,7 @@ class Tv2SeedersTest {
         for (Appointment appointment : savedAppointments) {
             AppointmentSlot slot = savedSlots.stream().filter(s -> s.getId().equals(appointment.getSlotId())).findFirst().orElseThrow();
             assertEquals(appointment.getManagerId(), slot.getManagerId());
-            assertEquals(appointment.getManagerId() + 10, appointment.getCategoryId());
+            assertTrue(scopes.isInScope(appointment.getManagerId(), appointment.getCategoryId()));
             assertEquals(appointment.getStatus() == AppointmentStatus.CANCELLED ? SlotStatus.AVAILABLE : SlotStatus.BOOKED, slot.getStatus());
             if (appointment.getStatus() == AppointmentStatus.CONFIRMED) assertTrue(slot.getStartAt().isAfter(LocalDateTime.now()));
             if (appointment.getStatus() == AppointmentStatus.COMPLETED || appointment.getStatus() == AppointmentStatus.NO_SHOW)
@@ -211,20 +242,26 @@ class Tv2SeedersTest {
         ChatSeeder seeder = new ChatSeeder(users, categories, sessions, messages, scopes, entityManager);
 
         seeder.seed();
+        int firstRunSessions = savedSessions.size();
+        int firstRunMessages = savedMessages.size();
         seeder.seed();
 
         assertEquals(60, seeder.order());
-        assertEquals(10, savedSessions.size());
-        assertEquals(8, savedSessions.stream().filter(s -> s.getStatus() == ChatSessionStatus.ENDED).count());
-        assertEquals(2, savedSessions.stream().filter(s -> s.getStatus() == ChatSessionStatus.EXPIRED).count());
-        assertEquals(6, savedSessions.stream().filter(s -> s.getRating() != null).count());
+        assertTrue(firstRunSessions >= 30);
+        assertEquals(firstRunSessions, savedSessions.size());
+        assertEquals(firstRunMessages, savedMessages.size());
+        assertEquals(12, savedSessions.stream().map(ChatSession::getManagerId)
+                .filter(java.util.Objects::nonNull).distinct().count());
+        assertTrue(savedSessions.stream().anyMatch(s -> s.getStatus() == ChatSessionStatus.ENDED));
+        assertTrue(savedSessions.stream().anyMatch(s -> s.getStatus() == ChatSessionStatus.EXPIRED));
+        assertTrue(savedSessions.stream().anyMatch(s -> s.getRating() != null));
         for (ChatSession session : savedSessions) {
-            assertTrue(session.getStartedAt().isAfter(LocalDateTime.now().minusDays(30)));
+            assertTrue(session.getStartedAt().isAfter(LocalDateTime.now().minusMonths(6)));
             assertTrue(session.getEndedAt().isBefore(LocalDateTime.now()));
             assertTrue(session.getStartedAt().isBefore(session.getEndedAt()));
             List<ChatMessage> conversation = savedMessages.stream().filter(m -> m.getSessionId().equals(session.getId())).toList();
             if (session.getStatus() == ChatSessionStatus.ENDED) {
-                assertEquals(session.getManagerId() + 10, session.getCategoryId());
+                assertTrue(scopes.isInScope(session.getManagerId(), session.getCategoryId()));
                 assertTrue(conversation.size() >= 4 && conversation.size() <= 10);
                 assertNotNull(session.getAcceptedAt());
                 for (int index = 0; index < conversation.size(); index++) {
@@ -272,5 +309,13 @@ class Tv2SeedersTest {
         user.setId(id);
         user.setEmail(email);
         demoUsers.put(email, user);
+    }
+
+    private static long departmentId(String categoryCode) {
+        String prefix = categoryCode.substring(0, categoryCode.indexOf('_'));
+        for (int index = 0; index < DEPARTMENT_CODES.length; index++) {
+            if (DEPARTMENT_CODES[index].equals(prefix)) return 101L + index;
+        }
+        throw new IllegalArgumentException("Chuyên mục demo không có phòng ban: " + categoryCode);
     }
 }

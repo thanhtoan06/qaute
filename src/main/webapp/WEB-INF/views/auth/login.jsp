@@ -1,102 +1,212 @@
+
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <title>Đăng nhập</title>
+<style>
+.login-premium { --login-blue: #2369c7; --login-blue-dark: #174b96; --login-ink: #1c3555; --login-muted: #7c8ea6; --login-border: #e0e9f4; position: relative; isolation: isolate; color: var(--login-ink); animation: login-entrance .45s cubic-bezier(.2, .75, .3, 1) both; }
+.login-premium *, .login-premium *::before, .login-premium *::after { box-sizing: border-box; }
+.login-premium::before { content: ""; position: absolute; z-index: -1; top: -42px; right: -27px; width: 148px; height: 148px; border: 1px solid rgba(35, 105, 199, .09); border-radius: 50%; box-shadow: 0 0 0 17px rgba(35, 105, 199, .025), 0 0 0 36px rgba(35, 105, 199, .015); pointer-events: none; }
+.login-premium::after { content: ""; position: absolute; z-index: -1; left: -34px; bottom: -37px; width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, rgba(35, 105, 199, .065), transparent 72%); pointer-events: none; }
+@keyframes login-entrance {
+  from { opacity: 0; transform: translateY(11px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes login-icon-entrance {
+  from { opacity: 0; transform: scale(.83) rotate(-7deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+.login-premium-heading { position: relative; margin-bottom: 1.65rem; }
+.login-premium-icon { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 66px; height: 66px; margin-bottom: 1.3rem; border: 1px solid rgba(255, 255, 255, .95); border-radius: 21px; background: linear-gradient(145deg, #ffffff, #eaf3ff); color: var(--login-blue); box-shadow: 0 9px 24px rgba(35, 105, 199, .16), 0 0 0 8px rgba(35, 105, 199, .035); animation: login-icon-entrance .5s cubic-bezier(.2, .75, .3, 1) both, qaute-auth-icon-glow 4s ease-in-out 1s infinite; }
+.login-premium-icon .bi { font-size: 1.8rem; line-height: 1; }
+.login-premium-icon::after { content: ""; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: #43c59a; box-shadow: 0 0 0 3px rgba(67, 197, 154, .12); }
+.login-premium-eyebrow { display: inline-flex; align-items: center; gap: .45rem; margin-bottom: .8rem; padding: .38rem .72rem; border: 1px solid #dce9fa; border-radius: 999px; background: linear-gradient(135deg, #f4f8ff, #eaf3ff); color: #326db6; font-size: .66rem; font-weight: 800; letter-spacing: .075em; text-transform: uppercase; }
+.login-premium-eyebrow .bi { font-size: .78rem; }
+.login-premium-title { margin: 0 0 .55rem; color: var(--login-ink); font-size: clamp(1.55rem, 4vw, 1.95rem); font-weight: 850; line-height: 1.24; letter-spacing: -.045em; }
+.login-premium-description { max-width: 440px; margin: 0; color: var(--login-muted); font-size: .86rem; line-height: 1.8; }
+.login-premium-alert { margin-bottom: 1rem; padding: .8rem .9rem; border: 1px solid #f3c7ce; border-radius: 12px; background: linear-gradient(120deg, #fff7f8, #fffdfd); color: #a83c4e; box-shadow: 0 4px 12px rgba(173, 57, 78, .04); font-size: .79rem; line-height: 1.65; }
+.login-premium-alert .bi { flex-shrink: 0; align-self: flex-start; margin-top: 2px; font-size: 1rem; }
+.login-premium-alert--success { border-color: #c8eddf; background: linear-gradient(120deg, #f1fbf6, #ffffff); color: #197c59; }
+.login-premium-form .form-label { display: flex; align-items: center; gap: .35rem; margin-bottom: .55rem; color: #344e6d; font-size: .81rem; font-weight: 750; }
+.login-premium-form .form-label.required::after { color: #e05b6b; }
+.login-premium-forgot { color: #286bbd !important; font-size: .76rem; font-weight: 750; text-decoration: none !important; transition: color .2s ease; }
+.login-premium-forgot:hover { color: #174b96 !important; }
+.login-premium-forgot .bi { margin-right: .15rem; font-size: .78rem; }
+.login-premium-form .input-group { position: relative; display: flex; flex-wrap: nowrap; min-height: 51px; border: 1px solid #dce6f2; border-radius: 13px; background: #ffffff; box-shadow: 0 3px 10px rgba(22, 54, 91, .025); transition: border-color .22s ease, box-shadow .22s ease, background .22s ease; }
+.login-premium-form .input-group:hover { border-color: #bfd3eb; box-shadow: 0 4px 14px rgba(22, 54, 91, .045); }
+.login-premium-form .input-group:focus-within { border-color: #6aa0e4; background: #ffffff; box-shadow: 0 0 0 4px rgba(35, 105, 199, .09), 0 7px 17px rgba(22, 54, 91, .045); }
+.login-premium-form .input-group:has(.form-control.is-invalid) { border-color: #e8a5ad; background: #fffafb; }
+.login-premium-form .input-group:has(.form-control.is-invalid):focus-within { border-color: #da7581; box-shadow: 0 0 0 4px rgba(220, 68, 88, .075); }
+.login-premium-form .input-group-text { display: inline-flex; align-items: center; justify-content: center; min-width: 47px; padding: 0 .85rem; border: 0 !important; border-radius: 12px 0 0 12px !important; background: transparent !important; color: #8197b3 !important; font-size: 1.05rem; transition: color .2s ease; }
+.login-premium-form .input-group:focus-within .input-group-text { color: var(--login-blue) !important; }
+.login-premium-form .form-control { min-width: 0; min-height: 49px; padding: .72rem .45rem .72rem 0; border: 0 !important; border-radius: 0 !important; background: transparent !important; color: #243c5a; outline: 0; box-shadow: none !important; font-size: .85rem; }
+.login-premium-form .form-control::placeholder { color: #a0afc1; opacity: 1; }
+.login-premium-form .form-control.is-invalid { background-image: none; }
+.login-premium-form .input-group button[data-toggle-password] { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 45px; width: 45px; min-height: 49px; padding: .5rem; border: 0 !important; border-radius: 0 12px 12px 0 !important; background: transparent !important; color: #8294ab !important; box-shadow: none !important; transition: color .2s ease, background .2s ease; }
+.login-premium-form .input-group button[data-toggle-password]:hover { color: var(--login-blue) !important; background: #f3f7fd !important; }
+.login-premium-form .input-group button[data-toggle-password]:focus-visible { outline-offset: -4px; }
+.login-premium-form .input-group button[data-toggle-password] .bi { font-size: 1.05rem; }
+.login-premium-form .invalid-feedback, .login-premium-form .form-hint { font-size: .76rem; line-height: 1.6; }
+.login-premium-form .form-check { display: flex; align-items: center; gap: .45rem; min-height: 1.35rem; padding-left: 0; }
+.login-premium-form .form-check-input { float: none; flex-shrink: 0; width: 1rem; height: 1rem; margin: 0; border-color: #c4d2e3; border-radius: 4px; cursor: pointer; box-shadow: none; transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease; }
+.login-premium-form .form-check-input:checked { border-color: #2369c7; background-color: #2369c7; }
+.login-premium-form .form-check-input:focus { border-color: #6aa0e4; box-shadow: 0 0 0 3px rgba(35, 105, 199, .1); }
+.login-premium-form .form-check-label { color: #778ba4; font-size: .75rem; line-height: 1.6; cursor: pointer; }
+.login-premium-form .login-premium-submit { position: relative; display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 51px; padding: .8rem 1.1rem; overflow: hidden; border: 1px solid #2467c5; border-radius: 13px !important; background: linear-gradient(115deg, #2d78d4 0%, #205eb8 52%, #184e9d 100%) !important; color: #ffffff; box-shadow: 0 7px 18px rgba(35, 105, 199, .2), inset 0 1px 0 rgba(255, 255, 255, .15); font-size: .88rem; font-weight: 750; letter-spacing: .005em; transition: transform .22s ease, box-shadow .22s ease, filter .22s ease; }
+.login-premium-form .login-premium-submit::before { content: ""; position: absolute; top: 0; left: -120%; width: 70%; height: 100%; background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .2), transparent); transform: skewX(-18deg); pointer-events: none; }
+.login-premium-form .login-premium-submit:hover { color: #ffffff; filter: saturate(1.08); transform: translateY(-2px); box-shadow: 0 11px 24px rgba(35, 105, 199, .27), inset 0 1px 0 rgba(255, 255, 255, .2); }
+.login-premium-form .login-premium-submit:hover::before { animation: qaute-shine .75s ease; }
+.login-premium-form .login-premium-submit:active { transform: translateY(0) scale(.99); }
+.login-premium-form .login-premium-submit:focus-visible { outline-offset: 4px; }
+.login-premium-form .login-premium-submit .bi { font-size: 1rem; }
+.login-premium-divider { display: flex; align-items: center; gap: .8rem; margin: 1.35rem 0; color: #95a3b5; font-size: .72rem; }
+.login-premium-divider::before, .login-premium-divider::after { content: ""; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, #dfe8f3); }
+.login-premium-divider::after { background: linear-gradient(90deg, #dfe8f3, transparent); }
+.login-premium-google { display: flex; align-items: center; justify-content: center; gap: .6rem; min-height: 49px; padding: .75rem 1rem; border: 1px solid #dce6f2 !important; border-radius: 12px !important; background: rgba(255, 255, 255, .9) !important; color: #405773 !important; box-shadow: 0 3px 10px rgba(22, 54, 91, .025); font-size: .83rem; font-weight: 700; text-decoration: none; transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.login-premium-google:hover { border-color: #b9cfe9 !important; background: #f8fbff !important; box-shadow: 0 7px 16px rgba(22, 54, 91, .07); transform: translateY(-1px); }
+.login-premium-google .bi { font-size: 1rem; }
+.login-premium-assurance { display: flex; align-items: flex-start; gap: .65rem; margin-top: 1.25rem; padding: .85rem .9rem; border: 1px solid #e2ecf8; border-radius: 12px; background: linear-gradient(125deg, rgba(245, 249, 255, .95), rgba(255, 255, 255, .9)); }
+.login-premium-assurance-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 10px; background: #e5f1ff; color: #3478c8; font-size: .95rem; }
+.login-premium-assurance-copy { min-width: 0; }
+.login-premium-assurance-title { margin: 0 0 .2rem; color: #385571; font-size: .75rem; font-weight: 750; }
+.login-premium-assurance-description { margin: 0; color: #8595a9; font-size: .7rem; line-height: 1.6; }
+.login-premium-footer { display: flex; align-items: center; justify-content: center; gap: .45rem; margin-top: 1.2rem; color: #8798ad; font-size: .73rem; line-height: 1.7; text-align: center; }
+.login-premium-footer .bi { color: #398a75; font-size: .9rem; }
+@media (max-width: 575.98px) {
+  .login-premium::before { top: -25px; right: -24px; width: 105px; height: 105px; }
+  .login-premium::after { left: -20px; bottom: -25px; width: 75px; height: 75px; }
+  .login-premium-heading { margin-bottom: 1.35rem; }
+  .login-premium-title { font-size: 1.55rem; }
+  .login-premium-icon { width: 59px; height: 59px; margin-bottom: 1.1rem; border-radius: 18px; }
+  .login-premium-icon .bi { font-size: 1.6rem; }
+  .login-premium-form .input-group { min-height: 48px; }
+  .login-premium-form .input-group-text { min-width: 42px; padding-right: .7rem; padding-left: .7rem; }
+  .login-premium-form .form-control, .login-premium-form .input-group button[data-toggle-password] { min-height: 46px; }
+  .login-premium-form .login-premium-submit, .login-premium-google { min-height: 48px; }
+  .login-premium-assurance { padding: .75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-premium, .login-premium *, .login-premium *::before, .login-premium *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
 
-<div class="mb-4">
-    <h3 class="fw-bold text-dark mb-1">Chào mừng trở lại!</h3>
-    <p class="text-secondary small">Vui lòng đăng nhập vào tài khoản QAUTE của bạn để tiếp tục.</p>
-</div>
 
-<c:if test="${verified}">
-    <div class="alert alert-success d-flex align-items-center gap-2 py-2 small">
-        <i class="bi bi-check-circle-fill"></i>
-        <span>Xác thực tài khoản thành công. Vui lòng đăng nhập.</span>
-    </div>
-</c:if>
 
-<c:if test="${param.passwordChanged eq 'true'}">
-    <div class="alert alert-success py-2 small" role="status">
-        Đã đổi mật khẩu và đăng xuất các phiên cũ. Vui lòng đăng nhập bằng mật khẩu mới.
-    </div>
-</c:if>
 
-<c:if test="${not empty errors['global']}">
-    <div class="alert alert-danger d-flex align-items-center gap-2 py-2 small">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <span><c:out value="${errors['global']}"/></span>
-    </div>
-</c:if>
-<c:if test="${not empty param.oauthError}">
-    <div class="alert alert-danger d-flex align-items-center gap-2 py-2 small">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <span><c:out value="${param.oauthError}"/></span>
-    </div>
-</c:if>
-
-<form method="post" action="/auth/login" id="login-form">
-    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-    <input type="hidden" name="returnUrl" value="<c:out value='${returnUrl}'/>"/>
-
-    <div class="mb-3">
-        <label class="form-label required fw-semibold small" for="identifier">Email hoặc MSSV</label>
-        <div class="input-group">
-            <span class="input-group-text bg-light border-end-0 text-muted">
-                <i class="bi bi-person"></i>
-            </span>
-            <input class="form-control border-start-0 ps-0 ${not empty errors['identifier'] ? 'is-invalid' : ''}"
-                   id="identifier" name="identifier" value="<c:out value='${form.identifier}'/>"
-                    placeholder="Ví dụ: MSSV, email hoặc tên đăng nhập"
-                   maxlength="150" autocomplete="username" autofocus>
+<div class="login-premium">
+    <div class="login-premium-heading">
+        <div class="login-premium-icon">
+            <i class="bi bi-person-lock"></i>
         </div>
-        <qa:formError field="identifier"/>
-    </div>
-
-    <div class="mb-3">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-            <label class="form-label required fw-semibold small mb-0" for="password">Mật khẩu</label>
-            <a href="/auth/forgot-password" class="text-primary text-decoration-none small">Quên mật khẩu?</a>
+        <div class="login-premium-eyebrow">
+            <i class="bi bi-stars"></i>
+            Không gian học tập QAUTE
         </div>
-        <div class="input-group">
-            <span class="input-group-text bg-light border-end-0 text-muted">
-                <i class="bi bi-lock"></i>
-            </span>
-            <input type="password" class="form-control border-start-0 border-end-0 ps-0 ${not empty errors['password'] ? 'is-invalid' : ''}"
-                   id="password" name="password" placeholder="Nhập mật khẩu của bạn" autocomplete="current-password">
-            <button class="btn btn-light border border-start-0 text-muted" type="button" data-toggle-password="#password"
-                    aria-label="Hiện hoặc ẩn mật khẩu">
-                <i class="bi bi-eye"></i>
-            </button>
+        <h3 class="login-premium-title">Chào mừng trở lại!</h3>
+        <p class="login-premium-description">Vui lòng đăng nhập vào tài khoản QAUTE của bạn để tiếp tục.</p>
+    </div>
+
+    <c:if test="${verified}">
+        <div class="alert alert-success d-flex align-items-center gap-2 login-premium-alert login-premium-alert--success">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Xác thực tài khoản thành công. Vui lòng đăng nhập.</span>
         </div>
-        <qa:formError field="password"/>
-    </div>
+    </c:if>
 
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="remember" id="remember" value="true"
-                   ${form.remember ? 'checked' : ''}>
-            <label class="form-check-label small text-secondary" for="remember">
-                Ghi nhớ đăng nhập 30 ngày
-            </label>
+    <c:if test="${param.passwordChanged eq 'true'}">
+        <div class="alert alert-success d-flex align-items-center gap-2 login-premium-alert login-premium-alert--success" role="status">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Đã đổi mật khẩu và đăng xuất các phiên cũ. Vui lòng đăng nhập bằng mật khẩu mới.</span>
+        </div>
+    </c:if>
+
+    <c:if test="${not empty errors['global']}">
+        <div class="alert alert-danger d-flex align-items-center gap-2 login-premium-alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span><c:out value="${errors['global']}"/></span>
+        </div>
+    </c:if>
+
+    <c:if test="${not empty param.oauthError}">
+        <div class="alert alert-danger d-flex align-items-center gap-2 login-premium-alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span><c:out value="${param.oauthError}"/></span>
+        </div>
+    </c:if>
+
+    <form method="post" action="/auth/login" id="login-form" class="login-premium-form">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <input type="hidden" name="returnUrl" value="<c:out value='${returnUrl}'/>"/>
+
+        <div class="mb-3">
+            <label class="form-label required" for="identifier">Email hoặc MSSV</label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-person-vcard-fill"></i>
+                </span>
+                <input class="form-control ${not empty errors['identifier'] ? 'is-invalid' : ''}"
+                       id="identifier" name="identifier" value="<c:out value='${form.identifier}'/>"
+                       placeholder="Ví dụ: MSSV, email hoặc tên đăng nhập"
+                       maxlength="150" autocomplete="username" autofocus>
+            </div>
+            <qa:formError field="identifier"/>
+        </div>
+
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label required mb-0" for="password">Mật khẩu</label>
+                <a href="/auth/forgot-password" class="login-premium-forgot">
+                    <i class="bi bi-question-circle"></i>Quên mật khẩu?
+                </a>
+            </div>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="bi bi-lock-fill"></i>
+                </span>
+                <input type="password" class="form-control ${not empty errors['password'] ? 'is-invalid' : ''}"
+                       id="password" name="password" placeholder="Nhập mật khẩu của bạn" autocomplete="current-password">
+                <button class="btn btn-light border border-start-0 text-muted" type="button" data-toggle-password="#password"
+                        aria-label="Hiện hoặc ẩn mật khẩu">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+            <qa:formError field="password"/>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="remember" id="remember" value="true"
+                       ${form.remember ? 'checked' : ''}>
+                <label class="form-check-label" for="remember">
+                    Ghi nhớ đăng nhập 30 ngày
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-3 shadow-sm login-premium-submit" id="login-submit"
+                style="background-color: var(--hcmute-blue); border-color: var(--hcmute-blue);">
+            <i class="bi bi-box-arrow-in-right"></i>Đăng nhập
+        </button>
+    </form>
+
+    <c:if test="${googleSsoEnabled}">
+        <div class="login-premium-divider">hoặc tiếp tục với</div>
+        <a href="/oauth2/authorization/google" class="btn btn-outline-primary w-100 py-2 rounded-3 login-premium-google">
+            <i class="bi bi-google"></i>Đăng nhập bằng Google
+        </a>
+    </c:if>
+
+    <div class="login-premium-assurance">
+        <span class="login-premium-assurance-icon"><i class="bi bi-shield-check"></i></span>
+        <div class="login-premium-assurance-copy">
+            <p class="login-premium-assurance-title">Đăng nhập an toàn</p>
+            <p class="login-premium-assurance-description">Sử dụng tài khoản của bạn để truy cập các dịch vụ hỗ trợ sinh viên QAUTE.</p>
         </div>
     </div>
 
-    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-3 shadow-sm" id="login-submit"
-            style="background-color: var(--hcmute-blue); border-color: var(--hcmute-blue);">
-        <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
-    </button>
-</form>
-
-<c:if test="${googleSsoEnabled}">
-    <div class="d-flex align-items-center gap-2 my-3">
-        <hr class="flex-grow-1 m-0"><span class="text-secondary small">hoặc</span><hr class="flex-grow-1 m-0">
+    <div class="login-premium-footer">
+        <i class="bi bi-shield-lock-fill"></i>
+        <span>Đăng nhập tài khoản để tiếp tục.</span>
     </div>
-    <a href="/oauth2/authorization/google" class="btn btn-outline-primary w-100 py-2 rounded-3">
-        <i class="bi bi-google me-2"></i>Đăng nhập bằng Google
-    </a>
-</c:if>
-
-<div class="text-center text-secondary small mt-4">
-    Đăng nhập tài khoản để tiếp tục.
 </div>
 
 <script src="/assets/js/auth/login.js"></script>
