@@ -107,7 +107,7 @@
                 </td>
                 <td><c:choose><c:when test="${not empty item.lastLoginAt()}"><time datetime="${item.lastLoginAt()}" data-workspace-datetime><c:out value="${item.lastLoginAt()}"/></time></c:when><c:otherwise><span class="text-secondary">Chưa đăng nhập</span></c:otherwise></c:choose></td>
                 <td><time datetime="${item.createdAt()}" data-workspace-datetime><c:out value="${item.createdAt()}"/></time></td>
-                <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="${ctx}/admin/users/${item.id()}">Chi tiết</a></td>
+                <td class="text-end"><div class="d-flex flex-wrap gap-1 justify-content-end"><a class="btn btn-sm btn-outline-primary" href="${ctx}/admin/users/${item.id()}">Chi tiết</a><a class="btn btn-sm btn-outline-secondary" href="${ctx}/admin/users/${item.id()}/password"><i class="bi bi-key me-1"></i>Đổi mật khẩu</a></div></td>
               </tr>
             </c:forEach>
           </c:otherwise>

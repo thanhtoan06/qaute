@@ -22,6 +22,7 @@ public final class AuditActions {
     public static final String USER_REACTIVATED = "USER_REACTIVATED";
     public static final String USER_ROLE_CHANGED = "USER_ROLE_CHANGED";
     public static final String USER_FORCE_RESET = "USER_FORCE_RESET";
+    public static final String USER_PASSWORD_CHANGED = "USER_PASSWORD_CHANGED";
     public static final String USER_SESSION_REVOKED = "USER_SESSION_REVOKED";
     public static final String USER_IMPORTED = "USER_IMPORTED";
     public static final String USER_INVITATION_RESENT = "USER_INVITATION_RESENT";
