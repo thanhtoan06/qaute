@@ -25,6 +25,7 @@ public record AdminUserDetailView(
         List<String> categoryNames,
         int relatedTicketCount) {
 
+    // Chuẩn hóa danh sách chuyên mục trước khi tạo DTO.
     public AdminUserDetailView {
         categoryNames = categoryNames == null ? List.of() : List.copyOf(categoryNames);
     }

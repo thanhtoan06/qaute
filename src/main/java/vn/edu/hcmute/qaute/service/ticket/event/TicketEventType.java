@@ -1,5 +1,6 @@
 package vn.edu.hcmute.qaute.service.ticket.event;
 
+// Xử lý nghiệp vụ TicketEventType trong hệ thống.
 public enum TicketEventType {
     CREATED, ASSIGNED, ADVISOR_REPLIED, STUDENT_REPLIED, INFO_REQUESTED, RESOLVED,
     CLOSED_BY_STUDENT, AUTO_CLOSED, REOPENED, CANCELLED, ESCALATED, FORCE_CLOSED,

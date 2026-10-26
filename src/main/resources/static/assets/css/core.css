@@ -1,0 +1,101 @@
+:root { color-scheme: light; --qa-primary: #206bc4; --qa-primary-dark: #154c91; --qa-primary-deep: #0b2852; --qa-primary-light: #4299f1; --qa-primary-soft: #eaf3ff; --qa-accent: #e5394f; --qa-accent-dark: #be263c; --qa-gold: #f4b942; --qa-success: #16a36a; --qa-warning: #e79a16; --qa-danger: #d9364f; --qa-text: #172b4d; --qa-text-secondary: #52647d; --qa-text-muted: #7889a1; --qa-surface: #ffffff; --qa-surface-soft: #f7faff; --qa-surface-muted: #edf3fa; --qa-border: #e3eaf3; --qa-border-strong: #cfdaea; --qa-radius-sm: 10px; --qa-radius: 16px; --qa-radius-lg: 22px; --qa-radius-xl: 30px; --qa-radius-hero: 28px; --qa-shadow-sm: 0 4px 14px rgba(18, 48, 89, .055); --qa-shadow: 0 10px 30px rgba(18, 48, 89, .09); --qa-shadow-lg: 0 20px 55px rgba(18, 48, 89, .13); --qa-shadow-blue: 0 12px 30px rgba(32, 107, 196, .2); --qa-transition: .25s cubic-bezier(.2, .75, .3, 1); --qa-transition-slow: .45s cubic-bezier(.2, .75, .3, 1); --hcmute-navy: #072146; --hcmute-blue: #0b3d82; --hcmute-blue-light: #1e40af; --hcmute-red: #dc3545; --hcmute-gold: #f59e0b; --hcmute-bg: #f8fafc; --hcmute-card: #ffffff; --hcmute-border: #e2e8f0; --hcmute-muted: #64748b; --hcmute-radius: 1rem; }
+html { min-height: 100%; scroll-behavior: smooth; scroll-padding-top: 90px; }
+body:not(.qa-workspace) { color: var(--qa-text); background-color: #f7faff; background-image: radial-gradient(circle at 1px 1px, rgba(32, 107, 196, .105) 1px, transparent 1.4px), repeating-linear-gradient(135deg, transparent 0, transparent 116px, rgba(32, 107, 196, .025) 117px, rgba(32, 107, 196, .025) 118px, transparent 119px, transparent 190px), radial-gradient(ellipse at 0% 0%, rgba(66, 153, 241, .105), transparent 34%), radial-gradient(ellipse at 100% 32%, rgba(112, 158, 238, .075), transparent 31%), radial-gradient(ellipse at 42% 100%, rgba(220, 53, 69, .035), transparent 36%), linear-gradient(145deg, #f8faff 0%, #ffffff 46%, #f5f8ff 100%); background-size: 28px 28px, 190px 190px, auto, auto, auto, auto; background-attachment: fixed; font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; overflow-x: hidden; }
+body.full-width-page, body.public-layout { color: var(--qa-text); background-color: #f7faff; background-image: radial-gradient(circle at 1px 1px, rgba(32, 107, 196, .105) 1px, transparent 1.4px), repeating-linear-gradient(135deg, transparent 0, transparent 116px, rgba(32, 107, 196, .025) 117px, rgba(32, 107, 196, .025) 118px, transparent 119px, transparent 190px), radial-gradient(ellipse at 0% 0%, rgba(66, 153, 241, .105), transparent 34%), radial-gradient(ellipse at 100% 32%, rgba(112, 158, 238, .075), transparent 31%), linear-gradient(145deg, #f8faff 0%, #ffffff 46%, #f5f8ff 100%); background-size: 28px 28px, 190px 190px, auto, auto, auto; background-attachment: fixed; }
+img { max-width: 100%; }
+a { text-underline-offset: 3px; }
+button, input, select, textarea { font: inherit; }
+::selection { color: #ffffff; background: var(--qa-primary); }
+:focus-visible { outline: 3px solid rgba(32, 107, 196, .45); outline-offset: 3px; }
+*, *::before, *::after { box-sizing: border-box; }
+@keyframes qa-page-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes qaute-fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes qaute-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes qaute-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+@keyframes qaute-glow {
+  0%, 100% { box-shadow: 0 8px 24px rgba(229, 57, 79, .19); }
+  50% { box-shadow: 0 10px 30px rgba(229, 57, 79, .29), 0 0 0 6px rgba(229, 57, 79, .055); }
+}
+@keyframes qaute-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+@keyframes qaute-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(32, 107, 196, .24); }
+  50% { box-shadow: 0 0 0 7px rgba(32, 107, 196, 0); }
+}
+@keyframes qaute-bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+@keyframes qaute-ambient-drift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to { transform: translate3d(-12px, 16px, 0) rotate(5deg); }
+}
+@keyframes qa-workspace-ambient-drift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to { transform: translate3d(-13px, 18px, 0) rotate(5deg); }
+}
+@keyframes qa-workspace-page-enter {
+  from { opacity: 0; transform: translateY(9px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes qa-progress-shimmer {
+  from { background-position: 200% center; }
+  to { background-position: -200% center; }
+}
+@keyframes qa-layout-orbit {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to { transform: translate3d(-14px, 18px, 0) rotate(5deg); }
+}
+@keyframes qaute-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes qaute-auth-icon-enter {
+  from { opacity: 0; transform: scale(.84) rotate(-7deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes qaute-auth-icon-glow {
+  0%, 100% { box-shadow: 0 9px 24px rgba(35, 105, 199, .16), 0 0 0 8px rgba(35, 105, 199, .035); }
+  50% { box-shadow: 0 12px 30px rgba(35, 105, 199, .22), 0 0 0 12px rgba(35, 105, 199, .015); }
+}
+@keyframes qaute-shine {
+  from { left: -120%; }
+  to { left: 150%; }
+}
+@keyframes qaute-orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes qaute-rise-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes qa-card-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes qaute-float-rotate {
+  0%, 100% { transform: translateY(0) rotate(5deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+@keyframes qaute-float-rotate-soft {
+  0%, 100% { transform: translateY(0) rotate(5deg); }
+  50% { transform: translateY(-9px) rotate(2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

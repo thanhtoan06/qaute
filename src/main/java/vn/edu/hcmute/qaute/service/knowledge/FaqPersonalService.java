@@ -23,6 +23,7 @@ import vn.edu.hcmute.qaute.repository.knowledge.FaqRepository;
 import vn.edu.hcmute.qaute.repository.knowledge.FaqViewRepository;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
+// Xử lý nghiệp vụ FaqPersonal trong hệ thống.
 @Service
 public class FaqPersonalService {
     private final FaqRepository faqs;
@@ -30,6 +31,7 @@ public class FaqPersonalService {
     private final FaqViewRepository views;
     private final CategoryQueryService categories;
 
+    // Khởi tạo dịch vụ quản lý FAQ cá nhân.
     public FaqPersonalService(FaqRepository faqs, FaqBookmarkRepository bookmarks,
                               FaqViewRepository views, CategoryQueryService categories) {
         this.faqs = faqs;
@@ -39,6 +41,7 @@ public class FaqPersonalService {
     }
 
     @Transactional
+    // Bật hoặc tắt đánh dấu FAQ của người dùng.
     public boolean toggleBookmark(Long userId, Long faqId) {
         requirePublished(faqId);
         return bookmarks.findByUserIdAndFaqId(userId, faqId).map(bookmark -> {
@@ -51,6 +54,7 @@ public class FaqPersonalService {
     }
 
     @Transactional
+    // Ghi nhận lượt xem FAQ của người dùng.
     public void recordView(Long userId, Long faqId) {
         requirePublished(faqId);
         LocalDateTime now = LocalDateTime.now();
@@ -65,6 +69,7 @@ public class FaqPersonalService {
     }
 
     @Transactional(readOnly = true)
+    // Trả về các FAQ người dùng xem gần đây.
     public Page<FaqListItem> recent(Long userId, Pageable pageable) {
         Pageable effectivePageable = pageable == null ? PageRequest.of(0, 20) : pageable;
         Page<FaqView> viewPage = views.findByUserIdOrderByLastViewedAtDesc(userId, effectivePageable);
@@ -78,16 +83,19 @@ public class FaqPersonalService {
         return new PageImpl<>(items, effectivePageable, viewPage.getTotalElements());
     }
 
+    // Tìm FAQ hiện đang được xuất bản.
     private Faq requirePublished(Long faqId) {
         return faqs.findById(faqId).filter(this::isPublishedNow)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy FAQ"));
     }
 
+    // Kiểm tra FAQ đang được xuất bản và đã đến thời điểm hiển thị.
     private boolean isPublishedNow(Faq faq) {
         return faq.getStatus() == FaqStatus.PUBLISHED
                 && (faq.getPublishAt() == null || !faq.getPublishAt().isAfter(LocalDateTime.now()));
     }
 
+    // Chuyển FAQ thành dữ liệu hiển thị trong danh sách.
     private FaqListItem toListItem(Faq faq) {
         String categoryName = categories.findCategory(faq.getCategoryId()).map(CategoryView::name).orElse("");
         List<String> tags = faq.getTags().stream().map(FaqTag::getName).sorted().toList();

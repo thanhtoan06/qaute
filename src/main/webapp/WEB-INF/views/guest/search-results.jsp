@@ -153,6 +153,7 @@
         </ol>
     </nav>
 
+    <%-- Nhập từ khóa tìm kiếm và giữ lại các bộ lọc đang áp dụng. --%>
     <section class="search-hero">
         <div class="search-hero-content">
             <div class="search-eyebrow">
@@ -211,6 +212,7 @@
         </div>
     </c:if>
 
+    <%-- Cung cấp bộ lọc sắp xếp và chuyên mục cạnh kết quả tìm kiếm. --%>
     <div class="row search-workspace g-4">
         <div class="col-lg-3">
             <aside class="search-sidebar">
@@ -221,6 +223,7 @@
                     </a>
                 </c:if>
 
+                <%-- Chọn thứ tự ưu tiên của kết quả tìm kiếm. --%>
                 <section class="search-filter-card">
                     <div class="search-filter-heading">
                         <span class="search-filter-icon"><i class="bi bi-sort-down"></i></span>
@@ -250,6 +253,7 @@
                     </div>
                 </section>
 
+                <%-- Lọc kết quả theo chuyên mục và đơn vị phụ trách. --%>
                 <section class="search-filter-card">
                     <div class="search-filter-heading">
                         <span class="search-filter-icon"><i class="bi bi-grid-3x3-gap-fill"></i></span>
@@ -283,6 +287,7 @@
         <div class="col-lg-9 search-main">
             <c:choose>
                 <c:when test="${not empty q and page.totalElements == 0 and empty errorMessage}">
+                    <%-- Gợi ý cách tìm khác và danh mục tham khảo khi không có kết quả. --%>
                     <section class="search-empty">
                         <div class="search-empty-icon">
                             <i class="bi bi-search"></i>
@@ -358,6 +363,7 @@
                         </div>
                     </c:if>
 
+                    <%-- Hiển thị các FAQ phù hợp và phân trang kết quả. --%>
                     <c:forEach var="item" items="${page.content}">
                         <article class="card search-result-card qa-card-hover">
                             <div class="card-body">

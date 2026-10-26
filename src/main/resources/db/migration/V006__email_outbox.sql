@@ -1,3 +1,4 @@
+-- Lưu hàng đợi email, số lần thử gửi và thời điểm thử tiếp theo.
 CREATE TABLE email_outbox (
     id              BIGINT       NOT NULL AUTO_INCREMENT,
     to_email        VARCHAR(150) NOT NULL,

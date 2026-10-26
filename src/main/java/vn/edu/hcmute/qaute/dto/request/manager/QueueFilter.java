@@ -5,10 +5,12 @@ import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.TicketPriority;
 import vn.edu.hcmute.qaute.common.constant.TicketStatus;
 
+// Đóng gói dữ liệu đầu vào cho thao tác QueueFilter.
 @Getter
 @Setter
 public class QueueFilter {
     private String tab = "unassigned";
+    private String mineStatus = "active";
     private Long categoryId;
     private TicketPriority priority;
     private TicketStatus status;

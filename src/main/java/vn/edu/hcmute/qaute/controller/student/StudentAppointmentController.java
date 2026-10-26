@@ -18,16 +18,19 @@ import vn.edu.hcmute.qaute.dto.view.AppointmentView;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.appointment.AppointmentService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho StudentAppointment.
 @Controller
 public class StudentAppointmentController {
 
     private final AppointmentService appointmentService;
 
+    // Khởi tạo bộ điều khiển quản lý lịch hẹn của sinh viên.
     public StudentAppointmentController(AppointmentService appointmentService) {
         this.appointmentService = appointmentService;
     }
 
     @GetMapping("/student/appointments")
+    // Hiển thị danh sách lịch hẹn theo trạng thái và trang.
     public String list(@RequestParam(defaultValue = "upcoming") String tab,
                        @RequestParam(defaultValue = "0") int page,
                        @RequestParam(defaultValue = "10") int size,
@@ -51,6 +54,7 @@ public class StudentAppointmentController {
     }
 
     @GetMapping("/student/appointments/{id}")
+    // Hiển thị thông tin chi tiết lịch hẹn.
     public String detail(@PathVariable Long id, Model model, RedirectAttributes flash) {
         try {
             Long studentId = SecurityUtils.requireUserId();
@@ -64,6 +68,7 @@ public class StudentAppointmentController {
     }
 
     @PostMapping("/student/appointments/{id}/cancel")
+    // Hủy lịch hẹn sau khi kiểm tra lý do và chuyển hướng an toàn.
     public String cancel(@PathVariable Long id,
                          @RequestParam(required = false) String reason,
                          @RequestParam(required = false) String redirectUrl,
@@ -83,6 +88,7 @@ public class StudentAppointmentController {
     }
 
     @GetMapping("/student/appointments/{id}/reschedule")
+    // Hiển thị biểu mẫu đổi lịch nếu lịch hẹn cho phép.
     public String rescheduleForm(@PathVariable Long id, Model model, RedirectAttributes flash) {
         try {
             Long studentId = SecurityUtils.requireUserId();
@@ -100,6 +106,7 @@ public class StudentAppointmentController {
     }
 
     @PostMapping("/student/appointments/{id}/reschedule")
+    // Đổi lịch hẹn sang khung giờ mới đã chọn.
     public String reschedule(@PathVariable Long id,
                              @RequestParam(required = false) Long newSlotId,
                              RedirectAttributes flash) {
@@ -121,6 +128,7 @@ public class StudentAppointmentController {
     }
 
     @GetMapping("/student/appointments/{id}/ics")
+    // Tạo tệp lịch ICS hoặc chuyển về trang chi tiết khi thất bại.
     public Object downloadIcs(@PathVariable Long id, RedirectAttributes flash) {
         try {
             String ics = appointmentService.buildIcs(SecurityUtils.requireUserId(), id);
@@ -139,6 +147,7 @@ public class StudentAppointmentController {
      * not pass an arbitrary client supplied URL to a redirect, otherwise a cancel
      * request can be used as an open-redirect endpoint.
      */
+    // Chỉ chấp nhận đường dẫn quay lại danh sách lịch hẹn nội bộ.
     private String safeRedirectUrl(String redirectUrl, Long appointmentId) {
         if ("/student/appointments".equals(redirectUrl)) {
             return redirectUrl;

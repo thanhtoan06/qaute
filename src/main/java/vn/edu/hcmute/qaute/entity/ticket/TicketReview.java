@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu TicketReview được lưu trữ trong hệ thống.
 @Entity @Table(name = "ticket_reviews")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class TicketReview extends AuditableEntity {

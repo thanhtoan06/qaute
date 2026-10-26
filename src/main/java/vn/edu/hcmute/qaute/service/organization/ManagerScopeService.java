@@ -15,18 +15,21 @@ public interface ManagerScopeService {
      * Manager có được giao chuyên mục không: có dòng gán trỏ tới chuyên mục
      * hoặc tổ tiên của nó. Chuyên mục không tồn tại thì trả false.
      */
+    // Kiểm tra chuyên mục có thuộc phạm vi của Manager hay không.
     boolean isInScope(Long managerId, Long categoryId);
 
     /**
      * Mọi chuyên mục thuộc phạm vi: các chuyên mục được giao và toàn bộ hậu duệ.
      * Không được giao gì thì trả danh sách rỗng.
      */
+    // Lấy tất cả mã chuyên mục trong phạm vi của Manager.
     List<Long> getScopeCategoryIds(Long managerId);
 
     /**
      * Id các Manager (vai trò MANAGER, trạng thái ACTIVE) được giao chuyên mục
      * hoặc tổ tiên của nó. Không ai thì trả danh sách rỗng.
      */
+    // Tìm mã các Manager được giao chuyên mục hoặc tổ tiên.
     List<Long> findManagerIdsInScope(Long categoryId);
 
     /**
@@ -34,17 +37,20 @@ public interface ManagerScopeService {
      * Chỉ Manager ACTIVE; thiếu hồ sơ thì trạng thái trực coi như OFFLINE.
      * Sắp trạng thái ONLINE trước rồi theo tên.
      */
+    // Tìm tư vấn viên phù hợp trong phạm vi chuyên mục.
     List<ManagerOption> findAdvisors(Long categoryId);
 
     /**
      * Manager ACTIVE và số ticket đang phụ trách còn dưới giới hạn đồng thời.
      * Thiếu hồ sơ thì giới hạn mặc định là 10.
      */
+    // Kiểm tra Manager còn khả năng nhận ticket hay không.
     boolean isAvailableForAssignment(Long managerId);
 
     /**
      * Số ticket Manager đang phụ trách (ASSIGNED, IN_PROGRESS, WAITING_STUDENT).
      * Entity Ticket của TV1 chưa có trong dự án thì trả 0.
      */
+    // Đếm số ticket đang mở do Manager phụ trách.
     int currentOpenTicketCount(Long managerId);
 }

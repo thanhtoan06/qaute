@@ -75,6 +75,7 @@
         </ol>
     </nav>
 
+    <%-- Tóm tắt cam kết bảo vệ quyền riêng tư của sinh viên. --%>
     <section class="privacy-hero">
         <div class="privacy-hero-content">
             <div class="privacy-hero-copy">
@@ -93,6 +94,7 @@
         </div>
     </section>
 
+    <%-- Mô tả cam kết bảo vệ và phạm vi sử dụng dữ liệu cá nhân. --%>
     <section class="privacy-content">
         <div class="privacy-content-heading">
             <div class="privacy-content-icon">
@@ -125,6 +127,7 @@
         </div>
     </section>
 
+    <%-- Liên kết đến kênh liên hệ để giải đáp thắc mắc về quyền riêng tư. --%>
     <section class="privacy-contact">
         <div class="privacy-contact-copy">
             <div class="privacy-contact-icon">

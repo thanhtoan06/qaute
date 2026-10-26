@@ -1,7 +1,8 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <%@ page import="org.sitemesh.content.Content" %>
-<%
+<%-- Lấy nội dung trang hiện tại để hiển thị trong giao diện sinh viên.
+--%><%
     Content pageContent = (Content) request.getAttribute("org.sitemesh.content.Content");
 %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
@@ -83,20 +84,22 @@ img { max-width: 100%; }
 .stu-nav { list-style: none; padding: 0 .75rem; margin: 0; }
 .stu-nav li { margin-bottom: 4px; }
 .stu-nav a { position: relative; display: flex; align-items: center; gap: .75rem; min-height: 43px; padding: .65rem .85rem; border: 1px solid transparent; border-radius: 11px; color: rgba(225, 236, 250, .72); font-size: .81rem; font-weight: 550; text-decoration: none; transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
-.stu-nav a i { display: inline-flex; align-items: center; justify-content: center; width: 21px; min-width: 21px; font-size: 1.02rem; color: #9cb7d7; text-align: center; flex-shrink: 0; transition: color .2s ease, transform .2s ease; }
+.stu-nav a i { display: inline-flex; align-items: center; justify-content: center; width: 30px; min-width: 30px; height: 30px; border: 1px solid rgba(162, 192, 226, .1); border-radius: 9px; background: rgba(255, 255, 255, .045); font-size: 1.02rem; color: #9cb7d7; text-align: center; flex-shrink: 0; transition: color .2s ease, transform .2s ease, background .2s ease, border-color .2s ease; }
 .stu-nav a:hover { background: rgba(255, 255, 255, .075); border-color: rgba(255, 255, 255, .035); color: #ffffff; transform: translateX(2px); }
-.stu-nav a:hover i { color: #b2d9ff; transform: scale(1.08); }
+.stu-nav a:hover i { color: #b2d9ff; transform: scale(1.08); border-color: rgba(173, 217, 255, .18); background: rgba(143, 195, 251, .12); }
 .stu-nav a.active { background: linear-gradient(110deg, #206bc4, #3286db); border-color: rgba(255, 255, 255, .1); color: #ffffff; font-weight: 700; box-shadow: 0 6px 16px rgba(9, 61, 121, .28), inset 0 1px 0 rgba(255, 255, 255, .1); }
-.stu-nav a.active::after { content: ""; position: absolute; top: 9px; bottom: 9px; right: 0; width: 3px; border-radius: 4px; background: #b9e0ff; box-shadow: 0 0 12px rgba(185, 224, 255, .5); }
-.stu-nav a.active i { color: #ffffff; }
+.stu-nav a.active::after { content: ""; position: absolute; top: 9px; bottom: 9px; right: 0; width: 3px; border-radius: 4px 0 0 4px; background: #b9e0ff; box-shadow: 0 0 12px rgba(185, 224, 255, .5); }
+.stu-nav a.active i { color: #ffffff; border-color: rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .13); }
 .stu-nav a .nav-badge { margin-left: auto; background: linear-gradient(135deg, #e34c62, #c62d45); color: #fff; font-size: .65rem; padding: .2em .58em; border-radius: 20px; font-weight: 800; min-width: 20px; text-align: center; box-shadow: 0 3px 9px rgba(198, 45, 69, .2); }
 .stu-nav a.active .nav-badge { background: rgba(255, 255, 255, .22); box-shadow: none; }
 .stu-sidebar-footer { margin-top: auto; padding: .85rem .75rem; border-top: 1px solid rgba(255, 255, 255, .085); }
+.stu-sidebar-footer .qa-sidebar-workspace-status { display: flex; align-items: center; gap: .55rem; padding: 0 .25rem .8rem; color: #9db2cc; font-size: .69rem; }
+.stu-sidebar-footer .qa-sidebar-workspace-status .qa-workspace-role-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: #43c99b; box-shadow: 0 0 0 3px rgba(67, 201, 155, .12); }
 .stu-sidebar-footer form button { display: flex; align-items: center; gap: .7rem; width: 100%; min-height: 42px; padding: .65rem .85rem; border-radius: 11px; background: rgba(255, 255, 255, .045); border: 1px solid rgba(255, 255, 255, .035); color: rgba(225, 236, 250, .67); font-size: .81rem; font-weight: 550; cursor: pointer; transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease; }
 .stu-sidebar-footer form button i { font-size: 1.05rem; }
 .stu-sidebar-footer form button:hover { background: rgba(220, 53, 69, .17); border-color: rgba(240, 100, 117, .18); color: #ffffff; transform: translateY(-1px); }
-.stu-topbar { position: fixed; top: 0; left: var(--stu-sidebar-w); right: 0; height: var(--stu-topbar-h); background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border-bottom: 1px solid rgba(222, 232, 244, .92); display: flex; align-items: center; padding: 0 1.5rem; z-index: 1030; gap: 1rem; box-shadow: 0 5px 22px rgba(17, 43, 78, .045); transition: left .3s ease, box-shadow .25s ease, background .25s ease; }
-.stu-topbar::after { content: ""; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(32, 107, 196, .16), transparent); pointer-events: none; }
+.stu-topbar { position: fixed; top: 0; left: var(--stu-sidebar-w); right: 0; height: var(--stu-topbar-h); background: linear-gradient(110deg, rgba(255, 255, 255, .97), rgba(243, 248, 255, .94) 58%, rgba(255, 255, 255, .97)); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border-bottom: 1px solid rgba(222, 232, 244, .92); display: flex; align-items: center; padding: 0 1.5rem; z-index: 1030; gap: 1rem; box-shadow: 0 6px 22px rgba(13, 43, 79, .065); transition: left .3s ease, box-shadow .25s ease, background .25s ease; }
+.stu-topbar::after { content: ""; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(32, 107, 196, .36), rgba(112, 201, 210, .3), transparent); pointer-events: none; }
 .stu-topbar .topbar-title { font-weight: 800; font-size: 1rem; color: #1a3555; letter-spacing: -.02em; flex: 1; }
 .stu-topbar .topbar-right { display: flex; align-items: center; gap: .55rem; min-width: 0; }
 .stu-sidebar-toggle { display: inline-flex !important; align-items: center; justify-content: center; width: 39px; height: 39px; background: linear-gradient(135deg, #287be0, #185caf); border: 1px solid #206bc4; font-size: 1.2rem; color: #fff; cursor: pointer; padding: 0; border-radius: 11px; flex: 0 0 39px; box-shadow: 0 4px 12px rgba(32, 107, 196, .2); transition: background .2s ease, transform .2s ease, box-shadow .2s ease; }
@@ -107,6 +110,7 @@ img { max-width: 100%; }
   body.stu-sidebar-collapsed .stu-sidebar { width: 76px; }
   body.stu-sidebar-collapsed .stu-sidebar .stu-brand { justify-content: center; padding-left: .75rem; padding-right: .75rem; }
   body.stu-sidebar-collapsed .stu-brand-text, body.stu-sidebar-collapsed .stu-user-card > div:last-child, body.stu-sidebar-collapsed .stu-nav-label, body.stu-sidebar-collapsed .stu-nav a span, body.stu-sidebar-collapsed .stu-sidebar-footer span { display: none; }
+  body.stu-sidebar-collapsed .stu-sidebar-footer .qa-sidebar-workspace-status .qa-workspace-role-dot { display: inline-block; }
   body.stu-sidebar-collapsed .stu-user-card { justify-content: center; margin-left: .5rem; margin-right: .5rem; padding-left: .5rem; padding-right: .5rem; }
   body.stu-sidebar-collapsed .stu-nav { padding-left: .5rem; padding-right: .5rem; }
   body.stu-sidebar-collapsed .stu-nav a { justify-content: center; padding-left: .6rem; padding-right: .6rem; }
@@ -119,6 +123,7 @@ img { max-width: 100%; }
 .stu-topbar-user:hover, .stu-topbar-user[aria-expanded="true"] { background: #f3f7fd; border-color: #e6edf7; box-shadow: 0 3px 9px rgba(17, 43, 78, .035); }
 .stu-topbar-user .u-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, #3988e5, #2361b7); border: 2px solid #ffffff; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: .8rem; box-shadow: 0 3px 9px rgba(32, 107, 196, .17); }
 .stu-topbar-user .u-name { font-size: .82rem; font-weight: 700; color: #263c57; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stu-topbar-user .u-role { margin-top: 3px; color: #8a9bb0; font-size: .69rem; font-weight: 500; line-height: 1.2; }
 .stu-topbar-brand { display: inline-flex; align-items: center; gap: .4rem; color: #1f2937; text-decoration: none; }
 .stu-topbar-brand img { width: 30px; height: 30px; object-fit: contain; background: #fff; border: 1px solid #e3eaf4; border-radius: 8px; padding: 2px; }
 .stu-topbar-brand span { color: var(--stu-red); }
@@ -203,9 +208,9 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
 .stu-main .dropdown-menu { padding: .5rem; border: 1px solid #e1e9f4; border-radius: 13px; box-shadow: var(--stu-shadow-lg); animation: qaute-enter .18s ease both; }
 .stu-main .dropdown-item { padding: .62rem .8rem; border-radius: 8px; font-size: .82rem; transition: color .18s ease, background .18s ease; }
 .stu-main .dropdown-item:hover, .stu-main .dropdown-item:focus { background: #eef5ff; color: #185caf; }
-.stu-main .modal-content { border: 1px solid #e1e9f4; border-radius: 17px; box-shadow: 0 24px 80px rgba(11, 31, 58, .19); overflow: hidden; }
-.stu-main .modal-header, .stu-main .modal-footer { background: linear-gradient(130deg, #ffffff, #f8fbff); border-color: #eaf0f7; }
-.stu-main .modal-title { color: #1c395d; font-weight: 800; }
+body.stu-layout .modal-content { border: 1px solid #e1e9f4; border-radius: 17px; box-shadow: 0 24px 80px rgba(11, 31, 58, .19); overflow: hidden; }
+body.stu-layout .modal-header, body.stu-layout .modal-footer { background: linear-gradient(130deg, #ffffff, #f8fbff); border-color: #eaf0f7; }
+body.stu-layout .modal-title { color: #1c395d; font-weight: 800; }
 .stu-main .alert { border-radius: 13px; box-shadow: 0 4px 13px rgba(17, 43, 78, .035); }
 .alert-important.alert-warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
 .alert-info { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
@@ -273,6 +278,41 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
 @media (prefers-reduced-motion: reduce) {
   body.stu-layout::before { animation: none !important; }
 }
+.stu-sidebar { background: radial-gradient(ellipse at 90% 0%, rgba(49, 117, 199, .23), transparent 36%), radial-gradient(ellipse at 0% 76%, rgba(37, 87, 147, .13), transparent 40%), linear-gradient(170deg, #102c50 0%, #0a1b34 49%, #07172c 100%); border-right: 1px solid rgba(255, 255, 255, .07); }
+.stu-brand { min-height: 68px; padding-top: 1.05rem; padding-bottom: 1.05rem; }
+.stu-brand-logo { width: 40px; height: 40px; border-radius: 12px; }
+.stu-brand-text .t1 { font-size: 1.08rem; font-weight: 850; }
+.stu-user-card { min-height: 58px; margin-top: .9rem; border-color: rgba(255, 255, 255, .09); background: linear-gradient(135deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .035)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035); }
+.stu-user-avatar { width: 40px; height: 40px; border-radius: 12px; border-color: rgba(255, 255, 255, .19); background: linear-gradient(135deg, #3988e5, #55b2f5); }
+.stu-nav-label { padding-top: 1.25rem; color: #7893b4; font-size: .63rem; letter-spacing: .12em; }
+.stu-nav a { min-height: 44px; border-radius: 11px; }
+.stu-nav a i { width: 30px; min-width: 30px; height: 30px; border: 1px solid rgba(162, 192, 226, .1); border-radius: 9px; background: rgba(255, 255, 255, .045); color: #a9c3e1; font-size: .94rem; transition: color .2s ease, transform .2s ease, background .2s ease, border-color .2s ease; }
+.stu-nav a:hover i { border-color: rgba(173, 217, 255, .18); background: rgba(143, 195, 251, .12); color: #c7e4ff; }
+.stu-nav a.active { background: linear-gradient(110deg, #206bc4, #3286db); }
+.stu-nav a.active i { border-color: rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .13); color: #ffffff; }
+.stu-sidebar-footer { padding-top: .8rem; padding-bottom: .8rem; }
+.stu-sidebar-footer form button { min-height: 44px; border-radius: 11px; }
+.stu-topbar { background: linear-gradient(110deg, rgba(255, 255, 255, .97), rgba(243, 248, 255, .94) 58%, rgba(255, 255, 255, .97)); border-bottom-color: rgba(219, 230, 244, .92); box-shadow: 0 6px 22px rgba(13, 43, 79, .065); }
+.stu-topbar::after { height: 2px; background: linear-gradient(90deg, transparent, rgba(32, 107, 196, .36), rgba(112, 201, 210, .3), transparent); }
+.stu-topbar .topbar-title { color: #1b385a; font-weight: 800; }
+.stu-sidebar-toggle { width: 39px; height: 39px; flex-basis: 39px; border: 1px solid #206bc4; border-radius: 11px; background: linear-gradient(135deg, #287be0, #185caf); box-shadow: 0 5px 14px rgba(32, 107, 196, .22); }
+.stu-topbar-brand img { border-color: #dce8f6; border-radius: 9px; box-shadow: 0 3px 8px rgba(20, 61, 107, .08); }
+.stu-topbar-brand strong { color: #173e70; }
+.stu-topbar-user .u-avatar { border-radius: 12px; background: linear-gradient(135deg, #3988e5, #55b2f5); }
+.stu-topbar-user:hover, .stu-topbar-user[aria-expanded="true"] { border-color: #dce8f6; background: linear-gradient(135deg, #f4f8ff, #ffffff); }
+.stu-topbar .dropdown-menu { border: 1px solid #e1e9f4 !important; border-radius: 13px !important; box-shadow: 0 18px 42px rgba(14, 39, 74, .14); }
+.stu-topbar .dropdown-item:hover, .stu-topbar .dropdown-item:focus { background: #eef5ff; color: #185caf; }
+@media (max-width: 991.98px) {
+  .stu-topbar { left: 0; }
+  .stu-sidebar-toggle { width: 39px; height: 39px; flex-basis: 39px; }
+}
+@media (max-width: 575.98px) {
+  .stu-topbar { height: 60px; }
+  .stu-topbar .stu-sidebar-toggle { width: 36px; height: 36px; flex-basis: 36px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.stu-layout *, body.stu-layout *::before, body.stu-layout *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
 @media print {
   .stu-sidebar, .stu-topbar, .stu-sidebar-overlay { display: none !important; }
   body.stu-layout { background: #ffffff !important; background-image: none !important; }
@@ -282,6 +322,7 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
   .stu-main .card { box-shadow: none !important; }
 }
 </style>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/role-shell.css">
 
     <title><%= pageContent.getExtractedProperties().getChild("title").getValue() %> - QAUTE</title>
     <%= pageContent.getExtractedProperties().getChild("head").getValue() %>
@@ -289,8 +330,10 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
 </head>
 <body class="stu-layout">
 
+<%-- Lớp phủ đóng menu bên khi người dùng chạm ra ngoài trên thiết bị di động. --%>
 <div class="stu-sidebar-overlay" id="stuSidebarOverlay" onclick="closeSidebar()"></div>
 
+<%-- Thanh bên hiển thị hồ sơ sinh viên và các nhóm chức năng điều hướng. --%>
 <aside class="stu-sidebar" id="stuSidebar">
     <a href="${ctx}/student/dashboard" class="stu-brand">
         <img src="${pageContext.request.contextPath}/assets/images/hcmute-logo.png"
@@ -309,6 +352,7 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
         </div>
     </a>
 
+    <%-- Lối tắt đến tổng quan, trang chủ và thông báo. --%>
     <div class="stu-nav-label">Tổng quan</div>
     <ul class="stu-nav">
         <li>
@@ -327,11 +371,13 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
             <a href="${ctx}/student/notifications" class="${fn:contains(currentUri, '/student/notifications') ? 'active' : ''}">
                 <i class="bi bi-bell-fill"></i>
                 <span>Thông báo</span>
-                <span class="nav-badge d-none" id="sidebar-notif-badge">0</span>
+                <span class="nav-badge qa-sidebar-notification-badge d-none"
+                    id="sidebar-notif-badge" data-sidebar-notification-badge>0</span>
             </a>
         </li>
     </ul>
 
+    <%-- Các chức năng gửi yêu cầu, chat và đặt lịch tư vấn. --%>
     <div class="stu-nav-label">Yêu cầu & Hỗ trợ</div>
     <ul class="stu-nav">
         <li>
@@ -347,14 +393,20 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
             </a>
         </li>
         <li>
-            <a href="${ctx}/student/chat" class="${fn:contains(currentUri, '/student/chat') ? 'active' : ''}">
+            <a href="${ctx}/student/chat" class="${fn:contains(currentUri, '/student/chat') and param.view ne 'history' ? 'active' : ''}">
                 <i class="bi bi-chat-dots-fill"></i>
-                <span>Chat tư vấn</span>
+                <span>Tư vấn trực tuyến</span>
+            </a>
+        </li>
+        <li>
+            <a href="${ctx}/student/chat?view=history" class="${fn:contains(currentUri, '/student/chat') and param.view == 'history' ? 'active' : ''}">
+                <i class="bi bi-clock-history"></i>
+                <span>Lịch sử tư vấn trực tuyến</span>
             </a>
         </li>
         <li>
             <a href="${ctx}/student/appointments" class="${fn:contains(currentUri, '/student/appointments') and not fn:contains(currentUri, '/book') ? 'active' : ''}">
-                <i class="bi bi-calendar-event-fill"></i>
+                <i class="bi bi-calendar-check"></i>
                 <span>Lịch hẹn</span>
             </a>
         </li>
@@ -366,12 +418,13 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
         </li>
     </ul>
 
+    <%-- Tra cứu FAQ và xem lại các câu hỏi đã truy cập. --%>
     <div class="stu-nav-label">Kiến thức</div>
     <ul class="stu-nav">
         <li>
             <a href="${ctx}/student/faq" class="${fn:contains(currentUri, '/student/faq') and not fn:contains(currentUri, 'recent') ? 'active' : ''}">
                 <i class="bi bi-question-circle-fill"></i>
-                <span>Hỏi đáp FAQ</span>
+                <span>Tra cứu FAQ</span>
             </a>
         </li>
         <li>
@@ -382,6 +435,7 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
         </li>
     </ul>
 
+    <%-- Các trang hồ sơ, bảo mật và tùy chọn thông báo. --%>
     <div class="stu-nav-label">Tài khoản</div>
     <ul class="stu-nav">
         <li>
@@ -404,7 +458,12 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
         </li>
     </ul>
 
+    <%-- Gửi biểu mẫu đăng xuất có kèm token CSRF. --%>
     <div class="stu-sidebar-footer">
+        <div class="qa-sidebar-workspace-status">
+            <span class="qa-workspace-role-dot"></span>
+            <span class="qa-sidebar-workspace-copy">Không gian sinh viên</span>
+        </div>
         <form method="post" action="${ctx}/auth/logout">
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <button type="submit">
@@ -415,6 +474,7 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
     </div>
 </aside>
 
+<%-- Thanh công cụ có nút mở menu, tên trang và menu tài khoản sinh viên. --%>
 <header class="stu-topbar">
     <button class="stu-sidebar-toggle" id="stuSidebarToggle" type="button" onclick="toggleSidebar()"
             aria-expanded="true" aria-label="Thu gọn menu" title="Thu gọn menu">
@@ -425,30 +485,38 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
         <strong>QA<span>UTE</span></strong>
     </a>
 
-    <div class="topbar-title d-none d-md-block">
-        <c:choose>
-            <c:when test="${currentUri == '/student/dashboard'}">Bảng điều khiển</c:when>
-            <c:when test="${fn:contains(currentUri, '/student/tickets/new')}">Tạo yêu cầu mới</c:when>
-            <c:when test="${fn:contains(currentUri, '/student/tickets')}">Yêu cầu của tôi</c:when>
-            <c:when test="${fn:contains(currentUri, '/student/chat')}">Chat tư vấn</c:when>
-            <c:when test="${fn:contains(currentUri, '/student/appointments/book')}">Đặt lịch hẹn</c:when>
-            <c:when test="${fn:contains(currentUri, '/student/appointments')}">Lịch hẹn</c:when>
-            <c:when test="${fn:contains(currentUri, '/student/faq/recent')}">FAQ đã xem</c:when>
-            <c:when test="${fn:contains(currentUri, '/student/faq')}">Hỏi đáp FAQ</c:when>
-            <c:when test="${fn:contains(currentUri, '/student/notifications')}">Thông báo</c:when>
-            <c:when test="${fn:contains(currentUri, '/student/profile')}">Hồ sơ cá nhân</c:when>
-            <c:when test="${fn:contains(currentUri, '/student/security')}">Bảo mật tài khoản</c:when>
-            <c:otherwise>QAUTE</c:otherwise>
-        </c:choose>
+    <div class="topbar-title qa-workspace-location d-none d-md-flex">
+        <small>KHÔNG GIAN SINH VIÊN</small>
+        <strong>
+            <c:choose>
+                <c:when test="${currentUri == '/student/dashboard'}">Bảng điều khiển</c:when>
+                <c:when test="${fn:contains(currentUri, '/student/tickets/new')}">Tạo yêu cầu mới</c:when>
+                <c:when test="${fn:contains(currentUri, '/student/tickets')}">Yêu cầu của tôi</c:when>
+                <c:when test="${fn:contains(currentUri, '/student/chat') and param.view == 'history'}">Lịch sử tư vấn trực tuyến</c:when>
+                <c:when test="${fn:contains(currentUri, '/student/chat')}">Tư vấn trực tuyến</c:when>
+                <c:when test="${fn:contains(currentUri, '/student/appointments/book')}">Đặt lịch hẹn</c:when>
+                <c:when test="${fn:contains(currentUri, '/student/appointments')}">Lịch hẹn</c:when>
+                <c:when test="${fn:contains(currentUri, '/student/faq/recent')}">FAQ đã xem</c:when>
+                <c:when test="${fn:contains(currentUri, '/student/faq')}">Tra cứu FAQ</c:when>
+                <c:when test="${fn:contains(currentUri, '/student/notifications')}">Thông báo</c:when>
+                <c:when test="${fn:contains(currentUri, '/student/profile')}">Hồ sơ cá nhân</c:when>
+                <c:when test="${fn:contains(currentUri, '/student/security')}">Bảo mật tài khoản</c:when>
+                <c:otherwise>QAUTE</c:otherwise>
+            </c:choose>
+        </strong>
     </div>
 
+    <%-- Menu hồ sơ, bảo mật, cài đặt thông báo và đăng xuất. --%>
     <div class="topbar-right ms-auto">
         <%@ include file="/WEB-INF/views/common/notification-bell.jspf" %>
 
         <div class="dropdown">
             <a href="#" class="stu-topbar-user" data-bs-toggle="dropdown" aria-expanded="false">
                 <c:choose><c:when test="${not empty studentAvatarUrl}"><img class="u-avatar" src="<c:out value='${studentAvatarUrl}'/>" alt="Avatar" style="object-fit:cover;"/></c:when><c:otherwise><div class="u-avatar"><c:out value="${avatarInitial}"/></div></c:otherwise></c:choose>
-                <div class="u-name d-none d-lg-block"><c:out value="${studentName}"/></div>
+                <div class="d-none d-lg-block text-start">
+                    <div class="u-name"><c:out value="${studentName}"/></div>
+                    <div class="u-role">Sinh viên</div>
+                </div>
                 <i class="bi bi-chevron-down ms-1 text-muted" style="font-size:.7rem;"></i>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius:12px;min-width:200px;">
@@ -475,16 +543,28 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
     </div>
 </header>
 
+<%-- Hiển thị nội dung của trang sinh viên hiện tại. --%>
 <main class="stu-main">
     <div class="stu-page-body">
         <%= pageContent.getExtractedProperties().getChild("body").getValue() %>
     </div>
+    <footer class="stu-footer">
+        <span>&copy; QAUTE · Cổng hỗ trợ sinh viên</span>
+    </footer>
 </main>
+
+<script>
+    document.querySelectorAll("body.stu-layout .modal").forEach(function (modal) {
+        document.body.appendChild(modal);
+    });
+</script>
 
 <%@ include file="/WEB-INF/views/common/scripts.jspf" %>
 <%@ include file="/WEB-INF/views/common/ws-scripts.jspf" %>
 
+<%-- Quản lý trạng thái thanh bên và đồng bộ huy hiệu thông báo giữa các vị trí. --%>
 <script>
+    // Chuyển đổi trạng thái thanh điều hướng trên máy tính và thiết bị di động.
     function toggleSidebar() {
         var toggle = document.getElementById('stuSidebarToggle');
         if (window.innerWidth >= 992) {
@@ -504,15 +584,18 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
         toggle.setAttribute('title', mobileOpen ? 'Đóng menu' : 'Mở menu');
         toggle.innerHTML = '<i class="bi ' + (mobileOpen ? 'bi-x-lg' : 'bi-list') + '"></i>';
     }
+    // Đóng thanh điều hướng trên thiết bị di động.
     function closeSidebar() {
         document.getElementById('stuSidebar').classList.remove('open');
         document.getElementById('stuSidebarOverlay').classList.remove('open');
     }
 
+    // Đồng bộ số thông báo giữa huy hiệu trên cùng và thanh bên.
     (function syncBadge() {
         const topBadge = document.getElementById('notification-badge');
         const sideBadge = document.getElementById('sidebar-notif-badge');
         if (!topBadge || !sideBadge) return;
+        // Cập nhật huy hiệu bên khi trạng thái thông báo thay đổi.
         const obs = new MutationObserver(() => {
             const hidden = topBadge.classList.contains('d-none');
             const count  = topBadge.textContent.trim();
@@ -526,8 +609,11 @@ a.text-primary, .text-primary { color: var(--stu-red) !important; }
         obs.observe(topBadge, { attributes: true, childList: true, subtree: true, characterData: true });
     })();
 
+    // Đăng ký xử lý điều hướng sau khi tài liệu tải xong.
     document.addEventListener('DOMContentLoaded', function () {
+        // Duyệt các liên kết điều hướng của sinh viên.
         document.querySelectorAll('.stu-nav a').forEach(function (link) {
+            // Đóng thanh điều hướng sau khi chọn một liên kết.
             link.addEventListener('click', function () {
                 closeSidebar();
             });

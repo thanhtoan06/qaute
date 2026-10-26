@@ -1,0 +1,9 @@
+<%@ page pageEncoding="UTF-8" %>
+<sec:authentication property="principal.fullName" var="workspaceName"/>
+<sec:authentication property="principal.email" var="workspaceEmail"/>
+<c:set var="workspaceInitial" value="${not empty workspaceName ? fn:toUpperCase(fn:substring(workspaceName, 0, 1)) : 'Q'}"/>
+<%-- Lấy tiêu đề trang hiện tại và lưu vào request để dùng trong giao diện workspace. --%>
+<%
+    request.setAttribute("workspacePageTitle",
+            pageContent.getExtractedProperties().getChild("title").getValue());
+%>

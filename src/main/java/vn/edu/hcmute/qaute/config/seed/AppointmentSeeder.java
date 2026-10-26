@@ -39,8 +39,13 @@ import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 @RequiredArgsConstructor
 public class AppointmentSeeder implements DemoSeeder {
 
-    private static final String STUDENT_EMAIL_SUFFIX = "@student.hcmute.edu.vn";
-    private static final int STUDENT_COUNT = 30;
+    private static final String STUDENT_EMAIL_SUFFIX = "@qaute.edu.vn";
+    private static final int STUDENT_MSSV_START = 111111;
+    private static final int STUDENT_COUNT = 20;
+    private static final String[] LEGACY_STUDENT_EMAILS = {
+        "24162129@student.hcmute.edu.vn",
+        "24162130@student.hcmute.edu.vn",
+    };
 
     private static final String[] MANAGER_KEYS = {
         "DT",
@@ -1970,9 +1975,12 @@ public class AppointmentSeeder implements DemoSeeder {
 
             AppointmentStatus status = APPOINTMENT_STATUSES[index];
             int studentIndex = status == AppointmentStatus.CONFIRMED
-                    ? confirmedStudentIndex++
+                    ? (confirmedStudentIndex++ % STUDENT_COUNT)
                     : (historyStudentIndex++ * 7 + 3) % STUDENT_COUNT;
-            User student = user((24162101 + studentIndex) + STUDENT_EMAIL_SUFFIX);
+            String studentEmail = index < LEGACY_STUDENT_EMAILS.length
+                    ? LEGACY_STUDENT_EMAILS[index]
+                    : (STUDENT_MSSV_START + studentIndex) + STUDENT_EMAIL_SUFFIX;
+            User student = user(studentEmail);
             if (appointments.existsByStudentIdAndTopic(student.getId(), TOPICS[index])) {
                 continue;
             }

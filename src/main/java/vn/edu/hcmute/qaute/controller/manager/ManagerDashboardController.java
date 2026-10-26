@@ -10,13 +10,18 @@ import vn.edu.hcmute.qaute.common.response.ApiResponse;
 import vn.edu.hcmute.qaute.security.QauteUserDetails;
 import vn.edu.hcmute.qaute.service.manager.ManagerDashboardService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ManagerDashboard.
 @Controller
 public class ManagerDashboardController {
     private final ManagerDashboardService dashboards;
 
-    public ManagerDashboardController(ManagerDashboardService dashboards) { this.dashboards = dashboards; }
+    // Khởi tạo bộ điều khiển trang tổng quan.
+    public ManagerDashboardController(ManagerDashboardService dashboards) {
+        this.dashboards = dashboards;
+    }
 
     @GetMapping("/manager/dashboard")
+    // Hiển thị trang tổng quan của quản lý.
     public String dashboard(@AuthenticationPrincipal QauteUserDetails me, Model model) {
         model.addAttribute("me", me);
         model.addAttribute("pageTitle", "Tổng quan");
@@ -25,6 +30,7 @@ public class ManagerDashboardController {
 
     @GetMapping("/api/manager/dashboard")
     @ResponseBody
+    // Trả về dữ liệu tổng quan của quản lý hiện tại.
     public ApiResponse<ManagerDashboardService.Dashboard> data(@AuthenticationPrincipal QauteUserDetails me) {
         return ApiResponse.ok(dashboards.get(me.getId()));
     }

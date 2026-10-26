@@ -16,6 +16,7 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.email.EmailService;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 
+// Xử lý nghiệp vụ Password trong hệ thống.
 @Service
 @Transactional
 public class PasswordServiceImpl implements PasswordService {
@@ -29,6 +30,7 @@ public class PasswordServiceImpl implements PasswordService {
     private final EmailService emailService;
     private final AuditService auditService;
 
+    // Khởi tạo dịch vụ đổi mật khẩu.
     public PasswordServiceImpl(UserRepository userRepository,
                                PasswordEncoder passwordEncoder,
                                AuthSessionService authSessionService,
@@ -41,6 +43,7 @@ public class PasswordServiceImpl implements PasswordService {
         this.auditService = auditService;
     }
 
+    // Kiểm tra thông tin và cập nhật mật khẩu của người dùng.
     @Override
     public void changePassword(Long userId, String currentPassword, String newPassword) {
         User user = userRepository.findById(userId)
@@ -81,6 +84,7 @@ public class PasswordServiceImpl implements PasswordService {
                 ));
     }
 
+    // Kiểm tra mật khẩu có đáp ứng yêu cầu độ mạnh hay không.
     private boolean isStrongPassword(String value) {
         if (value == null || value.length() < 8 || value.length() > 64) {
             return false;
@@ -91,4 +95,3 @@ public class PasswordServiceImpl implements PasswordService {
                 && value.chars().anyMatch(character -> !Character.isLetterOrDigit(character));
     }
 }
-

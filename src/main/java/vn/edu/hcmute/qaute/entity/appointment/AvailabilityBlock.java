@@ -8,12 +8,22 @@ import lombok.Getter;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu AvailabilityBlock được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "availability_blocks")
-@Getter @Setter
+@Getter
+@Setter
 public class AvailabilityBlock extends AuditableEntity {
-    @Column(name = "manager_id", nullable = false) private Long managerId;
-    @Column(name = "start_at", nullable = false) private LocalDateTime startAt;
-    @Column(name = "end_at", nullable = false) private LocalDateTime endAt;
-    @Column(length = 200) private String reason;
+
+    @Column(name = "manager_id", nullable = false)
+    private Long managerId;
+
+    @Column(name = "start_at", nullable = false)
+    private LocalDateTime startAt;
+
+    @Column(name = "end_at", nullable = false)
+    private LocalDateTime endAt;
+
+    @Column(length = 200)
+    private String reason;
 }

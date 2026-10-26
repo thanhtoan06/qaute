@@ -1,6 +1,6 @@
 <%@ tag body-content="empty" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%-- Lấy thông báo flash từ request hoặc session và hiển thị theo loại. --%>
 <c:set var="successMessage" value="${not empty requestScope.flashSuccess ? requestScope.flashSuccess : sessionScope.flashSuccess}"/>
 <c:set var="errorMessage" value="${not empty requestScope.flashError ? requestScope.flashError : sessionScope.flashError}"/>
 <c:set var="warningMessage" value="${not empty requestScope.flashWarning ? requestScope.flashWarning : sessionScope.flashWarning}"/>

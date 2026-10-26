@@ -33,6 +33,7 @@ import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.ticket.TicketAccessService;
 
+// Xử lý nghiệp vụ ManagerFaq trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class ManagerFaqService {
@@ -48,6 +49,7 @@ public class ManagerFaqService {
     private final UserLookupService users;
     private final AuditService audit;
 
+    // Khởi tạo dịch vụ FAQ dành cho tư vấn viên.
     public ManagerFaqService(AdminFaqService adminFaqs, FaqRepository faqs,
             ManagerScopeService scopes, TicketAccessService ticketAccess,
             TicketMessageRepository messages, UserLookupService users, AuditService audit) {
@@ -60,6 +62,7 @@ public class ManagerFaqService {
         this.audit = audit;
     }
 
+    // Liệt kê FAQ do tư vấn viên tạo theo trạng thái.
     public Page<AdminFaqListItem> list(Long managerId, FaqStatus status, Pageable pageable) {
         AdminFaqFilter filter = new AdminFaqFilter();
         filter.setAuthorId(managerId);
@@ -67,15 +70,18 @@ public class ManagerFaqService {
         return adminFaqs.search(filter, pageable);
     }
 
+    // Lấy biểu mẫu của bản nháp thuộc tư vấn viên.
     public FaqForm getForm(Long id, Long managerId) {
         requireOwnDraft(id, managerId);
         return adminFaqs.getForm(id);
     }
 
+    // Lấy mã yêu cầu nguồn của bản nháp FAQ.
     public Long sourceTicketId(Long id, Long managerId) {
         return requireOwnDraft(id, managerId).getSourceTicketId();
     }
 
+    // Lưu FAQ trong phạm vi chuyên mục được giao.
     @Transactional
     public Long save(FaqForm form, Long managerId) {
         if (form == null || form.getCategoryId() == null
@@ -88,12 +94,14 @@ public class ManagerFaqService {
         return adminFaqs.save(form, managerId);
     }
 
+    // Gửi bản nháp FAQ để quản trị viên duyệt.
     @Transactional
     public void submit(Long id, Long managerId, boolean confirmedNoPersonalInfo) {
         requireOwnDraft(id, managerId);
         adminFaqs.submitForReview(id, managerId, confirmedNoPersonalInfo);
     }
 
+    // Tạo FAQ từ yêu cầu đã giải quyết và cho phép công khai.
     @Transactional
     public Long createFromTicket(Long ticketId, Long managerId) {
         Ticket ticket = ticketAccess.requireViewable(ticketId, managerId, RoleCode.MANAGER);
@@ -128,6 +136,7 @@ public class ManagerFaqService {
         return faqId;
     }
 
+    // Kiểm tra FAQ là bản nháp thuộc tư vấn viên.
     private Faq requireOwnDraft(Long id, Long managerId) {
         Faq faq = faqs.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy FAQ"));
         if (!managerId.equals(faq.getAuthorId())) {
@@ -139,6 +148,7 @@ public class ManagerFaqService {
         return faq;
     }
 
+    // Loại bỏ thông tin cá nhân khỏi nội dung HTML.
     private static String redact(String html, StudentSummary student) {
         String result = HtmlUtils.htmlUnescape(TextUtil.stripHtml(HtmlSanitizerUtil.sanitize(html)));
         if (student != null && student.user() != null) {
@@ -152,6 +162,7 @@ public class ManagerFaqService {
         return PHONE.matcher(result).replaceAll("[đã ẩn]");
     }
 
+    // Thay chuỗi cá nhân bằng nội dung ẩn danh.
     private static String replaceLiteral(String value, String secret) {
         if (secret == null || secret.isBlank()) return value;
         return Pattern.compile(Pattern.quote(secret.trim()), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE)

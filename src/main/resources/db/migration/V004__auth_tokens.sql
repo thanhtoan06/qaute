@@ -1,3 +1,4 @@
+-- Lưu mã OTP đã băm, mục đích sử dụng và trạng thái xác minh.
 CREATE TABLE otp_codes (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -13,6 +14,7 @@ CREATE TABLE otp_codes (
     INDEX idx_otp_codes_email_purpose_created (email, purpose, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Lưu token đặt lại mật khẩu ở dạng băm cùng thời hạn sử dụng.
 CREATE TABLE password_reset_tokens (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -24,6 +26,7 @@ CREATE TABLE password_reset_tokens (
     CONSTRAINT fk_password_reset_tokens_user FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Lưu token kích hoạt tài khoản ở dạng băm cùng trạng thái tiêu thụ.
 CREATE TABLE account_activation_tokens (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,

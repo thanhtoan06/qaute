@@ -18,15 +18,18 @@ import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.exception.DuplicateException;
 import vn.edu.hcmute.qaute.service.admin.AdminSynonymService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminSynonym.
 @Controller
 public class AdminSynonymController {
     private final AdminSynonymService synonyms;
 
+    // Khởi tạo bộ điều khiển từ đồng nghĩa FAQ.
     public AdminSynonymController(AdminSynonymService synonyms) {
         this.synonyms = synonyms;
     }
 
     @GetMapping("/admin/faq/synonyms")
+    // Phân trang và hiển thị các cặp từ đồng nghĩa.
     public String list(@RequestParam(required = false) String term, @RequestParam(defaultValue="0") int page, Model model) {
         var results = synonyms.page(BoundedPages.of(page, 25));
         model.addAttribute("synonyms", results.getContent());
@@ -38,6 +41,7 @@ public class AdminSynonymController {
     }
 
     @PostMapping("/admin/faq/synonyms")
+    // Kiểm tra và thêm cặp từ đồng nghĩa.
     public String create(@Valid @ModelAttribute SynonymForm form, BindingResult errors,
                           RedirectAttributes redirect) {
         if (errors.hasErrors()) return invalid(errors, redirect);
@@ -45,20 +49,24 @@ public class AdminSynonymController {
     }
 
     @PostMapping("/admin/faq/synonyms/{id}/toggle")
+    // Đổi trạng thái cặp từ đồng nghĩa.
     public String toggle(@PathVariable Long id, RedirectAttributes redirect) {
         return action(redirect, () -> synonyms.toggle(id), "Đã đổi trạng thái cặp từ");
     }
 
     @PostMapping("/admin/faq/synonyms/{id}/delete")
+    // Xóa cặp từ đồng nghĩa.
     public String delete(@PathVariable Long id, RedirectAttributes redirect) {
         return action(redirect, () -> synonyms.delete(id), "Đã xóa cặp từ đồng nghĩa");
     }
 
+    // Chuyển lỗi biểu mẫu thành thông báo.
     private String invalid(BindingResult errors, RedirectAttributes redirect) {
         redirect.addFlashAttribute("flashError", errors.getAllErrors().getFirst().getDefaultMessage());
         return "redirect:/admin/faq/synonyms";
     }
 
+    // Thực hiện thao tác từ đồng nghĩa và báo kết quả.
     private String action(RedirectAttributes redirect, Runnable operation, String success) {
         try {
             operation.run();

@@ -1,6 +1,8 @@
+// Khởi tạo chức năng gợi ý tìm kiếm cho trang khách.
 (function (window, document) {
     'use strict';
 
+    // Gắn và quản lý danh sách gợi ý cho một ô tìm kiếm.
     function initSuggest(input) {
         if (!input || input.dataset.qaSuggestInitialized) {
             return;
@@ -28,6 +30,7 @@
         let currentSuggestions = [];
         let lastQuery = '';
 
+        // Ẩn danh sách gợi ý và xóa trạng thái hiện tại.
         function hideDropdown() {
             dropdown.style.display = 'none';
             dropdown.innerHTML = '';
@@ -35,6 +38,7 @@
             currentSuggestions = [];
         }
 
+        // Hiển thị các kết quả gợi ý phù hợp với truy vấn.
         function renderSuggestions(suggestions, query) {
             currentSuggestions = suggestions || [];
             activeIndex = -1;
@@ -45,6 +49,7 @@
                 return;
             }
 
+            // Tạo liên kết hiển thị cho từng kết quả gợi ý.
             currentSuggestions.forEach(function (item, index) {
                 const a = document.createElement('a');
                 a.href = '/faq/' + (item.slug || '');
@@ -64,6 +69,7 @@
                     a.appendChild(catDiv);
                 }
 
+                // Chọn gợi ý khi nhấn chuột xuống liên kết.
                 a.addEventListener('mousedown', function (e) {
                     e.preventDefault();
                     selectItem(item, query);
@@ -75,6 +81,7 @@
             dropdown.style.display = 'block';
         }
 
+        // Gửi lượt chọn gợi ý và chuyển đến trang câu hỏi.
         function selectItem(item, query) {
             if (!item) {
                 return;
@@ -103,6 +110,7 @@
             window.location.href = '/faq/' + encodeURIComponent(item.slug);
         }
 
+        // Cập nhật mục gợi ý đang được chọn bằng bàn phím.
         function highlightItem(index) {
             const items = dropdown.querySelectorAll('.dropdown-item');
             items.forEach(function (el) {
@@ -116,11 +124,13 @@
 
         const debouncedFetch = (window.Qaute && window.Qaute.debounce)
             ? window.Qaute.debounce(fetchSuggestions, 300)
+            // Lên lịch gọi API sau khoảng debounce.
             : function () {
                 window.clearTimeout(input._suggestTimer);
                 input._suggestTimer = window.setTimeout(fetchSuggestions, 300);
             };
 
+        // Tải gợi ý từ API cho truy vấn hiện tại.
         function fetchSuggestions() {
             const q = input.value.trim();
             if (q.length < 2) {
@@ -131,32 +141,39 @@
             const url = '/api/faqs/suggestions?q=' + encodeURIComponent(q) + '&source=' + encodeURIComponent(source);
             if (window.Qaute && window.Qaute.fetchJson) {
                 window.Qaute.fetchJson(url)
+                    // Hiển thị phản hồi nếu truy vấn vẫn còn khớp.
                     .then(function (res) {
                         if (input.value.trim() === q) {
                             renderSuggestions(res.data, q);
                         }
                     })
+                    // Ẩn gợi ý khi yêu cầu tải dữ liệu thất bại.
                     .catch(function () {
                         hideDropdown();
                     });
             } else {
                 fetch(url)
+                    // Chuyển phản hồi HTTP thành dữ liệu JSON.
                     .then(function (res) { return res.json(); })
+                    // Hiển thị phản hồi nếu truy vấn vẫn còn khớp.
                     .then(function (res) {
                         if (input.value.trim() === q) {
                             renderSuggestions(res.data, q);
                         }
                     })
+                    // Ẩn gợi ý khi yêu cầu tải dữ liệu thất bại.
                     .catch(function () {
                         hideDropdown();
                     });
             }
         }
 
+        // Tải gợi ý khi nội dung ô tìm kiếm thay đổi.
         input.addEventListener('input', function () {
             debouncedFetch();
         });
 
+        // Điều hướng và chọn gợi ý bằng các phím mũi tên, Enter hoặc Escape.
         input.addEventListener('keydown', function (e) {
             const items = dropdown.querySelectorAll('.dropdown-item');
             if (dropdown.style.display !== 'none' && items.length > 0) {
@@ -180,6 +197,7 @@
             }
         });
 
+        // Ẩn danh sách khi nhấp bên ngoài ô tìm kiếm.
         document.addEventListener('click', function (e) {
             if (!wrapper.contains(e.target)) {
                 hideDropdown();
@@ -187,6 +205,7 @@
         });
     }
 
+    // Khởi tạo gợi ý cho tất cả ô tìm kiếm trên trang.
     function initAll() {
         const inputs = document.querySelectorAll('input[data-qa-suggest]');
         inputs.forEach(initSuggest);

@@ -27,6 +27,7 @@ import vn.edu.hcmute.qaute.service.report.ServiceReportService;
 import vn.edu.hcmute.qaute.service.report.TicketReportService;
 import vn.edu.hcmute.qaute.service.ticket.SlaService;
 
+// Xử lý nghiệp vụ AdminDashboard trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class AdminDashboardService {
@@ -51,6 +52,7 @@ public class AdminDashboardService {
     private final SlaService sla;
     private final AuditLogRepository auditLogs;
 
+    // Khởi tạo dịch vụ tổng quan quản trị.
     public AdminDashboardService(DashboardQueryRepository queries, TicketReportService tickets,
             ServiceReportService services, ReportQueryRepository ticketQueries,
             CategoryQueryService categories, ManagerScopeService scopes, SlaService sla,
@@ -60,6 +62,7 @@ public class AdminDashboardService {
         this.sla = sla; this.auditLogs = auditLogs;
     }
 
+    // Tổng hợp số liệu và cảnh báo cho bảng điều khiển.
     public Dashboard get() {
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();
@@ -96,6 +99,7 @@ public class AdminDashboardService {
                 queries.failedEmails(), activity);
     }
 
+    // Tính thời gian phản hồi đầu tiên trung bình theo tuần.
     private List<WeeklyFrt> weeklyFrt(ReportScope scope, ReportRange range) {
         Map<LocalDate, double[]> weeks = new LinkedHashMap<>();
         for (var ticket : ticketQueries.latestCreated(scope, range, 5000)) {

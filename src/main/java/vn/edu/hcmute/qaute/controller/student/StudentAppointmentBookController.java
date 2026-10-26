@@ -23,6 +23,7 @@ import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.student.StudentTicketQueryService;
 import vn.edu.hcmute.qaute.dto.request.student.TicketFilter;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho StudentAppointmentBook.
 @Controller
 public class StudentAppointmentBookController {
 
@@ -30,6 +31,7 @@ public class StudentAppointmentBookController {
     private final CategoryQueryService categoryQueryService;
     private final StudentTicketQueryService ticketQueryService;
 
+    // Khởi tạo bộ điều khiển đặt lịch và truy vấn dữ liệu liên quan.
     public StudentAppointmentBookController(AppointmentService appointmentService,
                                             CategoryQueryService categoryQueryService,
                                             StudentTicketQueryService ticketQueryService) {
@@ -39,6 +41,7 @@ public class StudentAppointmentBookController {
     }
 
     @GetMapping("/student/appointments/book")
+    // Hiển thị biểu mẫu đặt lịch cùng danh mục và yêu cầu đang mở.
     public String bookForm(Model model) {
         Long studentId = SecurityUtils.requireUserId();
         List<DepartmentNode> tree = categoryQueryService.getActiveTree();
@@ -53,6 +56,7 @@ public class StudentAppointmentBookController {
     }
 
     @PostMapping("/student/appointments/book")
+    // Kiểm tra biểu mẫu và tạo lịch hẹn cho sinh viên.
     public String book(@Valid @ModelAttribute("form") AppointmentBookForm form,
                        BindingResult result,
                        RedirectAttributes flash) {

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.RoleCode;
 
+// Đóng gói dữ liệu đầu vào cho thao tác UserRoleChange.
 @Getter
 @Setter
 public class UserRoleChangeForm {

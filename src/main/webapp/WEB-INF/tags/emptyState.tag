@@ -1,11 +1,11 @@
 <%@ tag body-content="empty" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ attribute name="icon" type="java.lang.String" required="false" rtexprvalue="true" %>
 <%@ attribute name="title" type="java.lang.String" required="true" rtexprvalue="true" %>
 <%@ attribute name="message" type="java.lang.String" required="true" rtexprvalue="true" %>
 <%@ attribute name="actionUrl" type="java.lang.String" required="false" rtexprvalue="true" %>
 <%@ attribute name="actionLabel" type="java.lang.String" required="false" rtexprvalue="true" %>
+<%-- Hiển thị trạng thái chưa có dữ liệu và nút hành động nếu được cung cấp. --%>
 <c:set var="emptyIcon" value="${empty icon ? 'bi-inbox' : icon}"/>
 <div class="empty">
     <div class="empty-img"><i class="bi ${emptyIcon} display-4 text-secondary"></i></div>

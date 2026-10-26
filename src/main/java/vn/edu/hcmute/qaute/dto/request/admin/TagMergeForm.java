@@ -5,8 +5,11 @@ import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
+// Đóng gói dữ liệu đầu vào cho thao tác TagMerge.
 @Getter
 @Setter
 public class TagMergeForm {
-    @NotNull(message="Chọn thẻ đích") @Positive private Long targetId;
+    @NotNull(message = "Chọn thẻ đích")
+    @Positive
+    private Long targetId;
 }

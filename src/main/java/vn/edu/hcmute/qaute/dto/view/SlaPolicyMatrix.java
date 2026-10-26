@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import vn.edu.hcmute.qaute.common.constant.TicketPriority;
 
+// Đóng gói dữ liệu SlaPolicyMatrix để hiển thị hoặc trả về API.
 public record SlaPolicyMatrix(List<PolicyRow> defaults, List<CategoryOverride> overrides) {
     public record PolicyRow(TicketPriority priority, BigDecimal firstResponseHours,
                             BigDecimal resolutionHours, boolean active) {

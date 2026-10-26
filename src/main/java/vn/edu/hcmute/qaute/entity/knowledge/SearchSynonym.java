@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu SearchSynonym được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "search_synonyms", uniqueConstraints = {
         @UniqueConstraint(name = "uk_search_synonyms_term_synonym", columnNames = {"term", "synonym"})

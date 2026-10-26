@@ -20,7 +20,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.edu.hcmute.qaute.common.constant.FaqSort;
 import vn.edu.hcmute.qaute.common.constant.FaqStatus;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.common.util.TextUtil;
@@ -39,6 +38,7 @@ import vn.edu.hcmute.qaute.repository.knowledge.FaqRepository;
 import vn.edu.hcmute.qaute.repository.knowledge.FaqTagRepository;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
+// Xử lý nghiệp vụ FaqQuery trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class FaqQueryServiceImpl implements FaqQueryService {
@@ -49,6 +49,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     private final FaqFeedbackRepository faqFeedbackRepository;
     private final CategoryQueryService categoryQueryService;
 
+    // Khởi tạo dịch vụ truy vấn FAQ và các kho dữ liệu liên quan.
     public FaqQueryServiceImpl(FaqRepository faqRepository,
                                FaqTagRepository faqTagRepository,
                                FaqBookmarkRepository faqBookmarkRepository,
@@ -62,6 +63,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Lấy danh sách FAQ đã xuất bản theo bộ lọc.
     public Page<FaqListItem> list(FaqFilter filter, Pageable pageable) {
         LocalDateTime now = LocalDateTime.now();
         Specification<Faq> spec = (root, query, cb) -> {
@@ -83,6 +85,13 @@ public class FaqQueryServiceImpl implements FaqQueryService {
                         query.distinct(true);
                     }
                 }
+                if (filter.getQuery() != null && !filter.getQuery().isBlank()) {
+                    String normalizedQuery = TextUtil.normalizeVi(filter.getQuery().trim());
+                    predicates.add(cb.or(
+                            cb.like(root.get("titleNorm"), "%" + normalizedQuery + "%"),
+                            cb.like(root.get("bodyNorm"), "%" + normalizedQuery + "%")
+                    ));
+                }
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
@@ -93,6 +102,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Lấy danh sách FAQ người dùng đã đánh dấu.
     public Page<FaqListItem> listBookmarked(Long userId, Pageable pageable) {
         if (userId == null) return Page.empty(pageable == null ? Pageable.unpaged() : pageable);
         Pageable effectivePageable = pageable == null ? PageRequest.of(0, 20) : pageable;
@@ -109,6 +119,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Lấy mã các FAQ đã được người dùng đánh dấu.
     public Set<Long> bookmarkedIds(Long userId, Collection<Long> faqIds) {
         if (userId == null || faqIds == null || faqIds.isEmpty()) return Set.of();
         return faqBookmarkRepository.findByUserIdAndFaqIdIn(userId, faqIds).stream()
@@ -116,6 +127,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Lấy bình chọn của người dùng cho các FAQ đã cho.
     public Map<Long, Boolean> myVotes(Long userId, Collection<Long> faqIds) {
         if (userId == null || faqIds == null || faqIds.isEmpty()) return Map.of();
         Map<Long, Boolean> votes = new HashMap<>();
@@ -125,6 +137,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Lấy chi tiết FAQ đang xuất bản theo slug.
     public FaqDetailView getPublishedBySlug(String slug) {
         Faq faq = faqRepository.findBySlug(slug)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy FAQ"));
@@ -157,6 +170,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Lấy các FAQ có lượt xem vượt ngưỡng tối thiểu.
     public List<FaqListItem> topViewed(long minViews, int limit) {
         LocalDateTime now = LocalDateTime.now();
         Specification<Faq> spec = (root, query, cb) -> cb.and(
@@ -169,6 +183,22 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Lấy các FAQ có lượt đánh giá hữu ích cao nhất.
+    public List<FaqListItem> topHelpful(int limit) {
+        LocalDateTime now = LocalDateTime.now();
+        Specification<Faq> spec = (root, query, cb) -> cb.and(
+                cb.equal(root.get("status"), FaqStatus.PUBLISHED),
+                cb.or(cb.isNull(root.get("publishAt")), cb.lessThanOrEqualTo(root.get("publishAt"), now)),
+                cb.greaterThan(root.get("helpfulCount"), 0)
+        );
+        Sort sort = Sort.by(Sort.Direction.DESC, "helpfulCount")
+                .and(Sort.by(Sort.Direction.DESC, "viewCount"));
+        Pageable pageable = PageRequest.of(0, Math.max(1, limit), sort);
+        return faqRepository.findAll(spec, pageable).map(this::toListItem).getContent();
+    }
+
+    @Override
+    // Lấy danh sách FAQ nổi bật.
     public List<FaqListItem> featured(int limit) {
         LocalDateTime now = LocalDateTime.now();
         Specification<Faq> spec = (root, query, cb) -> cb.and(
@@ -181,6 +211,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Lấy danh sách FAQ mới cập nhật.
     public List<FaqListItem> latest(int limit) {
         LocalDateTime now = LocalDateTime.now();
         Specification<Faq> spec = (root, query, cb) -> cb.and(
@@ -192,6 +223,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Lấy các FAQ liên quan theo danh mục hoặc thẻ.
     public List<FaqListItem> related(Long faqId, int limit) {
         if (faqId == null) {
             return List.of();
@@ -231,6 +263,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Lấy danh sách thẻ phổ biến.
     public List<TagView> popularTags(int limit) {
         Pageable pageable = PageRequest.of(0, Math.max(1, limit));
         return faqTagRepository.findPopularTags(LocalDateTime.now(), pageable).stream()
@@ -243,6 +276,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Đếm số FAQ đang được xuất bản.
     public long countPublished() {
         LocalDateTime now = LocalDateTime.now();
         Specification<Faq> spec = (root, query, cb) -> cb.and(
@@ -253,6 +287,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Đếm số FAQ đang xuất bản theo danh mục.
     public Map<Long, Long> countPublishedByCategory() {
         Map<Long, Long> counts = new LinkedHashMap<>();
         for (Object[] row : faqRepository.countPublishedByCategory(LocalDateTime.now())) {
@@ -264,6 +299,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
     }
 
     @Override
+    // Gợi ý FAQ phù hợp với truy vấn.
     public List<FaqSuggestion> suggest(String query, int limit) {
         if (query == null || query.isBlank()) {
             return List.of();
@@ -285,11 +321,14 @@ public class FaqQueryServiceImpl implements FaqQueryService {
                         faq.getId(),
                         faq.getTitle(),
                         faq.getSlug(),
-                        categoryQueryService.getDisplayPath(faq.getCategoryId())
+                        categoryQueryService.getDisplayPath(faq.getCategoryId()),
+                        faq.getSummary(),
+                        faq.getBodyHtml()
                 ))
                 .toList();
     }
 
+    // Xác định phân trang và thứ tự sắp xếp cho danh sách FAQ.
     private Pageable resolvePageable(FaqFilter filter, Pageable pageable) {
         Sort sort = Sort.by(Sort.Direction.DESC, "updatedAt");
         if (filter != null && filter.getSort() != null) {
@@ -310,6 +349,7 @@ public class FaqQueryServiceImpl implements FaqQueryService {
         return PageRequest.of(page, size, sort);
     }
 
+    // Chuyển FAQ thành dữ liệu hiển thị trong danh sách.
     private FaqListItem toListItem(Faq faq) {
         String categoryName = categoryQueryService.findCategory(faq.getCategoryId())
                 .map(CategoryView::name)
@@ -334,9 +374,9 @@ public class FaqQueryServiceImpl implements FaqQueryService {
         );
     }
 
+    // Kiểm tra FAQ đang được xuất bản và đã đến thời điểm hiển thị.
     private boolean isPublishedNow(Faq faq) {
         return faq.getStatus() == FaqStatus.PUBLISHED
                 && (faq.getPublishAt() == null || !faq.getPublishAt().isAfter(LocalDateTime.now()));
     }
 }
-

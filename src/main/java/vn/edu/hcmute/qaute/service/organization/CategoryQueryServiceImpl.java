@@ -20,6 +20,7 @@ import vn.edu.hcmute.qaute.entity.organization.Department;
 import vn.edu.hcmute.qaute.repository.organization.CategoryRepository;
 import vn.edu.hcmute.qaute.repository.organization.DepartmentRepository;
 
+// Xử lý nghiệp vụ CategoryQuery trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class CategoryQueryServiceImpl implements CategoryQueryService {
@@ -36,12 +37,14 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
     private final DepartmentRepository departmentRepository;
     private final CategoryRepository categoryRepository;
 
+    // Khởi tạo dịch vụ tra cứu cây chuyên mục.
     public CategoryQueryServiceImpl(DepartmentRepository departmentRepository,
                                     CategoryRepository categoryRepository) {
         this.departmentRepository = departmentRepository;
         this.categoryRepository = categoryRepository;
     }
 
+    // Lấy cây các phòng ban và chuyên mục đang hoạt động.
     @Override
     public List<DepartmentNode> getActiveTree() {
         ActiveIndex index = loadActiveIndex();
@@ -64,6 +67,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
         return List.copyOf(tree);
     }
 
+    // Tìm chuyên mục theo mã định danh.
     @Override
     public Optional<CategoryView> findCategory(Long categoryId) {
         if (categoryId == null) {
@@ -73,6 +77,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                 .map(category -> toView(category, findDepartment(category)));
     }
 
+    // Lấy mã định danh của chuyên mục và các chuyên mục con.
     @Override
     public List<Long> getDescendantIds(Long categoryId) {
         if (categoryId == null) {
@@ -94,6 +99,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
         return List.copyOf(ids);
     }
 
+    // Tạo đường dẫn hiển thị của chuyên mục.
     @Override
     public String getDisplayPath(Long categoryId) {
         if (categoryId == null) {
@@ -104,6 +110,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                 .orElse("");
     }
 
+    // Tìm các chuyên mục lá đang hoạt động.
     @Override
     public List<CategoryView> findAllActiveLeaf() {
         ActiveIndex index = loadActiveIndex();
@@ -124,6 +131,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
         return List.copyOf(leaves);
     }
 
+    // Lấy mã định danh của tổ tiên và chính chuyên mục.
     @Override
     public List<Long> getAncestorIdsIncludingSelf(Long categoryId) {
         if (categoryId == null) {
@@ -142,6 +150,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
      * Nạp dữ liệu đang hoạt động bằng đúng 2 truy vấn rồi gom nhóm trong bộ nhớ (tránh N+1).
      * Thứ tự sortOrder → tên được giữ nguyên từ repository.
      */
+    // Nạp và nhóm các phòng ban, chuyên mục đang hoạt động.
     private ActiveIndex loadActiveIndex() {
         List<Department> departments = departmentRepository.findByActiveTrueOrderBySortOrderAscNameAsc();
         Map<Long, List<Category>> rootsByDepartment = new HashMap<>();
@@ -162,6 +171,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
         return new ActiveIndex(departments, rootsByDepartment, childrenByParent);
     }
 
+    // Chuyển chuyên mục cùng các chuyên mục con thành nút cây.
     private CategoryNode toNode(Category category, List<Category> activeChildren) {
         List<CategoryNode> children = activeChildren.stream()
                 .map(child -> new CategoryNode(
@@ -173,6 +183,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                 category.getDepth(), children);
     }
 
+    // Chuyển chuyên mục và phòng ban thành dữ liệu hiển thị.
     private CategoryView toView(Category category, Department department) {
         // "active" của view = chuyên mục bật VÀ phòng ban bật, để khớp với cây đang hoạt động.
         boolean active = isActive(category) && department != null && isActive(department);
@@ -188,10 +199,12 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                 active);
     }
 
+    // Tìm phòng ban chứa chuyên mục.
     private Department findDepartment(Category category) {
         return departmentRepository.findById(category.getDepartmentId()).orElse(null);
     }
 
+    // Ghép tên phòng ban và các cấp chuyên mục thành đường dẫn.
     private String buildDisplayPath(Category category) {
         List<String> parts = new ArrayList<>(MAX_DEPTH + 1);
         Department department = findDepartment(category);
@@ -205,6 +218,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
     }
 
     /** Chuỗi từ chuyên mục gốc xuống chính nó; vòng lặp bị chặn bởi MAX_DEPTH nên dữ liệu lỗi cũng không treo. */
+    // Tải chuỗi tổ tiên từ chuyên mục gốc đến chính nó.
     private List<Category> loadChainFromRoot(Category self) {
         LinkedList<Category> chain = new LinkedList<>();
         Category current = self;
@@ -218,10 +232,12 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
 
     // Nếu entity khai báo kiểu Boolean (không phải boolean) thì đổi thành
     // Boolean.TRUE.equals(category.getActive()) / Boolean.TRUE.equals(department.getActive()).
+    // Kiểm tra chuyên mục đang hoạt động.
     private static boolean isActive(Category category) {
         return category.isActive();
     }
 
+    // Kiểm tra phòng ban đang hoạt động.
     private static boolean isActive(Department department) {
         return department.isActive();
     }
@@ -232,10 +248,12 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
             Map<Long, List<Category>> rootsByDepartment,
             Map<Long, List<Category>> childrenByParent) {
 
+        // Lấy các chuyên mục gốc của phòng ban.
         List<Category> rootsOf(Long departmentId) {
             return rootsByDepartment.getOrDefault(departmentId, List.of());
         }
 
+        // Lấy các chuyên mục con của một chuyên mục.
         List<Category> childrenOf(Long parentId) {
             return childrenByParent.getOrDefault(parentId, List.of());
         }

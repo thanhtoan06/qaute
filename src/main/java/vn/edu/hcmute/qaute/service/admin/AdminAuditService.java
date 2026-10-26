@@ -32,6 +32,7 @@ import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.governance.AuditLogRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 
+// Xử lý nghiệp vụ AdminAudit trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class AdminAuditService {
@@ -41,31 +42,37 @@ public class AdminAuditService {
     private final AuditLogRepository logs;
     private final UserLookupService users;
 
+    // Khởi tạo dịch vụ tra cứu nhật ký quản trị.
     public AdminAuditService(AuditLogRepository logs, UserLookupService users) {
         this.logs = logs;
         this.users = users;
     }
 
+    // Tìm kiếm nhật ký theo bộ lọc và phân trang.
     public Page<AuditLogView> search(AuditFilter filter, Pageable pageable) {
         Page<AuditLog> page = logs.findAll(specification(filter), BoundedPages.of(pageable));
         Map<Long, UserSummary> actors = summaries(page.getContent());
         return page.map(log -> view(log, actors));
     }
 
+    // Lấy một bản ghi nhật ký theo mã.
     public AuditLogView get(Long id) {
         AuditLog log = logs.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy dòng nhật ký"));
         return view(log, summaries(List.of(log)));
     }
 
+    // Liệt kê các mã hành động đã được ghi nhận.
     public List<String> actions() {
         return logs.findDistinctActions();
     }
 
+    // Chuyển mã hành động thành nhãn hiển thị.
     public String actionLabel(String action) {
         return ACTION_LABELS.getOrDefault(action, action == null ? "" : action.replace('_', ' '));
     }
 
+    // Xuất nhật ký phù hợp thành tệp CSV.
     public byte[] exportCsv(AuditFilter filter) {
         List<AuditLog> rows = logs.findAll(specification(filter),
                 PageRequest.of(0, EXPORT_LIMIT, Sort.by(Sort.Order.desc("createdAt"),
@@ -85,6 +92,7 @@ public class AdminAuditService {
         return CsvUtil.withBom(csv.toString());
     }
 
+    // Tạo điều kiện truy vấn từ bộ lọc nhật ký.
     private Specification<AuditLog> specification(AuditFilter filter) {
         AuditFilter f = filter == null ? new AuditFilter() : filter;
         LocalDate from = f.getFrom();
@@ -116,12 +124,14 @@ public class AdminAuditService {
         };
     }
 
+    // Lấy thông tin tóm tắt của những người thực hiện.
     private Map<Long, UserSummary> summaries(List<AuditLog> rows) {
         Set<Long> actorIds = rows.stream().map(AuditLog::getActorId)
                 .filter(id -> id != null).collect(Collectors.toSet());
         return actorIds.isEmpty() ? Map.of() : users.getSummaries(actorIds);
     }
 
+    // Chuyển bản ghi nhật ký thành dữ liệu hiển thị.
     private AuditLogView view(AuditLog log, Map<Long, UserSummary> actors) {
         UserSummary actor = log.getActorId() == null ? null : actors.get(log.getActorId());
         String actorName = log.getActorId() == null ? "Hệ thống"
@@ -132,10 +142,12 @@ public class AdminAuditService {
                 log.getUserAgent(), log.getTraceId(), log.getCreatedAt());
     }
 
+    // Chuyển giá trị sang chuỗi, dùng chuỗi rỗng nếu null.
     private static String string(Object value) {
         return value == null ? "" : value.toString();
     }
 
+    // Tạo bảng nhãn tiếng Việt cho các hành động.
     private static Map<String, String> labels() {
         Map<String, String> result = new HashMap<>();
         result.put(AuditActions.USER_CREATED, "Tạo tài khoản");
@@ -157,7 +169,18 @@ public class AdminAuditService {
         result.put(AuditActions.TICKET_PRIORITY_CHANGED, "Đổi ưu tiên yêu cầu");
         result.put(AuditActions.TICKET_CATEGORY_CHANGED, "Đổi chuyên mục yêu cầu");
         result.put(AuditActions.TICKET_FORCE_CLOSED, "Đóng yêu cầu cưỡng bức");
+        result.put(AuditActions.APPOINTMENT_BOOKED, "Đặt lịch hẹn");
+        result.put(AuditActions.APPOINTMENT_CANCELLED_BY_STUDENT, "Sinh viên hủy lịch hẹn");
         result.put(AuditActions.APPOINTMENT_CANCELLED_BY_MANAGER, "Manager hủy lịch hẹn");
+        result.put(AuditActions.APPOINTMENT_RESCHEDULED, "Đổi lịch hẹn");
+        result.put(AuditActions.APPOINTMENT_COMPLETED, "Hoàn tất lịch hẹn");
+        result.put(AuditActions.APPOINTMENT_NO_SHOW, "Đánh dấu sinh viên vắng");
+        result.put(AuditActions.CHAT_SESSION_STARTED, "Bắt đầu phiên chat");
+        result.put(AuditActions.CHAT_AGENT_REQUESTED, "Yêu cầu tư vấn viên trong chat");
+        result.put(AuditActions.CHAT_AGENT_ACCEPTED, "Tư vấn viên nhận phiên chat");
+        result.put(AuditActions.CHAT_SESSION_CANCELLED, "Hủy phiên chat");
+        result.put(AuditActions.CHAT_SESSION_ENDED, "Kết thúc phiên chat");
+        result.put(AuditActions.CHAT_SESSION_EXPIRED, "Phiên chat hết hạn");
         result.put(AuditActions.CHAT_TRANSFERRED, "Chuyển phiên chat");
         result.put(AuditActions.SETTING_CHANGED, "Đổi cài đặt");
         result.put(AuditActions.SLA_POLICY_CHANGED, "Đổi chính sách SLA");

@@ -46,6 +46,7 @@ public class ManagerScopeForm {
 
     /** Chuyên mục chính luôn phải là một trong các chuyên mục Manager được giao. */
     @AssertTrue(message = "Chuyên mục phụ trách chính phải thuộc danh sách chuyên mục phụ trách")
+    // Kiểm tra các chuyên mục chính có thuộc danh sách được giao.
     public boolean isPrimaryCategoryIdsSubset() {
         if (primaryCategoryIds == null || primaryCategoryIds.isEmpty()) {
             return true;

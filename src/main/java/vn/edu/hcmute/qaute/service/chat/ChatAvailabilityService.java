@@ -21,6 +21,7 @@ import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 import vn.edu.hcmute.qaute.websocket.PresenceService;
 
+// Xử lý nghiệp vụ ChatAvailability trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class ChatAvailabilityService {
@@ -33,6 +34,7 @@ public class ChatAvailabilityService {
     private final PresenceService presence;
     private final ChatSessionRepository sessions;
 
+    // Khởi tạo dịch vụ với các nguồn cấu hình, lịch làm việc và trạng thái tư vấn viên.
     public ChatAvailabilityService(SettingsService settings, BusinessHourRepository hours,
             HolidayRepository holidays, ManagerScopeService scopes, ManagerProfileRepository profiles,
             PresenceService presence, ChatSessionRepository sessions) {
@@ -45,6 +47,7 @@ public class ChatAvailabilityService {
         this.sessions = sessions;
     }
 
+    // Xác định thời điểm hiện tại có nằm trong giờ làm việc đã cấu hình hay không.
     public boolean isWorkingNow() {
         if (!settings.getBoolean(SettingKeys.CHAT_USE_BUSINESS_HOURS)) {
             return true;
@@ -59,6 +62,7 @@ public class ChatAvailabilityService {
                         && now.toLocalTime().isBefore(hour.getEndTime()));
     }
 
+    // Trả về các tư vấn viên đang trực và còn khả năng nhận phiên chat.
     public List<Long> eligibleManagerIds(Long categoryId) {
         List<ManagerOption> advisors = scopes.findAdvisors(categoryId);
         if (advisors.isEmpty()) {

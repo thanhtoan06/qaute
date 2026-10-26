@@ -13,6 +13,7 @@ import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.NotificationType;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu NotificationPreference được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "notification_preferences")
 @Getter

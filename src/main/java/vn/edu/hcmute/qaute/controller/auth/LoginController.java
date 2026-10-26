@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.Map;
-import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +22,7 @@ import vn.edu.hcmute.qaute.security.QauteUserDetails;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.identity.LoginService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho Login.
 @Controller
 public class LoginController {
 
@@ -30,12 +31,14 @@ public class LoginController {
     @Value("${qaute.auth.google.enabled:false}")
     private boolean googleSsoEnabled;
 
+    // Khởi tạo bộ điều khiển đăng nhập.
     public LoginController(LoginService loginService, CookieService cookieService) {
         this.loginService = loginService;
         this.cookieService = cookieService;
     }
 
     @GetMapping("/auth/login")
+    // Hiển thị trang đăng nhập.
     public String loginPage(@RequestParam(defaultValue = "") String returnUrl,
                             @RequestParam(defaultValue = "false") boolean verified,
                             Model model) {
@@ -53,6 +56,7 @@ public class LoginController {
     }
 
     @PostMapping("/auth/login")
+    // Xác thực thông tin đăng nhập và xử lý kết quả.
     public String login(@Valid @ModelAttribute("form") LoginForm form,
                         BindingResult bindingResult,
                         @RequestParam(defaultValue = "") String returnUrl,
@@ -85,11 +89,13 @@ public class LoginController {
         };
     }
 
+    // Hiển thị lỗi đăng nhập.
     private String showError(Model model, String message) {
         model.addAttribute("errors", Map.of("global", message));
         return "auth/login";
     }
 
+    // Chỉ chuyển hướng về đường dẫn phù hợp với vai trò.
     private String safeRedirect(String returnUrl, String roleName) {
         if (returnUrl != null && returnUrl.startsWith("/") && !returnUrl.startsWith("//")
                 && !returnUrl.contains("://") && !returnUrl.contains("\\")) {
@@ -105,11 +111,13 @@ public class LoginController {
         return dashboardPath(RoleCode.valueOf(roleName));
     }
 
+    // Tạo đường dẫn chuyển đến trang tổng quan của người dùng hiện tại.
     private String dashboardRedirect() {
         return SecurityUtils.currentUser().map(QauteUserDetails::getRoleCode)
                 .map(role -> "redirect:" + dashboardPath(role)).orElse("redirect:/");
     }
 
+    // Lấy đường dẫn trang tổng quan theo vai trò.
     private String dashboardPath(RoleCode role) {
         return switch (role) {
             case STUDENT -> "/student/dashboard";

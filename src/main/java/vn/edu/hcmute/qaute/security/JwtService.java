@@ -15,6 +15,7 @@ import vn.edu.hcmute.qaute.common.constant.SettingKeys;
 import vn.edu.hcmute.qaute.config.AppProperties;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
+// Hỗ trợ xác thực và kiểm soát truy cập qua JwtService.
 @Service
 public class JwtService {
 
@@ -22,11 +23,13 @@ public class JwtService {
     private final SettingsService settingsService;
     private SecretKey signingKey;
 
+    // Khởi tạo dịch vụ JWT với cấu hình ứng dụng và cài đặt hệ thống.
     public JwtService(AppProperties appProperties, SettingsService settingsService) {
         this.appProperties = appProperties;
         this.settingsService = settingsService;
     }
 
+    // Kiểm tra bí mật JWT và tạo khóa ký.
     @PostConstruct
     void validateSecret() {
         String secret = appProperties.getJwt().getSecret();
@@ -36,6 +39,7 @@ public class JwtService {
         signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    // Tạo access token với vai trò, mã phiên và thời hạn hiện hành.
     public String createAccessToken(Long userId, RoleCode role, String jti) {
         Instant issuedAt = Instant.now();
         Instant expiresAt = issuedAt.plusSeconds(
@@ -51,6 +55,7 @@ public class JwtService {
         return builder.signWith(signingKey, Jwts.SIG.HS256).compact();
     }
 
+    // Phân tích các claim của access token đã ký.
     public JwtClaimsView parse(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(signingKey)
@@ -70,6 +75,7 @@ public class JwtService {
         }
     }
 
+    // Kiểm tra token hết hạn hoặc không hợp lệ.
     public boolean isExpired(String token) {
         try {
             return parse(token).expiresAt().isBefore(Instant.now());

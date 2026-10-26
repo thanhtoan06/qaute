@@ -1,6 +1,6 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
-<c:set var="notifTargetUrl" value="${not empty requestScope.notificationsUrl ? requestScope.notificationsUrl : '/student/notifications'}"/>
+<c:set var="notifTargetUrl" value="${not empty notificationsUrl ? notificationsUrl : '/student/notifications'}"/>
 <div class="nav-item dropdown d-flex me-2" id="notification-bell-dropdown">
     <a href="#" class="nav-link px-0 position-relative text-reset" data-bs-toggle="dropdown" tabindex="-1" aria-label="Thông báo" aria-expanded="false" id="notification-bell-btn">
         <i class="bi bi-bell fs-2"></i>
@@ -32,4 +32,3 @@
         </div>
     </div>
 </div>
-

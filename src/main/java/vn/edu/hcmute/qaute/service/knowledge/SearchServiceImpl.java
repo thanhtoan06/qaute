@@ -21,6 +21,7 @@ import vn.edu.hcmute.qaute.repository.knowledge.FaqSearchRepository;
 import vn.edu.hcmute.qaute.repository.knowledge.SearchLogRepository;
 import vn.edu.hcmute.qaute.repository.knowledge.SearchSynonymRepository;
 
+// Xử lý nghiệp vụ Search trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class SearchServiceImpl implements SearchService {
@@ -29,6 +30,7 @@ public class SearchServiceImpl implements SearchService {
     private final SearchSynonymRepository searchSynonymRepository;
     private final SearchLogRepository searchLogRepository;
 
+    // Khởi tạo dịch vụ tìm kiếm FAQ và các kho dữ liệu liên quan.
     public SearchServiceImpl(FaqSearchRepository faqSearchRepository,
                              SearchSynonymRepository searchSynonymRepository,
                              SearchLogRepository searchLogRepository) {
@@ -39,6 +41,7 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     @Transactional
+    // Tìm kiếm FAQ và ghi nhật ký truy vấn.
     public Page<SearchResultItem> search(String rawQuery,
                                          List<Long> categoryIds,
                                          String tagSlug,
@@ -60,22 +63,19 @@ public class SearchServiceImpl implements SearchService {
         }
 
         List<SearchSynonym> synonyms = searchSynonymRepository.findByActiveTrue();
-        Set<String> additions = new LinkedHashSet<>();
+        String synonymQuery = "";
         for (SearchSynonym syn : synonyms) {
             String termNorm = TextUtil.normalizeVi(syn.getTerm());
             String synNorm = TextUtil.normalizeVi(syn.getSynonym());
             if (!termNorm.isBlank() && !synNorm.isBlank()) {
                 if (q.contains(termNorm) && !q.contains(synNorm)) {
-                    additions.add(synNorm);
+                    synonymQuery = synNorm;
+                    break;
                 } else if (q.contains(synNorm) && !q.contains(termNorm)) {
-                    additions.add(termNorm);
+                    synonymQuery = termNorm;
+                    break;
                 }
             }
-        }
-
-        String expandedQuery = q;
-        if (!additions.isEmpty()) {
-            expandedQuery = q + " " + String.join(" ", additions);
         }
 
         FaqSort activeSort = sort != null ? sort : FaqSort.RELEVANCE;
@@ -86,10 +86,10 @@ public class SearchServiceImpl implements SearchService {
 
         if (categoryIds != null && !categoryIds.isEmpty()) {
             projectionPage = faqSearchRepository.searchWithCategories(
-                    expandedQuery, q, categoryIds, tagSlug, sortParam, unsorted);
+                    q, synonymQuery, categoryIds, tagSlug, sortParam, unsorted);
         } else {
             projectionPage = faqSearchRepository.searchWithoutCategories(
-                    expandedQuery, q, tagSlug, sortParam, unsorted);
+                    q, synonymQuery, tagSlug, sortParam, unsorted);
         }
 
         List<SearchResultItem> items = projectionPage.getContent().stream()
@@ -130,4 +130,3 @@ public class SearchServiceImpl implements SearchService {
         return resultPage;
     }
 }
-

@@ -22,6 +22,7 @@ import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.service.email.EmailService;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 
+// Xử lý nghiệp vụ PasswordReset trong hệ thống.
 @Service
 public class PasswordResetService {
 
@@ -39,6 +40,7 @@ public class PasswordResetService {
     private final EmailService emailService;
     private final AuditService auditService;
 
+    // Khởi tạo dịch vụ đặt lại mật khẩu.
     public PasswordResetService(UserRepository userRepository,
                                 PasswordResetTokenRepository passwordResetTokenRepository,
                                 OtpService otpService,
@@ -55,12 +57,14 @@ public class PasswordResetService {
         this.auditService = auditService;
     }
 
+    // Gửi OTP đặt lại mật khẩu nếu tìm thấy tài khoản đang hoạt động.
     @Transactional
     public void start(String identifier) {
         findActiveUser(identifier).ifPresent(user ->
                 otpService.issue(user, OtpPurpose.PASSWORD_RESET, "otp-reset"));
     }
 
+    // Xác minh OTP và cấp token đặt lại mật khẩu.
     @Transactional
     public String verifyOtpAndIssueToken(String identifier, String otp) {
         User user = findActiveUser(identifier)
@@ -81,6 +85,7 @@ public class PasswordResetService {
         return rawToken;
     }
 
+    // Đặt mật khẩu mới bằng token hợp lệ.
     @Transactional
     public void resetPassword(String rawToken, String newPassword) {
         String tokenHash = TokenUtil.sha256Hex(rawToken);
@@ -124,10 +129,12 @@ public class PasswordResetService {
                         "time", now.format(TIME_FORMATTER)));
     }
 
+    // Lấy email đã che của tài khoản đang hoạt động.
     public Optional<String> getMaskedEmail(String identifier) {
         return findActiveUser(identifier).map(u -> maskEmail(u.getEmail()));
     }
 
+    // Che phần định danh trước ký tự @ trong email.
     public static String maskEmail(String email) {
         if (email == null || !email.contains("@")) return email;
         int atIdx = email.indexOf('@');
@@ -139,6 +146,7 @@ public class PasswordResetService {
         return name.substring(0, 2) + "***" + name.substring(name.length() - 2) + domain;
     }
 
+    // Tìm tài khoản đang hoạt động theo MSSV hoặc email.
     public Optional<User> findActiveUser(String identifier) {
         if (identifier == null || identifier.isBlank()) {
             return Optional.empty();
@@ -150,6 +158,7 @@ public class PasswordResetService {
         return found.filter(u -> u.getStatus() == UserStatus.ACTIVE);
     }
 
+    // Vô hiệu hóa các token đặt lại mật khẩu chưa sử dụng.
     private void invalidateExistingTokens(Long userId) {
         LocalDateTime now = LocalDateTime.now();
         passwordResetTokenRepository.findByUserIdAndUsedAtIsNull(userId)

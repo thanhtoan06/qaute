@@ -20,6 +20,7 @@ import vn.edu.hcmute.qaute.repository.governance.AnnouncementRepository;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.media.MediaService;
 
+// Xử lý nghiệp vụ AdminAnnouncement trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class AdminAnnouncementService {
@@ -27,29 +28,40 @@ public class AdminAnnouncementService {
     private final MediaService media;
     private final AuditService audit;
 
+    // Khởi tạo các dịch vụ và repository cần dùng để quản lý thông báo.
     public AdminAnnouncementService(AnnouncementRepository announcements, MediaService media, AuditService audit) {
         this.announcements = announcements;
         this.media = media;
         this.audit = audit;
     }
 
+    // Trả về danh sách thông báo có phân trang và lọc trạng thái nếu được cung cấp.
     public Page<Announcement> list(AnnouncementStatus status, Pageable pageable) {
         Specification<Announcement> filter = (root, query, cb) -> status == null
-                ? cb.conjunction() : cb.equal(root.get("status"), status);
+                ? cb.conjunction()
+                : cb.equal(root.get("status"), status);
         return announcements.findAll(filter, BoundedPages.of(pageable));
     }
 
+    // Tạo dữ liệu biểu mẫu từ thông báo hiện có.
     public AnnouncementForm getForm(Long id) {
         Announcement a = get(id);
         AnnouncementForm f = new AnnouncementForm();
-        f.setId(a.getId()); f.setTitle(a.getTitle()); f.setSummary(a.getSummary());
-        f.setBodyHtml(a.getBodyHtml()); f.setAudience(a.getAudience()); f.setPinned(a.isPinned());
-        f.setPublishAt(a.getPublishAt()); f.setExpiresAt(a.getExpiresAt());
-        f.setCoverAssetId(a.getCoverAssetId()); f.setNotifyOnPublish(a.isNotifyOnPublish());
+        f.setId(a.getId());
+        f.setTitle(a.getTitle());
+        f.setSummary(a.getSummary());
+        f.setBodyHtml(a.getBodyHtml());
+        f.setAudience(a.getAudience());
+        f.setPinned(a.isPinned());
+        f.setPublishAt(a.getPublishAt());
+        f.setExpiresAt(a.getExpiresAt());
+        f.setCoverAssetId(a.getCoverAssetId());
+        f.setNotifyOnPublish(a.isNotifyOnPublish());
         f.setAutoPublish(a.isAutoPublish());
         return f;
     }
 
+    // Kiểm tra dữ liệu, lưu bản nháp và cập nhật ảnh bìa cùng nhật ký thay đổi.
     @Transactional
     public Long save(AnnouncementForm form, Long actorId) {
         if (form.getTitle() == null || form.getTitle().strip().length() < 5 || form.getTitle().length() > 200
@@ -58,12 +70,15 @@ public class AdminAnnouncementService {
             throw new BadRequestException("Thông tin thông báo chưa hợp lệ");
         }
         String body = HtmlSanitizerUtil.sanitize(form.getBodyHtml());
-        if (body.isBlank()) throw new BadRequestException("Nội dung thông báo không được để trống");
+        if (body.isBlank()) {
+            throw new BadRequestException("Nội dung thông báo không được để trống");
+        }
         LocalDateTime effectivePublish = form.getPublishAt() == null ? LocalDateTime.now() : form.getPublishAt();
         if (form.getExpiresAt() != null && !form.getExpiresAt().isAfter(effectivePublish)) {
             throw new BadRequestException("Thời gian hết hạn phải sau thời gian đăng");
         }
-        if (form.isAutoPublish() && (form.getPublishAt() == null || !form.getPublishAt().isAfter(LocalDateTime.now()))) {
+        if (form.isAutoPublish()
+                && (form.getPublishAt() == null || !form.getPublishAt().isAfter(LocalDateTime.now()))) {
             throw new BadRequestException("Hãy chọn thời gian tương lai để tự động đăng");
         }
         Announcement a = form.getId() == null ? new Announcement() : get(form.getId());
@@ -71,11 +86,19 @@ public class AdminAnnouncementService {
             throw new InvalidTransitionException("Chỉ có thể sửa bản nháp");
         }
         String before = a.getId() == null ? null : a.getTitle();
-        a.setTitle(form.getTitle().strip()); a.setSummary(form.getSummary().strip());
-        a.setBodyHtml(body); a.setAudience(form.getAudience()); a.setPinned(form.isPinned());
-        a.setPublishAt(form.getPublishAt()); a.setExpiresAt(form.getExpiresAt());
-        a.setNotifyOnPublish(form.isNotifyOnPublish()); a.setAutoPublish(form.isAutoPublish());
-        if (a.getId() == null) { a.setStatus(AnnouncementStatus.DRAFT); a.setCreatedBy(actorId); }
+        a.setTitle(form.getTitle().strip());
+        a.setSummary(form.getSummary().strip());
+        a.setBodyHtml(body);
+        a.setAudience(form.getAudience());
+        a.setPinned(form.isPinned());
+        a.setPublishAt(form.getPublishAt());
+        a.setExpiresAt(form.getExpiresAt());
+        a.setNotifyOnPublish(form.isNotifyOnPublish());
+        a.setAutoPublish(form.isAutoPublish());
+        if (a.getId() == null) {
+            a.setStatus(AnnouncementStatus.DRAFT);
+            a.setCreatedBy(actorId);
+        }
         a = announcements.saveAndFlush(a);
         if (form.getCoverAssetId() != null && !form.getCoverAssetId().equals(a.getCoverAssetId())) {
             media.attach(form.getCoverAssetId(), MediaUsageType.ANNOUNCEMENT_COVER, a.getId(), actorId);
@@ -85,32 +108,47 @@ public class AdminAnnouncementService {
         return a.getId();
     }
 
+    // Chuyển thông báo nháp sang trạng thái đã xuất bản và ghi nhật ký.
     @Transactional
     public void publish(Long id, Long actorId) {
         Announcement a = get(id);
-        if (a.getStatus() != AnnouncementStatus.DRAFT) throw new InvalidTransitionException("Thông báo không còn là bản nháp");
+        if (a.getStatus() != AnnouncementStatus.DRAFT) {
+            throw new InvalidTransitionException("Thông báo không còn là bản nháp");
+        }
         LocalDateTime now = LocalDateTime.now();
-        if (a.getPublishAt() == null || a.getPublishAt().isBefore(now)) a.setPublishAt(now);
-        a.setStatus(AnnouncementStatus.PUBLISHED); a.setAutoPublish(false); a.setNotified(false);
+        if (a.getPublishAt() == null || a.getPublishAt().isBefore(now)) {
+            a.setPublishAt(now);
+        }
+        a.setStatus(AnnouncementStatus.PUBLISHED);
+        a.setAutoPublish(false);
+        a.setNotified(false);
         audit.log(AuditActions.ANNOUNCEMENT_CHANGED, "announcement", id, "DRAFT", "PUBLISHED");
     }
 
+    // Chuyển thông báo đã xuất bản về bản nháp và tắt chế độ tự động đăng.
     @Transactional
     public void unpublish(Long id, Long actorId) {
         Announcement a = get(id);
-        if (a.getStatus() != AnnouncementStatus.PUBLISHED) throw new InvalidTransitionException("Thông báo chưa được xuất bản");
-        a.setStatus(AnnouncementStatus.DRAFT); a.setAutoPublish(false);
+        if (a.getStatus() != AnnouncementStatus.PUBLISHED) {
+            throw new InvalidTransitionException("Thông báo chưa được xuất bản");
+        }
+        a.setStatus(AnnouncementStatus.DRAFT);
+        a.setAutoPublish(false);
         audit.log(AuditActions.ANNOUNCEMENT_CHANGED, "announcement", id, "PUBLISHED", "DRAFT");
     }
 
+    // Xóa thông báo nháp và ghi nhận thao tác vào nhật ký.
     @Transactional
     public void delete(Long id, Long actorId) {
         Announcement a = get(id);
-        if (a.getStatus() != AnnouncementStatus.DRAFT) throw new InvalidTransitionException("Chỉ có thể xóa bản nháp");
+        if (a.getStatus() != AnnouncementStatus.DRAFT) {
+            throw new InvalidTransitionException("Chỉ có thể xóa bản nháp");
+        }
         announcements.delete(a);
         audit.log(AuditActions.ANNOUNCEMENT_CHANGED, "announcement", id, a.getTitle(), "DELETED");
     }
 
+    // Tìm thông báo theo mã hoặc báo lỗi nếu không tồn tại.
     private Announcement get(Long id) {
         return announcements.findById(id).orElseThrow(NotFoundException::new);
     }

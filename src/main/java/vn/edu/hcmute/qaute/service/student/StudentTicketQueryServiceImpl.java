@@ -25,6 +25,7 @@ import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
+// Xử lý nghiệp vụ StudentTicketQuery trong hệ thống.
 @Service
 public class StudentTicketQueryServiceImpl implements StudentTicketQueryService {
 
@@ -35,6 +36,7 @@ public class StudentTicketQueryServiceImpl implements StudentTicketQueryService 
     private final CategoryQueryService categoryQueryService;
     private final UserLookupService userLookupService;
 
+    // Khởi tạo dịch vụ truy vấn yêu cầu với các phụ thuộc cần thiết.
     public StudentTicketQueryServiceImpl(TicketRepository ticketRepository,
                                          CategoryQueryService categoryQueryService,
                                          UserLookupService userLookupService) {
@@ -45,6 +47,7 @@ public class StudentTicketQueryServiceImpl implements StudentTicketQueryService 
 
     @Override
     @Transactional(readOnly = true)
+    // Liệt kê yêu cầu của sinh viên theo bộ lọc và thông tin phân trang.
     public Page<TicketListItem> list(Long studentId, TicketFilter filter, Pageable pageable) {
         String sortField = filter.getSort() != null && SORT_WHITELIST.contains(filter.getSort())
                 ? filter.getSort() : DEFAULT_SORT;
@@ -72,6 +75,7 @@ public class StudentTicketQueryServiceImpl implements StudentTicketQueryService 
 
     @Override
     @Transactional(readOnly = true)
+    // Đếm số yêu cầu của sinh viên theo từng trạng thái.
     public Map<TicketStatus, Long> countByStatus(Long studentId) {
         Specification<Ticket> base = (root, query, cb) ->
                 cb.equal(root.get("studentId"), studentId);
@@ -83,6 +87,7 @@ public class StudentTicketQueryServiceImpl implements StudentTicketQueryService 
         return counts;
     }
 
+    // Tạo bộ điều kiện truy vấn yêu cầu của sinh viên.
     private Specification<Ticket> buildSpec(Long studentId, TicketFilter f) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -113,4 +118,3 @@ public class StudentTicketQueryServiceImpl implements StudentTicketQueryService 
         };
     }
 }
-

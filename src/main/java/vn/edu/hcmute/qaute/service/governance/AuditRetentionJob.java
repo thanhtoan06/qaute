@@ -24,6 +24,7 @@ public class AuditRetentionJob {
     private final SettingsService settingsService;
     private final AuditLogRepository auditLogRepository;
 
+    // Khởi tạo tác vụ dọn nhật ký theo thời hạn lưu trữ.
     public AuditRetentionJob(JobExecutionTemplate jobExecutionTemplate,
                              SettingsService settingsService,
                              AuditLogRepository auditLogRepository) {
@@ -33,6 +34,7 @@ public class AuditRetentionJob {
     }
 
     @Scheduled(cron = "0 0 4 * * *")
+    // Xóa nhật ký audit đã quá thời hạn lưu trữ cấu hình.
     public void purgeOldAuditLogs() {
         jobExecutionTemplate.run("audit-retention", () -> {
             int retentionDays = settingsService.getInt(SettingKeys.RETENTION_AUDIT_DAYS);

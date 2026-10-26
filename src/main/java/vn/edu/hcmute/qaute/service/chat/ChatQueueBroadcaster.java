@@ -10,6 +10,7 @@ import vn.edu.hcmute.qaute.common.constant.ChatSessionStatus;
 import vn.edu.hcmute.qaute.entity.chat.ChatSession;
 import vn.edu.hcmute.qaute.repository.chat.ChatSessionRepository;
 
+// Xử lý nghiệp vụ ChatQueueBroadcaster trong hệ thống.
 @Component
 public class ChatQueueBroadcaster {
     private final ChatAvailabilityService availability;
@@ -18,6 +19,7 @@ public class ChatQueueBroadcaster {
     private final ChatEventPublisher events;
     private final SimpMessagingTemplate messaging;
 
+    // Khởi tạo bộ phát cập nhật hàng đợi cho tư vấn viên và phiên chat.
     public ChatQueueBroadcaster(ChatAvailabilityService availability, ChatDeskService desk,
             ChatSessionRepository sessions, ChatEventPublisher events, SimpMessagingTemplate messaging) {
         this.availability = availability;
@@ -28,6 +30,7 @@ public class ChatQueueBroadcaster {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    // Phát lại hàng đợi và vị trí mới sau khi trạng thái hàng đợi thay đổi.
     public void changed(ChatQueueChangedEvent event) {
         for (Long managerId : availability.eligibleManagerIds(event.categoryId())) {
             messaging.convertAndSendToUser(String.valueOf(managerId), "/queue/chat-queue",

@@ -1,11 +1,16 @@
+// Khởi tạo dữ liệu và biểu đồ cho bảng điều khiển.
 (() => {
   'use strict';
   const root = document.getElementById('manager-dashboard');
   if (!root) return;
+  // Tìm phần tử giao diện theo mã định danh.
   const el = id => document.getElementById(id);
+  // Định dạng số theo quy ước tiếng Việt.
   const number = value => Number(value || 0).toLocaleString('vi-VN', {maximumFractionDigits: 1});
+  // Cập nhật nội dung của một chỉ số.
   const set = (id, value) => { el(id).textContent = value; };
 
+  // Vẽ biểu đồ với cấu hình chung của bảng điều khiển.
   function draw(id, type, labels, values, color) {
     if (!window.Chart) return;
     const horizontal = type === 'bar';
@@ -24,6 +29,7 @@
         }}});
   }
 
+  // Tạo liên kết công việc ưu tiên trên bảng điều khiển.
   function task(item) {
     const link = document.createElement('a');
     link.className = 'list-group-item list-group-item-action qa-dashboard-task';
@@ -44,6 +50,7 @@
     return link;
   }
 
+  // Nạp số liệu và cập nhật các thành phần bảng điều khiển.
   Qaute.fetchJson(root.dataset.api).then(response => {
     if (!response.success || !response.data) throw new Error(response.message || 'Không có dữ liệu.');
     const d = response.data;
@@ -63,6 +70,7 @@
       d.daily14.map(item => item.count), '#206bc4');
     draw('mgr-chart-category', 'bar', d.byCategory.map(item => item.name),
       d.byCategory.map(item => item.count), '#61b59a');
+  // Hiển thị lỗi khi không thể tải dữ liệu bảng điều khiển.
   }).catch(error => {
     const box = el('mgr-dashboard-error'); box.textContent = error.message || 'Không thể tải dashboard.';
     box.classList.remove('d-none');

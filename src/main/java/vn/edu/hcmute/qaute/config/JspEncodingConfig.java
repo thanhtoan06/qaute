@@ -3,7 +3,6 @@ package vn.edu.hcmute.qaute.config;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import jakarta.servlet.descriptor.JspConfigDescriptor;
 import jakarta.servlet.descriptor.JspPropertyGroupDescriptor;
 import jakarta.servlet.descriptor.TaglibDescriptor;
 
@@ -30,11 +29,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class JspEncodingConfig {
 
+    // Đăng ký cấu hình UTF-8 cho các trang JSP.
     @Bean
     public WebServerFactoryCustomizer<TomcatServletWebServerFactory> jspPageEncodingCustomizer() {
         return factory -> factory.addContextCustomizers(this::applyUtf8PageEncoding);
     }
 
+    // Áp dụng mã hóa UTF-8 cho JSP và JSP fragment.
     private void applyUtf8PageEncoding(Context context) {
         JspPropertyGroup group = new JspPropertyGroup();
         group.addUrlPattern("*.jsp");

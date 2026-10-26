@@ -4,6 +4,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
 
+// Hỗ trợ xác thực và kiểm soát truy cập qua TokenAuthenticationService.
 @Service
 public class TokenAuthenticationService {
 
@@ -11,6 +12,7 @@ public class TokenAuthenticationService {
     private final AuthSessionService authSessionService;
     private final QauteUserDetailsService userDetailsService;
 
+    // Khởi tạo dịch vụ xác thực token và kiểm tra trạng thái phiên.
     public TokenAuthenticationService(JwtService jwtService, AuthSessionService authSessionService,
                                       QauteUserDetailsService userDetailsService) {
         this.jwtService = jwtService;
@@ -18,6 +20,7 @@ public class TokenAuthenticationService {
         this.userDetailsService = userDetailsService;
     }
 
+    // Xác thực JWT cùng phiên hoạt động và trả về principal tương ứng.
     public Optional<QauteUserDetails> authenticateAccessToken(String jwt) {
         try {
             JwtClaimsView claims = jwtService.parse(jwt);

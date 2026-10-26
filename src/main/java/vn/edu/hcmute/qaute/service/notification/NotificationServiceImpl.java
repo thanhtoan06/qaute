@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.NotificationType;
+import vn.edu.hcmute.qaute.common.constant.RoleCode;
 import vn.edu.hcmute.qaute.common.exception.ForbiddenException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.config.AppProperties;
@@ -26,6 +27,7 @@ import vn.edu.hcmute.qaute.repository.notification.NotificationRepository;
 import vn.edu.hcmute.qaute.service.email.EmailService;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 
+// Xử lý nghiệp vụ Notification trong hệ thống.
 @Service
 @Transactional
 public class NotificationServiceImpl implements NotificationService {
@@ -50,6 +52,34 @@ public class NotificationServiceImpl implements NotificationService {
             NotificationType.SECURITY_ACCOUNT_LOCKED,
             NotificationType.SECURITY_PASSWORD_CHANGED,
             NotificationType.SECURITY_ROLE_CHANGED);
+    private static final Map<RoleCode, List<NotificationType>> PREFERENCE_TYPES_BY_ROLE = Map.of(
+            RoleCode.STUDENT, STUDENT_PREFERENCE_TYPES,
+            RoleCode.MANAGER, List.of(
+                    NotificationType.TICKET_NEW_IN_QUEUE,
+                    NotificationType.TICKET_ASSIGNED,
+                    NotificationType.TICKET_STUDENT_REPLIED,
+                    NotificationType.TICKET_REOPENED,
+                    NotificationType.TICKET_ESCALATED,
+                    NotificationType.SLA_AT_RISK,
+                    NotificationType.SLA_BREACHED,
+                    NotificationType.REVIEW_LOW_RATING,
+                    NotificationType.APPOINTMENT_CONFIRMED,
+                    NotificationType.APPOINTMENT_CHANGED,
+                    NotificationType.APPOINTMENT_CANCELLED,
+                    NotificationType.APPOINTMENT_REMINDER,
+                    NotificationType.CHAT_WAITING_NEW,
+                    NotificationType.ANNOUNCEMENT_PUBLISHED,
+                    NotificationType.SECURITY_ACCOUNT_LOCKED,
+                    NotificationType.SECURITY_PASSWORD_CHANGED,
+                    NotificationType.SECURITY_ROLE_CHANGED),
+            RoleCode.ADMIN, List.of(
+                    NotificationType.SLA_BREACHED,
+                    NotificationType.REVIEW_LOW_RATING,
+                    NotificationType.FAQ_REVIEW_REQUESTED,
+                    NotificationType.ANNOUNCEMENT_PUBLISHED,
+                    NotificationType.SECURITY_ACCOUNT_LOCKED,
+                    NotificationType.SECURITY_PASSWORD_CHANGED,
+                    NotificationType.SECURITY_ROLE_CHANGED));
 
     private final NotificationRepository notificationRepository;
     private final NotificationPreferenceRepository preferenceRepository;
@@ -58,6 +88,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final ApplicationEventPublisher eventPublisher;
     private final AppProperties appProperties;
 
+    // Khởi tạo dịch vụ với các thành phần lưu trữ, gửi email và cấu hình ứng dụng.
     public NotificationServiceImpl(NotificationRepository notificationRepository,
                                    NotificationPreferenceRepository preferenceRepository,
                                    EmailService emailService,
@@ -73,6 +104,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    // Tạo thông báo và gửi email theo tùy chọn của người dùng.
     public void notifyUser(Long userId, NotificationType type, String title, String body,
                            String linkUrl, String entityType, Long entityId) {
         if (userId == null || type == null) {
@@ -83,6 +115,7 @@ public class NotificationServiceImpl implements NotificationService {
         boolean inAppEnabled = preference != null ? preference.isInAppEnabled() : true;
         boolean emailEnabled = preference != null ? preference.isEmailEnabled() : type.isDefaultEmail();
 
+        // Lưu thông báo trong ứng dụng rồi phát sự kiện cập nhật cho người nhận.
         if (inAppEnabled) {
             Notification notification = notificationRepository.save(Notification.builder()
                     .userId(userId)
@@ -104,12 +137,14 @@ public class NotificationServiceImpl implements NotificationService {
             ));
         }
 
+        // Gửi email nếu sự kiện bắt buộc hoặc người dùng đã bật tùy chọn này.
         if (type.isMandatoryEmail() || emailEnabled) {
             sendEmail(userId, title, body, linkUrl);
         }
     }
 
     @Override
+    // Gửi cùng một thông báo đến các người dùng không trùng lặp.
     public void notifyUsers(Collection<Long> userIds, NotificationType type, String title, String body,
                             String linkUrl, String entityType, Long entityId) {
         if (userIds == null || userIds.isEmpty()) {
@@ -122,6 +157,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    // Chuyển thông tin dạng bản đồ thành nội dung thông báo rồi gửi đi.
     public void notifyUser(Long userId, NotificationType type, Map<String, String> details) {
         if (userId == null || type == null) {
             return;
@@ -148,6 +184,7 @@ public class NotificationServiceImpl implements NotificationService {
         notifyUser(userId, type, title, body, link, entityType, entityId);
     }
 
+    // Gửi email thông báo kèm liên kết chi tiết đến người dùng.
     private void sendEmail(Long userId, String title, String body, String linkUrl) {
         try {
             UserSummary user = userLookupService.getSummary(userId);
@@ -185,6 +222,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
+    // Lấy trang thông báo của người dùng, có thể chỉ gồm thông báo chưa đọc.
     public Page<NotificationView> list(Long userId, boolean unreadOnly, Pageable p) {
         if (userId == null) {
             return Page.empty(p);
@@ -197,6 +235,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
+    // Đếm số thông báo chưa đọc của người dùng.
     public long unreadCount(Long userId) {
         if (userId == null) {
             return 0L;
@@ -205,6 +244,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    // Đánh dấu thông báo thuộc người dùng là đã đọc.
     public void markRead(Long userId, Long id) {
         if (userId == null || id == null) {
             throw new NotFoundException("Thông báo không tồn tại");
@@ -224,6 +264,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    // Đánh dấu toàn bộ thông báo của người dùng là đã đọc.
     public void markAllRead(Long userId) {
         if (userId == null) {
             return;
@@ -232,6 +273,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    // Ẩn thông báo thuộc người dùng khỏi danh sách hiển thị.
     public void hide(Long userId, Long id) {
         if (userId == null || id == null) {
             throw new NotFoundException("Thông báo không tồn tại");
@@ -250,12 +292,21 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
+    // Lấy tùy chọn thông báo hiện có cùng các giá trị mặc định.
     public List<PreferenceView> getPreferences(Long userId) {
+        return getPreferences(userId, RoleCode.STUDENT);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    // Lấy tùy chọn theo các loại thông báo mà vai trò có thể nhận.
+    public List<PreferenceView> getPreferences(Long userId, RoleCode role) {
         if (userId == null) return List.of();
+        List<NotificationType> preferenceTypes = preferenceTypesFor(role);
         Map<NotificationType, NotificationPreference> existing = new EnumMap<>(NotificationType.class);
         preferenceRepository.findByUserId(userId).forEach(preference ->
                 existing.put(preference.getEventType(), preference));
-        return STUDENT_PREFERENCE_TYPES.stream().map(type -> {
+        return preferenceTypes.stream().map(type -> {
             NotificationPreference preference = existing.get(type);
             boolean emailLocked = type.isMandatoryEmail();
             boolean inApp = preference == null || preference.isInAppEnabled();
@@ -265,8 +316,16 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    // Lưu các tùy chọn nhận thông báo hợp lệ của người dùng.
     public void savePreferences(Long userId, Map<NotificationType, PreferenceInput> input) {
+        savePreferences(userId, RoleCode.STUDENT, input);
+    }
+
+    @Override
+    // Chỉ lưu các loại thông báo được cung cấp cho vai trò người dùng.
+    public void savePreferences(Long userId, RoleCode role, Map<NotificationType, PreferenceInput> input) {
         if (userId == null || input == null || input.isEmpty()) return;
+        List<NotificationType> preferenceTypes = preferenceTypesFor(role);
         Map<NotificationType, NotificationPreference> existing = new EnumMap<>(NotificationType.class);
         preferenceRepository.findByUserId(userId).forEach(preference ->
                 existing.put(preference.getEventType(), preference));
@@ -274,7 +333,7 @@ public class NotificationServiceImpl implements NotificationService {
         for (Map.Entry<NotificationType, PreferenceInput> entry : input.entrySet()) {
             NotificationType type = entry.getKey();
             PreferenceInput value = entry.getValue();
-            if (type == null || value == null || !STUDENT_PREFERENCE_TYPES.contains(type)) continue;
+            if (type == null || value == null || !preferenceTypes.contains(type)) continue;
             NotificationPreference preference = existing.get(type);
             if (preference == null) {
                 preference = NotificationPreference.builder().userId(userId).eventType(type).build();
@@ -284,6 +343,12 @@ public class NotificationServiceImpl implements NotificationService {
             preferenceRepository.save(preference);
         }
     }
+
+    private static List<NotificationType> preferenceTypesFor(RoleCode role) {
+        List<NotificationType> preferenceTypes = PREFERENCE_TYPES_BY_ROLE.get(Objects.requireNonNull(role, "role"));
+        if (preferenceTypes == null) {
+            throw new IllegalArgumentException("No notification preferences configured for role " + role);
+        }
+        return preferenceTypes;
+    }
 }
-
-

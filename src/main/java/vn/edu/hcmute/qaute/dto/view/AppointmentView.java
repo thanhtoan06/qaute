@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import vn.edu.hcmute.qaute.common.constant.AppointmentStatus;
 import vn.edu.hcmute.qaute.common.constant.Modality;
 
+// Đóng gói dữ liệu Appointment để hiển thị hoặc trả về API.
 public record AppointmentView(Long id, Long slotId, Long managerId, String managerName,
         Long categoryId, String categoryPath, Long ticketId, String ticketCode, String topic,
         String note, Modality modality, String location, String meetingLink,

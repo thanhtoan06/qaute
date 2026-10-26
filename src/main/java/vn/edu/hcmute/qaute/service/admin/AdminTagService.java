@@ -24,6 +24,7 @@ import vn.edu.hcmute.qaute.entity.knowledge.FaqTag;
 import vn.edu.hcmute.qaute.repository.knowledge.FaqTagRepository;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 
+// Xử lý nghiệp vụ AdminTag trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class AdminTagService {
@@ -31,12 +32,14 @@ public class AdminTagService {
     private final EntityManager entityManager;
     private final AuditService audit;
 
+    // Khởi tạo dịch vụ quản trị thẻ FAQ.
     public AdminTagService(FaqTagRepository tags, EntityManager entityManager, AuditService audit) {
         this.tags = tags;
         this.entityManager = entityManager;
         this.audit = audit;
     }
 
+    // Liệt kê thẻ FAQ cùng số lần sử dụng.
     public List<AdminTagView> list() {
         Map<Long, Long> counts = new HashMap<>();
         for (Object[] row : tags.countAllUsages()) {
@@ -47,6 +50,7 @@ public class AdminTagService {
                         counts.getOrDefault(tag.getId(), 0L))).toList();
     }
 
+    // Lấy trang thẻ FAQ kèm số lần sử dụng.
     public Page<AdminTagView> page(Pageable requested) {
         Page<FaqTag> page = tags.findAll(PageRequest.of(BoundedPages.of(requested).getPageNumber(),
                 BoundedPages.of(requested).getPageSize(), Sort.by("name", "id")));
@@ -58,6 +62,7 @@ public class AdminTagService {
         });
     }
 
+    // Tạo thẻ FAQ mới sau khi kiểm tra trùng lặp.
     @Transactional
     public void create(String name) {
         String cleaned = cleanName(name);
@@ -73,6 +78,7 @@ public class AdminTagService {
         }
     }
 
+    // Đổi tên thẻ FAQ và cập nhật dạng chuẩn.
     @Transactional
     public void rename(Long id, String name) {
         FaqTag tag = require(id);
@@ -93,6 +99,7 @@ public class AdminTagService {
         audit.log(AuditActions.TAG_CHANGED, "FaqTag", id, before, cleaned);
     }
 
+    // Gộp thẻ nguồn vào thẻ đích.
     @Transactional
     public void merge(Long sourceId, Long targetId) {
         if (sourceId == null || targetId == null) throw new BadRequestException("Chọn thẻ nguồn và thẻ đích");
@@ -110,6 +117,7 @@ public class AdminTagService {
                 source.getName(), "Gộp vào " + target.getName() + " (#" + targetId + ")");
     }
 
+    // Xóa thẻ FAQ nếu không còn được sử dụng.
     @Transactional
     public void delete(Long id) {
         FaqTag tag = require(id);
@@ -122,10 +130,12 @@ public class AdminTagService {
         audit.log(AuditActions.TAG_CHANGED, "FaqTag", id, tag.getName(), null);
     }
 
+    // Lấy thẻ hoặc báo không tìm thấy.
     private FaqTag require(Long id) {
         return tags.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy thẻ"));
     }
 
+    // Kiểm tra tên chuẩn và slug chưa bị trùng.
     private void ensureUnique(String norm, String slug, Long currentId) {
         boolean duplicated = currentId == null ? tags.existsByNameNorm(norm)
                 : tags.existsByNameNormAndIdNot(norm, currentId);
@@ -135,6 +145,7 @@ public class AdminTagService {
         }
     }
 
+    // Chuẩn hóa và kiểm tra tên thẻ.
     private static String cleanName(String name) {
         String cleaned = name == null ? "" : name.trim().replaceAll("\\s+", " ");
         if (cleaned.length() < 2 || cleaned.length() > 40) {

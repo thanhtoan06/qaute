@@ -13,16 +13,41 @@ import org.hibernate.validator.constraints.URL;
 import org.springframework.format.annotation.DateTimeFormat;
 import vn.edu.hcmute.qaute.common.constant.Modality;
 
-@Getter @Setter
+// Đóng gói dữ liệu đầu vào cho thao tác AvailabilityRule.
+@Getter
+@Setter
 public class AvailabilityRuleForm {
-    @NotNull @Min(1) @Max(7) private Integer dayOfWeek;
-    @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) private LocalTime startTime;
-    @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) private LocalTime endTime;
-    @NotNull private Integer slotMinutes;
-    @NotNull private Modality modality;
-    @Size(max = 200) private String location;
-    @URL(protocol = "https") @Pattern(regexp = "^$|^https://.*$", message = "Liên kết phải bắt đầu bằng https://")
-    @Size(max = 300) private String meetingLink;
-    @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) private LocalDate validFrom;
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) private LocalDate validTo;
+    @NotNull
+    @Min(1)
+    @Max(7)
+    private Integer dayOfWeek;
+
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
+    private LocalTime startTime;
+
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
+    private LocalTime endTime;
+
+    @NotNull
+    private Integer slotMinutes;
+
+    @NotNull
+    private Modality modality;
+
+    @Size(max = 200)
+    private String location;
+
+    @URL(protocol = "https")
+    @Pattern(regexp = "^$|^https://.*$", message = "Liên kết phải bắt đầu bằng https://")
+    @Size(max = 300)
+    private String meetingLink;
+
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate validFrom;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate validTo;
 }

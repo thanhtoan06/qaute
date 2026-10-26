@@ -43,18 +43,21 @@ import vn.edu.hcmute.qaute.service.admin.AdminFaqService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminFaq.
 @Controller
 public class AdminFaqController {
     private static final int PAGE_SIZE = 15;
     private final AdminFaqService faqs;
     private final CategoryQueryService categories;
 
+    // Khởi tạo bộ điều khiển FAQ.
     public AdminFaqController(AdminFaqService faqs, CategoryQueryService categories) {
         this.faqs = faqs;
         this.categories = categories;
     }
 
     @GetMapping("/admin/faq")
+    // Tìm kiếm và hiển thị danh sách FAQ.
     public String list(@ModelAttribute("filter") AdminFaqFilter filter,
                        @RequestParam(defaultValue = "0") int page, Model model) {
         Pageable pageable = PageUtil.of(page, PAGE_SIZE, filter.getSort(),
@@ -76,6 +79,7 @@ public class AdminFaqController {
     }
 
     @GetMapping("/admin/faq/new")
+    // Chuẩn bị biểu mẫu tạo FAQ.
     public String newPage(@RequestParam(required = false) String title, Model model) {
         FaqForm form = new FaqForm();
         if (title != null) form.setTitle(title.length() > 200 ? title.substring(0, 200) : title);
@@ -85,6 +89,7 @@ public class AdminFaqController {
     }
 
     @GetMapping("/admin/faq/{id}/edit")
+    // Tải biểu mẫu chỉnh sửa FAQ.
     public String edit(@PathVariable Long id, Model model) {
         model.addAttribute("form", faqs.getForm(id));
         formOptions(model, id);
@@ -92,6 +97,7 @@ public class AdminFaqController {
     }
 
     @PostMapping("/admin/faq")
+    // Kiểm tra và lưu biểu mẫu FAQ.
     public String save(@Valid @ModelAttribute("form") FaqForm form, BindingResult result,
                        Model model, RedirectAttributes redirect) {
         Map<String, String> errors = FormErrors.of(result);
@@ -114,6 +120,7 @@ public class AdminFaqController {
     }
 
     @GetMapping("/admin/faq/{id}/review")
+    // Hiển thị thông tin FAQ cần duyệt.
     public String review(@PathVariable Long id, Model model) {
         model.addAttribute("faq", faqs.review(id));
         model.addAttribute("pageTitle", "Duyệt FAQ");
@@ -121,12 +128,14 @@ public class AdminFaqController {
     }
 
     @GetMapping("/admin/faq/{id}/revisions")
+    // Hiển thị lịch sử phiên bản FAQ.
     public String revisions(@PathVariable Long id, @RequestParam(defaultValue="0") int page, Model model) {
         revisionPage(id, page, model);
         return "admin/faq-revisions";
     }
 
     @GetMapping("/admin/faq/{id}/revisions/compare")
+    // So sánh hai phiên bản FAQ.
     public String compareRevisions(@PathVariable Long id, @RequestParam int a, @RequestParam int b,
                                    Model model) {
         revisionPage(id, 0, model);
@@ -139,6 +148,7 @@ public class AdminFaqController {
     }
 
     @GetMapping("/admin/faq/{id}/revisions/{versionNo}")
+    // Hiển thị một phiên bản FAQ được chọn.
     public String revision(@PathVariable Long id, @PathVariable int versionNo, Model model) {
         revisionPage(id, 0, model);
         model.addAttribute("selected", faqs.revision(id, versionNo));
@@ -146,6 +156,7 @@ public class AdminFaqController {
     }
 
     @PostMapping("/admin/faq/{id}/revisions/{versionNo}/restore")
+    // Khôi phục phiên bản FAQ đã chọn.
     public String restoreRevision(@PathVariable Long id, @PathVariable int versionNo,
                                   RedirectAttributes redirect) {
         try {
@@ -157,6 +168,7 @@ public class AdminFaqController {
         return "redirect:/admin/faq/" + id + "/revisions";
     }
 
+    // Nạp thông tin FAQ và lịch sử phiên bản.
     private void revisionPage(Long id, int page, Model model) {
         AdminFaqReviewView faq = faqs.review(id);
         model.addAttribute("faq", faq);
@@ -167,6 +179,7 @@ public class AdminFaqController {
     }
 
     @PostMapping("/admin/faq/{id}/submit")
+    // Gửi FAQ để chờ duyệt.
     public String submit(@PathVariable Long id, @Valid @ModelAttribute FaqSubmitForm form, BindingResult errors,
                          RedirectAttributes redirect) {
         if (errors.hasErrors()) return invalid(errors, redirect);
@@ -176,6 +189,7 @@ public class AdminFaqController {
     }
 
     @PostMapping("/admin/faq/{id}/approve")
+    // Duyệt hoặc xuất bản FAQ theo biểu mẫu.
     public String approve(@PathVariable Long id,
                           @Valid @ModelAttribute FaqPublishForm form, BindingResult errors,
                           RedirectAttributes redirect) {
@@ -189,6 +203,7 @@ public class AdminFaqController {
     }
 
     @PostMapping("/admin/faq/{id}/reject")
+    // Từ chối FAQ và ghi nhận lý do.
     public String reject(@PathVariable Long id, @Valid @ModelAttribute UserActionForm form,
                          BindingResult errors, RedirectAttributes redirect) {
         if (errors.hasErrors()) return invalid(errors, redirect);
@@ -198,6 +213,7 @@ public class AdminFaqController {
     }
 
     @PostMapping("/admin/faq/{id}/archive")
+    // Lưu trữ FAQ và ghi nhận lý do.
     public String archive(@PathVariable Long id, @Valid @ModelAttribute UserActionForm form,
                           BindingResult errors, RedirectAttributes redirect) {
         if (errors.hasErrors()) return invalid(errors, redirect);
@@ -207,22 +223,26 @@ public class AdminFaqController {
     }
 
     @PostMapping("/admin/faq/{id}/restore")
+    // Khôi phục FAQ về bản nháp.
     public String restore(@PathVariable Long id, RedirectAttributes redirect) {
         return action(id, redirect, () -> faqs.restore(id, SecurityUtils.requireUserId()),
                 "Đã khôi phục FAQ thành bản nháp");
     }
 
     @PostMapping("/admin/faq/{id}/featured")
+    // Đổi trạng thái nổi bật của FAQ.
     public String featured(@PathVariable Long id, RedirectAttributes redirect) {
         return action(id, redirect, () -> faqs.toggleFeatured(id, SecurityUtils.requireUserId()),
                 "Đã cập nhật trạng thái nổi bật");
     }
 
+    // Chuyển lỗi biểu mẫu thành thông báo.
     private String invalid(BindingResult errors, RedirectAttributes redirect) {
         redirect.addFlashAttribute("flashError", errors.getAllErrors().getFirst().getDefaultMessage());
         return "redirect:/admin/faq";
     }
 
+    // Thực hiện thao tác FAQ và thông báo kết quả.
     private String action(Long id, RedirectAttributes redirect, Runnable operation, String success) {
         try {
             operation.run();
@@ -233,6 +253,7 @@ public class AdminFaqController {
         return "redirect:/admin/faq";
     }
 
+    // Nạp các lựa chọn và tiêu đề biểu mẫu FAQ.
     private void formOptions(Model model, Long selectedId) {
         FaqForm form = (FaqForm) model.asMap().get("form");
         model.addAttribute("categoryOptions", categoryOptions(form == null ? null : form.getCategoryId()));
@@ -242,6 +263,7 @@ public class AdminFaqController {
         model.addAttribute("editing", selectedId != null);
     }
 
+    // Tạo danh sách chuyên mục có thể chọn.
     private List<SlaCategoryOption> categoryOptions(Long selectedId) {
         List<SlaCategoryOption> options = new ArrayList<>();
         for (DepartmentNode department : categories.getActiveTree()) {
@@ -262,6 +284,7 @@ public class AdminFaqController {
         return List.copyOf(options);
     }
 
+    // Tạo chuỗi tham số lọc FAQ.
     private static String params(AdminFaqFilter filter, boolean includeStatus) {
         StringJoiner params = new StringJoiner("&amp;");
         if (includeStatus) add(params, "status", filter.getStatus());
@@ -273,6 +296,7 @@ public class AdminFaqController {
         return params.toString();
     }
 
+    // Thêm tham số không rỗng vào chuỗi lọc.
     private static void add(StringJoiner params, String key, Object value) {
         if (value != null && !value.toString().isBlank()) {
             params.add(key + "=" + URLEncoder.encode(value.toString(), StandardCharsets.UTF_8));

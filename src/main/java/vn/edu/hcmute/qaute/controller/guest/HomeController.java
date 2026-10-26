@@ -10,9 +10,11 @@ import vn.edu.hcmute.qaute.common.constant.SettingKeys;
 import vn.edu.hcmute.qaute.service.governance.AnnouncementQueryService;
 import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
+import vn.edu.hcmute.qaute.service.publicsite.GuestHomeFaqQueryService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 import vn.edu.hcmute.qaute.service.ticket.PublicStatsService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho Home.
 @Controller
 public class HomeController {
 
@@ -21,36 +23,42 @@ public class HomeController {
     private final SettingsService settingsService;
     private final AnnouncementQueryService announcementQueryService;
     private final PublicStatsService publicStatsService;
+    private final GuestHomeFaqQueryService guestHomeFaqQueryService;
 
+    // Khởi tạo controller trang chủ.
     public HomeController(CategoryQueryService categoryQueryService,
                           FaqQueryService faqQueryService,
                           SettingsService settingsService,
                           AnnouncementQueryService announcementQueryService,
-                          PublicStatsService publicStatsService) {
+                          PublicStatsService publicStatsService,
+                          GuestHomeFaqQueryService guestHomeFaqQueryService) {
         this.categoryQueryService = categoryQueryService;
         this.faqQueryService = faqQueryService;
         this.settingsService = settingsService;
         this.announcementQueryService = announcementQueryService;
         this.publicStatsService = publicStatsService;
+        this.guestHomeFaqQueryService = guestHomeFaqQueryService;
     }
 
+    // Hiển thị dữ liệu tổng quan trên trang chủ.
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("tree", categoryQueryService.getActiveTree());
         model.addAttribute("categoryCounts", faqQueryService.countPublishedByCategory());
         model.addAttribute("topViewed", faqQueryService.topViewed(10, 10));
+        model.addAttribute("topHelpful", faqQueryService.topHelpful(5));
         model.addAttribute("featured", faqQueryService.featured(4));
         model.addAttribute("latest", faqQueryService.latest(6));
-        
+
         long totalFaq = faqQueryService.countPublished();
         model.addAttribute("totalFaq", totalFaq);
-        
+
         model.addAttribute("contactEmail", settingsService.getString(SettingKeys.SITE_CONTACT_EMAIL));
         model.addAttribute("contactPhone", settingsService.getString(SettingKeys.SITE_CONTACT_PHONE));
 
         // T1-62: Announcements (ALL, 3) & Stats
         model.addAttribute("announcements", announcementQueryService.findActiveFor(AnnouncementAudience.ALL, 3));
-        
+
         Double medianFirstResponseMinutes = publicStatsService.getMedianFirstResponseMinutes(30);
         model.addAttribute("medianFirstResponseMinutes", medianFirstResponseMinutes);
 
@@ -58,6 +66,10 @@ public class HomeController {
         stats.put("totalFaq", totalFaq);
         stats.put("medianFirstResponseMinutes", medianFirstResponseMinutes);
         model.addAttribute("stats", stats);
+
+        // Guest Home FAQ - FAQ trên trang chủ
+        model.addAttribute("guestHomeFaqs", guestHomeFaqQueryService.getAllActive());
+        model.addAttribute("guestHomeFaqsByCategory", guestHomeFaqQueryService.getGroupedByCategory());
 
         return "guest/home";
     }

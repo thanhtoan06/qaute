@@ -14,6 +14,7 @@ import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.OtpPurpose;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu OtpCode được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "otp_codes")
 @Getter

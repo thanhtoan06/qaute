@@ -37,6 +37,7 @@ import vn.edu.hcmute.qaute.service.manager.ManagerTicketDetailService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
 
+// Xử lý nghiệp vụ AdminTicket trong hệ thống.
 @Service
 public class AdminTicketService {
     private final TicketRepository tickets;
@@ -47,6 +48,7 @@ public class AdminTicketService {
     private final TicketWorkflowService workflow;
     private final AuditService audit;
 
+    // Khởi tạo dịch vụ quản trị ticket.
     public AdminTicketService(TicketRepository tickets, CategoryRepository categoryRepository,
             CategoryQueryService categories, UserLookupService users,
             ManagerTicketDetailService details, TicketWorkflowService workflow, AuditService audit) {
@@ -59,6 +61,7 @@ public class AdminTicketService {
         this.audit = audit;
     }
 
+    // Tìm ticket theo bộ lọc và phân trang.
     @Transactional(readOnly = true)
     public Page<ManagerTicketListItem> search(AdminTicketFilter filter, Pageable pageable) {
         pageable = BoundedPages.of(pageable);
@@ -126,11 +129,13 @@ public class AdminTicketService {
                         : Math.max(0, Duration.between(ticket.getCreatedAt(), now).toHours())));
     }
 
+    // Lấy chi tiết ticket với quyền xem của quản trị viên.
     @Transactional(readOnly = true)
     public ManagerTicketDetailView detail(Long ticketId) {
         return details.getDetail(SecurityUtils.requireUserId(), ticketId, RoleCode.ADMIN);
     }
 
+    // Chuyển ticket sang Manager khác với lý do.
     @Transactional
     public void reassign(Long ticketId, Long toManagerId, String reason, Long adminId) {
         requireReason(reason);
@@ -141,6 +146,7 @@ public class AdminTicketService {
         audit.log(AuditActions.TICKET_REASSIGNED, "ticket", ticketId, old, state(after, reason));
     }
 
+    // Đổi mức ưu tiên ticket theo yêu cầu quản trị.
     @Transactional
     public void changePriority(Long ticketId, TicketPriority priority, String reason, Long adminId) {
         requireReason(reason);
@@ -150,6 +156,7 @@ public class AdminTicketService {
         audit.log(AuditActions.TICKET_PRIORITY_CHANGED, "ticket", ticketId, old, state(after, reason));
     }
 
+    // Đổi chuyên mục ticket theo yêu cầu quản trị.
     @Transactional
     public void changeCategory(Long ticketId, Long categoryId, String reason, Long adminId) {
         requireReason(reason);
@@ -159,6 +166,7 @@ public class AdminTicketService {
         audit.log(AuditActions.TICKET_CATEGORY_CHANGED, "ticket", ticketId, old, state(after, reason));
     }
 
+    // Đóng ticket cưỡng chế với lý do quản trị.
     @Transactional
     public void forceClose(Long ticketId, String reason, Long adminId) {
         requireReason(reason);
@@ -168,17 +176,20 @@ public class AdminTicketService {
         audit.log(AuditActions.TICKET_FORCE_CLOSED, "ticket", ticketId, old, state(after, reason));
     }
 
+    // Kiểm tra lý do thao tác quản trị.
     private static void requireReason(String reason) {
         if (reason == null || reason.trim().length() < 10 || reason.trim().length() > 500)
             throw new vn.edu.hcmute.qaute.common.exception.BadRequestException("Lý do phải từ 10 đến 500 ký tự");
     }
 
+    // Tạo dữ liệu trạng thái ticket để ghi nhật ký.
     private static String state(Ticket ticket, String reason) {
         return "status=" + ticket.getStatus() + ", priority=" + ticket.getPriority()
                 + ", categoryId=" + ticket.getCategoryId() + ", assigneeId="
                 + ticket.getCurrentAssigneeId() + ", reason=" + reason;
     }
 
+    // Lấy tên người dùng hoặc giá trị thay thế khi thiếu.
     private static String name(Map<Long, UserSummary> users, Long id) {
         UserSummary user = id == null ? null : users.get(id);
         return user == null ? "—" : user.fullName();

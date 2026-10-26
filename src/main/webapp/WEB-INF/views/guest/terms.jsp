@@ -76,6 +76,7 @@
         </ol>
     </nav>
 
+    <%-- Giới thiệu mục đích và phạm vi của điều khoản sử dụng QAUTE. --%>
     <section class="terms-hero">
         <div class="terms-hero-content">
             <div class="terms-hero-copy">
@@ -94,6 +95,7 @@
         </div>
     </section>
 
+    <%-- Trình bày các điều khoản và lưu ý dành cho người sử dụng hệ thống. --%>
     <section class="terms-content">
         <div class="terms-content-heading">
             <div class="terms-content-icon">
@@ -116,6 +118,7 @@
         </div>
     </section>
 
+    <%-- Cung cấp liên kết đến trang liên hệ khi cần hỗ trợ thêm. --%>
     <section class="terms-contact">
         <div class="terms-contact-copy">
             <div class="terms-contact-icon">

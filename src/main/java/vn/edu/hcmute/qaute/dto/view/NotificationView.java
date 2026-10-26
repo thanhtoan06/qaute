@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import vn.edu.hcmute.qaute.common.constant.NotificationType;
 import vn.edu.hcmute.qaute.entity.notification.Notification;
 
+// Đóng gói dữ liệu Notification để hiển thị hoặc trả về API.
 public record NotificationView(
         Long id,
         NotificationType type,
@@ -14,6 +15,7 @@ public record NotificationView(
         boolean read,
         LocalDateTime createdAt) {
 
+    // Chuyển thông báo entity thành dữ liệu hiển thị.
     public static NotificationView from(Notification notification) {
         if (notification == null) {
             return null;
@@ -30,4 +32,3 @@ public record NotificationView(
         );
     }
 }
-

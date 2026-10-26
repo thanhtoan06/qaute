@@ -15,4 +15,14 @@ public record DepartmentNode(
         String phone,
         String location,
         List<CategoryNode> categories) {
+
+    // Jakarta EL getter methods
+    public Long getId() { return id; }
+    public String getCode() { return code; }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public String getEmail() { return email; }
+    public String getPhone() { return phone; }
+    public String getLocation() { return location; }
+    public List<CategoryNode> getCategories() { return categories; }
 }

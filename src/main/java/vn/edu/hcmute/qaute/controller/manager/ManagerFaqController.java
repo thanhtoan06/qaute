@@ -1,7 +1,5 @@
 package vn.edu.hcmute.qaute.controller.manager;
 
-import vn.edu.hcmute.qaute.dto.request.admin.FaqSubmitForm;
-
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -20,18 +18,21 @@ import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.util.PageUtil;
 import vn.edu.hcmute.qaute.common.web.FormErrors;
 import vn.edu.hcmute.qaute.dto.request.admin.FaqForm;
+import vn.edu.hcmute.qaute.dto.request.admin.FaqSubmitForm;
 import vn.edu.hcmute.qaute.dto.view.SlaCategoryOption;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.manager.ManagerFaqService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ManagerFaq.
 @Controller
 public class ManagerFaqController {
     private final ManagerFaqService faqs;
     private final ManagerScopeService scopes;
     private final CategoryQueryService categories;
 
+    // Khởi tạo bộ điều khiển FAQ của quản lý.
     public ManagerFaqController(ManagerFaqService faqs, ManagerScopeService scopes,
             CategoryQueryService categories) {
         this.faqs = faqs;
@@ -40,6 +41,7 @@ public class ManagerFaqController {
     }
 
     @GetMapping("/manager/faq")
+    // Hiển thị danh sách FAQ theo trạng thái.
     public String list(@RequestParam(required = false) FaqStatus status,
             @RequestParam(defaultValue = "0") int page, Model model) {
         model.addAttribute("faqs", faqs.list(SecurityUtils.requireUserId(), status,
@@ -51,6 +53,7 @@ public class ManagerFaqController {
     }
 
     @GetMapping("/manager/faq/new")
+    // Hiển thị biểu mẫu tạo FAQ mới.
     public String newPage(Model model) {
         model.addAttribute("form", new FaqForm());
         formOptions(model, null);
@@ -58,6 +61,7 @@ public class ManagerFaqController {
     }
 
     @GetMapping("/manager/faq/{id}/edit")
+    // Hiển thị biểu mẫu chỉnh sửa FAQ.
     public String edit(@PathVariable Long id, Model model) {
         Long managerId = SecurityUtils.requireUserId();
         model.addAttribute("form", faqs.getForm(id, managerId));
@@ -67,6 +71,7 @@ public class ManagerFaqController {
     }
 
     @PostMapping("/manager/faq")
+    // Lưu bản nháp FAQ và hiển thị lỗi nếu có.
     public String save(@Valid @ModelAttribute("form") FaqForm form, BindingResult result,
             Model model, RedirectAttributes redirect) {
         Map<String, String> errors = FormErrors.of(result);
@@ -93,6 +98,7 @@ public class ManagerFaqController {
     }
 
     @PostMapping("/manager/faq/{id}/submit")
+    // Gửi FAQ đã xác nhận để chờ duyệt.
     public String submit(@PathVariable Long id, @Valid @ModelAttribute FaqSubmitForm form, BindingResult errors,
             RedirectAttributes redirect) {
         try {
@@ -107,6 +113,7 @@ public class ManagerFaqController {
     }
 
     @PostMapping("/manager/tickets/{id}/to-faq")
+    // Tạo bản nháp FAQ từ yêu cầu hỗ trợ.
     public String fromTicket(@PathVariable Long id, RedirectAttributes redirect) {
         try {
             Long faqId = faqs.createFromTicket(id, SecurityUtils.requireUserId());
@@ -118,6 +125,7 @@ public class ManagerFaqController {
         }
     }
 
+    // Nạp các lựa chọn chuyên mục và trạng thái biểu mẫu FAQ.
     private void formOptions(Model model, Long id) {
         Long managerId = SecurityUtils.requireUserId();
         List<Long> scopeIds = scopes.getScopeCategoryIds(managerId);

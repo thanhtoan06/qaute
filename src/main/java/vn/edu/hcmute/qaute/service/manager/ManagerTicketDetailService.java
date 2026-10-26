@@ -46,6 +46,7 @@ import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.ticket.TicketAccessService;
 
+// Xử lý nghiệp vụ ManagerTicketDetail trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class ManagerTicketDetailService {
@@ -64,6 +65,7 @@ public class ManagerTicketDetailService {
     private final TicketNoteService noteService;
     private final TicketReviewRepository reviews;
 
+    // Khởi tạo dịch vụ tổng hợp chi tiết yêu cầu cho tư vấn viên.
     public ManagerTicketDetailService(TicketAccessService access, TicketRepository tickets,
             TicketMessageRepository messages, TicketAttachmentRepository attachments,
             TicketStatusHistoryRepository histories, TicketAssignmentRepository assignments,
@@ -87,10 +89,12 @@ public class ManagerTicketDetailService {
         this.reviews = reviews;
     }
 
+    // Lấy chi tiết yêu cầu với quyền tư vấn viên.
     public ManagerTicketDetailView getDetail(Long managerId, Long ticketId) {
         return getDetail(managerId, ticketId, RoleCode.MANAGER);
     }
 
+    // Lấy chi tiết yêu cầu theo vai trò và quyền truy cập được cấp.
     public ManagerTicketDetailView getDetail(Long userId, Long ticketId, RoleCode role) {
         if (role != RoleCode.MANAGER && role != RoleCode.ADMIN) {
             throw new vn.edu.hcmute.qaute.common.exception.ForbiddenException();
@@ -181,6 +185,7 @@ public class ManagerTicketDetailService {
                 open && (mine || inScope), open && (mine || inScope), mine && working, mine && working);
     }
 
+    // Xác định tên người gửi tin nhắn.
     private static String senderName(TicketMessage message, Map<Long, UserSummary> summaries,
             StudentSummary student) {
         if (message.getSenderType() == SenderType.SYSTEM) return "Hệ thống";
@@ -189,11 +194,13 @@ public class ManagerTicketDetailService {
         return name(summaries, message.getSenderId());
     }
 
+    // Lấy tên người dùng hoặc nhãn mặc định khi chưa phân công.
     private static String name(Map<Long, UserSummary> summaries, Long id) {
         UserSummary summary = id == null ? null : summaries.get(id);
         return summary == null ? "Chưa phân công" : summary.fullName();
     }
 
+    // Tạo nội dung sự kiện tương ứng với loại phân công.
     private static String assignmentLabel(TicketAssignment assignment,
             Map<Long, UserSummary> summaries) {
         AssignmentType type = assignment.getType();
@@ -202,6 +209,7 @@ public class ManagerTicketDetailService {
         return "Đã phân công cho " + name(summaries, assignment.getToManagerId());
     }
 
+    // Tạo nội dung sự kiện chuyển cấp và thông tin người liên quan.
     private String escalationLabel(TicketEscalation escalation, Map<Long, UserSummary> summaries) {
         String from = categories.getDisplayPath(escalation.getFromCategoryId());
         String to = categories.getDisplayPath(escalation.getToCategoryId());

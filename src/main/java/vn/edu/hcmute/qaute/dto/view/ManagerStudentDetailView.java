@@ -7,6 +7,7 @@ import vn.edu.hcmute.qaute.common.constant.AppointmentStatus;
 import vn.edu.hcmute.qaute.common.constant.ChatSessionStatus;
 import vn.edu.hcmute.qaute.common.constant.TicketStatus;
 
+// Đóng gói dữ liệu ManagerStudentDetail để hiển thị hoặc trả về API.
 public record ManagerStudentDetailView(
         StudentSummary student,
         Page<TicketItem> tickets,

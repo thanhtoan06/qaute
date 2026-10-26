@@ -29,11 +29,13 @@ public class AdminManagerController {
 
     private final AdminManagerScopeService adminManagerScopeService;
 
+    // Khởi tạo bộ điều khiển phạm vi Manager.
     public AdminManagerController(AdminManagerScopeService adminManagerScopeService) {
         this.adminManagerScopeService = adminManagerScopeService;
     }
 
     @GetMapping("/admin/managers")
+    // Phân trang và hiển thị Manager cùng phạm vi phụ trách.
     public String list(@RequestParam(required = false) String q, @RequestParam(defaultValue="0") int page, Model model) {
         var results = adminManagerScopeService.page(q, BoundedPages.of(page, 25));
         model.addAttribute("managers", results.getContent());
@@ -46,6 +48,7 @@ public class AdminManagerController {
     }
 
     @GetMapping("/admin/managers/{id}/scope")
+    // Tải biểu mẫu phạm vi của Manager.
     public String scope(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {
             if (!model.containsAttribute("form")) {
@@ -59,6 +62,7 @@ public class AdminManagerController {
     }
 
     @PostMapping("/admin/managers/{id}/scope")
+    // Kiểm tra và lưu phạm vi phụ trách.
     public String save(@PathVariable Long id, @Valid @ModelAttribute("form") ManagerScopeForm form,
                        BindingResult bindingResult, Model model,
                        RedirectAttributes redirectAttributes) {
@@ -82,6 +86,7 @@ public class AdminManagerController {
         }
     }
 
+    // Nạp dữ liệu cho trang phạm vi Manager.
     private String scopeView(Model model, Long managerId) {
         model.addAttribute("manager", adminManagerScopeService.getManagerHeader(managerId));
         model.addAttribute("departments", adminManagerScopeService.departmentOptions());
@@ -90,6 +95,7 @@ public class AdminManagerController {
         return "admin/manager-scope";
     }
 
+    // Gộp lỗi và hiển thị lại biểu mẫu phạm vi.
     private String showFormError(Model model, Map<String, String> additions,
                                  ManagerScopeForm form, Long managerId) {
         Map<String, String> errors = new LinkedHashMap<>();

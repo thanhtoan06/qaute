@@ -25,11 +25,13 @@ import vn.edu.hcmute.qaute.common.response.ApiResponse;
 import vn.edu.hcmute.qaute.common.response.FieldErrorItem;
 import vn.edu.hcmute.qaute.common.web.FormErrors;
 
+// Chuyển ngoại lệ ứng dụng thành phản hồi phù hợp qua GlobalExceptionHandler.
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    // Xử lý ngoại lệ nghiệp vụ và tạo phản hồi phù hợp với yêu cầu.
     @ExceptionHandler(AppException.class)
     public Object handleAppException(AppException exception, HttpServletRequest request) {
         ErrorCode code = exception.getCode();
@@ -47,6 +49,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.valueOf(code.getHttpStatus()));
     }
 
+    // Chuyển lỗi kiểm tra dữ liệu thành danh sách lỗi trường.
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Object handleValidation(MethodArgumentNotValidException exception, HttpServletRequest request) {
         BindingResult bindingResult = exception.getBindingResult();
@@ -56,24 +59,28 @@ public class GlobalExceptionHandler {
                 errors, new HttpHeaders());
     }
 
+    // Trả về lỗi khi tệp tải lên vượt quá kích thước cho phép.
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public Object handleMaxUpload(MaxUploadSizeExceededException exception, HttpServletRequest request) {
         return respond(request, ErrorCode.ERR_FILE_REJECTED,
                 ErrorCode.ERR_FILE_REJECTED.getDefaultMessage(), List.of(), new HttpHeaders());
     }
 
+    // Trả về lỗi không tìm thấy tài nguyên hoặc trình xử lý.
     @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
     public Object handleNotFound(Exception exception, HttpServletRequest request) {
         return respond(request, ErrorCode.ERR_NOT_FOUND, ErrorCode.ERR_NOT_FOUND.getDefaultMessage(),
                 List.of(), new HttpHeaders());
     }
 
+    // Trả về lỗi khi phương thức HTTP không được hỗ trợ.
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public Object handleBadRequest(Exception exception, HttpServletRequest request) {
         return respond(request, ErrorCode.ERR_VALIDATION, ErrorCode.ERR_VALIDATION.getDefaultMessage(),
                 List.of(), new HttpHeaders());
     }
 
+    // Xử lý ngoại lệ chưa được phân loại và ghi nhận mã truy vết.
     @ExceptionHandler(Exception.class)
     public Object handleException(Exception exception, HttpServletRequest request) {
         String traceId = traceId();
@@ -84,12 +91,14 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    // Tạo phản hồi với trạng thái mặc định từ mã lỗi.
     private Object respond(HttpServletRequest request, ErrorCode code, String message,
                            List<FieldErrorItem> errors, HttpHeaders headers) {
         return respond(request, code, message, errors, headers, null,
                 HttpStatus.valueOf(code.getHttpStatus()));
     }
 
+    // Tạo phản hồi API hoặc trang lỗi với trạng thái và thông tin bổ sung.
     private Object respond(HttpServletRequest request, ErrorCode code, String message,
                            List<FieldErrorItem> errors, HttpHeaders headers, Integer retryAfter,
                            HttpStatus status) {
@@ -107,6 +116,7 @@ public class GlobalExceptionHandler {
         return modelAndView;
     }
 
+    // Kiểm tra yêu cầu có cần nhận phản hồi API hay không.
     private boolean isApi(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String requestedWith = request.getHeader("X-Requested-With");
@@ -116,6 +126,7 @@ public class GlobalExceptionHandler {
                 || (accept != null && accept.contains("application/json"));
     }
 
+    // Chọn trang lỗi tương ứng với mã trạng thái HTTP.
     private String viewFor(int status) {
         return switch (status) {
             case 400 -> "error/400";
@@ -127,6 +138,7 @@ public class GlobalExceptionHandler {
         };
     }
 
+    // Lấy mã truy vết hiện tại hoặc giá trị thay thế.
     private String traceId() {
         String traceId = MDC.get("traceId");
         return traceId == null ? "unknown" : traceId;

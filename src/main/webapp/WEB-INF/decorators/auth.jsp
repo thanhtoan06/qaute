@@ -1,12 +1,13 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <%@ page import="org.sitemesh.content.Content" %>
-<%
+<%-- Lấy nội dung trang, xác định tiêu đề và URI hiện tại cho trang xác thực.
+--%><%
     Content pageContent = (Content) request.getAttribute("org.sitemesh.content.Content");
     String pageTitle = "Xác thực tài khoản - QAUTE";
     if (pageContent != null && pageContent.getExtractedProperties().getChild("title") != null) {
         String t = pageContent.getExtractedProperties().getChild("title").getValue();
-        if (t != null && !t.isBlank()) {
+        if (t != null && !"null".equals(t) && !t.isBlank()) {
             pageTitle = t + " - QAUTE HCMUTE";
         }
     }
@@ -116,11 +117,16 @@ body.bg-light::before { content: ""; position: fixed; inset: 0; z-index: 0; poin
 </style>
 
     <title><%= pageTitle %></title>
-    <%= pageContent != null && pageContent.getExtractedProperties().getChild("head") != null ? pageContent.getExtractedProperties().getChild("head").getValue() : "" %>
+    <%= pageContent != null && pageContent.getExtractedProperties().getChild("head") != null
+            && pageContent.getExtractedProperties().getChild("head").getValue() != null
+            && !"null".equals(pageContent.getExtractedProperties().getChild("head").getValue())
+            ? pageContent.getExtractedProperties().getChild("head").getValue() : "" %>
 
 </head>
 <body class="bg-light">
+    <%-- Khung đăng nhập/đăng ký gồm giới thiệu dịch vụ và nội dung xác thực hiện tại. --%>
     <div class="hcmute-auth-wrapper">
+        <%-- Bảng giới thiệu thương hiệu, tiện ích hỗ trợ và thông tin trường. --%>
         <div class="hcmute-auth-card">
             <div class="hcmute-auth-left">
                 <div class="hcmute-auth-left-bg" style="background-image: url('${pageContext.request.contextPath}/assets/images/campus-hcmute.png');"></div>
@@ -178,6 +184,7 @@ body.bg-light::before { content: ""; position: fixed; inset: 0; z-index: 0; poin
                 </div>
             </div>
 
+            <%-- Khu vực hiển thị thông báo và biểu mẫu xác thực của trang con. --%>
             <div class="hcmute-auth-right">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <a href="/" class="text-secondary text-decoration-none small d-inline-flex align-items-center hover-primary">
@@ -190,11 +197,15 @@ body.bg-light::before { content: ""; position: fixed; inset: 0; z-index: 0; poin
 
                 <qa:alert/>
 
-                <%= pageContent != null && pageContent.getExtractedProperties().getChild("body") != null ? pageContent.getExtractedProperties().getChild("body").getValue() : "" %>
+                <%= pageContent != null && pageContent.getExtractedProperties().getChild("body") != null
+                        && pageContent.getExtractedProperties().getChild("body").getValue() != null
+                        && !"null".equals(pageContent.getExtractedProperties().getChild("body").getValue())
+                        ? pageContent.getExtractedProperties().getChild("body").getValue() : "" %>
             </div>
         </div>
     </div>
 
+    <%-- Nạp các script dùng chung cho trang xác thực. --%>
     <%@ include file="/WEB-INF/views/common/scripts.jspf" %>
 </body>
 </html>

@@ -1,8 +1,10 @@
+// Khởi tạo tích hợp trình soạn thảo văn bản Summernote.
 (function (window) {
     'use strict';
 
     window.Qaute = window.Qaute || {};
 
+    // Khởi tạo Summernote với cấu hình và xử lý nội dung.
     window.Qaute.initRichText = function (selector, options) {
         options = options || {};
         const $ = window.jQuery;
@@ -32,11 +34,13 @@
             ],
             disableDragAndDrop: true,
             callbacks: {
+                // Cảnh báo khi người dùng tải ảnh trực tiếp vào nội dung.
                 onImageUpload: function () {
                     if (window.Qaute && typeof window.Qaute.toast === 'function') {
                         window.Qaute.toast('Không cho phép chèn ảnh trực tiếp vào nội dung. Vui lòng đính kèm tệp ở bước 3.', 'warning');
                     }
                 },
+                // Chặn dán ảnh từ bảng nhớ tạm.
                 onPaste: function (e) {
                     const clipboardData = (e.originalEvent || e).clipboardData;
                     if (clipboardData && clipboardData.items) {
@@ -52,6 +56,7 @@
                         }
                     }
                 },
+                // Chuyển nội dung mới cho callback do bên gọi cung cấp.
                 onChange: function (contents) {
                     if (typeof options.onChange === 'function') {
                         options.onChange(contents);

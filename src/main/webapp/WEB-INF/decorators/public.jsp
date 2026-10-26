@@ -1,7 +1,8 @@
-<%@ page pageEncoding="UTF-8" %>
+﻿<%@ page pageEncoding="UTF-8" %>
     <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
         <%@ page import="org.sitemesh.content.Content" %>
-            <% Content pageContent=(Content) request.getAttribute("org.sitemesh.content.Content"); %>
+<%-- Lấy nội dung trang hiện tại để hiển thị trong giao diện công khai.
+--%>            <% Content pageContent=(Content) request.getAttribute("org.sitemesh.content.Content"); %>
                 <c:set var="currentUri" value="${requestScope['jakarta.servlet.forward.request_uri']}" />
                 <c:if test="${empty currentUri}">
                     <c:set var="currentUri" value="${pageContext.request.requestURI}" />
@@ -35,46 +36,63 @@ main.public-main .btn { border-radius: 10px; font-weight: 650; transition: trans
 main.public-main .btn:not(:disabled):hover { transform: translateY(-1px); }
 main.public-main .btn-primary { background: linear-gradient(120deg, #287be0, #1857a5); border-color: #206bc4; box-shadow: 0 5px 14px rgba(32, 107, 196, .15); }
 main.public-main .btn-primary:hover { background: linear-gradient(120deg, #206bc4, #124b91); box-shadow: 0 8px 21px rgba(32, 107, 196, .23); }
-.hcmute-navbar { position: sticky; top: 0; z-index: 1030; min-height: 132px !important; padding: 0; background: rgba(255, 255, 255, .89); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 0; border-bottom: 1px solid rgba(219, 230, 244, .9); box-shadow: 0 5px 26px rgba(13, 43, 79, .045); transition: background .25s ease, box-shadow .25s ease; }
+.hcmute-navbar { position: sticky; top: 0; z-index: 1030; min-height: 74px !important; padding: 0; background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 0; border-bottom: 1px solid rgba(219, 230, 244, .9); box-shadow: 0 4px 20px rgba(13, 43, 79, .04); transition: background .25s ease, box-shadow .25s ease; }
 .hcmute-navbar::after { content: ""; position: absolute; bottom: -1px; left: 0; width: 100%; height: 1px; background: linear-gradient(90deg, transparent, rgba(32, 107, 196, .28), rgba(227, 66, 85, .13), transparent); pointer-events: none; }
-.hcmute-navbar>.container-xl { min-height: 132px !important; gap: 20px; }
-.hcmute-navbar .navbar-brand { display: flex; align-items: center; gap: .6rem; padding: .65rem 0; margin-right: 1.25rem; text-decoration: none; flex-shrink: 0; }
-.hcmute-navbar .brand-logo-wrap { position: relative; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border: 1px solid #e0eafa; border-radius: 14px; background: linear-gradient(145deg, #ffffff, #f0f6ff); box-shadow: 0 5px 14px rgba(22, 72, 131, .075); transition: transform .25s var(--public-ease), box-shadow .25s ease; }
-.hcmute-navbar .navbar-brand:hover .brand-logo-wrap { transform: translateY(-2px) rotate(-2deg); box-shadow: 0 9px 20px rgba(22, 72, 131, .13); }
+.hcmute-navbar>.container-xl { min-height: 74px !important; gap: 16px; display: flex; align-items: center; justify-content: space-between; }
+.hcmute-navbar .navbar-brand { display: flex; align-items: center; gap: .75rem; padding: .4rem 0; margin-right: 1.25rem; text-decoration: none; flex-shrink: 0; }
+.hcmute-navbar .brand-logo-wrap { position: relative; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border: 1px solid #e0eafa; border-radius: 13px; background: linear-gradient(145deg, #ffffff, #f0f6ff); box-shadow: 0 4px 12px rgba(22, 72, 131, .07); transition: transform .25s var(--public-ease), box-shadow .25s ease; }
+.hcmute-navbar .navbar-brand:hover .brand-logo-wrap { transform: translateY(-2px) rotate(-2deg); box-shadow: 0 8px 18px rgba(22, 72, 131, .12); }
 .hcmute-navbar .brand-logo-wrap img { width: 38px; height: 38px; display: block; object-fit: contain; }
 .hcmute-navbar .brand-logo-wrap>div { border-radius: 11px !important; background: linear-gradient(135deg, #0b3d82, #287be0) !important; box-shadow: 0 5px 13px rgba(32, 107, 196, .2); }
-.hcmute-navbar .brand-text { display: flex; flex-direction: column; gap: 5px; }
-.hcmute-navbar .brand-text .brand-name { font-size: 1.27rem; font-weight: 900; letter-spacing: -.055em; color: #0b3d82; line-height: 1; }
-.hcmute-navbar .brand-text .brand-sub { font-size: .65rem; font-weight: 600; color: #74849a; line-height: 1.2; white-space: nowrap; }
+.hcmute-navbar .brand-text { display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.hcmute-navbar .brand-text .brand-name { font-size: 1.24rem; font-weight: 900; letter-spacing: -.045em; color: #0b3d82; line-height: 1.1; margin: 0; }
+.hcmute-navbar .brand-text .brand-sub { font-size: .67rem; font-weight: 600; color: #70829a; line-height: 1.2; white-space: nowrap; margin: 0; }
 .hcmute-navbar .navbar-collapse { align-items: center; }
-.hcmute-navbar .navbar-nav { align-items: center; gap: 3px; }
+.hcmute-navbar .navbar-nav { align-items: center; gap: 5px; margin: 0; }
 .hcmute-navbar .nav-item { display: flex; align-items: center; }
-.hcmute-navbar .nav-link { position: relative; display: inline-flex; align-items: center; gap: 7px; color: #53647c; font-weight: 650; font-size: .83rem; padding: .75rem .8rem; border: 0; border-radius: 11px; white-space: nowrap; transition: color .22s ease, background .22s ease, transform .22s ease; }
-.hcmute-navbar .nav-link::after { content: ""; position: absolute; bottom: 4px; left: 14px; right: 14px; height: 2px; background: linear-gradient(90deg, #287be0, #64b4ff); border-radius: 3px; transform: scaleX(0); transform-origin: left; transition: transform .25s var(--public-ease); }
-.hcmute-navbar .nav-link:hover, .hcmute-navbar .nav-link.active { color: #1555a0; background: rgba(32, 107, 196, .06); border-bottom-color: transparent; }
-.hcmute-navbar .nav-link:hover { transform: translateY(-1px); }
-.hcmute-navbar .nav-link:hover::after, .hcmute-navbar .nav-link.active::after { transform: scaleX(1); }
-.hcmute-navbar .navbar-toggler { width: 43px; height: 43px; display: none; align-items: center; justify-content: center; padding: .45rem; border: 1px solid #e0e8f3 !important; border-radius: 12px; background: linear-gradient(145deg, #ffffff, #f3f7fd); box-shadow: 0 3px 9px rgba(17, 43, 78, .035); transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.hcmute-navbar .nav-link { position: relative; display: inline-flex; align-items: center; gap: 7px; color: #4e6079; font-weight: 650; font-size: .86rem; padding: .55rem .92rem; border: 1px solid transparent; border-radius: 11px; white-space: nowrap; transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease; }
+.hcmute-navbar .nav-link i { font-size: .92rem; color: #6e829d; transition: color .2s ease; }
+.hcmute-navbar .nav-link:hover { color: #1757a0; background: rgba(32, 107, 196, .05); border-color: rgba(32, 107, 196, .1); transform: translateY(-1px); }
+.hcmute-navbar .nav-link:hover i { color: #206bc4; }
+.hcmute-navbar .nav-link.active { color: #1555a0; font-weight: 750; background: rgba(32, 107, 196, .08); border-color: rgba(32, 107, 196, .18); box-shadow: 0 2px 6px rgba(32, 107, 196, .05); }
+.hcmute-navbar .nav-link.active i { color: #206bc4; }
+.hcmute-navbar .nav-link::after { display: none; }
+.hcmute-navbar .navbar-toggler { width: 42px; height: 42px; display: none; align-items: center; justify-content: center; padding: .45rem; border: 1px solid #e0e8f3 !important; border-radius: 12px; background: linear-gradient(145deg, #ffffff, #f3f7fd); box-shadow: 0 3px 9px rgba(17, 43, 78, .035); transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
 .hcmute-navbar .navbar-toggler:hover { border-color: #b8cfea !important; box-shadow: 0 5px 13px rgba(32, 107, 196, .1); }
 .hcmute-navbar .navbar-toggler:focus { box-shadow: 0 0 0 3px rgba(32, 107, 196, .12); }
-.hcmute-navbar .nav-search-input { min-width: 155px; flex: 1 1 auto; width: 1%; border-radius: 12px 0 0 12px; border: 1px solid #dce6f2; border-right: 0; background: rgba(255, 255, 255, .95); padding: .58rem .8rem; font-size: .8rem; box-shadow: none; transition: border-color .2s ease, background .2s ease, box-shadow .2s ease; }
-.hcmute-navbar .navbar-collapse > form[role="search"] { flex: 0 1 280px; min-width: 0; }
-.hcmute-navbar .navbar-collapse > form[role="search"] .input-group { width: 100%; min-width: 0; flex-wrap: nowrap; }
-.hcmute-navbar .navbar-collapse > form[role="search"] .input-group > .qa-suggest-wrapper { display: flex; flex: 1 1 0; align-items: stretch; width: 100%; min-width: 0; }
-.hcmute-navbar .navbar-collapse > form[role="search"] .qa-suggest-wrapper > .nav-search-input { flex: 1 1 0; width: 100%; min-width: 0; pointer-events: auto; }
-.hcmute-navbar .nav-search-input:focus { position: relative; z-index: 2; border-color: #80b0e7; background: #ffffff; box-shadow: 0 0 0 3px rgba(32, 107, 196, .08); }
-.hcmute-navbar .nav-search-input::placeholder { color: #8d9cb0; }
-.hcmute-navbar .nav-search-btn { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; min-width: 42px; border-radius: 0 12px 12px 0; background: linear-gradient(135deg, #287be0, #1857a5); color: #ffffff; border: 1px solid #206bc4; padding: .5rem .75rem; font-size: .85rem; box-shadow: 0 4px 10px rgba(32, 107, 196, .12); transition: background .2s ease, box-shadow .2s ease, transform .2s ease; }
-.hcmute-navbar .nav-search-btn:hover { background: linear-gradient(135deg, #206bc4, #124b91); box-shadow: 0 6px 15px rgba(32, 107, 196, .22); }
-.hcmute-navbar .btn-login-nav, .hcmute-navbar .btn-register-nav { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; white-space: nowrap; border-radius: 999px; padding: .48rem .9rem; font-size: .8rem; font-weight: 750; text-decoration: none; transition: color .22s ease, background .22s ease, border-color .22s ease, transform .22s ease, box-shadow .22s ease; }
-.hcmute-navbar .btn-login-nav { border: 1px solid #c8daef; color: #1757a0; background: rgba(255, 255, 255, .85); }
-.hcmute-navbar .btn-login-nav:hover { color: #ffffff; border-color: #206bc4; background: linear-gradient(135deg, #287be0, #1857a5); transform: translateY(-1px); box-shadow: 0 6px 15px rgba(32, 107, 196, .18); }
+.hcmute-navbar .btn-login-nav, .hcmute-navbar .btn-register-nav { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; white-space: nowrap; border-radius: 999px; padding: .5rem 1.25rem; font-size: .85rem; font-weight: 750; text-decoration: none; transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+.hcmute-navbar .btn-login-nav { border: 1.5px solid #bdd3ec; color: #1757a0; background: #ffffff; box-shadow: 0 3px 10px rgba(22, 72, 131, .06); }
+.hcmute-navbar .btn-login-nav:hover { color: #ffffff; border-color: #206bc4; background: linear-gradient(135deg, #287be0, #1557a5); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(32, 107, 196, .22); }
 .hcmute-navbar .btn-register-nav { color: #ffffff; border: 1px solid #206bc4; background: linear-gradient(135deg, #287be0, #1857a5); box-shadow: 0 5px 13px rgba(32, 107, 196, .15); }
 .hcmute-navbar .btn-register-nav:hover { color: #ffffff; background: linear-gradient(135deg, #206bc4, #124b91); transform: translateY(-1px); box-shadow: 0 8px 19px rgba(32, 107, 196, .24); }
-.hcmute-navbar .btn-outline-danger { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; font-weight: 650 !important; border-color: #f0cbd0; background: #fffafa; transition: color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease; }
+.hcmute-navbar .btn-outline-danger { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; font-weight: 650 !important; border-color: #f0cbd0; background: #fffafa; border-radius: 999px; padding: .45rem .95rem; font-size: .82rem; transition: color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease; }
 .hcmute-navbar .btn-outline-danger:hover { box-shadow: 0 5px 13px rgba(220, 53, 69, .12); }
 .hcmute-navbar .d-flex.align-items-center.gap-2 { flex-shrink: 0; }
 .hcmute-navbar .navbar-collapse .d-flex.me-3 { margin-right: .9rem !important; }
+.hcmute-navbar { isolation: isolate; background: rgba(248, 251, 255, .94); box-shadow: 0 8px 28px rgba(13, 43, 79, .075); }
+.hcmute-navbar::before { content: ""; position: absolute; z-index: -1; inset: 0; background: radial-gradient(ellipse at 7% 0%, rgba(66, 153, 241, .13), transparent 34%), radial-gradient(ellipse at 92% 100%, rgba(227, 66, 85, .075), transparent 28%), linear-gradient(110deg, rgba(255,255,255,.97), rgba(241,247,255,.94) 52%, rgba(255,255,255,.97)); pointer-events: none; }
+.hcmute-navbar>.container-xl { position: relative; }
+.hcmute-navbar .brand-logo-wrap { isolation: isolate; border-color: #d8e6f7; background: linear-gradient(145deg, #fff, #eaf3ff); box-shadow: 0 7px 18px rgba(32, 107, 196, .13), inset 0 1px 0 #fff; }
+.hcmute-navbar .brand-logo-wrap::after { content: ""; position: absolute; z-index: -1; inset: -5px; border: 1px solid rgba(46, 125, 210, .13); border-radius: 16px; transition: inset .25s ease, border-color .25s ease; }
+.hcmute-navbar .navbar-brand:hover .brand-logo-wrap::after { inset: -8px; border-color: rgba(46, 125, 210, .25); }
+.hcmute-navbar .brand-text .brand-name { background: linear-gradient(100deg, #123f78, #287be0 68%, #4589d1); background-clip: text; -webkit-text-fill-color: transparent; }
+.hcmute-navbar .brand-text .brand-sub { color: #687f9d; }
+.hcmute-navbar .navbar-nav { padding: .28rem; border: 1px solid rgba(217, 230, 246, .76); border-radius: 15px; background: rgba(255,255,255,.62); box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 4px 13px rgba(20, 61, 107, .035); }
+.hcmute-navbar .nav-link { color: #405875; }
+.hcmute-navbar .nav-link::after { position: absolute; right: .9rem; bottom: .23rem; left: .9rem; display: block; height: 2px; border-radius: 9px; background: linear-gradient(90deg, #287be0, #74c9d4); content: ""; transform: scaleX(0); transform-origin: left; transition: transform .24s ease; }
+.hcmute-navbar .nav-link:hover::after, .hcmute-navbar .nav-link.active::after { transform: scaleX(1); }
+.hcmute-navbar .nav-item:nth-child(1) .nav-link i { color: #3478c5; }
+.hcmute-navbar .nav-item:nth-child(2) .nav-link i { color: #d07a48; }
+.hcmute-navbar .nav-item:nth-child(3) .nav-link i { color: #218d7c; }
+.hcmute-navbar .nav-item:nth-child(4) .nav-link i { color: #7958c7; }
+.hcmute-navbar .nav-item:nth-child(5) .nav-link i { color: #c18a2f; }
+.hcmute-navbar .nav-link:hover, .hcmute-navbar .nav-link.active { background: linear-gradient(135deg, rgba(227, 240, 255, .9), rgba(245, 249, 255, .94)); }
+.hcmute-navbar .nav-link.active { border-color: rgba(94, 151, 214, .18); color: #154c91; box-shadow: 0 4px 11px rgba(32, 107, 196, .08); }
+.hcmute-navbar .btn-login-nav { border-color: #a9c8ed; background: linear-gradient(145deg, #fff, #f1f7ff); box-shadow: 0 5px 13px rgba(32, 107, 196, .09), inset 0 1px 0 #fff; }
+.hcmute-navbar .btn-register-nav { position: relative; overflow: hidden; background: linear-gradient(115deg, #347fe0, #1b5eae 62%, #174d91); box-shadow: 0 7px 18px rgba(32, 107, 196, .23), inset 0 1px 0 rgba(255,255,255,.24); }
+.hcmute-navbar .btn-register-nav::before { position: absolute; top: -50%; left: -65%; width: 42%; height: 200%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent); content: ""; transform: rotate(22deg); transition: left .45s ease; }
+.hcmute-navbar .btn-register-nav:hover::before { left: 130%; }
+.hcmute-navbar .navbar-toggler { border-color: #d5e4f5 !important; background: linear-gradient(145deg, #fff, #edf5ff); color: #205b9c; box-shadow: 0 5px 13px rgba(32, 107, 196, .08); }
 .hcmute-footer { position: relative; flex-shrink: 0; isolation: isolate; overflow: hidden; background: radial-gradient(ellipse at 90% 0%, rgba(53, 119, 198, .2), transparent 36%), radial-gradient(ellipse at 0% 100%, rgba(227, 66, 85, .095), transparent 34%), linear-gradient(150deg, #10294a 0%, #091d37 54%, #07162b 100%); color: #b8c7da; padding: 3.8rem 0 0; margin-top: auto; }
 .hcmute-footer::before { content: ""; position: absolute; z-index: -1; top: -220px; right: -140px; width: 460px; height: 460px; border: 1px solid rgba(255, 255, 255, .1); border-radius: 50%; box-shadow: 0 0 0 30px rgba(255, 255, 255, .018), 0 0 0 70px rgba(255, 255, 255, .012); pointer-events: none; }
 .hcmute-footer::after { content: ""; position: absolute; z-index: -1; inset: 0; opacity: .2; background-image: radial-gradient(circle, rgba(180, 210, 246, .28) .7px, transparent 1px); background-size: 23px 23px; -webkit-mask-image: linear-gradient(110deg, black, transparent 80%); mask-image: linear-gradient(110deg, black, transparent 80%); pointer-events: none; }
@@ -111,35 +129,35 @@ main.public-main .btn-primary:hover { background: linear-gradient(120deg, #206bc
   .hcmute-navbar .btn-login-nav, .hcmute-navbar .btn-register-nav { padding: .45rem .72rem; font-size: .77rem; }
 }
 @media (max-width: 991.98px) {
-  html { scroll-padding-top: 78px; }
-  .hcmute-navbar { height: auto; min-height: 104px !important; flex-shrink: 0; background: #ffffff; }
-  .hcmute-navbar>.container-xl { min-height: 104px !important; padding-left: 22px; padding-right: 22px; }
+  html { scroll-padding-top: 70px; }
+  .hcmute-navbar { height: auto; min-height: 70px !important; flex-shrink: 0; background: rgba(248, 251, 255, .97); }
+  .hcmute-navbar>.container-xl { min-height: 70px !important; padding-left: 18px; padding-right: 18px; }
   .hcmute-navbar .navbar-brand { margin-right: auto; }
   .hcmute-navbar .navbar-toggler { display: inline-flex; }
-  .hcmute-navbar .navbar-collapse { padding: 12px 0 18px; border-top: 1px solid #e9eff7; margin-top: 0; background: #ffffff; }
-  .hcmute-navbar .navbar-nav { align-items: stretch; gap: 3px; margin-bottom: 12px !important; }
+  .hcmute-navbar .navbar-collapse { padding: 12px 0 18px; border-top: 1px solid #dce8f5; margin-top: 0; background: transparent; }
+  .hcmute-navbar .navbar-nav { align-items: stretch; padding: .45rem; border-radius: 14px; background: rgba(255,255,255,.78); }
+  .hcmute-navbar .navbar-nav { align-items: stretch; gap: 4px; margin-bottom: 12px !important; }
   .hcmute-navbar .nav-item { display: block; }
-  .hcmute-navbar .nav-link { display: flex; min-height: 42px; padding: .7rem .9rem; border-radius: 10px; font-size: .88rem; }
-  .hcmute-navbar .nav-link::after { display: none; }
-  .hcmute-navbar .nav-link.active { background: linear-gradient(100deg, rgba(32, 107, 196, .1), rgba(66, 153, 241, .045)); box-shadow: inset 3px 0 0 #287be0; }
+  .hcmute-navbar .nav-link { display: flex; min-height: 42px; padding: .65rem .9rem; border-radius: 10px; font-size: .88rem; }
+  .hcmute-navbar .nav-link.active { background: linear-gradient(100deg, rgba(32, 107, 196, .1), rgba(66, 153, 241, .045)); border-color: rgba(32, 107, 196, .2); }
   .hcmute-navbar .navbar-collapse .d-flex.me-3 { margin: 0 0 13px !important; }
   .hcmute-navbar .navbar-collapse > form[role="search"] { flex-basis: auto; width: 100%; }
   .hcmute-navbar .nav-search-input { min-width: 0; }
   .hcmute-navbar .navbar-collapse>.d-flex.align-items-center.gap-2 { display: flex; flex-wrap: wrap; gap: 8px !important; padding-top: 5px; }
-  .hcmute-navbar .btn-login-nav, .hcmute-navbar .btn-register-nav { min-height: 39px; padding-left: 1rem; padding-right: 1rem; }
+  .hcmute-navbar .btn-login-nav, .hcmute-navbar .btn-register-nav { min-height: 40px; padding-left: 1.25rem; padding-right: 1.25rem; }
   .hcmute-footer { padding-top: 3.2rem; }
 }
 @media (max-width: 575.98px) {
-  html { scroll-padding-top: 68px; }
+  html { scroll-padding-top: 62px; }
   body.public-layout, body.full-width-page { background-attachment: scroll; }
   body.public-layout { background-image: radial-gradient(circle at 1px 1px, rgba(32, 107, 196, .06) 1px, transparent 1.5px), radial-gradient(ellipse at 0% 0%, rgba(66, 153, 241, .075), transparent 36%), linear-gradient(145deg, #f7faff, #ffffff 52%, #f4f8ff); background-size: 28px 28px, auto, auto; }
-  .hcmute-navbar { min-height: 92px !important; }
-  .hcmute-navbar>.container-xl { min-height: 92px !important; padding-left: 15px; padding-right: 15px; }
-  .hcmute-navbar .brand-logo-wrap { width: 41px; height: 41px; border-radius: 12px; }
-  .hcmute-navbar .brand-logo-wrap img { width: 34px; height: 34px; }
+  .hcmute-navbar { min-height: 64px !important; }
+  .hcmute-navbar>.container-xl { min-height: 64px !important; padding-left: 15px; padding-right: 15px; }
+  .hcmute-navbar .brand-logo-wrap { width: 42px; height: 42px; border-radius: 12px; }
+  .hcmute-navbar .brand-logo-wrap img { width: 32px; height: 32px; }
   .hcmute-navbar .brand-text .brand-name { font-size: 1.15rem; }
   .hcmute-navbar .brand-text .brand-sub { font-size: .61rem; }
-  .hcmute-navbar .navbar-toggler { width: 40px; height: 40px; }
+  .hcmute-navbar .navbar-toggler { width: 38px; height: 38px; }
   .hcmute-navbar .navbar-collapse { padding-top: 10px; padding-bottom: 15px; }
   .hcmute-navbar .navbar-collapse>.d-flex.align-items-center.gap-2 { align-items: stretch !important; }
   .hcmute-navbar .btn-login-nav, .hcmute-navbar .btn-register-nav { min-height: 40px; }
@@ -153,17 +171,27 @@ main.public-main .btn-primary:hover { background: linear-gradient(120deg, #206bc
   body.public-layout::before, body.public-layout::after, .hcmute-footer::before, .hcmute-footer::after { display: none !important; }
   .hcmute-navbar { position: static; }
 }
+@media (prefers-reduced-motion: reduce) {
+  .hcmute-navbar *, .hcmute-navbar *::before, .hcmute-navbar *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
 </style>
 
                         <title>
-                            <%= pageContent.getExtractedProperties().getChild("title").getValue() %> - QAUTE HCMUTE
+                            <% String pageTitle = pageContent.getExtractedProperties().getChild("title").getValue(); %>
+                            <%= (pageTitle != null && !"null".equals(pageTitle) && !pageTitle.isBlank()) ? pageTitle + " - QAUTE HCMUTE" : "QAUTE - Tư vấn Sinh viên HCMUTE" %>
                         </title>
-                        <%= pageContent.getExtractedProperties().getChild("head").getValue() %>
+                        <%
+                            String headContent = pageContent.getExtractedProperties().getChild("head").getValue();
+                            if (headContent != null && !"null".equals(headContent)) {
+                                out.print(headContent);
+                            }
+                        %>
 
                 </head>
 
                 <body class="public-layout ${requestScope['qaute.fullWidthPage'] == true ? 'full-width-page' : ''}">
 
+                    <%-- Thanh điều hướng công khai gồm liên kết nội dung, tìm kiếm và tài khoản. --%>
                     <nav class="navbar navbar-expand-lg hcmute-navbar">
                         <div class="container-xl">
                             <a class="navbar-brand" href="/">
@@ -188,7 +216,8 @@ main.public-main .btn-primary:hover { background: linear-gradient(120deg, #206bc
                             </button>
 
                             <div class="collapse navbar-collapse" id="public-navbar">
-                                <ul class="navbar-nav me-auto mb-0">
+                                <%-- Các liên kết đến trang chủ, thông báo, hỏi đáp, chủ đề và hướng dẫn căn giữa đều đặn --%>
+                                <ul class="navbar-nav mx-auto mb-0">
                                     <li class="nav-item">
                                         <a class="nav-link ${currentUri == '/' or currentUri == '' ? 'active' : ''}"
                                             href="/">
@@ -221,6 +250,9 @@ main.public-main .btn-primary:hover { background: linear-gradient(120deg, #206bc
                                     </li>
                                 </ul>
 
+                                <%-- Tìm kiếm nội dung công khai theo từ khóa người dùng nhập. --%>
+                                <%-- Form tìm kiếm đã bị ẩn cho trang guest --%>
+                                <%--
                                 <form class="d-flex me-3" method="get" action="/search" role="search">
                                     <div class="input-group">
                                         <input class="nav-search-input form-control" type="search" name="q"
@@ -231,7 +263,9 @@ main.public-main .btn-primary:hover { background: linear-gradient(120deg, #206bc
                                         </button>
                                     </div>
                                 </form>
+                                --%>
 
+                                <%-- Hiển thị đăng nhập cho khách hoặc lối vào hệ thống và đăng xuất cho người dùng. --%>
                                 <div class="d-flex align-items-center gap-2">
                                     <sec:authorize access="isAnonymous()">
                                         <a href="/auth/login" class="btn-login-nav">
@@ -268,22 +302,24 @@ main.public-main .btn-primary:hover { background: linear-gradient(120deg, #206bc
                         </div>
                     </nav>
 
+                    <%-- Khu vực nội dung công khai; trang chủ dùng bố cục riêng, trang khác có thông báo. --%>
                     <main class="public-main">
                         <c:set var="isHome"
                             value="${currentUri == '/' or currentUri == '' or fn:endsWith(currentUri, '/home')}" />
                         <c:choose>
                             <c:when test="${isHome}">
-                                <%= pageContent.getExtractedProperties().getChild("body").getValue() %>
+                                <% String bodyVal = pageContent.getExtractedProperties().getChild("body").getValue(); if (bodyVal != null && !"null".equals(bodyVal)) out.print(bodyVal); %>
                             </c:when>
                             <c:otherwise>
                                 <div class="container-xl py-4">
                                     <qa:alert />
-                                    <%= pageContent.getExtractedProperties().getChild("body").getValue() %>
+                                    <% String bodyVal2 = pageContent.getExtractedProperties().getChild("body").getValue(); if (bodyVal2 != null && !"null".equals(bodyVal2)) out.print(bodyVal2); %>
                                 </div>
                             </c:otherwise>
                         </c:choose>
                     </main>
 
+                    <%-- Chân trang giới thiệu QAUTE, liên kết dịch vụ, thông tin liên hệ và bản quyền. --%>
                     <footer class="hcmute-footer">
                         <div class="container-xl">
                             <div class="row g-4 pb-4">
@@ -308,6 +344,7 @@ main.public-main .btn-primary:hover { background: linear-gradient(120deg, #206bc
                                     </div>
                                 </div>
 
+                                <%-- Liên kết dịch vụ dành cho sinh viên. --%>
                                 <div class="col-6 col-lg-2">
                                     <h6>Dịch vụ</h6>
                                     <ul class="list-unstyled d-flex flex-column gap-2">
@@ -317,6 +354,7 @@ main.public-main .btn-primary:hover { background: linear-gradient(120deg, #206bc
                                     </ul>
                                 </div>
 
+                                <%-- Liên kết giới thiệu, hướng dẫn và chính sách. --%>
                                 <div class="col-6 col-lg-2">
                                     <h6>Về chúng tôi</h6>
                                     <ul class="list-unstyled d-flex flex-column gap-2">
@@ -326,6 +364,7 @@ main.public-main .btn-primary:hover { background: linear-gradient(120deg, #206bc
                                     </ul>
                                 </div>
 
+                                <%-- Địa chỉ, điện thoại, email và giờ làm việc của trường. --%>
                                 <div class="col-lg-4">
                                     <h6>Liên hệ</h6>
                                     <div class="contact-item"><i class="bi bi-geo-alt-fill"
@@ -351,6 +390,7 @@ main.public-main .btn-primary:hover { background: linear-gradient(120deg, #206bc
                         </div>
                     </footer>
 
+                    <%-- Nạp script toàn cục và tiện ích chat trên các trang công khai. --%>
                     <%@ include file="/WEB-INF/views/common/scripts.jspf" %>
                         <%@ include file="/WEB-INF/views/common/chatbot-widget.jspf" %>
                 </body>

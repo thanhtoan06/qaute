@@ -22,9 +22,11 @@
     let currentSubscription = null;
 
     // Helper DOM accessor
+    // Lấy phần tử giao diện theo mã định danh.
     const el = id => document.getElementById(id);
 
     // --- State Switching ---
+    // Hiển thị giao diện tương ứng với trạng thái phiên chat.
     function setState(viewState) {
         const states = ['chatStateLoading', 'chatStateStart', 'chatStateBot', 'chatStateQueue', 'chatStateRoom'];
         states.forEach(s => {
@@ -74,6 +76,7 @@
     }
 
     // --- State B: Bot Suggestions ---
+    // Hiển thị các câu hỏi thường gặp do trợ lý gợi ý.
     function renderBotView() {
         if (!state.currentSession) return;
         el('botQuestionText').textContent = state.currentSession.question || '';
@@ -92,6 +95,7 @@
         } else {
             list.style.display = 'block';
             noSugg.style.display = 'none';
+            // Tạo liên kết cho tối đa ba FAQ được gợi ý.
             suggestions.slice(0, 3).forEach(item => {
                 const a = document.createElement('a');
                 const slugOrId = encodeURIComponent(item.slug || item.id);
@@ -131,12 +135,20 @@
     }
 
     // --- State C: Queue View ---
+    // Hiển thị trạng thái chờ hoặc thông tin phiên không khả dụng.
     function renderQueueView() {
         if (!state.currentSession) return;
 
         const isUnavailable = (state.currentSession.workingNow === false) || (state.currentSession.status === 'EXPIRED');
 
         if (isUnavailable) {
+            const badge = el('chatHeaderBadge');
+            if (badge) {
+                badge.textContent = state.currentSession.workingNow === false
+                    ? 'Ngoài giờ trực'
+                    : 'Không có tư vấn viên';
+                badge.className = 'badge bg-warning text-white';
+            }
             el('queueWaitingView').style.display = 'none';
             el('queueUnavailableView').style.display = 'block';
 
@@ -149,6 +161,11 @@
             const ticketUrl = '/student/tickets/new?categoryId=' + encodeURIComponent(catId) + '&q=' + encodeURIComponent(q);
             el('btnConvertToTicket').href = ticketUrl;
         } else {
+            const badge = el('chatHeaderBadge');
+            if (badge) {
+                badge.textContent = 'Đang chờ';
+                badge.className = 'badge bg-warning text-white';
+            }
             el('queueUnavailableView').style.display = 'none';
             el('queueWaitingView').style.display = 'block';
 
@@ -158,6 +175,7 @@
     }
 
     // --- State D: Room View ---
+    // Chuẩn bị giao diện phòng chat và đồng bộ tin nhắn.
     function renderRoomView() {
         if (!state.currentSession) return;
         el('roomAdvisorName').textContent = state.currentSession.managerName || 'Tư vấn viên';
@@ -174,11 +192,13 @@
         syncMessages(0);
     }
 
+    // Vẽ danh sách tin nhắn hiện tại trong phòng chat.
     function renderMessages() {
         const container = el('chatMessagesList');
         if (!container) return;
         container.replaceChildren();
 
+        // Vẽ nội dung, tệp đính kèm và trạng thái của từng tin nhắn.
         state.messages.forEach(msg => {
             const row = document.createElement('div');
             const isMe = msg.senderType === 'STUDENT';
@@ -198,21 +218,78 @@
 
             // Message content / Attachment
             if (msg.assetId) {
-                const attachLink = document.createElement('a');
-                attachLink.href = '/api/media/' + encodeURIComponent(msg.assetId) + '/download';
-                attachLink.className = 'qa-chat-attachment';
-                attachLink.target = '_blank';
-                attachLink.rel = 'noopener noreferrer';
+                // Kiểm tra nếu là ảnh hiển thị thumbnail, nếu không thì hiển thị link download
+                const content = msg.content || 'Tệp đính kèm';
+                const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(content);
 
-                const attachIcon = document.createElement('i');
-                attachIcon.className = 'bi bi-paperclip fs-4';
-                const attachName = document.createElement('span');
-                attachName.className = 'text-truncate';
-                attachName.textContent = msg.content || 'Tệp đính kèm';
+                if (isImage) {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = 'qa-chat-image-container';
 
-                attachLink.appendChild(attachIcon);
-                attachLink.appendChild(attachName);
-                bubble.appendChild(attachLink);
+                    const img = document.createElement('img');
+                    const imageUrl = '/api/media/' + encodeURIComponent(msg.assetId) + '/download';
+                    img.src = imageUrl;
+                    img.alt = content;
+                    img.className = 'qa-chat-image';
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '300px';
+                    img.style.borderRadius = '8px';
+                    img.style.cursor = 'pointer';
+                    img.dataset.retryCount = '0';
+                    img.addEventListener('error', () => {
+                        const retries = Number(img.dataset.retryCount);
+                        if (retries >= 5) return;
+                        img.dataset.retryCount = String(retries + 1);
+                        window.setTimeout(() => {
+                            img.src = imageUrl + '?chatRetry=' + (retries + 1);
+                        }, 500 * (retries + 1));
+                    });
+
+                    const imgLink = document.createElement('a');
+                    imgLink.href = '/api/media/' + encodeURIComponent(msg.assetId) + '/download';
+                    imgLink.target = '_blank';
+                    imgLink.rel = 'noopener noreferrer';
+                    imgLink.appendChild(img);
+
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = '/api/media/' + encodeURIComponent(msg.assetId) + '/download';
+                    downloadLink.target = '_blank';
+                    downloadLink.rel = 'noopener noreferrer';
+                    downloadLink.className = 'qa-chat-attachment mt-2';
+                    downloadLink.style.display = 'inline-flex';
+                    downloadLink.style.alignItems = 'center';
+                    downloadLink.style.gap = '0.5rem';
+                    downloadLink.style.fontSize = '0.85rem';
+
+                    const downloadIcon = document.createElement('i');
+                    downloadIcon.className = 'bi bi-download fs-5';
+                    const downloadName = document.createElement('span');
+                    downloadName.className = 'text-truncate';
+                    downloadName.textContent = content;
+
+                    downloadLink.appendChild(downloadIcon);
+                    downloadLink.appendChild(downloadName);
+
+                    imgContainer.appendChild(imgLink);
+                    imgContainer.appendChild(downloadLink);
+                    bubble.appendChild(imgContainer);
+                } else {
+                    const attachLink = document.createElement('a');
+                    attachLink.href = '/api/media/' + encodeURIComponent(msg.assetId) + '/download';
+                    attachLink.className = 'qa-chat-attachment';
+                    attachLink.target = '_blank';
+                    attachLink.rel = 'noopener noreferrer';
+
+                    const attachIcon = document.createElement('i');
+                    attachIcon.className = 'bi bi-paperclip fs-4';
+                    const attachName = document.createElement('span');
+                    attachName.className = 'text-truncate';
+                    attachName.textContent = content;
+
+                    attachLink.appendChild(attachIcon);
+                    attachLink.appendChild(attachName);
+                    bubble.appendChild(attachLink);
+                }
             } else {
                 const textDiv = document.createElement('div');
                 textDiv.className = 'text-break';
@@ -234,11 +311,11 @@
                     statusSpan.className = 'qa-chat-status';
 
                     if (!msg.id) {
-                        statusSpan.innerHTML = '<i class="bi bi-clock small" title="Đang gửi..."></i>';
+                        statusSpan.innerHTML = '<i class="bi bi-clock me-1"></i>Đang gửi…';
                     } else if (msg.readAt) {
-                        statusSpan.innerHTML = '<i class="bi bi-check2-all text-white fw-bold" title="Đã xem"></i>';
+                        statusSpan.innerHTML = '<i class="bi bi-check2-all me-1"></i>Đã xem';
                     } else {
-                        statusSpan.innerHTML = '<i class="bi bi-check2" title="Đã gửi"></i>';
+                        statusSpan.innerHTML = '<i class="bi bi-check2 me-1"></i>Đã gửi';
                     }
                     meta.appendChild(statusSpan);
                 }
@@ -253,6 +330,7 @@
         scrollToBottom();
     }
 
+    // Thêm tin nhắn mới hoặc cập nhật tin nhắn đã có.
     function addOrUpdateMessage(msg) {
         if (!msg) return;
         const idx = state.messages.findIndex(m =>
@@ -275,6 +353,7 @@
         markRead();
     }
 
+    // Cuộn danh sách tin nhắn xuống cuối khi phù hợp.
     function scrollToBottom(force) {
         const c = el('chatMessagesContainer');
         if (!c) return;
@@ -284,10 +363,20 @@
         }
     }
 
+    // Định dạng thời điểm tin nhắn theo giờ địa phương.
     function formatTime(isoString) {
         if (!isoString) return '';
         try {
             const date = new Date(isoString);
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+
+            // Nếu tin nhắn là ngày khác với ngày hiện tại, hiển thị ngày
+            if (date.toDateString() !== now.toDateString()) {
+                return pad(date.getDate()) + '/' + pad(date.getMonth() + 1) + '/' + date.getFullYear() + ' ' +
+                       date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
+            }
+            // Cùng ngày, chỉ hiển thị giờ
             return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
         } catch (_) {
             return '';
@@ -295,12 +384,13 @@
     }
 
     // --- Message Sending & Rate Limit ---
-    async function sendMessage() {
+    // Kiểm tra giới hạn gửi và gửi tin nhắn cùng tệp đính kèm.
+    async function sendMessage(attachmentOnly = false) {
         if (!state.currentSession || !state.currentSession.sessionId) return;
         if (state.currentSession.status === 'ENDED') return;
 
         const input = el('roomMessageInput');
-        const content = input ? input.value.trim() : '';
+        const content = attachmentOnly ? '' : (input ? input.value.trim() : '');
 
         if (!content && !state.pendingFile) return;
 
@@ -319,9 +409,17 @@
 
         const clientMessageId = crypto.randomUUID();
         let assetId = null;
+        let attachmentName = '';
 
         // Upload attachment if any
         if (state.pendingFile) {
+            const uploadStatus = el('chatAttachStatus');
+            if (uploadStatus) {
+                uploadStatus.textContent = state.pendingFile.type.startsWith('image/')
+                    ? 'Ảnh đang được đính kèm…'
+                    : 'Tệp đang được đính kèm…';
+                uploadStatus.style.display = 'inline';
+            }
             try {
                 const formData = new FormData();
                 formData.append('file', state.pendingFile);
@@ -339,17 +437,19 @@
                     throw new Error(body.message || 'Không thể tải tệp lên.');
                 }
                 assetId = body.data.id;
+                attachmentName = body.data.originalName || state.pendingFile.name;
             } catch (err) {
                 Qaute.toast(err.message || 'Lỗi tải tệp đính kèm.', 'danger');
                 return;
             } finally {
                 removeAttachment();
+                if (uploadStatus) uploadStatus.style.display = 'none';
             }
         }
 
         state.sendTimestamps.push(now);
 
-        const textToSend = content || (assetId ? 'Tệp đính kèm' : '');
+        const textToSend = content || attachmentName;
 
         // Optimistic UI display
         const tempMsg = {
@@ -367,7 +467,7 @@
         addOrUpdateMessage(tempMsg);
         scrollToBottom(true);
 
-        if (input) {
+        if (input && !attachmentOnly) {
             input.value = '';
             input.style.height = 'auto';
             el('chatInputCharCount').textContent = '0 / 1000';
@@ -394,6 +494,7 @@
     }
 
     // --- Typing Handler ---
+    // Phát trạng thái đang nhập khi người dùng gõ tin nhắn.
     function handleTypingInput() {
         if (!state.currentSession || state.currentSession.status === 'ENDED') return;
 
@@ -409,6 +510,7 @@
         }, 1500);
     }
 
+    // Gửi trạng thái đang nhập qua kết nối chat.
     function sendTyping(isTyping) {
         if (!stompClient || !stompClient.connected || !state.currentSession) return;
         stompClient.publish({
@@ -421,6 +523,7 @@
     }
 
     // --- Read Receipt Handler ---
+    // Đánh dấu tin nhắn mới nhất đã đọc khi cửa sổ đang hoạt động.
     function markRead() {
         if (!state.currentSession || !stompClient || !stompClient.connected) return;
         if (document.hidden || !document.hasFocus()) return;
@@ -442,6 +545,7 @@
     }
 
     // --- Attachment Handler ---
+    // Kiểm tra và ghi nhận tệp đính kèm được chọn.
     function handleFileSelected(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -458,8 +562,10 @@
             ? (file.size / (1024 * 1024)).toFixed(1) + ' MB'
             : Math.round(file.size / 1024) + ' KB';
         el('chatAttachPreview').style.display = 'flex';
+        sendMessage(true);
     }
 
+    // Xóa tệp đính kèm đang chờ gửi.
     function removeAttachment() {
         state.pendingFile = null;
         el('chatFileInput').value = '';
@@ -467,6 +573,7 @@
     }
 
     // --- STOMP Connection & Subscriptions ---
+    // Tạo và kích hoạt kết nối STOMP.
     function initStomp() {
         if (!window.StompJs || !window.SockJS) {
             console.warn('Thư viện StompJs/SockJS chưa sẵn sàng.');
@@ -479,6 +586,10 @@
                 'X-XSRF-TOKEN': Qaute.csrfToken()
             },
             reconnectDelay: 3000,
+            beforeConnect: async () => {
+                await Qaute.refreshSessionIfNeeded();
+            },
+            // Đăng ký phiên và đồng bộ tin nhắn sau khi kết nối.
             onConnect: () => {
                 if (state.currentSession && state.currentSession.sessionId) {
                     subscribeSession(state.currentSession.sessionId);
@@ -487,6 +598,7 @@
                     }
                 }
             },
+            // Ghi nhận lỗi do máy chủ STOMP gửi về.
             onStompError: frame => {
                 console.error('STOMP Error:', frame);
             }
@@ -495,6 +607,7 @@
         stompClient.activate();
     }
 
+    // Đăng ký nhận sự kiện của phiên chat.
     function subscribeSession(sessionId) {
         if (!stompClient || !stompClient.connected || !sessionId) return;
         if (currentSubscription) {
@@ -504,6 +617,7 @@
             currentSubscription = null;
         }
 
+        // Phân tích và xử lý từng sự kiện nhận từ máy chủ.
         currentSubscription = stompClient.subscribe('/topic/chat/' + sessionId, frame => {
             try {
                 const event = JSON.parse(frame.body);
@@ -514,6 +628,7 @@
         });
     }
 
+    // Hủy đăng ký sự kiện của phiên chat hiện tại.
     function unsubscribeSession() {
         if (currentSubscription) {
             try {
@@ -523,6 +638,7 @@
         }
     }
 
+    // Cập nhật trạng thái giao diện theo sự kiện STOMP.
     function handleStompEvent(event) {
         if (!event || !event.type) return;
 
@@ -535,6 +651,7 @@
 
             case 'MESSAGE_READ':
                 if (event.messageId) {
+                    // Đánh dấu các tin nhắn đã được người dùng đọc.
                     state.messages.forEach(m => {
                         if (m.senderType === 'STUDENT' && m.id && m.id <= event.messageId) {
                             if (!m.readAt) m.readAt = event.at || new Date().toISOString();
@@ -545,17 +662,20 @@
                 break;
 
             case 'TYPING':
-                const indicator = el('roomTypingIndicator');
-                if (indicator) {
-                    if (event.isTyping) {
-                        el('roomTypingText').textContent = (state.currentSession?.managerName || 'Tư vấn viên') + ' đang nhập...';
-                        indicator.style.display = 'block';
-                        clearTimeout(indicator._timer);
-                        indicator._timer = setTimeout(() => {
+                // Chỉ hiển thị khi đối phương (tư vấn viên/trợ lý) đang nhập, bỏ qua sự kiện do chính mình phát.
+                if (event.senderType && event.senderType !== 'STUDENT') {
+                    const indicator = el('roomTypingIndicator');
+                    if (indicator) {
+                        if (event.isTyping) {
+                            el('roomTypingText').textContent = (state.currentSession?.managerName || 'Tư vấn viên') + ' đang nhập...';
+                            indicator.style.display = 'block';
+                            clearTimeout(indicator._timer);
+                            indicator._timer = setTimeout(() => {
+                                indicator.style.display = 'none';
+                            }, 4000);
+                        } else {
                             indicator.style.display = 'none';
-                        }, 4000);
-                    } else {
-                        indicator.style.display = 'none';
+                        }
                     }
                 }
                 break;
@@ -604,6 +724,7 @@
         }
     }
 
+    // Chuyển giao diện sang trạng thái phiên chat đã kết thúc.
     function onSessionEnded() {
         if (state.currentSession) {
             state.currentSession.status = 'ENDED';
@@ -623,6 +744,7 @@
     }
 
     // --- REST Synchronization ---
+    // Tải các tin nhắn mới hơn mã tin nhắn đã nhận.
     async function syncMessages(afterId) {
         if (!state.currentSession || !state.currentSession.sessionId) return;
         try {
@@ -636,6 +758,7 @@
     }
 
     // --- Session Lifecycle (Start, Request Agent, Cancel, End) ---
+    // Kiểm tra phiên tư vấn đang hoạt động của người dùng.
     async function checkCurrentSession() {
         setState('LOADING');
         try {
@@ -669,6 +792,7 @@
         }
     }
 
+    // Kiểm tra thông tin và tạo phiên tư vấn mới.
     async function startSession(e) {
         if (e) e.preventDefault();
         const categoryId = el('chatCategoryId').value;
@@ -723,6 +847,7 @@
         }
     }
 
+    // Yêu cầu kết nối với tư vấn viên cho phiên hiện tại.
     async function requestAgent() {
         if (!state.currentSession || !state.currentSession.sessionId) return;
 
@@ -752,6 +877,7 @@
         }
     }
 
+    // Hủy phiên tư vấn và trở về trạng thái ban đầu.
     async function cancelSession() {
         if (!state.currentSession || !state.currentSession.sessionId) return;
 
@@ -767,6 +893,7 @@
         }
     }
 
+    // Gửi yêu cầu kết thúc cuộc trò chuyện.
     function endSession() {
         if (!state.currentSession || !state.currentSession.sessionId) return;
         if (!stompClient || !stompClient.connected) {
@@ -780,6 +907,7 @@
         });
     }
 
+    // Xóa dữ liệu phiên và đưa giao diện về trạng thái bắt đầu.
     function resetSession() {
         unsubscribeSession();
         state.currentSession = null;
@@ -796,6 +924,7 @@
     }
 
     // --- Rating & Ticket Convert ---
+    // Gắn thao tác chọn sao cho biểu mẫu đánh giá.
     function setupRatingStars() {
         const starContainer = el('ratingStars');
         if (!starContainer) return;
@@ -804,6 +933,7 @@
         const ratingLabels = ['', 'Rất không hài lòng', 'Không hài lòng', 'Bình thường', 'Hài lòng', 'Rất hài lòng'];
 
         stars.forEach(star => {
+            // Lưu lựa chọn sao và bật nút gửi đánh giá.
             star.addEventListener('click', () => {
                 state.selectedRating = Number(star.getAttribute('data-rating'));
                 updateStarDisplay(state.selectedRating);
@@ -811,17 +941,20 @@
                 el('btnSubmitRating').disabled = false;
             });
 
+            // Xem trước số sao khi rê chuột qua lựa chọn.
             star.addEventListener('mouseenter', () => {
                 const r = Number(star.getAttribute('data-rating'));
                 updateStarDisplay(r);
             });
         });
 
+        // Khôi phục số sao đã chọn sau khi rê chuột ra ngoài.
         starContainer.addEventListener('mouseleave', () => {
             updateStarDisplay(state.selectedRating);
         });
     }
 
+    // Cập nhật số sao đang sáng trên giao diện.
     function updateStarDisplay(rating) {
         const stars = document.querySelectorAll('#ratingStars .qa-star');
         stars.forEach(s => {
@@ -834,6 +967,7 @@
         });
     }
 
+    // Gửi đánh giá của người dùng cho phiên tư vấn.
     async function submitRating() {
         if (!state.currentSession || !state.selectedRating) return;
         const comment = el('ratingComment').value.trim();
@@ -862,6 +996,7 @@
         }
     }
 
+    // Tạo yêu cầu hỗ trợ từ nội dung phiên chat.
     async function convertToTicket() {
         if (!state.currentSession || !state.currentSession.sessionId) return;
         const btn = el('btnConvertToTicketPost');
@@ -886,6 +1021,7 @@
     }
 
     // --- Chat History Tab ---
+    // Tải một trang lịch sử các phiên tư vấn.
     async function loadHistory(page) {
         state.historyPage = Math.max(0, page || 0);
 
@@ -911,6 +1047,7 @@
             const tbody = el('historyTableBody');
             tbody.replaceChildren();
 
+            // Tạo một dòng lịch sử cùng nút mở chi tiết phiên.
             items.forEach(item => {
                 const tr = document.createElement('tr');
 
@@ -970,10 +1107,12 @@
         }
     }
 
+    // Vẽ các nút chuyển trang lịch sử tư vấn.
     function renderHistoryPagination(totalPages, currentPage) {
         const pag = el('historyPagination');
         pag.replaceChildren();
 
+        // Tạo một mục điều hướng cho trang lịch sử.
         const addPageItem = (label, targetPage, disabled, active) => {
             const li = document.createElement('li');
             li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
@@ -997,6 +1136,7 @@
         addPageItem('Sau', currentPage + 1, currentPage >= totalPages - 1, false);
     }
 
+    // Tải và hiển thị nội dung chi tiết một phiên lịch sử.
     async function viewHistoryDetail(historyItem) {
         const modal = el('chatHistoryModal');
         if (!modal) return;
@@ -1021,6 +1161,7 @@
             const container = el('historyMessagesContainer');
             container.replaceChildren();
 
+            // Vẽ nội dung từng tin nhắn trong cửa sổ lịch sử.
             messages.forEach(msg => {
                 const row = document.createElement('div');
                 const isMe = msg.senderType === 'STUDENT';
@@ -1075,6 +1216,7 @@
     }
 
     // --- Init & Event Listeners ---
+    // Gắn các thao tác giao diện và khởi chạy kết nối chat.
     function init() {
         // Tab switching: Live Chat vs History
         const tabLive = el('tabLiveChat');
@@ -1083,6 +1225,7 @@
         const histView = el('chatHistoryView');
 
         if (tabLive && tabHist) {
+            // Chuyển sang thẻ hội thoại trực tiếp.
             tabLive.addEventListener('click', () => {
                 tabLive.classList.add('active');
                 tabHist.classList.remove('active');
@@ -1090,6 +1233,7 @@
                 histView.style.display = 'none';
             });
 
+            // Chuyển sang thẻ lịch sử và tải trang đầu tiên.
             tabHist.addEventListener('click', () => {
                 tabHist.classList.add('active');
                 tabLive.classList.remove('active');
@@ -1097,6 +1241,10 @@
                 histView.style.display = 'block';
                 loadHistory(0);
             });
+
+            if (new URLSearchParams(window.location.search).get('view') === 'history') {
+                tabHist.click();
+            }
         }
 
         const btnRefreshHist = el('btnRefreshHistory');
@@ -1120,6 +1268,7 @@
         // State B (Bot) buttons
         const btnResolved = el('btnResolved');
         if (btnResolved) {
+            // Đóng phiên đã được giải đáp và xác nhận với người dùng.
             btnResolved.addEventListener('click', async () => {
                 if (state.currentSession) {
                     try {
@@ -1150,6 +1299,7 @@
         // State C (Queue) buttons
         const btnCancelQueue = el('btnCancelQueue');
         if (btnCancelQueue) {
+            // Yêu cầu xác nhận trước khi hủy phiên đang chờ.
             btnCancelQueue.addEventListener('click', () => {
                 if (window.confirm('Bạn có chắc chắn muốn hủy yêu cầu tư vấn này?')) {
                     cancelSession();
@@ -1167,11 +1317,13 @@
         // State D (Room) input & controls
         const roomInput = el('roomMessageInput');
         if (roomInput) {
+            // Cập nhật trạng thái đang nhập và bộ đếm ký tự.
             roomInput.addEventListener('input', () => {
                 handleTypingInput();
                 el('chatInputCharCount').textContent = roomInput.value.length + ' / 1000';
             });
 
+            // Gửi tin nhắn khi nhấn Enter không kèm Shift.
             roomInput.addEventListener('keydown', e => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -1199,6 +1351,7 @@
 
         const btnEndChat = el('btnRoomEndChat');
         if (btnEndChat) {
+            // Xác nhận trước khi kết thúc cuộc trò chuyện.
             btnEndChat.addEventListener('click', () => {
                 if (window.confirm('Bạn có chắc chắn muốn kết thúc cuộc trò chuyện này?')) {
                     endSession();
@@ -1236,6 +1389,7 @@
     }
 
     QauteChat.init = init;
+    // Cung cấp trạng thái chat hiện tại cho bên gọi.
     QauteChat.getState = () => state;
 
     window.QauteChat = QauteChat;

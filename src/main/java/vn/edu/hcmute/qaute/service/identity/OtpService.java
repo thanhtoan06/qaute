@@ -19,19 +19,17 @@ import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.identity.OtpCodeRepository;
 import vn.edu.hcmute.qaute.service.email.EmailService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+// Xử lý nghiệp vụ Otp trong hệ thống.
 @Service
 public class OtpService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(OtpService.class);
 
     private final OtpCodeRepository otpCodeRepository;
     private final SettingsService settingsService;
     private final AppProperties appProperties;
     private final EmailService emailService;
 
+    // Khởi tạo dịch vụ phát hành và xác minh OTP.
     public OtpService(OtpCodeRepository otpCodeRepository, SettingsService settingsService,
                       AppProperties appProperties, EmailService emailService) {
         this.otpCodeRepository = otpCodeRepository;
@@ -40,6 +38,7 @@ public class OtpService {
         this.emailService = emailService;
     }
 
+    // Tạo mã OTP, áp dụng giới hạn gửi và gửi email.
     @Transactional
     public void issue(User user, OtpPurpose purpose, String templateName) {
         LocalDateTime now = LocalDateTime.now();
@@ -78,14 +77,12 @@ public class OtpService {
                 .build();
         otpCodeRepository.save(code);
 
-        LOG.info("[OTP ISSUED] Email: {}, Mục đích: {}, Mã OTP: {} (hiệu lực {} phút)",
-                user.getEmail(), purpose, otp, ttlMinutes);
-
         emailService.sendTemplated(user.getEmail(), "Mã xác thực QAUTE", templateName,
                 Map.of("fullName", user.getFullName(), "otp", otp,
                         "ttlMinutes", String.valueOf(ttlMinutes)));
     }
 
+    // Xác minh OTP và đánh dấu mã đã sử dụng.
     @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = AppException.class)
     public void verify(User user, OtpPurpose purpose, String code) {
         OtpCode otp = otpCodeRepository
@@ -111,6 +108,7 @@ public class OtpService {
         otp.setConsumedAt(now);
     }
 
+    // Tính thời gian còn lại trước khi có thể gửi lại OTP.
     @Transactional(readOnly = true)
     public int secondsUntilResend(String email, OtpPurpose purpose) {
         return otpCodeRepository.findFirstByEmailAndPurposeOrderByIdDesc(email, purpose)

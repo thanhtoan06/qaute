@@ -10,22 +10,26 @@ import vn.edu.hcmute.qaute.entity.governance.Announcement;
 import vn.edu.hcmute.qaute.repository.governance.AnnouncementRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 
+// Khởi tạo dữ liệu mẫu cho AnnouncementSeeder trong môi trường demo.
 @Component
 public class AnnouncementSeeder implements DemoSeeder {
 
     private final AnnouncementRepository repo;
     private final UserRepository users;
 
+    // Khởi tạo seeder thông báo với các kho dữ liệu cần thiết.
     public AnnouncementSeeder(AnnouncementRepository repo, UserRepository users) {
         this.repo = repo;
         this.users = users;
     }
 
+    // Xác định thứ tự chạy của seeder thông báo.
     @Override
     public int order() {
         return 50;
     }
 
+    // Tạo dữ liệu thông báo demo khi chưa có dữ liệu.
     @Override
     @Transactional
     public void seed() {

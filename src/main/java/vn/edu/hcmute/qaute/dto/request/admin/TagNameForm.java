@@ -5,8 +5,11 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+// Đóng gói dữ liệu đầu vào cho thao tác TagName.
 @Getter
 @Setter
 public class TagNameForm {
-    @NotBlank(message = "Nhập tên thẻ") @Size(min=2, max=40, message="Tên thẻ phải từ 2 đến 40 ký tự") private String name;
+    @NotBlank(message = "Nhập tên thẻ")
+    @Size(min = 2, max = 40, message = "Tên thẻ phải từ 2 đến 40 ký tự")
+    private String name;
 }

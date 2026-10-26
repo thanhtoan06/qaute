@@ -27,6 +27,7 @@ import vn.edu.hcmute.qaute.repository.organization.ManagerCategoryRepository;
 import vn.edu.hcmute.qaute.repository.organization.ManagerProfileRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 
+// Xử lý nghiệp vụ ManagerScope trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class ManagerScopeServiceImpl implements ManagerScopeService {
@@ -46,6 +47,7 @@ public class ManagerScopeServiceImpl implements ManagerScopeService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    // Khởi tạo dịch vụ quản lý phạm vi của Manager.
     public ManagerScopeServiceImpl(ManagerProfileRepository managerProfileRepository,
                                    ManagerCategoryRepository managerCategoryRepository,
                                    CategoryQueryService categoryQueryService,
@@ -56,6 +58,7 @@ public class ManagerScopeServiceImpl implements ManagerScopeService {
         this.userLookupService = userLookupService;
     }
 
+    // Kiểm tra chuyên mục có thuộc phạm vi của Manager hay không.
     @Override
     public boolean isInScope(Long managerId, Long categoryId) {
         if (managerId == null || categoryId == null) {
@@ -73,6 +76,7 @@ public class ManagerScopeServiceImpl implements ManagerScopeService {
         return false;
     }
 
+    // Lấy tất cả mã chuyên mục trong phạm vi của Manager.
     @Override
     public List<Long> getScopeCategoryIds(Long managerId) {
         if (managerId == null) {
@@ -85,6 +89,7 @@ public class ManagerScopeServiceImpl implements ManagerScopeService {
         return List.copyOf(scope);
     }
 
+    // Tìm mã các Manager được giao chuyên mục hoặc tổ tiên.
     @Override
     public List<Long> findManagerIdsInScope(Long categoryId) {
         if (categoryId == null) {
@@ -115,6 +120,7 @@ public class ManagerScopeServiceImpl implements ManagerScopeService {
         return result;
     }
 
+    // Tìm tư vấn viên phù hợp trong phạm vi chuyên mục.
     @Override
     public List<ManagerOption> findAdvisors(Long categoryId) {
         List<Long> managerIds = findManagerIdsInScope(categoryId);
@@ -149,6 +155,7 @@ public class ManagerScopeServiceImpl implements ManagerScopeService {
         return advisors;
     }
 
+    // Kiểm tra Manager còn khả năng nhận ticket hay không.
     @Override
     public boolean isAvailableForAssignment(Long managerId) {
         if (managerId == null) {
@@ -169,6 +176,7 @@ public class ManagerScopeServiceImpl implements ManagerScopeService {
         return currentOpenTicketCount(managerId) < limit;
     }
 
+    // Đếm số ticket đang mở do Manager phụ trách.
     @Override
     public int currentOpenTicketCount(Long managerId) {
         if (managerId == null) {

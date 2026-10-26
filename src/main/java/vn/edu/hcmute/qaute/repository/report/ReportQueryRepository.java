@@ -15,8 +15,10 @@ import vn.edu.hcmute.qaute.entity.ticket.Ticket;
 public class ReportQueryRepository {
     private final EntityManager em;
 
+    // Khởi tạo kho truy vấn báo cáo.
     public ReportQueryRepository(EntityManager em) { this.em = em; }
 
+    // Thống kê số phiếu được tạo theo ngày.
     public List<Object[]> createdPerDay(ReportScope scope, ReportRange range) {
         return rows("select function('date', t.createdAt), count(t) from Ticket t where "
                 + scopeClause(scope) + " and t.createdAt >= :from and t.createdAt < :to "
@@ -24,6 +26,7 @@ public class ReportQueryRepository {
                 scope, range, Map.of());
     }
 
+    // Thống kê số phiếu được tạo theo giờ.
     public List<Object[]> createdPerHour(ReportScope scope, ReportRange range) {
         return rows("select function('hour', t.createdAt), count(t) from Ticket t where "
                 + scopeClause(scope) + " and t.createdAt >= :from and t.createdAt < :to "
@@ -31,18 +34,21 @@ public class ReportQueryRepository {
                 scope, range, Map.of());
     }
 
+    // Thống kê số phiếu theo danh mục.
     public List<Object[]> createdByCategory(ReportScope scope, ReportRange range) {
         return rows("select t.categoryId, count(t) from Ticket t where " + scopeClause(scope)
                 + " and t.createdAt >= :from and t.createdAt < :to group by t.categoryId order by count(t) desc",
                 scope, range, Map.of());
     }
 
+    // Thống kê số phiếu theo trạng thái.
     public List<Object[]> createdByStatus(ReportScope scope, ReportRange range) {
         return rows("select t.status, count(t) from Ticket t where " + scopeClause(scope)
                 + " and t.createdAt >= :from and t.createdAt < :to group by t.status order by count(t) desc",
                 scope, range, Map.of());
     }
 
+    // Lấy các phiếu mới nhất trong phạm vi báo cáo.
     public List<Ticket> latestCreated(ReportScope scope, ReportRange range, int limit) {
         String jpql = "select t from Ticket t where " + scopeClause(scope)
                 + " and t.createdAt >= :from and t.createdAt < :to order by t.createdAt desc, t.id desc";
@@ -51,6 +57,7 @@ public class ReportQueryRepository {
         return query.setMaxResults(limit).getResultList();
     }
 
+    // Tổng hợp số liệu tuân thủ SLA.
     public long[] slaCounts(ReportScope scope, ReportRange range) {
         String jpql = "select count(t), sum(case when "
                 + "(t.slaFirstResponseDueAt is null or (t.firstResponseAt is not null and t.firstResponseAt <= t.slaFirstResponseDueAt)) "
@@ -62,6 +69,7 @@ public class ReportQueryRepository {
         return new long[]{number(row[0]), number(row[1])};
     }
 
+    // Tổng hợp số phiếu tồn đọng theo thời gian.
     public long[] backlog(ReportScope scope, LocalDateTime now) {
         String jpql = "select count(t), "
                 + "sum(case when t.createdAt > :d1 then 1 else 0 end), "
@@ -76,6 +84,7 @@ public class ReportQueryRepository {
         return new long[]{number(row[0]), number(row[1]), number(row[2]), number(row[3])};
     }
 
+    // Đếm phiếu đã xử lý và được mở lại.
     public long[] resolvedAndReopened(ReportScope scope, ReportRange range) {
         String jpql = "select count(t), sum(case when t.reopenCount > 0 then 1 else 0 end) "
                 + "from Ticket t where " + scopeClause(scope)
@@ -84,6 +93,7 @@ public class ReportQueryRepository {
         return new long[]{number(row[0]), number(row[1])};
     }
 
+    // Lấy đánh giá của các phiếu trong phạm vi báo cáo.
     public List<Object[]> reviews(ReportScope scope, ReportRange range) {
         String jpql = "select r.rating, r.reasonCodes from TicketReview r, Ticket t "
                 + "where r.ticketId = t.id and " + scopeClause(scope)
@@ -92,6 +102,7 @@ public class ReportQueryRepository {
     }
 
     @SuppressWarnings("unchecked")
+    // Lấy danh sách ứng viên quản lý.
     public List<Object[]> managerCandidates() {
         return em.createNativeQuery("select u.id, u.full_name, coalesce(p.max_concurrent_tickets, 10) "
                         + "from users u join roles r on r.id = u.role_id "
@@ -100,6 +111,7 @@ public class ReportQueryRepository {
                 .setParameter("role", "MANAGER").setParameter("status", "ACTIVE").getResultList();
     }
 
+    // Tổng hợp khối lượng công việc của quản lý.
     public long[] managerWorkload(Long managerId, ReportScope scope, ReportRange range) {
         Object[] row = rows("select "
                 + "sum(case when t.status not in :finished then 1 else 0 end), "
@@ -113,12 +125,14 @@ public class ReportQueryRepository {
         return new long[]{number(row[0]), number(row[1])};
     }
 
+    // Thực thi truy vấn báo cáo và trả về các hàng kết quả.
     private List<Object[]> rows(String jpql, ReportScope scope, ReportRange range, Map<String, Object> extra) {
         TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
         bind(query, scope, range, extra);
         return query.getResultList();
     }
 
+    // Gán tham số phạm vi, thời gian và tham số bổ sung.
     private void bind(jakarta.persistence.Query query, ReportScope scope, ReportRange range, Map<String, Object> extra) {
         if (scope != null) {
             if (scope.categoryIds() != null && !scope.categoryIds().isEmpty()) query.setParameter("categoryIds", scope.categoryIds());
@@ -131,6 +145,7 @@ public class ReportQueryRepository {
         extra.forEach(query::setParameter);
     }
 
+    // Tạo điều kiện lọc theo phạm vi báo cáo.
     private String scopeClause(ReportScope scope) {
         if (scope == null || (scope.managerId() == null && scope.categoryIds() == null)) return "1 = 1";
         boolean categories = scope.categoryIds() != null && !scope.categoryIds().isEmpty();
@@ -141,5 +156,6 @@ public class ReportQueryRepository {
         return "1 = 0";
     }
 
+    // Chuyển giá trị số thành long, mặc định bằng không nếu null.
     private long number(Object value) { return value == null ? 0 : ((Number) value).longValue(); }
 }

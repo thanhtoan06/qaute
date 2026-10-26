@@ -25,12 +25,14 @@ import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.ticket.TicketAccessService;
 import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ManagerTicketAction.
 @Controller
 public class ManagerTicketActionController {
     private final TicketWorkflowService workflow;
     private final TicketAccessService access;
     private final ManagerScopeService scopes;
 
+    // Khởi tạo bộ điều khiển thao tác nhận và chuyển yêu cầu.
     public ManagerTicketActionController(TicketWorkflowService workflow, TicketAccessService access,
                                          ManagerScopeService scopes) {
         this.workflow = workflow;
@@ -39,6 +41,7 @@ public class ManagerTicketActionController {
     }
 
     @PostMapping("/manager/tickets/{id}/claim")
+    // Nhận xử lý yêu cầu hỗ trợ.
     public String claim(@PathVariable Long id, @RequestParam(required = false) String redirect,
                         RedirectAttributes flash) {
         return run(redirect, flash, () -> workflow.claim(id, SecurityUtils.requireUserId()),
@@ -46,6 +49,7 @@ public class ManagerTicketActionController {
     }
 
     @PostMapping("/manager/tickets/{id}/assign")
+    // Chuyển yêu cầu cho tư vấn viên khác.
     public String assign(@PathVariable Long id, @Valid @ModelAttribute AssignForm form,
                          BindingResult result, @RequestParam(required = false) String redirect,
                          RedirectAttributes flash) {
@@ -59,6 +63,7 @@ public class ManagerTicketActionController {
     }
 
     @PostMapping("/manager/tickets/{id}/return")
+    // Trả yêu cầu về hàng đợi.
     public String returnToQueue(@PathVariable Long id, @Valid @ModelAttribute ReturnQueueForm form,
                                 BindingResult result, @RequestParam(required = false) String redirect,
                                 RedirectAttributes flash) {
@@ -73,11 +78,13 @@ public class ManagerTicketActionController {
 
     @GetMapping("/manager/tickets/{id}/advisors")
     @ResponseBody
+    // Lấy danh sách tư vấn viên có thể nhận yêu cầu.
     public ApiResponse<List<ManagerOption>> advisors(@PathVariable Long id) {
         Ticket ticket = access.requireViewable(id, SecurityUtils.requireUserId(), RoleCode.MANAGER);
         return ApiResponse.ok(scopes.findAdvisors(ticket.getCategoryId()));
     }
 
+    // Thực hiện thao tác và đặt thông báo kết quả chuyển hướng.
     private String run(String redirect, RedirectAttributes flash, Runnable action,
                        String success, boolean claim) {
         try {
@@ -89,6 +96,7 @@ public class ManagerTicketActionController {
         return redirectTo(redirect);
     }
 
+    // Chuyển mã lỗi nghiệp vụ thành thông báo phù hợp.
     private static String errorMessage(AppException exception, boolean claim) {
         ErrorCode code = exception.getCode();
         if (code == ErrorCode.ERR_CONFLICT) {
@@ -105,10 +113,12 @@ public class ManagerTicketActionController {
                 ? code.getDefaultMessage() : exception.getMessage();
     }
 
+    // Kiểm tra lý do có độ dài hợp lệ sau khi loại khoảng trắng.
     private static boolean validReason(String reason) {
         return reason != null && reason.trim().length() >= 10 && reason.trim().length() <= 500;
     }
 
+    // Chỉ chuyển hướng đến đường dẫn nội bộ thuộc khu vực quản lý.
     static String redirectTo(String requested) {
         if (requested == null || requested.length() > 2048) return "redirect:/manager/queue";
         try {

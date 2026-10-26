@@ -37,6 +37,7 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.admin.AdminTicketService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminTicket.
 @Controller
 public class AdminTicketController {
     private static final Set<String> SORT_FIELDS = Set.of("createdAt", "lastActivityAt", "priority");
@@ -46,6 +47,7 @@ public class AdminTicketController {
     private final CategoryQueryService categories;
     private final UserRepository users;
 
+    // Khởi tạo bộ điều khiển giám sát yêu cầu.
     public AdminTicketController(AdminTicketService service, DepartmentRepository departments,
             CategoryRepository categoryRepository, CategoryQueryService categories, UserRepository users) {
         this.service = service;
@@ -56,6 +58,7 @@ public class AdminTicketController {
     }
 
     @GetMapping("/admin/tickets")
+    // Tìm kiếm và hiển thị danh sách yêu cầu.
     public String list(@ModelAttribute("filter") AdminTicketFilter filter,
             @RequestParam(defaultValue = "0") int page, Model model) {
         Pageable pageable = "priority".equals(filter.getSort())
@@ -69,6 +72,7 @@ public class AdminTicketController {
     }
 
     @GetMapping("/admin/tickets/{id}")
+    // Hiển thị chi tiết yêu cầu và các lựa chọn xử lý.
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("detail", service.detail(id));
         Map<Long, String> leafCategories = new LinkedHashMap<>();
@@ -82,6 +86,7 @@ public class AdminTicketController {
     }
 
     @PostMapping("/admin/tickets/{id}/reassign")
+    // Kiểm tra và phân công lại yêu cầu.
     public String reassign(@PathVariable Long id, @Valid @ModelAttribute AssignForm form,
             BindingResult errors, RedirectAttributes flash) {
         if (errors.hasErrors()) return invalid(id, errors, flash);
@@ -93,6 +98,7 @@ public class AdminTicketController {
     }
 
     @PostMapping("/admin/tickets/{id}/priority")
+    // Kiểm tra và đổi mức ưu tiên yêu cầu.
     public String priority(@PathVariable Long id, @Valid @ModelAttribute PriorityForm form,
             BindingResult errors, RedirectAttributes flash) {
         if (errors.hasErrors()) return invalid(id, errors, flash);
@@ -104,6 +110,7 @@ public class AdminTicketController {
     }
 
     @PostMapping("/admin/tickets/{id}/category")
+    // Kiểm tra và đổi chuyên mục yêu cầu.
     public String category(@PathVariable Long id, @Valid @ModelAttribute CategoryChangeForm form,
             BindingResult errors, RedirectAttributes flash) {
         if (errors.hasErrors()) return invalid(id, errors, flash);
@@ -115,6 +122,7 @@ public class AdminTicketController {
     }
 
     @PostMapping("/admin/tickets/{id}/force-close")
+    // Kiểm tra và buộc đóng yêu cầu.
     public String forceClose(@PathVariable Long id, @Valid @ModelAttribute UserActionForm form,
             BindingResult errors, RedirectAttributes flash) {
         if (errors.hasErrors()) return invalid(id, errors, flash);
@@ -124,11 +132,13 @@ public class AdminTicketController {
                 "Đã đóng yêu cầu");
     }
 
+    // Chuyển lỗi biểu mẫu thành thông báo.
     private static String invalid(Long id, BindingResult errors, RedirectAttributes flash) {
         flash.addFlashAttribute("flashError", errors.getAllErrors().getFirst().getDefaultMessage());
         return "redirect:/admin/tickets/" + id;
     }
 
+    // Kiểm tra lý do rồi thực hiện thao tác yêu cầu.
     private static String run(Long id, String reason, Object choice, RedirectAttributes flash,
             Runnable action, String success) {
         if (choice == null || reason == null || reason.trim().length() < 10 || reason.trim().length() > 500) {
@@ -144,6 +154,7 @@ public class AdminTicketController {
         return "redirect:/admin/tickets/" + id;
     }
 
+    // Nạp các lựa chọn lọc danh sách yêu cầu.
     private void options(Model model) {
         model.addAttribute("statuses", TicketStatus.values());
         model.addAttribute("priorities", TicketPriority.values());
@@ -156,6 +167,7 @@ public class AdminTicketController {
         model.addAttribute("managers", users.searchByRoleAndKeyword(RoleCode.MANAGER, null));
     }
 
+    // Tạo chuỗi tham số lọc yêu cầu.
     private static String params(AdminTicketFilter f) {
         StringJoiner params = new StringJoiner("&amp;");
         add(params, "q", f.getQ());
@@ -173,6 +185,7 @@ public class AdminTicketController {
         return params.toString();
     }
 
+    // Thêm tham số không rỗng vào chuỗi lọc.
     private static void add(StringJoiner params, String name, Object value) {
         if (value != null && !value.toString().isBlank()) {
             params.add(name + "=" + URLEncoder.encode(value.toString(), StandardCharsets.UTF_8));

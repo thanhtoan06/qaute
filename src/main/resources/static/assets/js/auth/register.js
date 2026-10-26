@@ -1,3 +1,4 @@
+// Khởi tạo kiểm tra biểu mẫu đăng ký và mật khẩu.
 (function () {
     "use strict";
 
@@ -11,15 +12,22 @@
     const strength = document.getElementById("password-strength");
     const strengthText = document.getElementById("password-strength-text");
 
-    document.querySelectorAll("[data-toggle-password]").forEach(function (button) {
-        button.addEventListener("click", function () {
-            const input = document.querySelector(button.dataset.togglePassword);
-            input.type = input.type === "password" ? "text" : "password";
-            button.querySelector("i").className = input.type === "password"
-                ? "bi bi-eye" : "bi bi-eye-slash";
-        });
-    });
+    document.querySelectorAll("[data-toggle-password]").forEach(
+        // Gắn xử lý ẩn/hiện mật khẩu cho từng nút.
+        function (button) {
+            button.addEventListener("click",
+                // Đổi trạng thái hiển thị mật khẩu khi bấm nút.
+                function () {
+                    const input = document.querySelector(button.dataset.togglePassword);
+                    input.type = input.type === "password" ? "text" : "password";
+                    button.querySelector("i").className = input.type === "password"
+                        ? "bi bi-eye" : "bi bi-eye-slash";
+                }
+            );
+        }
+    );
 
+    // Cập nhật thanh đánh giá độ mạnh của mật khẩu.
     function updateStrength() {
         const value = password.value;
         let score = 0;
@@ -33,6 +41,7 @@
         strengthText.textContent = score === 0 ? "" : ["Yếu", "Yếu", "Trung bình", "Tốt", "Mạnh"][score];
     }
 
+    // Đánh dấu khi mật khẩu xác nhận không khớp.
     function updateMatch() {
         if (confirmPassword.value && password.value !== confirmPassword.value) {
             confirmPassword.classList.add("is-invalid");
@@ -41,25 +50,31 @@
         }
     }
 
-    password.addEventListener("input", function () {
-        updateStrength();
-        updateMatch();
-    });
+    password.addEventListener("input",
+        // Cập nhật độ mạnh và trạng thái khớp khi mật khẩu thay đổi.
+        function () {
+            updateStrength();
+            updateMatch();
+        }
+    );
     confirmPassword.addEventListener("input", updateMatch);
 
-    form.addEventListener("submit", function (event) {
-        updateMatch();
-        const acceptTerms = document.getElementById("acceptTerms");
-        if (!form.checkValidity() || password.value !== confirmPassword.value
-            || (acceptTerms && !acceptTerms.checked)) {
-            event.preventDefault();
-            form.classList.add("was-validated");
-            return;
+    form.addEventListener("submit",
+        // Kiểm tra biểu mẫu và khóa nút gửi nếu dữ liệu hợp lệ.
+        function (event) {
+            updateMatch();
+            const acceptTerms = document.getElementById("acceptTerms");
+            if (!form.checkValidity() || password.value !== confirmPassword.value
+                || (acceptTerms && !acceptTerms.checked)) {
+                event.preventDefault();
+                form.classList.add("was-validated");
+                return;
+            }
+            const submit = document.getElementById("register-submit");
+            if (submit) {
+                submit.disabled = true;
+                submit.textContent = submit.getAttribute("data-loading-text") || "Đang đăng ký...";
+            }
         }
-        const submit = document.getElementById("register-submit");
-        if (submit) {
-            submit.disabled = true;
-            submit.textContent = submit.getAttribute("data-loading-text") || "Đang đăng ký...";
-        }
-    });
+    );
 })();

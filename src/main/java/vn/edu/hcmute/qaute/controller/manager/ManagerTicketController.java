@@ -32,6 +32,7 @@ import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ManagerTicket.
 @Controller
 public class ManagerTicketController {
     private final ManagerTicketDetailService details;
@@ -40,6 +41,7 @@ public class ManagerTicketController {
     private final ManagerScopeService scopes;
     private final TicketNoteService notes;
 
+    // Khởi tạo bộ điều khiển chi tiết yêu cầu hỗ trợ.
     public ManagerTicketController(ManagerTicketDetailService details,
             TicketWorkflowService workflow, CategoryQueryService categories,
             ManagerScopeService scopes,
@@ -52,6 +54,7 @@ public class ManagerTicketController {
     }
 
     @GetMapping("/manager/tickets/{id}")
+    // Hiển thị chi tiết yêu cầu và các thao tác khả dụng.
     public String detail(@PathVariable Long id, Model model) {
         Long managerId = SecurityUtils.requireUserId();
         var detail = details.getDetail(managerId, id);
@@ -72,6 +75,7 @@ public class ManagerTicketController {
     }
 
     @PostMapping("/manager/tickets/{id}/reply")
+    // Gửi phản hồi của tư vấn viên cho sinh viên.
     public String reply(@PathVariable Long id, @Valid @ModelAttribute ReplyForm form,
             BindingResult result, RedirectAttributes flash) {
         return run(id, result, flash, () -> {
@@ -83,6 +87,7 @@ public class ManagerTicketController {
     }
 
     @PostMapping("/manager/tickets/{id}/request-info")
+    // Yêu cầu sinh viên bổ sung thông tin.
     public String requestInfo(@PathVariable Long id, @Valid @ModelAttribute RequestInfoForm form,
             BindingResult result, RedirectAttributes flash) {
         return run(id, result, flash, () -> workflow.requestMoreInfo(id,
@@ -91,6 +96,7 @@ public class ManagerTicketController {
     }
 
     @PostMapping("/manager/tickets/{id}/resolve")
+    // Đánh dấu yêu cầu đã được giải quyết.
     public String resolve(@PathVariable Long id, @Valid @ModelAttribute ResolveForm form,
             BindingResult result, RedirectAttributes flash) {
         return run(id, result, flash, () -> workflow.resolve(id,
@@ -99,6 +105,7 @@ public class ManagerTicketController {
     }
 
     @PostMapping("/manager/tickets/{id}/priority")
+    // Thay đổi mức ưu tiên của yêu cầu.
     public String priority(@PathVariable Long id, @Valid @ModelAttribute PriorityForm form,
             BindingResult result, RedirectAttributes flash) {
         return run(id, result, flash, () -> workflow.changePriority(id,
@@ -107,6 +114,7 @@ public class ManagerTicketController {
     }
 
     @PostMapping("/manager/tickets/{id}/category")
+    // Thay đổi chuyên mục của yêu cầu.
     public String category(@PathVariable Long id, @Valid @ModelAttribute CategoryChangeForm form,
             BindingResult result, RedirectAttributes flash) {
         return run(id, result, flash, () -> workflow.changeCategory(id,
@@ -115,6 +123,7 @@ public class ManagerTicketController {
     }
 
     @PostMapping("/manager/tickets/{id}/escalate")
+    // Chuyển cấp yêu cầu sang phạm vi xử lý khác.
     public String escalate(@PathVariable Long id, @Valid @ModelAttribute EscalateForm form,
             BindingResult result, RedirectAttributes flash) {
         if (result.hasErrors()) {
@@ -134,6 +143,7 @@ public class ManagerTicketController {
 
     @GetMapping("/api/manager/categories/{id}/advisors")
     @ResponseBody
+    // Lấy danh sách tư vấn viên của chuyên mục đích.
     public ApiResponse<List<ManagerOption>> advisors(@PathVariable Long id) {
         if (categories.findAllActiveLeaf().stream().noneMatch(category -> category.id().equals(id))) {
             throw new NotFoundException("Không tìm thấy chuyên mục đích");
@@ -141,6 +151,7 @@ public class ManagerTicketController {
         return ApiResponse.ok(scopes.findAdvisors(id));
     }
 
+    // Kiểm tra biểu mẫu, thực hiện thao tác và chuyển về chi tiết.
     private String run(Long id, BindingResult result, RedirectAttributes flash,
             Runnable action, String success) {
         if (result.hasErrors()) {
@@ -156,6 +167,7 @@ public class ManagerTicketController {
         return redirect(id);
     }
 
+    // Tạo đường dẫn quay lại chi tiết yêu cầu.
     private static String redirect(Long id) {
         return "redirect:/manager/tickets/" + id;
     }

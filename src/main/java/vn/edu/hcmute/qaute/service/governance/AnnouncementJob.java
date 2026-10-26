@@ -16,17 +16,20 @@ import vn.edu.hcmute.qaute.repository.governance.AnnouncementRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.service.notification.NotificationService;
 
+// Xử lý nghiệp vụ AnnouncementJob trong hệ thống.
 @Component
 public class AnnouncementJob {
     private final JobExecutionTemplate jobs;
     private final Publisher publisher;
 
+    // Khởi tạo tác vụ lập lịch xử lý thông báo.
     public AnnouncementJob(JobExecutionTemplate jobs, Publisher publisher) {
         this.jobs = jobs;
         this.publisher = publisher;
     }
 
     @Scheduled(fixedDelay = 60000)
+    // Chạy tác vụ xử lý thông báo theo lịch.
     public void run() {
         jobs.run("announcements", publisher::process);
     }
@@ -37,6 +40,7 @@ public class AnnouncementJob {
         private final UserRepository users;
         private final NotificationService notifications;
 
+        // Khởi tạo bộ phát hành thông báo.
         public Publisher(AnnouncementRepository announcements, UserRepository users,
                          NotificationService notifications) {
             this.announcements = announcements;
@@ -45,6 +49,7 @@ public class AnnouncementJob {
         }
 
         @Transactional
+        // Phát hành thông báo đến hạn và gửi tin cho người nhận.
         public void process() {
             LocalDateTime now = LocalDateTime.now();
             for (Announcement a : announcements.findByStatusAndPublishAtLessThanEqual(AnnouncementStatus.DRAFT, now)) {

@@ -5,7 +5,9 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+// Đóng gói dữ liệu đầu vào cho thao tác RequestInfo.
+@Getter
+@Setter
 public class RequestInfoForm {
     @NotBlank(message = "Vui lòng nhập thông tin cần bổ sung")
     private String messageHtml;

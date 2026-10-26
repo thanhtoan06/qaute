@@ -16,9 +16,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.hcmute.qaute.common.exception.AppException;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.web.FormErrors;
-import vn.edu.hcmute.qaute.dto.request.manager.ManagerProfileForm;
 import vn.edu.hcmute.qaute.dto.request.manager.ManagerAvatarForm;
 import vn.edu.hcmute.qaute.dto.request.manager.ManagerPresenceForm;
+import vn.edu.hcmute.qaute.dto.request.manager.ManagerProfileForm;
 import vn.edu.hcmute.qaute.dto.request.student.ChangePasswordForm;
 import vn.edu.hcmute.qaute.dto.view.AuthSessionView;
 import vn.edu.hcmute.qaute.dto.view.ManagerProfileView;
@@ -28,6 +28,7 @@ import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
 import vn.edu.hcmute.qaute.service.identity.PasswordService;
 import vn.edu.hcmute.qaute.service.manager.ManagerProfileService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ManagerProfile.
 @Controller
 @RequestMapping("/manager/profile")
 public class ManagerProfileController {
@@ -35,6 +36,7 @@ public class ManagerProfileController {
     private final PasswordService passwords;
     private final AuthSessionService sessions;
 
+    // Khởi tạo bộ điều khiển hồ sơ quản lý.
     public ManagerProfileController(ManagerProfileService profiles, PasswordService passwords,
             AuthSessionService sessions) {
         this.profiles = profiles;
@@ -43,6 +45,7 @@ public class ManagerProfileController {
     }
 
     @GetMapping
+    // Hiển thị hồ sơ và biểu mẫu cập nhật thông tin.
     public String profile(Model model) {
         ManagerProfileView profile = profiles.get(SecurityUtils.requireUserId());
         model.addAttribute("profile", profile);
@@ -58,6 +61,7 @@ public class ManagerProfileController {
     }
 
     @PostMapping
+    // Cập nhật thông tin hồ sơ quản lý.
     public String update(@Valid @ModelAttribute("form") ManagerProfileForm form,
             BindingResult result, Model model, RedirectAttributes redirect) {
         if (result.hasErrors()) {
@@ -83,6 +87,7 @@ public class ManagerProfileController {
     }
 
     @PostMapping("/avatar")
+    // Cập nhật ảnh đại diện của quản lý.
     public String avatar(@Valid @ModelAttribute ManagerAvatarForm form, BindingResult errors,
                          RedirectAttributes redirect) {
         if (errors.hasErrors()) {
@@ -99,6 +104,7 @@ public class ManagerProfileController {
     }
 
     @PostMapping("/status")
+    // Cập nhật trạng thái trực của quản lý.
     public String status(@Valid @ModelAttribute ManagerPresenceForm form, BindingResult errors,
                          RedirectAttributes flash) {
         if (errors.hasErrors()) {
@@ -115,6 +121,7 @@ public class ManagerProfileController {
     }
 
     @GetMapping("/security")
+    // Hiển thị các phiên đăng nhập và biểu mẫu bảo mật.
     public String security(Model model) {
         model.addAttribute("sessions", sessions.listSessions(SecurityUtils.requireUserId(), currentJti()));
         if (!model.containsAttribute("form")) model.addAttribute("form", new ChangePasswordForm());
@@ -122,6 +129,7 @@ public class ManagerProfileController {
     }
 
     @PostMapping("/security/password")
+    // Đổi mật khẩu và hiển thị lỗi xác thực nếu có.
     public String changePassword(@Valid @ModelAttribute("form") ChangePasswordForm form,
             BindingResult result, Model model, RedirectAttributes redirect) {
         if (form.getNewPassword() != null && form.getConfirmPassword() != null
@@ -152,6 +160,7 @@ public class ManagerProfileController {
     }
 
     @PostMapping("/sessions/{id}/revoke")
+    // Thu hồi phiên đăng nhập được chọn.
     public String revokeSession(@PathVariable Long id, RedirectAttributes redirect) {
         Long userId = SecurityUtils.requireUserId();
         List<AuthSessionView> active = sessions.listSessions(userId, currentJti());
@@ -172,6 +181,7 @@ public class ManagerProfileController {
         return "redirect:/manager/profile/security";
     }
 
+    // Lấy mã phiên đăng nhập hiện tại của người dùng.
     private static String currentJti() {
         return SecurityUtils.currentUser().map(QauteUserDetails::getSessionJti).orElse(null);
     }

@@ -18,6 +18,7 @@ import vn.edu.hcmute.qaute.repository.identity.StudentProfileRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
 
+// Xử lý nghiệp vụ UserLookup trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class UserLookupServiceImpl implements UserLookupService {
@@ -27,6 +28,7 @@ public class UserLookupServiceImpl implements UserLookupService {
     private final StudentProfileRepository studentProfileRepository;
     private final FacultyRepository facultyRepository;
 
+    // Khởi tạo dịch vụ tra cứu thông tin người dùng.
     public UserLookupServiceImpl(UserRepository userRepository,
                                  MediaAssetRepository mediaAssetRepository,
                                  StudentProfileRepository studentProfileRepository,
@@ -37,6 +39,7 @@ public class UserLookupServiceImpl implements UserLookupService {
         this.facultyRepository = facultyRepository;
     }
 
+    // Lấy thông tin tóm tắt của một người dùng.
     @Override
     public UserSummary getSummary(Long userId) {
         if (userId == null) {
@@ -46,6 +49,7 @@ public class UserLookupServiceImpl implements UserLookupService {
         return toSummary(user, loadAvatarUrl(user.getAvatarAssetId()));
     }
 
+    // Lấy thông tin tóm tắt của nhiều người dùng theo ID.
     @Override
     public Map<Long, UserSummary> getSummaries(Collection<Long> ids) {
         if (ids == null || ids.isEmpty()) {
@@ -62,6 +66,7 @@ public class UserLookupServiceImpl implements UserLookupService {
         return Map.copyOf(summaries);
     }
 
+    // Lấy thông tin hồ sơ sinh viên và khoa.
     @Override
     public StudentSummary getStudentSummary(Long userId) {
         if (userId == null) {
@@ -84,6 +89,7 @@ public class UserLookupServiceImpl implements UserLookupService {
                 profile == null ? null : profile.getProgram());
     }
 
+    // Tải các ảnh đại diện được tham chiếu bởi danh sách người dùng.
     private Map<Long, MediaAsset> loadAvatars(List<User> users) {
         List<Long> avatarIds = users.stream()
                 .map(User::getAvatarAssetId)
@@ -100,6 +106,7 @@ public class UserLookupServiceImpl implements UserLookupService {
         return result;
     }
 
+    // Lấy URL ảnh đại diện theo mã tài sản.
     private String loadAvatarUrl(Long avatarAssetId) {
         if (avatarAssetId == null) {
             return null;
@@ -109,6 +116,7 @@ public class UserLookupServiceImpl implements UserLookupService {
                 .orElse(null);
     }
 
+    // Tạo DTO tóm tắt từ người dùng và URL ảnh.
     private UserSummary toSummary(User user, String avatarUrl) {
         return new UserSummary(
                 user.getId(),

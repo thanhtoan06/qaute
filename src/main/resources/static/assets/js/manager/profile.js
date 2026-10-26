@@ -1,3 +1,4 @@
+// Khởi tạo chức năng tải ảnh đại diện sau khi tài liệu được tải.
 document.addEventListener('DOMContentLoaded', () => {
   const button = document.getElementById('btnChangeAvatar');
   const input = document.getElementById('avatarFileInput');
@@ -9,16 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const assetId = document.getElementById('avatarAssetIdInput');
   if (!button || !input || !form) return;
 
+  // Hiển thị thông báo lỗi khi xử lý ảnh.
   const showError = message => {
     error.textContent = message;
     error.classList.remove('d-none');
   };
+  // Cập nhật trạng thái tải của nút và biểu tượng chờ.
   const loading = value => {
     button.disabled = value;
     spinner.classList.toggle('d-none', !value);
     spinner.style.display = value ? 'flex' : '';
   };
   button.addEventListener('click', () => input.click());
+  // Kiểm tra, thu nhỏ và tải ảnh đại diện đã chọn.
   input.addEventListener('change', async () => {
     const file = input.files?.[0];
     if (!file) return;

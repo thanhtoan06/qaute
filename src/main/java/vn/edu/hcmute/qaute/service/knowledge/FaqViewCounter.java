@@ -11,6 +11,7 @@ import vn.edu.hcmute.qaute.common.constant.SettingKeys;
 import vn.edu.hcmute.qaute.repository.knowledge.FaqRepository;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
+// Xử lý nghiệp vụ FaqViewCounter trong hệ thống.
 @Component
 public class FaqViewCounter {
 
@@ -18,12 +19,14 @@ public class FaqViewCounter {
     private final FaqRepository faqRepository;
     private final SettingsService settingsService;
 
+    // Khởi tạo bộ đếm lượt xem và các dịch vụ phụ thuộc.
     public FaqViewCounter(FaqRepository faqRepository, SettingsService settingsService) {
         this.faqRepository = faqRepository;
         this.settingsService = settingsService;
     }
 
     @Transactional
+    // Ghi nhận lượt xem nếu người xem chưa vượt giới hạn trùng lặp.
     public void recordView(Long faqId, String viewerKey) {
         if (faqId == null || viewerKey == null || viewerKey.isBlank()) {
             return;
@@ -44,6 +47,7 @@ public class FaqViewCounter {
     }
 
     @Scheduled(fixedDelay = 600000)
+    // Loại bỏ các khóa lượt xem đã hết thời gian lưu.
     public void cleanup() {
         int dedupeMinutes = settingsService.getInt(SettingKeys.FAQ_VIEW_DEDUPE_MINUTES);
         if (dedupeMinutes <= 0) {
@@ -53,4 +57,3 @@ public class FaqViewCounter {
         viewCache.entrySet().removeIf(entry -> entry.getValue().isBefore(cutoff));
     }
 }
-

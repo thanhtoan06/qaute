@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu TicketTag được lưu trữ trong hệ thống.
 @Entity @Table(name = "ticket_tags")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class TicketTag extends AuditableEntity {

@@ -8,6 +8,7 @@ import vn.edu.hcmute.qaute.entity.ticket.Ticket;
 import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 
+// Xử lý nghiệp vụ TicketAccess trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class TicketAccessServiceImpl implements TicketAccessService {
@@ -15,12 +16,14 @@ public class TicketAccessServiceImpl implements TicketAccessService {
     private final TicketRepository tickets;
     private final ManagerScopeService managerScope;
 
+    // Khởi tạo dịch vụ kiểm tra quyền truy cập ticket.
     public TicketAccessServiceImpl(TicketRepository tickets, ManagerScopeService managerScope) {
         this.tickets = tickets;
         this.managerScope = managerScope;
     }
 
     @Override
+    // Kiểm tra quyền xem ticket mà không phát sinh lỗi khi không có quyền.
     public boolean canView(Long ticketId, Long userId, RoleCode role) {
         if (ticketId == null || userId == null || role == null) {
             return false;
@@ -31,6 +34,7 @@ public class TicketAccessServiceImpl implements TicketAccessService {
     }
 
     @Override
+    // Lấy ticket hoặc báo không tìm thấy khi người dùng không có quyền.
     public Ticket requireViewable(Long ticketId, Long userId, RoleCode role) {
         if (ticketId == null || userId == null || role == null) {
             throw new NotFoundException("Không tìm thấy ticket");
@@ -43,6 +47,7 @@ public class TicketAccessServiceImpl implements TicketAccessService {
         return ticket;
     }
 
+    // Kiểm tra quyền dựa trên vai trò và phạm vi quản lý.
     private boolean checkPermission(Ticket ticket, Long userId, RoleCode role) {
         if (role == RoleCode.ADMIN) {
             return true;
@@ -57,4 +62,3 @@ public class TicketAccessServiceImpl implements TicketAccessService {
         return false;
     }
 }
-

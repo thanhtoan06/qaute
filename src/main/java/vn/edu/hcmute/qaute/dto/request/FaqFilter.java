@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.FaqSort;
 
+// Đóng gói dữ liệu đầu vào cho thao tác FaqFilter.
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,6 +18,7 @@ public class FaqFilter {
 
     private List<Long> categoryIds;
     private String tagSlug;
+    private String query;
     private FaqSort sort;
 }
 

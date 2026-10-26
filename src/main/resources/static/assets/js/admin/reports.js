@@ -1,3 +1,4 @@
+// Khởi tạo bộ lọc, báo cáo và biểu đồ quản trị.
 (() => {
   'use strict';
   const root = document.getElementById('admin-reports');
@@ -8,17 +9,22 @@
   const to = document.getElementById('admin-report-to');
   const department = document.getElementById('admin-report-department');
   const category = document.getElementById('admin-report-category');
+  // Lấy phần tử báo cáo theo mã định danh.
   const get = id => document.getElementById(id);
   const charts = new Map();
   let pending = null, requestId = 0;
+  // Định dạng số theo quy ước tiếng Việt.
   const format = value => Number(value || 0).toLocaleString('vi-VN', {maximumFractionDigits: 1});
+  // Định dạng giá trị phần trăm.
   const pct = value => `${format(value)}%`;
 
+  // Chuyển ngày thành chuỗi YYYY-MM-DD theo giờ địa phương.
   function localDate(date) {
     const year = date.getFullYear(), month = String(date.getMonth() + 1).padStart(2, '0');
     return `${year}-${month}-${String(date.getDate()).padStart(2, '0')}`;
   }
 
+  // Cập nhật ngày bắt đầu và kết thúc theo khoảng thời gian định sẵn.
   function updatePresetDates() {
     if (range.value === 'custom') return;
     const end = new Date();
@@ -28,6 +34,7 @@
     to.value = localDate(end);
   }
 
+  // Đồng bộ bộ lọc ngày và danh sách chuyên mục theo phòng ban.
   function toggleFilters() {
     const custom = range.value === 'custom';
     document.querySelectorAll('.admin-custom-date').forEach(node => node.classList.toggle('d-none', !custom));
@@ -41,7 +48,9 @@
     if (category.selectedOptions[0]?.disabled) category.value = '';
   }
 
+  // Hủy các biểu đồ hiện tại trước khi dựng biểu đồ mới.
   function destroyCharts() { charts.forEach(chart => chart.destroy()); charts.clear(); }
+  // Tạo biểu đồ và lưu lại để quản lý vòng đời.
   function chart(id, type, labels, datasets, extra = {}) {
     const canvas = get(id);
     if (!window.Chart || !canvas) return;
@@ -51,6 +60,7 @@
     }}));
   }
 
+  // Đổ dữ liệu vào bảng hoặc hiển thị nội dung rỗng.
   function table(id, items, cells, emptyText) {
     const body = get(id); body.replaceChildren();
     if (!items?.length) {
@@ -58,17 +68,20 @@
       td.colSpan = cells.length; td.className = 'text-secondary text-center py-3'; td.textContent = emptyText;
       tr.append(td); body.append(tr); return;
     }
-    items.forEach(item => {
-      const tr = document.createElement('tr');
-      cells.forEach(read => {
-        const td = document.createElement('td');
-        const value = read(item); td.textContent = value == null ? '—' : String(value);
-        tr.append(td);
+    items.forEach(
+      // Tạo một hàng bảng cho từng mục dữ liệu.
+      item => {
+        const tr = document.createElement('tr');
+        cells.forEach(read => {
+          const td = document.createElement('td');
+          const value = read(item); td.textContent = value == null ? '—' : String(value);
+          tr.append(td);
+        });
+        body.append(tr);
       });
-      body.append(tr);
-    });
   }
 
+  // Tạo một dòng chỉ số gồm nhãn và giá trị.
   function metric(label, value) {
     const line = document.createElement('div'); line.className = 'd-flex justify-content-between border-bottom py-2 gap-2';
     const name = document.createElement('span'); name.textContent = label;
@@ -76,6 +89,7 @@
     line.append(name, number); return line;
   }
 
+  // Hiển thị các chỉ số, bảng và biểu đồ từ dữ liệu báo cáo.
   function render(data) {
     destroyCharts();
     const {ticket, knowledge, departments, managers, chat, appointment, weekly, hourly} = data;
@@ -119,6 +133,7 @@
       {horizontal: true});
   }
 
+  // Tải báo cáo theo bộ lọc hiện tại và xử lý trạng thái yêu cầu.
   async function load(updateUrl) {
     toggleFilters();
     if (!form.reportValidity()) return;
@@ -144,21 +159,27 @@
     }
   }
 
-  form.addEventListener('submit', event => { event.preventDefault(); load(true); });
-  range.addEventListener('change', () => {
-    updatePresetDates(); toggleFilters();
-    if (range.value !== 'custom' || (from.value && to.value)) load(true);
-  });
+  form.addEventListener('submit',
+    // Ngăn gửi biểu mẫu mặc định và tải báo cáo theo bộ lọc.
+    event => { event.preventDefault(); load(true); });
+  range.addEventListener('change',
+    // Cập nhật ngày theo khoảng mới và tải lại báo cáo khi đủ điều kiện.
+    () => {
+      updatePresetDates(); toggleFilters();
+      if (range.value !== 'custom' || (from.value && to.value)) load(true);
+    });
   [department, category].forEach(node => node.addEventListener('change', () => load(true)));
-  document.querySelectorAll('.js-report-export').forEach(button => button.addEventListener('click', () => {
-    toggleFilters();
-    if (!form.reportValidity()) return;
-    updatePresetDates();
-    const params = new URLSearchParams({type: button.dataset.type, from: from.value, to: to.value});
-    if (department.value) params.set('departmentId', department.value);
-    if (category.value) params.set('categoryId', category.value);
-    window.location.assign(`${root.dataset.exportUrl}?${params}`);
-  }));
+  document.querySelectorAll('.js-report-export').forEach(button => button.addEventListener('click',
+    // Xuất báo cáo theo bộ lọc hiện tại.
+    () => {
+      toggleFilters();
+      if (!form.reportValidity()) return;
+      updatePresetDates();
+      const params = new URLSearchParams({type: button.dataset.type, from: from.value, to: to.value});
+      if (department.value) params.set('departmentId', department.value);
+      if (category.value) params.set('categoryId', category.value);
+      window.location.assign(`${root.dataset.exportUrl}?${params}`);
+    }));
   document.querySelectorAll('[data-bs-toggle="tab"]').forEach(button =>
     button.addEventListener('shown.bs.tab', () => charts.forEach(instance => instance.resize())));
   toggleFilters();

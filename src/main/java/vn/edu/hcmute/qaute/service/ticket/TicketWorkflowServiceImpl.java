@@ -1,7 +1,6 @@
 package vn.edu.hcmute.qaute.service.ticket;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.ActorType;
 import vn.edu.hcmute.qaute.common.constant.AssignmentType;
-import vn.edu.hcmute.qaute.common.constant.AvailabilityStatus;
 import vn.edu.hcmute.qaute.common.constant.ErrorCode;
 import vn.edu.hcmute.qaute.common.constant.MediaStatus;
 import vn.edu.hcmute.qaute.common.constant.MediaUsageType;
@@ -32,7 +30,6 @@ import vn.edu.hcmute.qaute.common.exception.InvalidTransitionException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.common.util.HtmlSanitizerUtil;
 import vn.edu.hcmute.qaute.common.util.TextUtil;
-import vn.edu.hcmute.qaute.dto.view.ManagerOption;
 import vn.edu.hcmute.qaute.dto.view.SlaSnapshot;
 import vn.edu.hcmute.qaute.dto.view.UserSummary;
 import vn.edu.hcmute.qaute.entity.media.MediaAsset;
@@ -58,6 +55,7 @@ import vn.edu.hcmute.qaute.service.ticket.command.CreateTicketCommand;
 import vn.edu.hcmute.qaute.service.ticket.event.TicketEventPublisher;
 import vn.edu.hcmute.qaute.service.ticket.event.TicketEventType;
 
+// Xử lý nghiệp vụ TicketWorkflow trong hệ thống.
 @Service
 @Transactional
 public class TicketWorkflowServiceImpl implements TicketWorkflowService {
@@ -84,6 +82,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     private final SettingsService settings;
     private final TicketEventPublisher events;
 
+    // Khởi tạo dịch vụ điều phối ticket với các kho dữ liệu và dịch vụ phụ trợ.
     public TicketWorkflowServiceImpl(TicketRepository tickets, TicketMessageRepository messages,
                                      TicketAttachmentRepository attachments, TicketStatusHistoryRepository histories,
                                      TicketAssignmentRepository assignments, TicketEscalationRepository escalations,
@@ -109,8 +108,10 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Tạo ticket mới, lưu nội dung và thiết lập các mốc SLA.
     public Ticket createTicket(Long studentId, CreateTicketCommand command) {
         try {
+            // Kiểm tra quyền tạo, chống gửi lặp và chuẩn hóa dữ liệu đầu vào.
             requireActiveStudent(studentId);
             if (command == null) throw new BadRequestException("Dữ liệu tạo ticket không hợp lệ");
             String submitToken = blankToNull(command.submitToken());
@@ -137,10 +138,10 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
                     .slaResolutionMinutes(snapshot.resolutionMinutes())
                     .slaFirstResponseDueAt(snapshot.firstResponseDueAt()).slaResolutionDueAt(snapshot.resolutionDueAt())
                     .slaPausedSeconds(0).slaStatus(SlaStatus.ON_TRACK).lastActivityAt(now).submitToken(submitToken).build();
+            // Lưu ticket, khởi tạo hội thoại và lịch sử trước khi đưa vào hàng đợi.
             ticket = tickets.saveAndFlush(ticket);
             addMessage(ticket, studentId, SenderType.STUDENT, description, assetIds);
             recordHistory(ticket, null, TicketStatus.NEW, studentId, ActorType.STUDENT, null);
-            autoAssignIfEnabled(ticket);
             events.publish(TicketEventType.CREATED, ticket, studentId, Map.of());
             return ticket;
         } catch (OptimisticLockingFailureException exception) {
@@ -149,6 +150,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Thêm phản hồi của sinh viên và tiếp tục SLA nếu đang chờ thông tin.
     public Ticket addStudentReply(Long ticketId, Long studentId, String contentHtml, List<Long> assetIds) {
         try {
             Ticket ticket = findOwnedByStudent(ticketId, studentId);
@@ -177,6 +179,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Thêm phản hồi của tư vấn viên và ghi nhận phản hồi đầu tiên nếu cần.
     public Ticket addAdvisorReply(Long ticketId, Long managerId, String contentHtml, List<Long> assetIds) {
         try {
             Ticket ticket = findOrThrow(ticketId);
@@ -202,12 +205,14 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         }
     }
 
+    // Lưu lịch sử thay đổi trạng thái ticket.
     private void recordHistory(Ticket ticket, TicketStatus from, TicketStatus to, Long actorId, ActorType actorType,
                                String reason) {
         histories.save(TicketStatusHistory.builder().ticketId(ticket.getId()).fromStatus(from).toStatus(to)
                 .actorId(actorId).actorType(actorType).reason(reason).build());
     }
 
+    // Lưu tin nhắn và liên kết các tệp đính kèm với ticket.
     private TicketMessage addMessage(Ticket ticket, Long senderId, SenderType senderType, Content content,
                                      List<Long> assetIds) {
         TicketMessage message = messages.save(TicketMessage.builder().ticketId(ticket.getId()).senderId(senderId)
@@ -220,25 +225,30 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         return message;
     }
 
+    // Cập nhật thời điểm hoạt động gần nhất của ticket.
     private void touch(Ticket ticket) {
         ticket.setLastActivityAt(LocalDateTime.now());
     }
 
+    // Tìm ticket theo mã hoặc báo không tìm thấy.
     private Ticket findOrThrow(Long id) {
         return tickets.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy ticket"));
     }
 
     /** Avoid disclosing the existence of a ticket to a different student. */
+    // Tìm ticket thuộc sở hữu của sinh viên hoặc báo không tìm thấy.
     private Ticket findOwnedByStudent(Long id, Long studentId) {
         return tickets.findById(id)
                 .filter(ticket -> Objects.equals(ticket.getStudentId(), studentId))
                 .orElseThrow(NotFoundException::new);
     }
 
+    // Chuyển lỗi khóa lạc quan thành lỗi xung đột nghiệp vụ.
     private ConflictException mapOptimisticLock(OptimisticLockingFailureException exception) {
         return new ConflictException("Ticket vừa được người khác cập nhật, vui lòng tải lại");
     }
 
+    // Xác nhận tài khoản thuộc sinh viên đang hoạt động.
     private void requireActiveStudent(Long studentId) {
         UserSummary user = users.getSummary(studentId);
         if (user.role() != RoleCode.STUDENT || user.status() != UserStatus.ACTIVE) {
@@ -246,12 +256,14 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         }
     }
 
+    // Xác nhận chuyên mục tồn tại và đang hoạt động.
     private void validateCategory(Long categoryId) {
         if (categories.findCategory(categoryId).filter(category -> category.active()).isEmpty()) {
             throw new BadRequestException("Chuyên mục không hợp lệ", Map.of("categoryId", "Chuyên mục không tồn tại hoặc đã ngừng hoạt động"));
         }
     }
 
+    // Chuẩn hóa và kiểm tra độ dài tiêu đề ticket.
     private String validateTitle(String raw) {
         String title = raw == null ? "" : raw.trim();
         if (title.length() < 10 || title.length() > 150) {
@@ -260,6 +272,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         return title;
     }
 
+    // Làm sạch nội dung HTML và kiểm tra độ dài văn bản.
     private Content sanitize(String rawHtml, int minLength, String field) {
         String html = HtmlSanitizerUtil.sanitize(rawHtml);
         String text = TextUtil.stripHtml(html);
@@ -269,6 +282,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         return new Content(html, text);
     }
 
+    // Kiểm tra lý do và giới hạn ticket khẩn đang mở của sinh viên.
     private void validateUrgent(Long studentId, boolean urgentRequested, String urgentReason) {
         if (!urgentRequested) return;
         String reason = urgentReason == null ? "" : urgentReason.trim();
@@ -281,6 +295,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         }
     }
 
+    // Chuẩn hóa danh sách tệp đính kèm và xác minh quyền sở hữu.
     private List<Long> normalizedAssetIds(List<Long> input, Long ownerId) {
         List<Long> ids = input == null ? List.of() : new LinkedHashSet<>(input).stream().toList();
         if (ids.size() > settings.getInt(SettingKeys.FILE_MAX_COUNT)) {
@@ -297,15 +312,13 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         return ids;
     }
 
+    // Chuyển chuỗi rỗng thành null và loại bỏ khoảng trắng thừa.
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
 
-    private static UnsupportedOperationException unsupported() {
-        return new UnsupportedOperationException("Chưa cài đặt");
-    }
-
     @Override
+    // Yêu cầu sinh viên bổ sung thông tin cho ticket.
     public Ticket requestMoreInfo(Long ticketId, Long managerId, String messageHtml, List<Long> assetIds) {
         try {
             Ticket ticket = findOrThrow(ticketId);
@@ -337,6 +350,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Giải quyết ticket và lưu ghi chú xử lý.
     public Ticket resolve(Long ticketId, Long managerId, String resolutionNote) {
         try {
             Ticket ticket = findOrThrow(ticketId);
@@ -371,6 +385,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Xác nhận đóng ticket đã được giải quyết.
     public Ticket confirmClose(Long ticketId, Long studentId) {
         try {
             Ticket ticket = findOwnedByStudent(ticketId, studentId);
@@ -395,6 +410,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Mở lại ticket theo yêu cầu hợp lệ của sinh viên.
     public Ticket reopen(Long ticketId, Long studentId, String reason) {
         try {
             Ticket ticket = findOwnedByStudent(ticketId, studentId);
@@ -448,6 +464,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Hủy ticket mới theo yêu cầu của sinh viên.
     public Ticket cancel(Long ticketId, Long studentId, String reason) {
         try {
             Ticket ticket = findOwnedByStudent(ticketId, studentId);
@@ -477,6 +494,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Thay đổi mức ưu tiên và tính lại thời hạn SLA.
     public Ticket changePriority(Long ticketId, Long actorUserId, TicketPriority priority, String reason) {
         try {
             Ticket ticket = findOrThrow(ticketId);
@@ -507,6 +525,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Chuyển ticket sang chuyên mục khác và cập nhật SLA.
     public Ticket changeCategory(Long ticketId, Long actorUserId, Long newCategoryId, String reason) {
         try {
             Ticket ticket = findOrThrow(ticketId);
@@ -543,6 +562,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Chuyển ticket sang chuyên mục hoặc tư vấn viên đích.
     public Ticket escalate(Long ticketId, Long managerId, Long toCategoryId, Long toManagerId, String reason) {
         try {
             Ticket ticket = findOrThrow(ticketId);
@@ -607,6 +627,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Đóng ticket bắt buộc theo yêu cầu của quản trị viên.
     public Ticket forceClose(Long ticketId, Long adminId, String reason) {
         try {
             UserSummary admin = users.getSummary(adminId);
@@ -639,6 +660,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
 
     @Override
     @Transactional
+    // Đóng ticket đã quá hạn và gửi nhắc nhở khi cần.
     public int autoCloseExpired() {
         LocalDateTime now = LocalDateTime.now();
         int closedCount = 0;
@@ -687,15 +709,13 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Nhận ticket mới trong phạm vi quản lý của tư vấn viên.
     public Ticket claim(Long ticketId, Long managerId) {
         try {
             requireActiveManager(managerId);
             Ticket ticket = findOrThrow(ticketId);
             if (!managerScope.isInScope(managerId, ticket.getCategoryId())) {
                 throw new NotFoundException("Chuyên mục ticket không thuộc phạm vi của bạn");
-            }
-            if (!managerScope.isAvailableForAssignment(managerId)) {
-                throw new AppException(ErrorCode.ERR_LIMIT_EXCEEDED, "Bạn đã nhận tối đa số yêu cầu đồng thời");
             }
             LocalDateTime now = LocalDateTime.now();
             int updated = tickets.claimIfNew(ticketId, managerId, now);
@@ -713,6 +733,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Giao hoặc giao lại ticket cho tư vấn viên được chỉ định.
     public Ticket assign(Long ticketId, Long toManagerId, Long actorUserId, String reason) {
         try {
             Ticket ticket = findOrThrow(ticketId);
@@ -757,6 +778,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
     }
 
     @Override
+    // Trả ticket đang xử lý về hàng chờ.
     public Ticket returnToQueue(Long ticketId, Long actorUserId, String reason) {
         try {
             Ticket ticket = findOrThrow(ticketId);
@@ -791,30 +813,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         }
     }
 
-    @Override
-    public void autoAssignIfEnabled(Ticket ticket) {
-        if (ticket == null || ticket.getStatus() != TicketStatus.NEW) return;
-        if (!settings.getBoolean(SettingKeys.TICKET_AUTO_ASSIGN_ENABLED)) return;
-        List<ManagerOption> candidates = managerScope.findAdvisors(ticket.getCategoryId()).stream()
-                .filter(m -> m.status() == AvailabilityStatus.ONLINE && managerScope.isAvailableForAssignment(m.id()))
-                .collect(java.util.stream.Collectors.toList());
-        if (candidates.isEmpty()) return;
-        ManagerOption chosen = candidates.stream()
-                .min(Comparator.comparingInt((ManagerOption m) -> managerScope.currentOpenTicketCount(m.id()))
-                        .thenComparingLong(ManagerOption::id))
-                .orElse(null);
-        if (chosen == null) return;
-        LocalDateTime now = LocalDateTime.now();
-        tickets.claimIfNew(ticket.getId(), chosen.id(), now);
-        Ticket updated = findOrThrow(ticket.getId());
-        saveAssignment(updated, null, chosen.id(), null, AssignmentType.AUTO, null, now);
-        recordHistory(updated, TicketStatus.NEW, TicketStatus.ASSIGNED, chosen.id(), ActorType.MANAGER, null);
-        events.publish(TicketEventType.ASSIGNED, updated, chosen.id(), Map.of());
-        ticket.setStatus(updated.getStatus());
-        ticket.setCurrentAssigneeId(updated.getCurrentAssigneeId());
-        ticket.setFirstAssignedAt(updated.getFirstAssignedAt());
-    }
-
+    // Xác nhận tư vấn viên đang hoạt động.
     private void requireActiveManager(Long managerId) {
         UserSummary user = users.getSummary(managerId);
         if (user.role() != RoleCode.MANAGER || user.status() != UserStatus.ACTIVE) {
@@ -822,6 +821,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         }
     }
 
+    // Kiểm tra người thực hiện có quyền giao ticket.
     private void requireAssignActor(Long actorUserId, Ticket ticket) {
         UserSummary actor = users.getSummary(actorUserId);
         if (actor.role() == RoleCode.ADMIN) return;
@@ -832,6 +832,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         throw new ForbiddenException("Bạn không có quyền giao ticket này");
     }
 
+    // Kiểm tra người thực hiện có quyền thay đổi ticket.
     private void requireChangeActor(Long actorUserId, Ticket ticket) {
         UserSummary actor = users.getSummary(actorUserId);
         if (actor.role() == RoleCode.ADMIN) return;
@@ -842,6 +843,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         throw new ForbiddenException("Bạn không có quyền thực hiện thao tác này");
     }
 
+    // Kiểm tra người dùng có vai trò quản trị viên.
     private boolean isActorAdmin(Long actorUserId) {
         try {
             UserSummary actor = users.getSummary(actorUserId);
@@ -851,6 +853,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
         }
     }
 
+    // Lưu thông tin phân công ticket.
     private void saveAssignment(Ticket ticket, Long fromManagerId, Long toManagerId,
                                 Long assignedBy, AssignmentType type, String reason, LocalDateTime now) {
         assignments.save(TicketAssignment.builder()
@@ -864,6 +867,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
                 .build());
     }
 
+    // Đóng lần phân công hiện tại của ticket nếu có.
     private void closeCurrentAssignment(Long ticketId, LocalDateTime now) {
         assignments.findFirstByTicketIdAndEndedAtIsNullOrderByIdDesc(ticketId)
                 .ifPresent(a -> {
@@ -872,6 +876,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
                 });
     }
 
+    // Thêm tin nhắn hệ thống vào ticket.
     private void addSystemMessage(Ticket ticket, String text) {
         messages.save(TicketMessage.builder()
                 .ticketId(ticket.getId())
@@ -882,6 +887,7 @@ public class TicketWorkflowServiceImpl implements TicketWorkflowService {
                 .build());
     }
 
+    // Kiểm tra tư vấn viên còn hoạt động và phụ trách chuyên mục.
     private boolean isManagerActiveAndInScope(Long managerId, Long categoryId) {
         try {
             UserSummary user = users.getSummary(managerId);

@@ -13,4 +13,12 @@ public record CategoryNode(
         String icon,
         int depth,
         List<CategoryNode> children) {
+
+    // Jakarta EL getter methods
+    public Long getId() { return id; }
+    public String getCode() { return code; }
+    public String getName() { return name; }
+    public String getIcon() { return icon; }
+    public int getDepth() { return depth; }
+    public List<CategoryNode> getChildren() { return children; }
 }

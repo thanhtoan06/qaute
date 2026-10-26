@@ -110,6 +110,7 @@
         </ol>
     </nav>
 
+    <%-- Giới thiệu danh bạ và mục đích trang liên hệ. --%>
     <section class="contact-hero">
         <div class="contact-hero-content">
             <div class="contact-eyebrow">
@@ -128,6 +129,7 @@
         </div>
     </section>
 
+    <%-- Hiển thị các kênh liên hệ chung dành cho sinh viên. --%>
     <section aria-label="Thông tin liên hệ chính">
         <div class="contact-section-heading">
             <div>
@@ -233,6 +235,7 @@
         </div>
     </section>
 
+    <%-- Danh sách đơn vị, thông tin liên lạc và phạm vi hỗ trợ. --%>
     <section class="contact-directory">
         <div class="contact-directory-topline">
             <div class="contact-section-heading mb-0">

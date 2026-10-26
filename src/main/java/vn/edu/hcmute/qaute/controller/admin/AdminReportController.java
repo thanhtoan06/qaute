@@ -48,6 +48,7 @@ import vn.edu.hcmute.qaute.service.report.ServiceReportService;
 import vn.edu.hcmute.qaute.service.report.TicketReportService;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminReport.
 @Controller
 public class AdminReportController {
     private final TicketReportService ticketReports;
@@ -59,6 +60,7 @@ public class AdminReportController {
     private final CategoryQueryService categoryPaths;
     private final AuditService audit;
 
+    // Khởi tạo bộ điều khiển báo cáo quản trị.
     public AdminReportController(TicketReportService ticketReports, ServiceReportService serviceReports,
             ReportQueryRepository ticketQueries, ServiceReportQueryRepository serviceQueries,
             DepartmentRepository departments, CategoryRepository categories,
@@ -81,6 +83,7 @@ public class AdminReportController {
     private record Criteria(ReportRange range, ReportScope scope) {}
 
     @GetMapping("/admin/reports")
+    // Hiển thị trang báo cáo theo phạm vi đã chọn.
     public String page(@RequestParam(defaultValue = "30") String range,
             @RequestParam(required = false) String from, @RequestParam(required = false) String to,
             @RequestParam(required = false) Long departmentId,
@@ -101,6 +104,7 @@ public class AdminReportController {
 
     @GetMapping("/api/admin/reports/data")
     @ResponseBody
+    // Tổng hợp dữ liệu báo cáo theo khoảng thời gian và phạm vi.
     public ApiResponse<ReportData> data(@RequestParam(defaultValue = "30") String range,
             @RequestParam(required = false) String from, @RequestParam(required = false) String to,
             @RequestParam(required = false) Long departmentId,
@@ -117,6 +121,7 @@ public class AdminReportController {
     }
 
     @GetMapping("/admin/reports/export")
+    // Tạo tệp CSV cho loại báo cáo được yêu cầu.
     public ResponseEntity<byte[]> export(@RequestParam String type,
             @RequestParam(required = false) String from, @RequestParam(required = false) String to,
             @RequestParam(required = false) Long departmentId,
@@ -134,6 +139,7 @@ public class AdminReportController {
         return ResponseEntity.ok().headers(headers).body(CsvUtil.withBom(csv));
     }
 
+    // Tạo nội dung CSV cho loại báo cáo.
     private String csv(String type, Criteria criteria) {
         ReportRange dates = criteria.range();
         StringBuilder csv = new StringBuilder();
@@ -192,6 +198,7 @@ public class AdminReportController {
         return csv.toString();
     }
 
+    // Xác thực khoảng ngày và phạm vi báo cáo.
     private Criteria criteria(String range, String from, String to, Long departmentId, Long categoryId) {
         LocalDate today = LocalDate.now();
         ReportRange dates = switch (range) {
@@ -224,12 +231,14 @@ public class AdminReportController {
         return new Criteria(dates, new ReportScope(null, ids));
     }
 
+    // Chuyển chuỗi ngày thành ngày báo cáo.
     private LocalDate parse(String value) {
         if (value == null || value.isBlank()) throw new BadRequestException("Vui lòng chọn đủ ngày bắt đầu và kết thúc");
         try { return LocalDate.parse(value); }
         catch (DateTimeParseException error) { throw new BadRequestException("Ngày báo cáo không hợp lệ"); }
     }
 
+    // Gộp số liệu theo tuần bắt đầu từ thứ Hai.
     private List<WeeklyCount> weekly(List<DailyCount> days) {
         var counts = new TreeMap<LocalDate, Long>();
         for (DailyCount item : days) {
@@ -239,6 +248,7 @@ public class AdminReportController {
         return counts.entrySet().stream().map(item -> new WeeklyCount(item.getKey(), item.getValue())).toList();
     }
 
+    // Tổng hợp tải ticket và chat theo giờ.
     private List<HourlyLoad> hourly(ReportScope scope, ReportRange range) {
         long[] ticketCounts = new long[24];
         long[] chatCounts = new long[24];

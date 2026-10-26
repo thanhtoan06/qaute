@@ -1,7 +1,6 @@
 package vn.edu.hcmute.qaute.service.admin;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +56,7 @@ public class AdminUserQueryService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    // Khởi tạo dịch vụ truy vấn danh sách người dùng quản trị.
     public AdminUserQueryService(UserRepository userRepository,
                                  StudentProfileRepository studentProfileRepository,
                                  FacultyRepository facultyRepository,
@@ -74,6 +74,7 @@ public class AdminUserQueryService {
     }
 
     /** Searches users by identity fields, role, status, and inclusive account-created dates. */
+    // Tìm người dùng theo bộ lọc và phân trang.
     public Page<AdminUserListItem> search(UserFilter filter, Pageable pageable) {
         UserFilter safeFilter = filter == null ? new UserFilter() : filter;
         return userRepository.findAll(specification(safeFilter), safePageable(safeFilter, pageable))
@@ -81,6 +82,7 @@ public class AdminUserQueryService {
     }
 
     /** Returns account details and the role-specific profile, or a 404 when the account is absent. */
+    // Lấy thông tin tài khoản cùng hồ sơ theo vai trò.
     public AdminUserDetailView getDetail(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng"));
@@ -117,6 +119,7 @@ public class AdminUserQueryService {
                 categoryNames, relatedTicketCount(user, role));
     }
 
+    // Tạo điều kiện truy vấn người dùng từ bộ lọc.
     private Specification<User> specification(UserFilter filter) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new java.util.ArrayList<>();
@@ -147,6 +150,7 @@ public class AdminUserQueryService {
         };
     }
 
+    // Tạo phân trang an toàn với trường sắp xếp cho phép.
     private Pageable safePageable(UserFilter filter, Pageable pageable) {
         int page = pageable == null ? 0 : pageable.getPageNumber();
         int size = pageable == null ? 15 : pageable.getPageSize();
@@ -155,11 +159,13 @@ public class AdminUserQueryService {
                 ALLOWED_SORT_FIELDS, DEFAULT_SORT_FIELD);
     }
 
+    // Chuyển tài khoản thành mục hiển thị trong danh sách.
     private AdminUserListItem toListItem(User user) {
         return new AdminUserListItem(user.getId(), user.getFullName(), user.getEmail(), user.getMssv(),
                 roleOf(user), user.getStatus(), user.getLastLoginAt(), user.getCreatedAt());
     }
 
+    // Lấy tên chuyên mục được giao cho Manager.
     private List<String> categoryNames(Long managerId) {
         List<Long> categoryIds = managerCategoryRepository.findByManagerId(managerId).stream()
                 .map(ManagerCategory::getCategoryId)
@@ -177,6 +183,7 @@ public class AdminUserQueryService {
                 .toList();
     }
 
+    // Đếm ticket liên quan đến tài khoản theo vai trò.
     private int relatedTicketCount(User user, RoleCode role) {
         // The Ticket entity is supplied by the student module in a later integration step.
         boolean ticketAvailable = entityManager.getMetamodel().getEntities().stream()
@@ -192,10 +199,12 @@ public class AdminUserQueryService {
         return Math.toIntExact(count);
     }
 
+    // Lấy mã vai trò của tài khoản.
     private static RoleCode roleOf(User user) {
         return user.getRole() == null ? null : user.getRole().getCode();
     }
 
+    // Cắt khoảng trắng và chuyển chuỗi rỗng thành null.
     private static String clean(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

@@ -34,6 +34,7 @@ import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.ticket.SlaService;
 
+// Xử lý nghiệp vụ TicketReport trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class TicketReportService {
@@ -43,6 +44,7 @@ public class TicketReportService {
     private final ManagerScopeService scopes;
     private final CategoryQueryService categories;
 
+    // Khởi tạo dịch vụ tổng hợp báo cáo phiếu hỗ trợ.
     public TicketReportService(ReportQueryRepository queries, SlaService sla,
                                ManagerScopeService scopes, CategoryQueryService categories) {
         this.queries = queries;
@@ -51,6 +53,7 @@ public class TicketReportService {
         this.categories = categories;
     }
 
+    // Tổng hợp các chỉ số phiếu hỗ trợ trong phạm vi và thời gian yêu cầu.
     public TicketReport build(ReportScope scope, ReportRange range) {
         if (scope == null || range == null || range.from() == null || range.to() == null
                 || range.from().isAfter(range.to())
@@ -82,6 +85,7 @@ public class TicketReportService {
                 percent(resolved[1], resolved[0]), csat(queries.reviews(scope, range)), workload(scope, range));
     }
 
+    // Giới hạn phạm vi báo cáo theo quyền của người dùng hiện tại.
     private ReportScope effectiveScope(ReportScope requested) {
         if (SecurityUtils.hasRole(RoleCode.ADMIN)) return requested;
         if (!SecurityUtils.hasRole(RoleCode.MANAGER)) throw new ForbiddenException();
@@ -91,6 +95,7 @@ public class TicketReportService {
         return new ReportScope(managerId, allowed);
     }
 
+    // Điền số lượng cho từng ngày trong khoảng báo cáo.
     private List<DailyCount> daily(List<Object[]> rows, ReportRange range) {
         Map<LocalDate, Long> counts = new HashMap<>();
         for (Object[] row : rows) counts.put(day(row[0]), number(row[1]));
@@ -100,6 +105,7 @@ public class TicketReportService {
         return result;
     }
 
+    // Chuyển giá trị ngày từ kết quả truy vấn thành LocalDate.
     private LocalDate day(Object value) {
         if (value instanceof LocalDate date) return date;
         if (value instanceof Date date) return date.toLocalDate();
@@ -107,11 +113,13 @@ public class TicketReportService {
         return LocalDate.parse(value.toString());
     }
 
+    // Tính số phút làm việc đã trừ thời gian tạm dừng SLA.
     private double minutes(Ticket ticket, LocalDateTime end) {
         return Math.max(0, sla.businessMinutesBetween(ticket.getCreatedAt(), end)
                 - ticket.getSlaPausedSeconds() / 60.0);
     }
 
+    // Tính số lượng, trung bình, trung vị và phân vị 90 của thời gian.
     private TimeStats stats(List<Double> values) {
         if (values.isEmpty()) return new TimeStats(0, 0, 0, 0);
         values.sort(Double::compareTo);
@@ -121,6 +129,7 @@ public class TicketReportService {
                 median, values.get((int) Math.ceil(n * 0.9) - 1));
     }
 
+    // Tổng hợp điểm hài lòng và các lý do đánh giá.
     private CsatStats csat(List<Object[]> reviews) {
         long[] distribution = new long[5];
         Map<String, Long> reasons = new HashMap<>();
@@ -146,6 +155,7 @@ public class TicketReportService {
                 percent(satisfied, total), distribution, top);
     }
 
+    // Tổng hợp khối lượng công việc của các quản lý trong phạm vi.
     private List<WorkloadItem> workload(ReportScope scope, ReportRange range) {
         if (scope.managerId() == null && scope.categoryIds() != null && scope.categoryIds().isEmpty()) return List.of();
         List<WorkloadItem> result = new ArrayList<>();
@@ -161,7 +171,10 @@ public class TicketReportService {
         return result;
     }
 
+    // Chuyển giá trị truy vấn thành số nguyên, mặc định bằng không.
     private long number(Object value) { return value == null ? 0 : ((Number) value).longValue(); }
+
+    // Tính tỷ lệ phần trăm an toàn khi mẫu số bằng không.
     private double percent(long numerator, long denominator) {
         return denominator == 0 ? 0 : 100.0 * numerator / denominator;
     }

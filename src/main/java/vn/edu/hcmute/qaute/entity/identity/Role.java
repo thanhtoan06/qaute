@@ -13,6 +13,7 @@ import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.RoleCode;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu Role được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "roles")
 @Getter

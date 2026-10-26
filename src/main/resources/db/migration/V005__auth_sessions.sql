@@ -1,3 +1,4 @@
+-- Quản lý refresh session, thời hạn, thu hồi và thay thế phiên đăng nhập.
 CREATE TABLE auth_sessions (
     id                 BIGINT       NOT NULL AUTO_INCREMENT,
     user_id            BIGINT       NOT NULL,
@@ -20,6 +21,7 @@ CREATE TABLE auth_sessions (
     CONSTRAINT fk_auth_sessions_user FOREIGN KEY (user_id) REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Ghi nhận kết quả đăng nhập và thông tin thiết bị phục vụ kiểm tra.
 CREATE TABLE login_history (
     id               BIGINT       NOT NULL AUTO_INCREMENT,
     user_id          BIGINT       NULL,

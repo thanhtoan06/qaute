@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import vn.edu.hcmute.qaute.entity.ticket.Ticket;
 
+// Xử lý nghiệp vụ TicketEventPublisher trong hệ thống.
 @Component
 public class TicketEventPublisher {
     private final ApplicationEventPublisher publisher;

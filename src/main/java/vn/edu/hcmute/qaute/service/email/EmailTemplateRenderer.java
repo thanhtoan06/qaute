@@ -11,6 +11,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import vn.edu.hcmute.qaute.config.AppProperties;
 
+// Xử lý nghiệp vụ EmailTemplateRenderer trong hệ thống.
 @Component
 public class EmailTemplateRenderer {
 
@@ -18,10 +19,12 @@ public class EmailTemplateRenderer {
 
     private final AppProperties appProperties;
 
+    // Khởi tạo bộ kết xuất mẫu với cấu hình ứng dụng.
     public EmailTemplateRenderer(AppProperties appProperties) {
         this.appProperties = appProperties;
     }
 
+    // Đọc mẫu email và thay thế các biến bằng dữ liệu đã mã hóa HTML.
     public String render(String templateName, Map<String, String> model) {
         ClassPathResource resource = new ClassPathResource("mail-templates/" + templateName + ".html");
         if (!resource.exists()) {
@@ -51,6 +54,7 @@ public class EmailTemplateRenderer {
         return result.toString();
     }
 
+    // Mã hóa ký tự đặc biệt để chèn an toàn vào HTML.
     private String escapeHtml(String value) {
         if (value == null) {
             return "";

@@ -1,7 +1,7 @@
 <%@ tag body-content="empty" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ attribute name="status" type="java.lang.String" required="true" rtexprvalue="true" %>
+<%-- Đổi trạng thái yêu cầu thành nhãn tiếng Việt và màu huy hiệu tương ứng. --%>
 <c:set var="statusClass" value="bg-secondary-lt"/>
 <c:set var="statusLabel" value="${status}"/>
 <c:choose>

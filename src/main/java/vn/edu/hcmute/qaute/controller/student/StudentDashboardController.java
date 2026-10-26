@@ -13,12 +13,14 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.governance.AnnouncementQueryService;
 import vn.edu.hcmute.qaute.service.student.StudentDashboardService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho StudentDashboard.
 @Controller
 public class StudentDashboardController {
 
     private final StudentDashboardService dashboardService;
     private final AnnouncementQueryService announcementQueryService;
 
+    // Khởi tạo bộ điều khiển bảng điều khiển và thông báo.
     public StudentDashboardController(StudentDashboardService dashboardService,
                                       AnnouncementQueryService announcementQueryService) {
         this.dashboardService = dashboardService;
@@ -26,6 +28,7 @@ public class StudentDashboardController {
     }
 
     @GetMapping("/student/dashboard")
+    // Hiển thị dữ liệu tổng quan và thông báo dành cho sinh viên.
     public String dashboard(@AuthenticationPrincipal QauteUserDetails me, Model model) {
         Long studentId = SecurityUtils.requireUserId();
         StudentDashboardView dashboard = dashboardService.getDashboard(studentId);

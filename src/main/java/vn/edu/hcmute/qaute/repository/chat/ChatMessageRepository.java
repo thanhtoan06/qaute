@@ -9,17 +9,24 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import vn.edu.hcmute.qaute.entity.chat.ChatMessage;
 
+// Khai báo truy vấn lưu trữ dữ liệu ChatMessage.
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
+    // Tìm tin nhắn mới hơn ID đã nhận.
     List<ChatMessage> findBySessionIdAndIdGreaterThanOrderByIdAsc(Long sessionId, Long afterId);
 
+    // Lấy tối đa 200 tin nhắn mới hơn ID đã nhận.
     List<ChatMessage> findTop200BySessionIdAndIdGreaterThanOrderByIdAsc(Long sessionId, Long afterId);
 
+    // Lấy tối đa 100 tin nhắn mới hơn ID đã nhận.
     List<ChatMessage> findTop100BySessionIdAndIdGreaterThanOrderByIdAsc(Long sessionId, Long afterId);
 
+    // Liệt kê tin nhắn theo thứ tự tăng dần.
     List<ChatMessage> findBySessionIdOrderByIdAsc(Long sessionId);
 
+    // Tìm tin nhắn theo mã phía máy khách.
     Optional<ChatMessage> findBySessionIdAndClientMessageId(Long sessionId, String clientMessageId);
 
+    // Đánh dấu tin nhắn đến là đã đọc.
     @Modifying
     @Query("update ChatMessage m set m.readAt = :now where m.sessionId = :sessionId "
             + "and (m.senderId is null or m.senderId <> :readerId) "

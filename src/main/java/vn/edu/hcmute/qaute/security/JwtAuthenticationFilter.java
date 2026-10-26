@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
 
+// Hỗ trợ xác thực và kiểm soát truy cập qua JwtAuthenticationFilter.
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final CookieService cookieService;
@@ -18,6 +19,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final AuthSessionService authSessionService;
 
+    // Khởi tạo bộ lọc xác thực JWT cùng các dịch vụ liên quan.
     public JwtAuthenticationFilter(CookieService cookieService,
                                    TokenAuthenticationService tokenAuthenticationService,
                                    JwtService jwtService,
@@ -28,11 +30,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.authSessionService = authSessionService;
     }
 
+    // Bỏ qua xác thực JWT cho tài nguyên tĩnh.
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getRequestURI().startsWith("/assets/");
+        String path = request.getRequestURI();
+        return path.startsWith("/assets/") || "/auth/refresh-if-needed".equals(path);
     }
 
+    // Xác thực access token hoặc làm mới phiên trước khi tiếp tục chuỗi lọc.
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
@@ -54,6 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    // Làm mới phiên từ refresh token và xác thực access token mới.
     private Optional<QauteUserDetails> refresh(HttpServletRequest request, HttpServletResponse response) {
         return cookieService.getRefreshToken(request)
                 .flatMap(token -> authSessionService.refresh(token, request.getHeader("User-Agent"),
@@ -64,6 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 });
     }
 
+    // Đặt thông tin người dùng đã xác thực vào ngữ cảnh bảo mật.
     private void setAuthentication(QauteUserDetails user) {
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());

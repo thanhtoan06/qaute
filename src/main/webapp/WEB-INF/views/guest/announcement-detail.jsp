@@ -111,6 +111,7 @@
 
             <div class="row g-4 qad-layout">
                 <div class="col-lg-8">
+                    <%-- Hiển thị tiêu đề, ngày đăng, nội dung và ảnh của thông báo. --%>
                     <article class="qad-main-card mb-4">
                         <header class="qad-article-head">
                             <div class="qad-eyebrow"><i class="bi bi-broadcast-pin"></i> Cổng thông tin QAUTE</div>
@@ -127,7 +128,7 @@
                             <c:if test="${not empty announcement.publishAt()}">
                                 <div class="qad-meta">
                                     <span class="qad-meta-item"><i class="bi bi-calendar2-check"></i>Ngày đăng:
-                                        ${announcement.publishAt().dayOfMonth}/${announcement.publishAt().monthValue}/${announcement.publishAt().year}</span>
+                                        <time datetime="<c:out value='${announcement.publishAt()}'/>" data-qaute-datetime><c:out value="${announcement.publishAt()}"/></time></span>
                                     <span class="qad-meta-item"><i class="bi bi-shield-check"></i>Thông tin chính
                                         thức</span>
                                 </div>
@@ -157,6 +158,7 @@
                 </div>
 
                 <aside class="col-lg-4 qad-sidebar">
+                    <%-- Điều hướng về trang chủ hoặc bảng điều khiển theo quyền người dùng. --%>
                     <section class="qad-side-card">
                         <div class="qad-side-head">
                             <span class="qad-side-icon"><i class="bi bi-compass"></i></span>
@@ -180,6 +182,7 @@
                         </div>
                     </section>
 
+                    <%-- Cung cấp các kênh FAQ, chat và gửi yêu cầu hỗ trợ thêm. --%>
                     <section class="qad-side-card">
                         <div class="qad-side-head">
                             <span class="qad-side-icon qad-teal"><i class="bi bi-headset"></i></span>

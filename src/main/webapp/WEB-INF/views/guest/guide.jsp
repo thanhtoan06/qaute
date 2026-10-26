@@ -114,6 +114,7 @@
         </ol>
     </nav>
 
+    <%-- Giới thiệu tài liệu hướng dẫn sử dụng các tính năng QAUTE. --%>
     <section class="guide-hero">
         <div class="guide-hero-grid">
             <div class="guide-hero-copy">
@@ -146,6 +147,7 @@
         <p>Chọn từng mục để xem hướng dẫn thao tác và những lưu ý quan trọng trong quá trình sử dụng hệ thống.</p>
     </div>
 
+    <%-- Các hướng dẫn thao tác được nhóm trong danh sách có thể mở rộng. --%>
     <div class="accordion mb-5" id="guideAccordion">
         <div class="accordion-item mb-3 border rounded shadow-none">
             <h2 class="accordion-header" id="headingOne">
@@ -288,6 +290,7 @@
         </div>
     </div>
 
+    <%-- Liên kết đến các chức năng và kênh hỗ trợ sau khi đọc hướng dẫn. --%>
     <section class="guide-cta">
         <div class="guide-cta-icon">
             <i class="bi bi-chat-square-heart-fill"></i>

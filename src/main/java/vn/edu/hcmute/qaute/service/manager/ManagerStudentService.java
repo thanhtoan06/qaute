@@ -26,7 +26,6 @@ import vn.edu.hcmute.qaute.dto.view.ManagerStudentDetailView;
 import vn.edu.hcmute.qaute.dto.view.ManagerStudentListItem;
 import vn.edu.hcmute.qaute.dto.view.StudentSummary;
 import vn.edu.hcmute.qaute.entity.appointment.Appointment;
-import vn.edu.hcmute.qaute.entity.appointment.AppointmentSlot;
 import vn.edu.hcmute.qaute.entity.chat.ChatSession;
 import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.entity.ticket.Ticket;
@@ -34,6 +33,7 @@ import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 
+// Xử lý nghiệp vụ ManagerStudent trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class ManagerStudentService {
@@ -42,6 +42,7 @@ public class ManagerStudentService {
     private final UserLookupService users;
     private final AuditService audit;
 
+    // Khởi tạo dịch vụ tra cứu thông tin sinh viên trong phạm vi phụ trách.
     public ManagerStudentService(EntityManager entityManager, ManagerScopeService scopes,
                                  UserLookupService users, AuditService audit) {
         this.entityManager = entityManager;
@@ -50,6 +51,7 @@ public class ManagerStudentService {
         this.audit = audit;
     }
 
+    // Tìm kiếm và phân trang sinh viên có liên hệ với tư vấn viên.
     public Page<ManagerStudentListItem> search(Long managerId, String q, Pageable pageable) {
         pageable = BoundedPages.of(pageable);
         List<Long> categoryIds = scopes.getScopeCategoryIds(managerId);
@@ -76,10 +78,12 @@ public class ManagerStudentService {
         return new PageImpl<>(items, pageable, total);
     }
 
+    // Lấy trang thông tin sinh viên với kích thước mặc định.
     public ManagerStudentDetailView detail(Long managerId, Long studentId) {
         return detail(managerId, studentId, BoundedPages.of(0, 15));
     }
 
+    // Lấy chi tiết sinh viên cùng các yêu cầu, lịch hẹn và phiên trò chuyện.
     public ManagerStudentDetailView detail(Long managerId, Long studentId, Pageable requested) {
         Pageable page = BoundedPages.of(requested);
         List<Long> categoryIds = scopes.getScopeCategoryIds(managerId);
@@ -136,6 +140,7 @@ public class ManagerStudentService {
         return new ManagerStudentDetailView(student, tickets, appointments, chats);
     }
 
+    // Tạo điều kiện xác định sinh viên thuộc phạm vi có thể xem.
     private Predicate visible(CriteriaBuilder cb, CriteriaQuery<?> query, Root<User> user,
                               Long managerId, List<Long> categoryIds, String q) {
         List<Predicate> predicates = new ArrayList<>();

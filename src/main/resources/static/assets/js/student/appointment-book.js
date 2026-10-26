@@ -25,6 +25,7 @@
     var slotLoading = document.getElementById('slotLoading');
     var slotEmpty   = document.getElementById('slotEmpty');
     var slotGrid    = document.getElementById('slotGrid');
+    var slotModalityEmpty = document.getElementById('slotModalityEmpty');
     var fCategoryId = document.getElementById('fCategoryId');
     var fManagerId  = document.getElementById('fManagerId');
     var fSlotId     = document.getElementById('fSlotId');
@@ -38,12 +39,15 @@
     var summaryAdvisor = document.getElementById('summaryAdvisor');
     var summaryModality = document.getElementById('summaryModality');
     var btnSubmit   = document.getElementById('btnSubmit');
+    var slotRequestId = 0;
 
+    // Định dạng ngày theo chuẩn yyyy-MM-dd.
     function formatDateValue(date) {
         return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0')
             + '-' + String(date.getDate()).padStart(2, '0');
     }
 
+    // Tạo các lựa chọn ngày làm việc sắp tới.
     function renderQuickDates() {
         if (!quickDateGrid || !dateInput) return;
         var date = new Date();
@@ -56,13 +60,14 @@
             var label = date.toLocaleDateString('vi-VN', {weekday: 'short'}).replace('.', '');
             var day = String(date.getDate()).padStart(2, '0');
             var month = String(date.getMonth() + 1).padStart(2, '0');
-            html += '<div class="col"><button type="button" class="btn btn-outline-secondary quick-date-btn w-100"'
-                + ' data-date="' + value + '"><span class="small d-block">' + escH(label)
-                + '</span><strong>' + day + '/' + month + '</strong></button></div>';
+            html += '<button type="button" class="btn btn-outline-secondary quick-date-btn w-100"'
+                + ' data-date="' + value + '"><span class="quick-date-weekday small">' + escH(label)
+                + '</span><strong class="quick-date-value">' + day + '/' + month + '</strong></button>';
             count++;
         }
         quickDateGrid.innerHTML = html;
         quickDateGrid.querySelectorAll('.quick-date-btn').forEach(function (button) {
+            // Chọn ngày nhanh và cập nhật ô ngày.
             button.addEventListener('click', function () {
                 quickDateGrid.querySelectorAll('.quick-date-btn').forEach(function (item) {
                     item.classList.remove('selected', 'text-white');
@@ -74,19 +79,18 @@
                 dateInput.dispatchEvent(new Event('change'));
             });
         });
-        if (dateInput.value) {
-            var selected = quickDateGrid.querySelector('[data-date="' + dateInput.value + '"]');
-            if (selected) selected.click();
-        } else {
-            quickDateGrid.querySelector('.quick-date-btn').click();
-        }
+        var selected = dateInput.value
+            ? quickDateGrid.querySelector('[data-date="' + dateInput.value + '"]')
+            : null;
+        (selected || quickDateGrid.querySelector('.quick-date-btn')).click();
     }
 
-    // Set min date = today
-    var today = new Date().toISOString().slice(0, 10);
+    // Đặt ngày tối thiểu theo ngày địa phương của sinh viên.
+    var today = formatDateValue(new Date());
     if (dateInput) { dateInput.min = today; if (!dateInput.value) dateInput.value = today; }
 
     // ─── Step navigation ─────────────────────────────────────────────────────
+    // Chuyển biểu mẫu đặt lịch sang bước được chỉ định.
     function goStep(n) {
         document.getElementById('panel-' + currentStep).classList.remove('active');
         var indCurrent = document.getElementById('step-ind-' + currentStep);
@@ -100,9 +104,11 @@
     }
 
     // ─── Populate departments ─────────────────────────────────────────────────
+    // Nạp danh sách phòng ban vào ô chọn.
     function populateDepts() {
         if (!deptSelect) return;
-        tree.forEach(function (dept) {
+        if (deptSelect.options.length > 1) return;
+        (tree || []).forEach(function (dept) {
             var opt = document.createElement('option');
             opt.value = dept.id;
             opt.textContent = dept.name;
@@ -111,6 +117,7 @@
     }
 
     if (deptSelect) {
+        // Nạp chuyên mục tương ứng với phòng ban đã chọn.
         deptSelect.addEventListener('change', function () {
             var deptId = Number(this.value);
             catSelect.innerHTML = '<option value="">-- Chọn chuyên mục --</option>';
@@ -144,6 +151,7 @@
     }
 
     if (catSelect) {
+        // Hiển thị danh sách tư vấn viên theo chuyên mục.
         catSelect.addEventListener('change', function () {
             var catId = Number(this.value);
             fCategoryId.value = catId || '';
@@ -158,6 +166,7 @@
     }
 
     // ─── Load advisors ────────────────────────────────────────────────────────
+    // Tải danh sách tư vấn viên theo chuyên mục.
     function loadAdvisors(categoryId) {
         advisorCards.innerHTML = '';
         advisorCards.appendChild(advisorLoading);
@@ -165,16 +174,19 @@
 
         fetch(ctx + '/api/appointments/advisors?categoryId=' + categoryId)
             .then(function (r) { return r.json(); })
+            // Hiển thị danh sách tư vấn viên nhận được.
             .then(function (resp) {
                 advisorLoading.style.display = 'none';
                 renderAdvisors(resp.data || []);
             })
+            // Báo lỗi trong vùng hiển thị khi tải danh sách thất bại.
             .catch(function () {
                 advisorLoading.style.display = 'none';
                 advisorCards.innerHTML = '<div class="col-12 text-danger small p-2">Không tải được danh sách tư vấn viên.</div>';
             });
     }
 
+    // Tạo thẻ cho tư vấn viên và lựa chọn phân công tự động.
     function renderAdvisors(advisors) {
         advisorCards.innerHTML = '';
         // "Any advisor" option
@@ -184,6 +196,7 @@
         });
     }
 
+    // Tạo thẻ thông tin và lựa chọn tư vấn viên.
     function buildAdvisorCard(id, name, title, avatarUrl, status, preSelected) {
         var col = document.createElement('div');
         col.className = 'col-12 col-sm-6';
@@ -206,6 +219,7 @@
             '<i class="bi ' + (preSelected ? 'bi-check-circle-fill text-primary' : 'bi-circle text-secondary') + ' ms-2 fs-5 adv-check"></i>' +
             '</div></div>';
 
+        // Cập nhật tư vấn viên được chọn trên biểu mẫu.
         col.querySelector('.advisor-card').addEventListener('click', function () {
             document.querySelectorAll('.advisor-card').forEach(function (c) {
                 c.classList.remove('selected');
@@ -228,11 +242,13 @@
         return col;
     }
 
+    // Mã hóa ký tự HTML trước khi chèn dữ liệu vào giao diện.
     function escH(s) {
         return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     if (btnNext1) {
+        // Chuyển sang bước chọn khung giờ khi đã có chuyên mục.
         btnNext1.addEventListener('click', function () {
             if (!fCategoryId.value) return;
             goStep(2);
@@ -243,15 +259,17 @@
     if (btnPrev2) btnPrev2.addEventListener('click', function () { goStep(1); });
 
     // ─── Load slots ───────────────────────────────────────────────────────────
+    // Tải các khung giờ phù hợp với ngày và lựa chọn hiện tại.
     function loadSlots() {
         var date = dateInput ? dateInput.value : '';
-        var modality = modalitySelect ? modalitySelect.value : '';
         var catId = fCategoryId.value;
         if (!date || !catId) return;
+        var requestId = ++slotRequestId;
 
         slotPlaceholder.style.display = 'none';
         slotLoading.style.display = 'block';
         slotEmpty.style.display = 'none';
+        slotModalityEmpty.style.display = 'none';
         slotGrid.innerHTML = '';
         selectedSlot = null;
         fSlotId.value = '';
@@ -259,11 +277,14 @@
 
         var url = ctx + '/api/appointments/slots?categoryId=' + catId + '&date=' + date;
         if (fManagerId.value) url += '&managerId=' + fManagerId.value;
-        if (modality) url += '&modality=' + modality;
-
         fetch(url)
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (!r.ok) throw new Error('Không tải được khung giờ.');
+                return r.json();
+            })
+            // Hiển thị khung giờ hoặc trạng thái không có lịch.
             .then(function (resp) {
+                if (requestId !== slotRequestId) return;
                 slotLoading.style.display = 'none';
                 var slots = resp.data || [];
                 if (slots.length === 0) {
@@ -272,35 +293,42 @@
                     renderSlots(slots, date);
                 }
             })
+            // Báo lỗi khi không tải được khung giờ.
             .catch(function () {
+                if (requestId !== slotRequestId) return;
                 slotLoading.style.display = 'none';
                 slotGrid.innerHTML = '<div class="col-12 text-danger small p-2">Không tải được khung giờ.</div>';
             });
     }
 
+    // Tạo các nút chọn khung giờ.
     function renderSlots(slots, date) {
         slotGrid.innerHTML = '';
+        // Tạo giao diện và thao tác chọn cho từng khung giờ.
         slots.forEach(function (slot) {
             var start = new Date(slot.startAt);
             var end   = new Date(slot.endAt);
             var timeLabel = fmtTime(start) + ' – ' + fmtTime(end);
-            var mIcon = slot.modality === 'ONLINE' ? '🖥' : slot.modality === 'IN_PERSON' ? '🏫' : '🔄';
+            var mIcon = slot.modality === 'ONLINE' ? 'bi-camera-video-fill'
+                : slot.modality === 'IN_PERSON' ? 'bi-geo-alt-fill' : 'bi-arrow-left-right';
             var mLabel = slot.modality === 'ONLINE' ? 'Online' : slot.modality === 'IN_PERSON' ? 'Trực tiếp' : 'Linh hoạt';
 
             var col = document.createElement('div');
-            col.className = 'col-6 col-sm-4 col-md-3';
+            col.className = 'col';
+            col.setAttribute('data-slot-modality', slot.modality || '');
             col.innerHTML = '<button type="button" class="btn btn-outline-primary slot-btn w-100 py-2"' +
                 ' data-sid="' + escH(String(slot.slotId)) + '"' +
                 ' data-slabel="' + escH(timeLabel) + '"' +
                 ' data-smanager="' + escH(slot.managerName || '') + '"' +
                 ' data-smodality="' + escH(slot.modality || '') + '"' +
                 ' data-sstart="' + escH(slot.startAt || '') + '">' +
-                '<div class="fw-semibold small">' + escH(timeLabel) + '</div>' +
-                '<div class="small text-muted">' + mIcon + ' ' + mLabel + '</div>' +
-                (slot.managerName ? '<div class="small text-muted text-truncate" style="max-width:120px">' + escH(slot.managerName) + '</div>' : '') +
+                '<span class="slot-time fw-semibold small">' + escH(timeLabel) + '</span>' +
+                '<span class="slot-modality small text-muted"><i class="bi ' + mIcon + ' me-1" aria-hidden="true"></i>' + mLabel + '</span>' +
+                (slot.managerName ? '<span class="slot-manager small text-muted text-truncate">' + escH(slot.managerName) + '</span>' : '') +
                 '</button>';
 
             var btn = col.querySelector('.slot-btn');
+            // Lưu khung giờ đã chọn vào biểu mẫu.
             btn.addEventListener('click', function () {
                 document.querySelectorAll('.slot-btn').forEach(function (b) { b.classList.remove('selected'); });
                 this.classList.add('selected');
@@ -313,32 +341,76 @@
                 };
                 fSlotId.value = selectedSlot.id;
                 fDate.value = date;
-                fModality.value = selectedSlot.modality;
-                btnNext2.disabled = false;
+                updateSlotChoices();
             });
             slotGrid.appendChild(col);
         });
+        updateSlotChoices();
     }
 
+    // Lọc khung giờ theo hình thức và giữ lựa chọn nếu khung giờ vẫn phù hợp.
+    function updateSlotChoices() {
+        var requested = modalitySelect ? modalitySelect.value : '';
+        var selectedStillAvailable = false;
+        var visibleCount = 0;
+        var slots = slotGrid.querySelectorAll('[data-slot-modality]');
+        slots.forEach(function (col) {
+            var slotModality = col.getAttribute('data-slot-modality');
+            var compatible = !requested || slotModality === 'BOTH' || slotModality === requested;
+            col.hidden = !compatible;
+            if (compatible) visibleCount++;
+            var button = col.querySelector('.slot-btn');
+            if (button && button.classList.contains('selected') && compatible) {
+                selectedStillAvailable = true;
+            }
+        });
+        if (selectedSlot && !selectedStillAvailable) {
+            selectedSlot = null;
+            fSlotId.value = '';
+            fModality.value = '';
+            slotGrid.querySelectorAll('.slot-btn.selected').forEach(function (button) {
+                button.classList.remove('selected');
+            });
+        }
+        fModality.value = requested;
+        btnNext2.disabled = !selectedSlot || !requested;
+        slotModalityEmpty.style.display = requested && slots.length && !visibleCount
+            ? 'block' : 'none';
+    }
+
+    // Định dạng thời gian theo giờ và phút.
     function fmtTime(d) {
         return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
     }
 
     if (dateInput) dateInput.addEventListener('change', loadSlots);
-    if (modalitySelect) modalitySelect.addEventListener('change', function () { if (dateInput && dateInput.value) loadSlots(); });
+    if (modalitySelect) modalitySelect.addEventListener('change', updateSlotChoices);
 
+    // Gắn lựa chọn hình thức tư vấn vào các thẻ tương ứng.
     document.querySelectorAll('[data-modality-choice]').forEach(function (card) {
+        // Cập nhật hình thức tư vấn mà không tải lại và làm mất khung giờ đã chọn.
         card.addEventListener('click', function () {
             document.querySelectorAll('[data-modality-choice]').forEach(function (item) {
                 item.classList.remove('selected');
             });
             this.classList.add('selected');
             modalitySelect.value = this.getAttribute('data-modality-choice');
-            if (dateInput && dateInput.value) loadSlots();
+            updateSlotChoices();
         });
     });
 
+    if (modalitySelect && fModality.value) {
+        var initialChoice = document.querySelector('[data-modality-choice="' + fModality.value + '"]');
+        if (initialChoice) {
+            initialChoice.classList.add('selected');
+            modalitySelect.value = fModality.value;
+        } else {
+            fModality.value = '';
+        }
+    }
+
     if (btnNext2) {
+        // Xác nhận khung giờ và chuyển đến bước thông tin.
         btnNext2.addEventListener('click', function () {
             if (!selectedSlot) return;
             updateSummary();
@@ -348,6 +420,7 @@
 
     if (btnPrev3) btnPrev3.addEventListener('click', function () { goStep(2); });
 
+    // Cập nhật thông tin tóm tắt lịch hẹn.
     function updateSummary() {
         if (!selectedSlot) return;
         var dateVal = fDate.value || '';
@@ -361,8 +434,10 @@
     }
 
     // ─── Char counters ────────────────────────────────────────────────────────
+    // Theo dõi và hiển thị số ký tự đã nhập.
     function charCounter(input, counter) {
         if (!input || !counter) return;
+        // Đồng bộ số ký tự hiện tại với bộ đếm.
         function upd() { counter.textContent = input.value.length + ' / ' + (input.maxLength > 0 ? input.maxLength : ''); }
         input.addEventListener('input', upd);
         upd();
@@ -374,10 +449,16 @@
     // ─── Submit guard ─────────────────────────────────────────────────────────
     var form = document.getElementById('apptBookForm');
     if (form) {
+        // Kiểm tra dữ liệu đặt lịch trước khi gửi biểu mẫu.
         form.addEventListener('submit', function (e) {
             if (!fSlotId.value) {
                 e.preventDefault();
                 alert('Vui lòng chọn khung giờ trước khi đặt lịch.');
+                return;
+            }
+            if (!fModality.value) {
+                e.preventDefault();
+                alert('Hãy chọn hình thức trực tuyến hoặc trực tiếp.');
                 return;
             }
             var topic = topicInput ? topicInput.value.trim() : '';

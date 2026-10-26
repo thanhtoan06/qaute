@@ -15,5 +15,6 @@ public interface AuditService {
      * @param before     tóm tắt trạng thái trước (tối đa 1000 ký tự, dài hơn sẽ bị cắt); có thể null
      * @param after      tóm tắt trạng thái sau (tối đa 1000 ký tự, dài hơn sẽ bị cắt); có thể null
      */
+    // Ghi nhật ký audit mà không làm gián đoạn nghiệp vụ gọi vào.
     void log(String action, String entityType, Long entityId, String before, String after);
 }

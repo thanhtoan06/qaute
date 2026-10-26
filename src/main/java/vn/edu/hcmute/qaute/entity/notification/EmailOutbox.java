@@ -14,6 +14,7 @@ import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.EmailStatus;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu EmailOutbox được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "email_outbox")
 @Getter

@@ -9,12 +9,15 @@ import org.springframework.stereotype.Repository;
 import vn.edu.hcmute.qaute.dto.view.report.ReportRange;
 import vn.edu.hcmute.qaute.dto.view.report.ReportScope;
 
+// Khai báo truy vấn lưu trữ dữ liệu ServiceReportQuery.
 @Repository
 public class ServiceReportQueryRepository {
     private final EntityManager em;
 
+    // Khởi tạo kho truy vấn báo cáo dịch vụ.
     public ServiceReportQueryRepository(EntityManager em) { this.em = em; }
 
+    // Tổng hợp số liệu các phiên trò chuyện.
     public Object[] chatTotals(ReportScope scope, ReportRange range) {
         Query q = em.createNativeQuery("select count(*), "
                 + "avg(case when c.accepted_at is not null then timestampdiff(second, c.started_at, c.accepted_at) end), "
@@ -31,6 +34,7 @@ public class ServiceReportQueryRepository {
     }
 
     @SuppressWarnings("unchecked")
+    // Thống kê số phiên trò chuyện theo giờ.
     public List<Object[]> chatsPerHour(ReportScope scope, ReportRange range) {
         Query q = em.createNativeQuery("select hour(c.started_at), count(*) from chat_sessions c where "
                 + scopeClause(scope, "c") + " and c.started_at >= :from and c.started_at < :to "
@@ -40,6 +44,7 @@ public class ServiceReportQueryRepository {
     }
 
     @SuppressWarnings("unchecked")
+    // Thống kê số phiên trò chuyện theo quản lý.
     public List<Object[]> chatsPerManager(ReportScope scope, ReportRange range) {
         Query q = em.createNativeQuery("select u.full_name, count(*) from chat_sessions c "
                 + "join users u on u.id = c.manager_id where " + scopeClause(scope, "c")
@@ -49,6 +54,7 @@ public class ServiceReportQueryRepository {
         return q.getResultList();
     }
 
+    // Tổng hợp số liệu lịch hẹn.
     public Object[] appointmentTotals(ReportScope scope, ReportRange range) {
         Query q = em.createNativeQuery("select count(*), "
                 + "sum(case when a.status = :completed then 1 else 0 end), "
@@ -62,6 +68,7 @@ public class ServiceReportQueryRepository {
         return (Object[]) q.getSingleResult();
     }
 
+    // Tổng hợp số liệu khung giờ và lượt đặt.
     public long[] slotTotals(ReportRange range, Set<Long> managerIds) {
         if (managerIds != null && managerIds.isEmpty()) return new long[]{0, 0};
         Query q = em.createNativeQuery("select count(*), sum(case when s.status = :booked then 1 else 0 end) "
@@ -74,6 +81,7 @@ public class ServiceReportQueryRepository {
         return new long[]{number(row[0]), number(row[1])};
     }
 
+    // Đếm lượt xem câu hỏi thường gặp.
     public long faqViews(ReportRange range) {
         Query q = em.createQuery("select count(v) from FaqView v where v.lastViewedAt >= :from "
                 + "and v.lastViewedAt < :to");
@@ -81,6 +89,7 @@ public class ServiceReportQueryRepository {
         return number(q.getSingleResult());
     }
 
+    // Tổng hợp phản hồi về câu hỏi thường gặp.
     public long[] feedback(ReportRange range) {
         Query q = em.createQuery("select count(f), sum(case when f.helpful = true then 1 else 0 end) "
                 + "from FaqFeedback f where f.updatedAt >= :from and f.updatedAt < :to");
@@ -89,6 +98,7 @@ public class ServiceReportQueryRepository {
         return new long[]{number(row[0]), number(row[1])};
     }
 
+    // Tổng hợp số liệu tìm kiếm.
     public long[] searches(ReportRange range) {
         Query q = em.createQuery("select "
                 + "sum(case when s.resultCount is not null then 1 else 0 end), "
@@ -101,6 +111,7 @@ public class ServiceReportQueryRepository {
     }
 
     @SuppressWarnings("unchecked")
+    // Lấy các truy vấn tìm kiếm không có kết quả phổ biến nhất.
     public List<Object[]> topNoResultQueries(ReportRange range) {
         Query q = em.createQuery("select s.queryNorm, count(s) from SearchLog s "
                 + "where s.createdAt >= :from and s.createdAt < :to and s.resultCount = 0 "
@@ -110,6 +121,7 @@ public class ServiceReportQueryRepository {
     }
 
     @SuppressWarnings("unchecked")
+    // Lấy các câu hỏi thường gặp có tỷ lệ hữu ích thấp.
     public List<Object[]> lowHelpfulFaqs() {
         return em.createQuery("select f.title, f.helpfulCount, f.notHelpfulCount from Faq f "
                         + "where f.helpfulCount + f.notHelpfulCount >= :minimum "
@@ -118,6 +130,7 @@ public class ServiceReportQueryRepository {
                 .setParameter("minimum", 5).setMaxResults(30).getResultList();
     }
 
+    // Tổng hợp số liệu chuyển hướng từ tìm kiếm sang câu hỏi thường gặp.
     public long[] deflection(ReportRange range) {
         Query q = em.createNativeQuery("select count(*), "
                 + "sum(case when s.user_id is not null and not exists (select 1 from tickets t "
@@ -131,6 +144,7 @@ public class ServiceReportQueryRepository {
         return new long[]{number(row[0]), number(row[1])};
     }
 
+    // Đếm phiên trò chuyện đã được quản lý tiếp nhận.
     public long managerChats(Long managerId, ReportRange range) {
         Query q = em.createQuery("select count(c) from ChatSession c where c.managerId = :managerId "
                 + "and c.acceptedAt >= :from and c.acceptedAt < :to");
@@ -139,6 +153,7 @@ public class ServiceReportQueryRepository {
         return number(q.getSingleResult());
     }
 
+    // Tạo điều kiện lọc theo phạm vi báo cáo.
     private String scopeClause(ReportScope scope, String alias) {
         if (scope == null || (scope.managerId() == null && scope.categoryIds() == null)) return "1 = 1";
         boolean categories = scope.categoryIds() != null && !scope.categoryIds().isEmpty();
@@ -150,6 +165,7 @@ public class ServiceReportQueryRepository {
         return "1 = 0";
     }
 
+    // Gán tham số phạm vi và thời gian cho truy vấn.
     private void bind(Query q, ReportScope scope, ReportRange range) {
         bindRange(q, range);
         if (scope == null) return;
@@ -157,11 +173,13 @@ public class ServiceReportQueryRepository {
         if (scope.categoryIds() != null && !scope.categoryIds().isEmpty()) q.setParameter("categoryIds", scope.categoryIds());
     }
 
+    // Gán khoảng thời gian cho truy vấn.
     private void bindRange(Query q, ReportRange range) {
         LocalDateTime from = range.from().atStartOfDay();
         LocalDateTime to = range.to().plusDays(1).atStartOfDay();
         q.setParameter("from", from).setParameter("to", to);
     }
 
+    // Chuyển giá trị số thành long, mặc định bằng không nếu null.
     private long number(Object value) { return value == null ? 0 : ((Number) value).longValue(); }
 }

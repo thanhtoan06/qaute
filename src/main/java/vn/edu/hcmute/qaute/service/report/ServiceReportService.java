@@ -26,6 +26,7 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.ticket.SlaService;
 
+// Xử lý nghiệp vụ ServiceReport trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class ServiceReportService {
@@ -36,6 +37,7 @@ public class ServiceReportService {
     private final CategoryRepository categories;
     private final SlaService sla;
 
+    // Khởi tạo dịch vụ tổng hợp báo cáo dịch vụ.
     public ServiceReportService(ServiceReportQueryRepository serviceQueries, ReportQueryRepository ticketQueries,
                                 ManagerScopeService scopes, DepartmentRepository departments,
                                 CategoryRepository categories, SlaService sla) {
@@ -47,6 +49,7 @@ public class ServiceReportService {
         this.sla = sla;
     }
 
+    // Tổng hợp số liệu trò chuyện theo phạm vi và thời gian.
     public ChatReport chat(ReportScope scope, ReportRange range) {
         validate(scope, range);
         scope = effectiveScope(scope);
@@ -58,6 +61,7 @@ public class ServiceReportService {
                 percent(number(values[3]), total), perManager);
     }
 
+    // Tổng hợp số liệu đặt lịch theo phạm vi và thời gian.
     public AppointmentReport appointment(ReportScope scope, ReportRange range) {
         validate(scope, range);
         scope = effectiveScope(scope);
@@ -68,6 +72,7 @@ public class ServiceReportService {
                 percent(number(values[3]), booked), percent(slots[1], slots[0]));
     }
 
+    // Tổng hợp số liệu phản hồi và tìm kiếm tri thức.
     public KnowledgeReport knowledge(ReportRange range) {
         requireAdmin();
         validateRange(range);
@@ -85,6 +90,7 @@ public class ServiceReportService {
                 topNoResult, lowHelpful, percent(deflection[1], deflection[0]));
     }
 
+    // So sánh chỉ số báo cáo giữa các phòng ban.
     public List<DepartmentCompare> compareDepartments(ReportRange range) {
         requireAdmin();
         validateRange(range);
@@ -105,6 +111,7 @@ public class ServiceReportService {
         return result;
     }
 
+    // Tổng hợp hiệu suất báo cáo của từng quản lý.
     public List<ManagerPerformance> managerPerformance(ReportRange range) {
         requireAdmin();
         validateRange(range);
@@ -121,6 +128,7 @@ public class ServiceReportService {
         return result;
     }
 
+    // Lấy các quản lý thuộc phạm vi đặt lịch được yêu cầu.
     private Set<Long> slotManagerIds(ReportScope scope) {
         if (scope.managerId() == null && scope.categoryIds() == null) return null;
         Set<Long> managerIds = new HashSet<>();
@@ -129,6 +137,7 @@ public class ServiceReportService {
         return managerIds;
     }
 
+    // Giới hạn phạm vi báo cáo theo quyền của người dùng hiện tại.
     private ReportScope effectiveScope(ReportScope requested) {
         // The report scope supplied by a Manager is never wider than their assigned categories.
         if (SecurityUtils.hasRole(RoleCode.ADMIN)) return requested;
@@ -139,6 +148,7 @@ public class ServiceReportService {
         return new ReportScope(managerId, allowed);
     }
 
+    // Tính thời gian phản hồi trung bình theo phút làm việc.
     private double averageFirstResponse(List<Ticket> tickets) {
         long count = 0;
         double total = 0;
@@ -151,27 +161,36 @@ public class ServiceReportService {
         return count == 0 ? 0 : total / count;
     }
 
+    // Tính điểm đánh giá trung bình từ danh sách phản hồi.
     private double averageRating(List<Object[]> reviews) {
         return reviews.stream().mapToInt(row -> ((Number) row[0]).intValue()).average().orElse(0);
     }
 
+    // Kiểm tra phạm vi và khoảng thời gian báo cáo.
     private void validate(ReportScope scope, ReportRange range) {
         if (scope == null) throw new BadRequestException("Phạm vi báo cáo không hợp lệ");
         validateRange(range);
     }
 
+    // Yêu cầu người dùng hiện tại có quyền quản trị.
     private void requireAdmin() {
         if (!SecurityUtils.hasRole(RoleCode.ADMIN)) throw new ForbiddenException();
     }
 
+    // Kiểm tra khoảng thời gian báo cáo hợp lệ.
     private void validateRange(ReportRange range) {
         if (range == null || range.from() == null || range.to() == null || range.from().isAfter(range.to())
                 || java.time.temporal.ChronoUnit.DAYS.between(range.from(), range.to()) > 365)
             throw new BadRequestException("Khoảng báo cáo không hợp lệ");
     }
 
+    // Chuyển giá trị truy vấn thành số nguyên, mặc định bằng không.
     private long number(Object value) { return value == null ? 0 : ((Number) value).longValue(); }
+
+    // Chuyển giá trị truy vấn thành số thập phân, mặc định bằng không.
     private double decimal(Object value) { return value == null ? 0 : ((Number) value).doubleValue(); }
+
+    // Tính tỷ lệ phần trăm an toàn khi mẫu số bằng không.
     private double percent(long numerator, long denominator) {
         return denominator == 0 ? 0 : 100.0 * numerator / denominator;
     }

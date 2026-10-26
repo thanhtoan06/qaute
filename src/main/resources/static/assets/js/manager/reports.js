@@ -1,3 +1,4 @@
+// Khởi tạo bộ lọc và báo cáo dành cho quản lý.
 (() => {
   'use strict';
   const root = document.getElementById('manager-reports');
@@ -10,9 +11,13 @@
   const charts = new Map();
   let requestId = 0;
   let pending = null;
+  // Tìm phần tử giao diện theo mã định danh.
   const byId = id => document.getElementById(id);
+  // Định dạng số theo quy ước tiếng Việt.
   const format = value => Number(value || 0).toLocaleString('vi-VN', {maximumFractionDigits: 1});
+  // Định dạng giá trị phần trăm.
   const percentage = value => `${format(value)}%`;
+  // Tạo một hàng thông tin trong phần báo cáo.
   const row = (label, value) => {
     const node = document.createElement('div');
     node.className = 'd-flex justify-content-between border-bottom py-2 gap-2';
@@ -22,6 +27,7 @@
     return node;
   };
 
+  // Ẩn hoặc bật các bộ lọc ngày và chuyên mục.
   function toggleFilters() {
     const custom = range.value === 'custom';
     document.querySelectorAll('.report-custom-date').forEach(node => node.classList.toggle('d-none', !custom));
@@ -29,11 +35,13 @@
     category.disabled = mine.checked;
   }
 
+  // Hủy các biểu đồ cũ trước khi hiển thị dữ liệu mới.
   function destroyCharts() {
     charts.forEach(chart => chart.destroy());
     charts.clear();
   }
 
+  // Vẽ biểu đồ báo cáo theo loại và dữ liệu đã cung cấp.
   function draw(id, type, labels, values, color, extra = {}) {
     const canvas = byId(id);
     if (!canvas || !window.Chart) return;
@@ -47,6 +55,7 @@
     }));
   }
 
+  // Cập nhật các chỉ số tổng hợp của báo cáo.
   function showKpis(ticket) {
     const total = (ticket.perDay || []).reduce((sum, day) => sum + day.count, 0);
     byId('kpi-tickets').textContent = format(total);
@@ -59,6 +68,7 @@
     return total;
   }
 
+  // Hiển thị tải công việc theo từng tư vấn viên.
   function showWorkload(items) {
     const tbody = byId('report-workload');
     tbody.replaceChildren();
@@ -67,6 +77,7 @@
       td.colSpan = 4; td.className = 'text-secondary text-center py-3'; td.textContent = 'Chưa có tư vấn viên trong phạm vi.';
       tr.append(td); tbody.append(tr); return;
     }
+    // Tạo một dòng hiển thị tải công việc cho mỗi tư vấn viên.
     items.forEach(item => {
       const tr = document.createElement('tr');
       [item.managerName, item.open, item.capacity, item.resolvedInRange].forEach(value => {
@@ -76,6 +87,7 @@
     });
   }
 
+  // Hiển thị các số liệu chat và lịch hẹn.
   function showOther(chat, appointment) {
     const target = byId('report-other');
     target.replaceChildren(
@@ -91,6 +103,7 @@
     );
   }
 
+  // Cập nhật toàn bộ nội dung báo cáo từ dữ liệu nhận được.
   function render(data) {
     destroyCharts();
     const {ticket, chat, appointment} = data;
@@ -112,6 +125,7 @@
       '#2fb344', {label: 'Lượt đánh giá'});
   }
 
+  // Tải báo cáo theo bộ lọc hiện tại.
   async function load(updateUrl) {
     toggleFilters();
     if (!form.reportValidity()) return;
@@ -139,7 +153,9 @@
     }
   }
 
+  // Nạp lại báo cáo khi người dùng gửi bộ lọc.
   form.addEventListener('submit', event => { event.preventDefault(); load(true); });
+  // Cập nhật bộ lọc và tải lại báo cáo khi giá trị thay đổi.
   [range, category, mine].forEach(input => input.addEventListener('change', () => {
     toggleFilters();
     if (range.value !== 'custom' || (dateInputs[0].value && dateInputs[1].value)) load(true);

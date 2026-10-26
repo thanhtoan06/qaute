@@ -10,6 +10,7 @@ import vn.edu.hcmute.qaute.dto.view.SettingView;
 import vn.edu.hcmute.qaute.entity.system.SystemSetting;
 import vn.edu.hcmute.qaute.repository.system.SystemSettingRepository;
 
+// Xử lý nghiệp vụ Settings trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class SettingsServiceImpl implements SettingsService {
@@ -21,11 +22,13 @@ public class SettingsServiceImpl implements SettingsService {
     private final SystemSettingRepository settingRepository;
     private final ConcurrentMap<String, SettingView> cache = new ConcurrentHashMap<>();
 
+    // Tạo dịch vụ thiết lập với kho dữ liệu tương ứng.
     public SettingsServiceImpl(SystemSettingRepository settingRepository) {
         this.settingRepository = settingRepository;
     }
 
     @Override
+    // Trả về giá trị chuỗi sau khi kiểm tra kiểu thiết lập.
     public String getString(String key) {
         SettingView setting = getSetting(key);
         if (!TYPE_STRING.equals(setting.valueType())) {
@@ -35,6 +38,7 @@ public class SettingsServiceImpl implements SettingsService {
     }
 
     @Override
+    // Trả về giá trị số nguyên sau khi kiểm tra giới hạn kiểu.
     public int getInt(String key) {
         long value = getLong(key);
         try {
@@ -45,6 +49,7 @@ public class SettingsServiceImpl implements SettingsService {
     }
 
     @Override
+    // Trả về giá trị số nguyên dài của thiết lập.
     public long getLong(String key) {
         SettingView setting = getSetting(key);
         if (!TYPE_INT.equals(setting.valueType())) {
@@ -58,6 +63,7 @@ public class SettingsServiceImpl implements SettingsService {
     }
 
     @Override
+    // Trả về giá trị boolean sau khi kiểm tra kiểu và nội dung.
     public boolean getBoolean(String key) {
         SettingView setting = getSetting(key);
         if (!TYPE_BOOL.equals(setting.valueType())
@@ -68,6 +74,7 @@ public class SettingsServiceImpl implements SettingsService {
     }
 
     @Override
+    // Liệt kê các thiết lập theo nhóm và khóa.
     public List<SettingView> listAll() {
         return settingRepository.findAllByOrderByGroupNameAscSettingKeyAsc().stream()
                 .map(this::toView)
@@ -76,6 +83,7 @@ public class SettingsServiceImpl implements SettingsService {
 
     @Override
     @Transactional
+    // Kiểm tra và lưu giá trị mới cho thiết lập.
     public void update(String key, String value, Long actorUserId) {
         SystemSetting setting = settingRepository.findBySettingKey(key)
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy thiết lập: " + key));
@@ -86,6 +94,7 @@ public class SettingsServiceImpl implements SettingsService {
         cache.remove(key);
     }
 
+    // Tìm thiết lập trong bộ nhớ đệm hoặc báo lỗi nếu khóa không hợp lệ.
     private SettingView getSetting(String key) {
         if (key == null || key.isBlank()) {
             throw new IllegalStateException("Khóa thiết lập không hợp lệ");
@@ -93,12 +102,14 @@ public class SettingsServiceImpl implements SettingsService {
         return cache.computeIfAbsent(key, this::loadSetting);
     }
 
+    // Tải thiết lập theo khóa từ kho dữ liệu.
     private SettingView loadSetting(String key) {
         return settingRepository.findBySettingKey(key)
                 .map(this::toView)
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy thiết lập: " + key));
     }
 
+    // Chuyển thực thể thiết lập thành dữ liệu hiển thị.
     private SettingView toView(SystemSetting setting) {
         return new SettingView(
                 setting.getSettingKey(),
@@ -110,6 +121,7 @@ public class SettingsServiceImpl implements SettingsService {
                 setting.getDescription());
     }
 
+    // Kiểm tra giá trị theo kiểu và giới hạn của thiết lập.
     private void validateValue(SystemSetting setting, String value) {
         if (value == null) {
             throw invalidValue("Giá trị thiết lập không được để trống");
@@ -134,6 +146,7 @@ public class SettingsServiceImpl implements SettingsService {
         }
     }
 
+    // Kiểm tra cú pháp và giới hạn của giá trị số nguyên.
     private void validateInteger(SystemSetting setting, String value) {
         final long number;
         try {
@@ -149,6 +162,7 @@ public class SettingsServiceImpl implements SettingsService {
         }
     }
 
+    // Tạo lỗi yêu cầu không hợp lệ với thông báo tương ứng.
     private BadRequestException invalidValue(String message) {
         return new BadRequestException(message);
     }

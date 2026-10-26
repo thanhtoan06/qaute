@@ -1,3 +1,4 @@
+-- Khai báo các vai trò cơ bản dùng để phân quyền người dùng.
 CREATE TABLE roles (
     id         BIGINT      NOT NULL AUTO_INCREMENT,
     code       VARCHAR(20) NOT NULL,
@@ -8,12 +9,14 @@ CREATE TABLE roles (
     UNIQUE KEY uk_roles_code (code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Khởi tạo vai trò sinh viên, tư vấn viên và quản trị viên.
 INSERT INTO roles (code, name)
 VALUES
     ('STUDENT', 'Sinh viên'),
     ('MANAGER', 'Tư vấn viên'),
     ('ADMIN', 'Quản trị viên');
 
+-- Lưu danh mục khoa để liên kết với hồ sơ sinh viên.
 CREATE TABLE faculties (
     id         BIGINT       NOT NULL AUTO_INCREMENT,
     code       VARCHAR(30)  NULL,
@@ -25,6 +28,7 @@ CREATE TABLE faculties (
     UNIQUE KEY uk_faculties_code (code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Khởi tạo danh sách khoa mặc định của trường.
 INSERT INTO faculties (code, name)
 VALUES
     ('CNTT', 'Công nghệ Thông tin'),
@@ -38,6 +42,7 @@ VALUES
     ('TT', 'Thời trang và Du lịch'),
     ('KHUD', 'Khoa học Ứng dụng');
 
+-- Lưu tài khoản, trạng thái xác thực và vai trò của người dùng.
 CREATE TABLE users (
     id                  BIGINT       NOT NULL AUTO_INCREMENT,
     email               VARCHAR(150) NOT NULL,
@@ -65,6 +70,7 @@ CREATE TABLE users (
     CONSTRAINT fk_users_avatar_asset FOREIGN KEY (avatar_asset_id) REFERENCES media_assets (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Lưu thông tin học tập bổ sung cho tài khoản sinh viên.
 CREATE TABLE student_profiles (
     id         BIGINT      NOT NULL AUTO_INCREMENT,
     user_id    BIGINT      NOT NULL,

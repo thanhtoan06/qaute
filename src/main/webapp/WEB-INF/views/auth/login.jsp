@@ -92,6 +92,7 @@
 
 
 
+<%-- Biểu mẫu đăng nhập bằng tài khoản QAUTE hoặc Google SSO. --%>
 <div class="login-premium">
     <div class="login-premium-heading">
         <div class="login-premium-icon">
@@ -126,6 +127,7 @@
         </div>
     </c:if>
 
+    <%-- Thu thập thông tin đăng nhập, tùy chọn ghi nhớ và trả lỗi theo trường. --%>
     <form method="post" action="/auth/login" id="login-form" class="login-premium-form">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <input type="hidden" name="returnUrl" value="<c:out value='${returnUrl}'/>"/>
@@ -181,6 +183,7 @@
         </button>
     </form>
 
+    <%-- Hiển thị lựa chọn đăng nhập Google khi SSO được bật. --%>
     <c:if test="${googleSsoEnabled}">
         <div class="login-premium-divider">hoặc tiếp tục với</div>
         <a href="/oauth2/authorization/google" class="btn btn-outline-primary w-100 py-2 rounded-3 login-premium-google">

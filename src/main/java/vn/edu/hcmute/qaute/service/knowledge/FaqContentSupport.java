@@ -4,8 +4,10 @@ import vn.edu.hcmute.qaute.common.util.HtmlSanitizerUtil;
 import vn.edu.hcmute.qaute.common.util.TextUtil;
 import vn.edu.hcmute.qaute.entity.knowledge.Faq;
 
+// Xử lý nghiệp vụ FaqContentSupport trong hệ thống.
 public final class FaqContentSupport {
 
+    // Ngăn tạo đối tượng hỗ trợ nội dung FAQ.
     private FaqContentSupport() {
     }
 
@@ -16,6 +18,7 @@ public final class FaqContentSupport {
      *
      * @param faq đối tượng Faq cần chuẩn hóa dữ liệu
      */
+    // Chuẩn hóa nội dung FAQ trước khi lưu.
     public static void prepare(Faq faq) {
         if (faq == null) {
             return;
@@ -30,4 +33,3 @@ public final class FaqContentSupport {
         faq.setBodyNorm(TextUtil.normalizeVi(strippedText));
     }
 }
-

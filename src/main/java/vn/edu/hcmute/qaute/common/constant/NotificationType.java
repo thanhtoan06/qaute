@@ -1,6 +1,8 @@
 package vn.edu.hcmute.qaute.common.constant;
 
+// Các loại thông báo và chính sách email áp dụng cho từng loại.
 public enum NotificationType {
+    // Thông báo liên quan đến yêu cầu tư vấn.
     TICKET_CREATED("Yêu cầu đã được tạo", false, true),
     TICKET_NEW_IN_QUEUE("Có yêu cầu mới trong hàng đợi", false, false),
     TICKET_ASSIGNED("Yêu cầu đã được nhận xử lý", false, true),
@@ -13,20 +15,24 @@ public enum NotificationType {
     TICKET_REOPENED("Yêu cầu được mở lại", false, false),
     TICKET_ESCALATED("Yêu cầu được chuyển cấp", false, true),
     TICKET_FORCE_CLOSED("Yêu cầu bị đóng bởi quản trị", false, true),
+    // Cảnh báo SLA và đánh giá chất lượng.
     SLA_AT_RISK("Yêu cầu sắp quá hạn xử lý", false, false),
     SLA_BREACHED("Yêu cầu đã quá hạn xử lý", false, false),
     REVIEW_LOW_RATING("Có đánh giá thấp", false, false),
+    // Thông báo về lịch hẹn và phiên chat.
     APPOINTMENT_CONFIRMED("Lịch hẹn đã xác nhận", false, true),
     APPOINTMENT_CHANGED("Lịch hẹn đã thay đổi", false, true),
     APPOINTMENT_CANCELLED("Lịch hẹn đã hủy", false, true),
     APPOINTMENT_REMINDER("Nhắc lịch hẹn", false, true),
     CHAT_WAITING_NEW("Có sinh viên đang chờ chat", false, false),
     CHAT_MISSED("Phiên chat không được tiếp nhận", false, false),
+    // Quy trình duyệt FAQ và thông báo chính thức.
     FAQ_REVIEW_REQUESTED("Có bài FAQ chờ duyệt", false, false),
     FAQ_APPROVED("Bài FAQ đã được duyệt", false, false),
     FAQ_REJECTED("Bài FAQ bị từ chối", false, false),
     FAQ_FROM_TICKET_PUBLISHED("Câu hỏi của bạn đã trở thành FAQ", false, false),
     ANNOUNCEMENT_PUBLISHED("Thông báo mới từ nhà trường", false, false),
+    // Cảnh báo bảo mật tài khoản.
     SECURITY_ACCOUNT_LOCKED("Tài khoản bị khóa", true, true),
     SECURITY_PASSWORD_CHANGED("Mật khẩu đã được đổi", true, true),
     SECURITY_ROLE_CHANGED("Quyền tài khoản đã thay đổi", true, true);
@@ -35,20 +41,24 @@ public enum NotificationType {
     private final boolean mandatoryEmail;
     private final boolean defaultEmail;
 
+    // Lưu nhãn và chính sách gửi email của loại thông báo.
     NotificationType(String label, boolean mandatoryEmail, boolean defaultEmail) {
         this.label = label;
         this.mandatoryEmail = mandatoryEmail;
         this.defaultEmail = defaultEmail;
     }
 
+    // Trả về nhãn hiển thị của thông báo.
     public String getLabel() {
         return label;
     }
 
+    // Cho biết email có bắt buộc với thông báo này hay không.
     public boolean isMandatoryEmail() {
         return mandatoryEmail;
     }
 
+    // Cho biết email có được bật mặc định cho thông báo này hay không.
     public boolean isDefaultEmail() {
         return defaultEmail;
     }

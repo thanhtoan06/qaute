@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.validation.StrongPassword;
 
+// Đóng gói dữ liệu đầu vào cho thao tác UserPassword.
 @Getter
 @Setter
 @NoArgsConstructor

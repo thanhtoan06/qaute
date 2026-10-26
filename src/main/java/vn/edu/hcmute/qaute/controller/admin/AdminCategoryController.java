@@ -31,11 +31,13 @@ public class AdminCategoryController {
 
     private final AdminCategoryService adminCategoryService;
 
+    // Khởi tạo bộ điều khiển chuyên mục.
     public AdminCategoryController(AdminCategoryService adminCategoryService) {
         this.adminCategoryService = adminCategoryService;
     }
 
     @GetMapping("/admin/categories")
+    // Hiển thị cây chuyên mục theo phòng ban.
     public String list(@RequestParam(required = false) Long departmentId, Model model) {
         model.addAttribute("trees", adminCategoryService.tree(departmentId));
         model.addAttribute("departments", adminCategoryService.departmentOptions());
@@ -45,6 +47,7 @@ public class AdminCategoryController {
     }
 
     @GetMapping("/admin/categories/new")
+    // Chuẩn bị biểu mẫu tạo chuyên mục.
     public String newPage(@RequestParam(required = false) Long departmentId,
                           @RequestParam(required = false) Long parentId, Model model) {
         if (!model.containsAttribute("form")) {
@@ -54,6 +57,7 @@ public class AdminCategoryController {
     }
 
     @GetMapping("/admin/categories/{id}/edit")
+    // Tải biểu mẫu chỉnh sửa chuyên mục.
     public String editPage(@PathVariable Long id, Model model,
                            RedirectAttributes redirectAttributes) {
         try {
@@ -68,6 +72,7 @@ public class AdminCategoryController {
     }
 
     @PostMapping("/admin/categories")
+    // Kiểm tra và lưu biểu mẫu chuyên mục.
     public String save(@Valid @ModelAttribute("form") CategoryForm form,
                        BindingResult bindingResult, Model model,
                        RedirectAttributes redirectAttributes) {
@@ -96,6 +101,7 @@ public class AdminCategoryController {
     }
 
     @PostMapping("/admin/categories/{id}/toggle")
+    // Đổi trạng thái hoạt động của chuyên mục.
     public String toggle(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             adminCategoryService.toggleActive(id, SecurityUtils.requireUserId());
@@ -107,6 +113,7 @@ public class AdminCategoryController {
     }
 
     /** Nạp dữ liệu cho form: danh sách phòng ban và các chuyên mục cha có thể chọn. */
+    // Nạp dữ liệu cần thiết cho biểu mẫu chuyên mục.
     private String formView(Model model, CategoryForm form) {
         model.addAttribute("pageTitle", form.getId() == null ? "Thêm chuyên mục" : "Sửa chuyên mục");
         model.addAttribute("departments", adminCategoryService.departmentOptions());
@@ -114,6 +121,7 @@ public class AdminCategoryController {
         return "admin/category-form";
     }
 
+    // Gộp lỗi và hiển thị lại biểu mẫu chuyên mục.
     private String showFormError(Model model, Map<String, String> additions, CategoryForm form) {
         Map<String, String> errors = new LinkedHashMap<>();
         Object existing = model.getAttribute("errors");

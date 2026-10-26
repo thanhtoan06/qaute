@@ -6,7 +6,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+// Đóng gói dữ liệu đầu vào cho thao tác ManagerProfile.
+@Getter
+@Setter
 public class ManagerProfileForm {
     @NotBlank(message = "Vui lòng nhập họ và tên")
     @Size(min = 2, max = 100, message = "Họ và tên phải từ 2 đến 100 ký tự")

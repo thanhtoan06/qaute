@@ -21,13 +21,16 @@ import vn.edu.hcmute.qaute.dto.request.admin.AnnouncementForm;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.admin.AdminAnnouncementService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminAnnouncement.
 @Controller
 public class AdminAnnouncementController {
     private final AdminAnnouncementService service;
 
+    // Khởi tạo bộ điều khiển thông báo quản trị.
     public AdminAnnouncementController(AdminAnnouncementService service) { this.service = service; }
 
     @GetMapping("/admin/announcements")
+    // Lọc và hiển thị danh sách thông báo.
     public String list(@RequestParam(required = false) AnnouncementStatus status,
                        @RequestParam(defaultValue = "0") int page, Model model) {
         model.addAttribute("announcements", service.list(status, PageRequest.of(Math.max(0, page), 15,
@@ -39,6 +42,7 @@ public class AdminAnnouncementController {
     }
 
     @GetMapping("/admin/announcements/new")
+    // Chuẩn bị biểu mẫu tạo thông báo.
     public String create(Model model) {
         AnnouncementForm form = new AnnouncementForm();
         form.setAudience(AnnouncementAudience.ALL);
@@ -48,6 +52,7 @@ public class AdminAnnouncementController {
     }
 
     @GetMapping("/admin/announcements/{id}/edit")
+    // Tải biểu mẫu chỉnh sửa thông báo.
     public String edit(@PathVariable Long id, Model model) {
         model.addAttribute("form", service.getForm(id));
         options(model);
@@ -55,6 +60,7 @@ public class AdminAnnouncementController {
     }
 
     @PostMapping("/admin/announcements")
+    // Kiểm tra và lưu biểu mẫu thông báo.
     public String save(@Valid @ModelAttribute("form") AnnouncementForm form, BindingResult result,
                        Model model, RedirectAttributes redirect) {
         Map<String, String> errors = FormErrors.of(result);
@@ -73,26 +79,31 @@ public class AdminAnnouncementController {
     }
 
     @PostMapping("/admin/announcements/{id}/publish")
+    // Xuất bản thông báo đã chọn.
     public String publish(@PathVariable Long id, RedirectAttributes redirect) {
         return action(id, redirect, "Đã xuất bản thông báo", () -> service.publish(id, SecurityUtils.requireUserId()));
     }
 
     @PostMapping("/admin/announcements/{id}/unpublish")
+    // Chuyển thông báo về bản nháp.
     public String unpublish(@PathVariable Long id, RedirectAttributes redirect) {
         return action(id, redirect, "Đã chuyển về bản nháp", () -> service.unpublish(id, SecurityUtils.requireUserId()));
     }
 
     @PostMapping("/admin/announcements/{id}/delete")
+    // Xóa thông báo đã chọn.
     public String delete(@PathVariable Long id, RedirectAttributes redirect) {
         return action(id, redirect, "Đã xóa thông báo", () -> service.delete(id, SecurityUtils.requireUserId()));
     }
 
+    // Thực hiện thao tác và thông báo kết quả.
     private String action(Long id, RedirectAttributes redirect, String message, Runnable work) {
         try { work.run(); redirect.addFlashAttribute("flashSuccess", message); }
         catch (AppException e) { redirect.addFlashAttribute("flashError", e.getMessage()); }
         return "redirect:/admin/announcements";
     }
 
+    // Nạp các lựa chọn dùng trong biểu mẫu thông báo.
     private void options(Model model) {
         model.addAttribute("audiences", AnnouncementAudience.values());
         model.addAttribute("pageTitle", "Soạn thông báo");

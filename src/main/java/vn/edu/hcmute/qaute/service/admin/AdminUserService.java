@@ -36,6 +36,7 @@ import vn.edu.hcmute.qaute.service.identity.InvitationService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.notification.NotificationService;
 
+// Xử lý nghiệp vụ AdminUser trong hệ thống.
 @Service
 @Transactional
 public class AdminUserService {
@@ -53,6 +54,7 @@ public class AdminUserService {
     private final ObjectProvider<NotificationService> notifications;
     private final AuditService audit;
 
+    // Khởi tạo dịch vụ quản trị tài khoản người dùng.
     public AdminUserService(UserRepository users, RoleRepository roles,
                             StudentProfileRepository students, ManagerProfileRepository managers,
                             ManagerCategoryRepository managerCategories,
@@ -75,6 +77,7 @@ public class AdminUserService {
         this.audit = audit;
     }
 
+    // Tạo tài khoản và hồ sơ theo vai trò.
     public User create(UserCreateForm form, Long actorId) {
         if (form.getRole() == null) {
             throw fieldError("role", "Vui lòng chọn vai trò");
@@ -110,6 +113,7 @@ public class AdminUserService {
         return user;
     }
 
+    // Tạo biểu mẫu chỉnh sửa tài khoản.
     @Transactional(readOnly = true)
     public UserEditForm getEditForm(Long id) {
         User user = requireUser(id);
@@ -134,6 +138,7 @@ public class AdminUserService {
         return form;
     }
 
+    // Cập nhật thông tin tài khoản và hồ sơ liên quan.
     public void update(Long id, UserEditForm form, Long actorId) {
         User user = requireUser(id);
         RoleCode role = user.getRole().getCode();
@@ -160,6 +165,7 @@ public class AdminUserService {
                 summary(user) + profileSummary(id, role));
     }
 
+    // Gửi lại lời mời kích hoạt tài khoản.
     public void resendInvitation(Long id, Long actorId) {
         User user = requireUser(id);
         if (user.getStatus() != UserStatus.PENDING_ACTIVATION) {
@@ -169,6 +175,7 @@ public class AdminUserService {
         audit.log(AuditActions.USER_INVITATION_RESENT, "User", id, null, "invitationQueued=true");
     }
 
+    // Khóa tài khoản theo yêu cầu quản trị.
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void lock(Long id, String reason, Long actorId) {
         User user = requireUser(id);
@@ -188,6 +195,7 @@ public class AdminUserService {
                 summary(user) + ",reason=" + normalizedReason);
     }
 
+    // Mở khóa tài khoản đã bị khóa.
     public void unlock(Long id, Long actorId) {
         User user = requireUser(id);
         if (user.getStatus() != UserStatus.LOCKED) {
@@ -200,6 +208,7 @@ public class AdminUserService {
         audit.log(AuditActions.USER_UNLOCKED, "User", id, before, summary(user));
     }
 
+    // Vô hiệu hóa tài khoản sau khi kiểm tra điều kiện.
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deactivate(Long id, String reason, Long actorId) {
         User user = requireUser(id);
@@ -215,6 +224,7 @@ public class AdminUserService {
                 summary(user) + ",reason=" + normalizedReason);
     }
 
+    // Kích hoạt lại tài khoản đã vô hiệu hóa.
     public void reactivate(Long id, Long actorId) {
         User user = requireUser(id);
         if (user.getStatus() != UserStatus.DEACTIVATED) {
@@ -231,6 +241,7 @@ public class AdminUserService {
         audit.log(AuditActions.USER_REACTIVATED, "User", id, before, summary(user));
     }
 
+    // Gửi lời mời đặt lại mật khẩu và thu hồi phiên.
     public void forcePasswordReset(Long id, Long actorId) {
         User user = requireUser(id);
         if (user.getStatus() != UserStatus.ACTIVE) {
@@ -242,6 +253,7 @@ public class AdminUserService {
                 "invitationSent=true,sessionsRevoked=true");
     }
 
+    // Đổi vai trò tài khoản sau khi kiểm tra điều kiện.
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void changeRole(Long id, RoleCode newRole, String reason, Long actorId) {
         User user = requireUser(id);
@@ -297,12 +309,14 @@ public class AdminUserService {
                 summary(user) + ",reason=" + normalizedReason);
     }
 
+    // Liệt kê phiên đăng nhập của tài khoản.
     @Transactional(readOnly = true)
     public List<AuthSessionView> sessions(Long id) {
         requireUser(id);
         return sessions.listSessions(id);
     }
 
+    // Thu hồi một phiên đăng nhập của tài khoản.
     public void revokeSession(Long sessionId, Long userId, Long actorId) {
         requireUser(userId);
         AuthSessionView target = sessions.listSessions(userId).stream()
@@ -322,6 +336,7 @@ public class AdminUserService {
                 "sessionId=" + sessionId, "revokedBy=" + actorId);
     }
 
+    // Thu hồi toàn bộ phiên đăng nhập của tài khoản.
     public void revokeAllSessions(Long userId, Long actorId) {
         requireUser(userId);
         sessions.revokeAllSessions(userId, "admin_manual");
@@ -329,12 +344,14 @@ public class AdminUserService {
                 "allSessions=true", "revokedBy=" + actorId);
     }
 
+    // Lấy lịch sử đăng nhập gần đây của tài khoản.
     @Transactional(readOnly = true)
     public List<LoginHistoryView> loginHistory(Long id) {
         requireUser(id);
         return sessions.listLoginHistory(id, 50);
     }
 
+    // Ngăn thao tác khóa tài khoản không được phép.
     private void protectAccountRemoval(User user, Long actorId) {
         if (Objects.equals(user.getId(), actorId)) {
             throw new BadRequestException("Không thể khóa hoặc vô hiệu hóa tài khoản của chính mình");
@@ -353,6 +370,7 @@ public class AdminUserService {
         }
     }
 
+    // Kiểm tra và chuẩn hóa lý do thao tác.
     private static String requireReason(String reason) {
         String normalized = reason == null ? "" : reason.trim();
         if (normalized.length() < 10 || normalized.length() > 500) {
@@ -361,10 +379,12 @@ public class AdminUserService {
         return normalized;
     }
 
+    // Lấy tài khoản hoặc báo không tìm thấy.
     private User requireUser(Long id) {
         return users.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng"));
     }
 
+    // Kiểm tra và chuẩn hóa MSSV theo vai trò.
     private String checkedMssv(RoleCode role, String raw, Long currentUserId) {
         if (role != RoleCode.STUDENT) {
             return null;
@@ -378,6 +398,7 @@ public class AdminUserService {
         return mssv;
     }
 
+    // Kiểm tra mã khoa hoặc phòng ban trong hồ sơ.
     private void validateProfileIds(RoleCode role, Long facultyId, Long departmentId) {
         if (role == RoleCode.STUDENT && facultyId != null && !faculties.existsById(facultyId)) {
             throw fieldError("facultyId", "Khoa không tồn tại");
@@ -387,6 +408,7 @@ public class AdminUserService {
         }
     }
 
+    // Áp dụng thông tin học tập lên hồ sơ sinh viên.
     private static void applyStudent(StudentProfile profile, Long facultyId, String classCode,
                                      String cohort, String program) {
         profile.setFacultyId(facultyId);
@@ -395,6 +417,7 @@ public class AdminUserService {
         profile.setProgram(blankToNull(program));
     }
 
+    // Áp dụng thông tin công việc lên hồ sơ Manager.
     private static void applyManager(ManagerProfile profile, Long departmentId, String jobTitle,
                                      String employeeCode) {
         profile.setDepartmentId(departmentId);
@@ -402,6 +425,7 @@ public class AdminUserService {
         profile.setEmployeeCode(blankToNull(employeeCode));
     }
 
+    // Tạo tóm tắt hồ sơ theo vai trò.
     private String profileSummary(Long id, RoleCode role) {
         if (role == RoleCode.STUDENT) {
             return students.findByUserId(id).map(profile -> ",facultyId=" + profile.getFacultyId()
@@ -416,16 +440,19 @@ public class AdminUserService {
         return "";
     }
 
+    // Tạo tóm tắt tài khoản để ghi nhật ký.
     private static String summary(User user) {
         return "name=" + user.getFullName() + ",email=" + user.getEmail() + ",mssv=" + user.getMssv()
                 + ",phone=" + user.getPhone() + ",role=" + user.getRole().getCode()
                 + ",status=" + user.getStatus();
     }
 
+    // Chuyển chuỗi rỗng thành null sau khi cắt khoảng trắng.
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
 
+    // Tạo lỗi nhập liệu gắn với trường cụ thể.
     private static BadRequestException fieldError(String field, String message) {
         return new BadRequestException(message, Map.of(field, message));
     }

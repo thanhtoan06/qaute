@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import java.util.Objects;
 
+// Lớp cơ sở cho các thực thể dùng chung trong ứng dụng.
 @MappedSuperclass
 public abstract class BaseEntity {
 
@@ -13,15 +14,18 @@ public abstract class BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Lấy mã định danh của thực thể.
     public Long getId() {
         return id;
     }
 
+    // Gán mã định danh cho thực thể.
     public void setId(Long id) {
         this.id = id;
     }
 
     @Override
+    // So sánh hai thực thể dựa trên mã định danh.
     public boolean equals(Object other) {
         if (this == other) {
             return true;
@@ -34,6 +38,7 @@ public abstract class BaseEntity {
     }
 
     @Override
+    // Trả về mã băm dựa trên lớp của thực thể.
     public int hashCode() {
         return getClass().hashCode();
     }

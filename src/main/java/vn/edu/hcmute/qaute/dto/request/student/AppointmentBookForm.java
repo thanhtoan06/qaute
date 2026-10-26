@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 import vn.edu.hcmute.qaute.common.constant.Modality;
 
+// Đóng gói dữ liệu đầu vào cho thao tác AppointmentBook.
 @Getter
 @Setter
 @NoArgsConstructor

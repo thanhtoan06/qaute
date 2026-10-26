@@ -23,6 +23,7 @@ import vn.edu.hcmute.qaute.repository.organization.DepartmentRepository;
 import vn.edu.hcmute.qaute.repository.organization.ManagerProfileRepository;
 import vn.edu.hcmute.qaute.service.media.MediaService;
 
+// Xử lý nghiệp vụ ManagerProfile trong hệ thống.
 @Service
 @Transactional
 public class ManagerProfileService {
@@ -32,6 +33,7 @@ public class ManagerProfileService {
     private final MediaAssetRepository assets;
     private final MediaService media;
 
+    // Khởi tạo dịch vụ hồ sơ tư vấn viên.
     public ManagerProfileService(UserRepository users, ManagerProfileRepository profiles,
             DepartmentRepository departments, MediaAssetRepository assets, MediaService media) {
         this.users = users;
@@ -41,6 +43,7 @@ public class ManagerProfileService {
         this.media = media;
     }
 
+    // Lấy hồ sơ và trạng thái trực của tư vấn viên.
     @Transactional(readOnly = true)
     public ManagerProfileView get(Long userId) {
         User user = requireManager(userId);
@@ -64,6 +67,7 @@ public class ManagerProfileService {
                 profile == null ? null : profile.getLastSeenAt());
     }
 
+    // Cập nhật thông tin hồ sơ tư vấn viên.
     public void update(Long userId, ManagerProfileForm form) {
         if (form == null || form.getFullName() == null
                 || form.getFullName().trim().length() < 2
@@ -92,6 +96,7 @@ public class ManagerProfileService {
         profiles.save(profile);
     }
 
+    // Gắn ảnh đại diện mới cho tư vấn viên.
     public void updateAvatar(Long userId, Long assetId) {
         User user = requireManager(userId);
         if (assetId == null) throw new BadRequestException("Ảnh đại diện không hợp lệ");
@@ -116,6 +121,7 @@ public class ManagerProfileService {
         }
     }
 
+    // Cập nhật trạng thái trực và thời điểm hoạt động.
     public void setStatus(Long userId, AvailabilityStatus status) {
         requireManager(userId);
         if (status == null) throw new BadRequestException("Trạng thái trực không hợp lệ");
@@ -126,21 +132,25 @@ public class ManagerProfileService {
         profiles.save(profile);
     }
 
+    // Ghi nhận thời điểm tư vấn viên vừa hoạt động.
     public void touchLastSeen(Long userId) {
         profiles.touchLastSeen(userId, LocalDateTime.now());
     }
 
+    // Lấy trạng thái trực hiện tại của tư vấn viên.
     @Transactional(readOnly = true)
     public AvailabilityStatus currentStatus(Long userId) {
         return profiles.findByUserId(userId).map(ManagerProfile::getAvailabilityStatus)
                 .orElse(AvailabilityStatus.OFFLINE);
     }
 
+    // Đưa các trạng thái trực quá hạn về ngoại tuyến.
     public int expireStalePresence(LocalDateTime cutoff) {
         return profiles.markStaleOffline(List.of(AvailabilityStatus.ONLINE, AvailabilityStatus.BUSY),
                 AvailabilityStatus.OFFLINE, cutoff);
     }
 
+    // Kiểm tra tài khoản tồn tại và có vai trò tư vấn viên.
     private User requireManager(Long userId) {
         User user = users.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản Manager"));
@@ -150,6 +160,7 @@ public class ManagerProfileService {
         return user;
     }
 
+    // Chuẩn hóa chuỗi rỗng thành giá trị null.
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

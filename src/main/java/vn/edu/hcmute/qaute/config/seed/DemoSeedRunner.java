@@ -9,6 +9,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+// Chạy các bộ khởi tạo dữ liệu mẫu theo thứ tự trong môi trường demo.
 @Component
 @Profile("demo")
 public class DemoSeedRunner implements ApplicationRunner {
@@ -17,10 +18,12 @@ public class DemoSeedRunner implements ApplicationRunner {
 
     private final List<DemoSeeder> seeders;
 
+    // Khởi tạo bộ chạy với danh sách seeder demo.
     public DemoSeedRunner(List<DemoSeeder> seeders) {
         this.seeders = seeders;
     }
 
+    // Chạy lần lượt các seeder theo thứ tự và ghi nhận kết quả.
     @Override
     public void run(ApplicationArguments args) {
         seeders.stream()
@@ -38,6 +41,7 @@ public class DemoSeedRunner implements ApplicationRunner {
                 });
     }
 
+    // Tính thời gian đã trôi qua theo mili giây.
     private long elapsedMillis(long started) {
         return (System.nanoTime() - started) / 1_000_000L;
     }

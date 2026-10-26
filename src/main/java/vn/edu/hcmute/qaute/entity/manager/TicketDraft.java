@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu TicketDraft được lưu trữ trong hệ thống.
 @Entity @Table(name = "ticket_drafts", uniqueConstraints =
         @UniqueConstraint(name = "uk_ticket_drafts_ticket_manager", columnNames = {"ticket_id", "manager_id"}))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

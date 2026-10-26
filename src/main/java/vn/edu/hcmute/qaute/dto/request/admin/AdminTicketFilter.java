@@ -8,7 +8,9 @@ import vn.edu.hcmute.qaute.common.constant.SlaStatus;
 import vn.edu.hcmute.qaute.common.constant.TicketPriority;
 import vn.edu.hcmute.qaute.common.constant.TicketStatus;
 
-@Getter @Setter
+// Đóng gói dữ liệu đầu vào cho thao tác AdminTicketFilter.
+@Getter
+@Setter
 public class AdminTicketFilter {
     private String q;
     private TicketStatus status;
@@ -17,8 +19,10 @@ public class AdminTicketFilter {
     private Long departmentId;
     private Long assigneeId;
     private SlaStatus slaStatus;
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) private LocalDate from;
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) private LocalDate to;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate from;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate to;
     private Integer minRating;
     private Integer maxRating;
     private String sort;

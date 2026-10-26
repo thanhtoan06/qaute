@@ -1,3 +1,4 @@
+// Khởi tạo trình soạn thảo và các thao tác trong không gian yêu cầu.
 document.addEventListener('DOMContentLoaded', () => {
   const workspace = document.getElementById('workspace-actions');
   if (!workspace) return;
@@ -11,16 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
   let replySubmitting = false;
   let restoring = false;
 
+  // Lấy văn bản thuần từ nội dung HTML.
   function htmlText(html) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     return (doc.body.textContent || '').trim();
   }
 
+  // Lấy nội dung hiện tại từ Summernote hoặc vùng nhập văn bản.
   function editorCode(textarea) {
     return window.jQuery?.fn?.summernote && window.jQuery(textarea).next('.note-editor').length
       ? window.jQuery(textarea).summernote('code') : textarea.value;
   }
 
+  // Cấu hình Summernote cho từng vùng nhập nội dung.
   workspace.querySelectorAll('.js-ticket-editor').forEach(textarea => {
     if (!window.jQuery?.fn?.summernote) return;
     window.jQuery(textarea).summernote({
@@ -33,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ['view', ['codeview']]
       ],
       callbacks: {
+        // Đánh dấu bản nháp thay đổi khi nội dung trình soạn thảo đổi.
         onChange() {
           if (textarea === editor && !restoring) draftDirty = true;
         }
@@ -44,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (editor && workspace.dataset.draftUrl) {
     fetch(workspace.dataset.draftUrl, { credentials: 'same-origin' })
       .then(response => response.ok ? response.json() : Promise.reject())
+      // Khôi phục bản nháp nếu người dùng chưa bắt đầu chỉnh sửa.
       .then(result => {
         if (!result.success || draftDirty || replySubmitting) return;
         const html = result.data?.contentHtml || '';
@@ -59,8 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
         draftDirty = false;
         draftStatus.textContent = 'Đã khôi phục bản nháp.';
       })
+      // Báo lỗi nếu không thể tải bản nháp.
       .catch(() => { draftStatus.textContent = 'Không thể tải bản nháp.'; });
 
+    // Tự động lưu bản nháp khi có nội dung thay đổi.
     window.setInterval(() => {
       if (!draftDirty || draftSavePromise || replySubmitting) return;
       const html = editorCode(editor);
@@ -75,16 +83,19 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         body: JSON.stringify({ contentHtml: html })
       }).then(response => response.ok ? response.json() : Promise.reject())
+        // Cập nhật trạng thái sau khi lưu bản nháp.
         .then(result => {
           if (!result.success) throw new Error('Không thể lưu bản nháp.');
           lastSaved = html;
           draftDirty = editorCode(editor) !== html;
           draftStatus.textContent = 'Đã lưu bản nháp.';
+        // Giữ trạng thái cần lưu để thử lại khi có lỗi.
         }).catch(() => { draftStatus.textContent = 'Chưa lưu được bản nháp. Hệ thống sẽ thử lại.'; })
         .finally(() => { draftSavePromise = null; });
     }, 10000);
   }
 
+  // Thiết lập kiểm tra và tải tệp cho từng biểu mẫu trong không gian yêu cầu.
   workspace.querySelectorAll('.qa-workspace-form').forEach(form => {
     const files = form.querySelector('.js-ticket-files');
     const list = form.querySelector('.js-upload-list');
@@ -97,10 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let failed = false;
     let submitted = false;
 
+    // Chỉ cho phép gửi khi không còn tệp chờ và không có lỗi.
     function refreshSubmit() {
       if (submit) submit.disabled = pending > 0 || failed || submitted;
     }
 
+    // Tải các tệp đính kèm được chọn và cập nhật danh sách.
     if (files) files.addEventListener('change', async () => {
       failed = false;
       uploadError.textContent = '';
@@ -141,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // Xác thực biểu mẫu, nội dung trả lời và trạng thái tải tệp.
     form.addEventListener('submit', event => {
       if (submitted || pending > 0 || failed) {
         event.preventDefault();
@@ -168,7 +182,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Gắn thao tác chèn FAQ cho các nút liên quan.
   workspace.closest('.row')?.querySelectorAll('.js-insert-faq').forEach(button => {
+    // Chèn liên kết FAQ vào trình soạn thảo hoặc vùng nhập liệu.
     button.addEventListener('click', () => {
       if (!editor) return;
       const link = document.createElement('a');
@@ -192,6 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const error = document.getElementById('canned-response-error');
     fetch(picker.dataset.listUrl, { credentials: 'same-origin' })
       .then(response => response.ok ? response.json() : Promise.reject())
+      // Hiển thị các mẫu trả lời khả dụng trong danh sách chọn.
       .then(result => {
         if (!result.success) throw new Error('Không thể tải mẫu trả lời.');
         select.replaceChildren(new Option('Chọn mẫu trả lời', ''));
@@ -201,11 +218,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (!result.data?.length) select.options[0].textContent = 'Chưa có mẫu trả lời';
       })
+      // Thông báo nếu không thể tải danh sách mẫu trả lời.
       .catch(() => {
         select.options[0].textContent = 'Không tải được mẫu trả lời';
         error.textContent = 'Vui lòng tải lại trang để thử lại.';
       });
     select.addEventListener('change', () => { insert.disabled = !select.value; });
+    // Tải và chèn nội dung mẫu đã chọn vào câu trả lời.
     insert.addEventListener('click', async () => {
       if (!select.value) return;
       insert.disabled = true;
@@ -239,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const recipient = document.getElementById('escalate-manager');
     const error = document.getElementById('escalate-advisors-error');
     let requestNumber = 0;
+    // Tải danh sách tư vấn viên theo chuyên mục được chọn.
     escalationCategory.addEventListener('change', async () => {
       const currentRequest = ++requestNumber;
       recipient.replaceChildren(new Option(

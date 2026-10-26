@@ -1,7 +1,7 @@
 <%@ tag body-content="empty" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ attribute name="priority" type="java.lang.String" required="true" rtexprvalue="true" %>
+<%-- Chuyển mức ưu tiên yêu cầu thành nhãn tiếng Việt và màu huy hiệu. --%>
 <c:set var="priorityClass" value="bg-secondary-lt"/>
 <c:set var="priorityLabel" value="${priority}"/>
 <c:choose>

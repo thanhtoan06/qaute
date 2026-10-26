@@ -16,15 +16,18 @@ import vn.edu.hcmute.qaute.dto.view.SettingView;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.admin.AdminSettingsService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminSettings.
 @Controller
 public class AdminSettingsController {
     private final AdminSettingsService settings;
 
+    // Khởi tạo bộ điều khiển cài đặt hệ thống.
     public AdminSettingsController(AdminSettingsService settings) {
         this.settings = settings;
     }
 
     @GetMapping("/admin/settings")
+    // Hiển thị các nhóm cài đặt hệ thống.
     public String page(@RequestParam(name = "group", required = false) String group, Model model) {
         Map<String, List<SettingView>> groups = settings.groups();
         populate(model, groups, group, Map.of(), Map.of());
@@ -32,6 +35,7 @@ public class AdminSettingsController {
     }
 
     @PostMapping("/admin/settings/{group}")
+    // Lưu giá trị cài đặt của nhóm được chọn.
     public String save(@PathVariable String group, @RequestParam Map<String, String> values,
                        Model model, RedirectAttributes redirect) {
         Map<String, String> errors = settings.saveGroup(group, values, SecurityUtils.requireUserId());
@@ -47,6 +51,7 @@ public class AdminSettingsController {
         return "admin/settings";
     }
 
+    // Nạp nhóm cài đặt và giá trị hiển thị vào trang.
     private static void populate(Model model, Map<String, List<SettingView>> groups,
                                  String selectedGroup, Map<String, String> errors,
                                  Map<String, String> invalidValues) {

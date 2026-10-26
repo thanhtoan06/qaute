@@ -1,7 +1,7 @@
 <%@ tag body-content="empty" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ attribute name="sla" type="java.lang.String" required="true" rtexprvalue="true" %>
+<%-- Chỉ hiển thị huy hiệu SLA khi có dữ liệu và biểu thị mức độ đúng hạn. --%>
 <c:if test="${not empty sla}">
     <c:set var="slaClass" value="bg-secondary-lt"/>
     <c:set var="slaLabel" value="${sla}"/>

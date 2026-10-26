@@ -13,17 +13,20 @@ import vn.edu.hcmute.qaute.dto.view.ManagerOption;
 import vn.edu.hcmute.qaute.dto.view.SlotView;
 import vn.edu.hcmute.qaute.service.appointment.AppointmentService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho StudentAppointmentApi.
 @RestController
 @PreAuthorize("hasRole('STUDENT')")
 public class StudentAppointmentApiController {
 
     private final AppointmentService appointmentService;
 
+    // Khởi tạo bộ điều khiển tra cứu lịch hẹn.
     public StudentAppointmentApiController(AppointmentService appointmentService) {
         this.appointmentService = appointmentService;
     }
 
     @GetMapping("/api/appointments/slots")
+    // Tra cứu các khung giờ còn trống theo bộ lọc.
     public ApiResponse<List<SlotView>> slots(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long managerId,
@@ -33,6 +36,7 @@ public class StudentAppointmentApiController {
     }
 
     @GetMapping("/api/appointments/advisors")
+    // Lấy danh sách cố vấn theo danh mục đã chọn.
     public ApiResponse<List<ManagerOption>> advisors(@RequestParam(required = false) Long categoryId) {
         return ApiResponse.ok(appointmentService.findAdvisors(categoryId));
     }

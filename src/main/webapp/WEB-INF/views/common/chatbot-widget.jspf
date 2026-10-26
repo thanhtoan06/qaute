@@ -6,10 +6,11 @@
             <div class="qaute-chat-header-glow"></div>
             <div class="d-flex align-items-center gap-2 qaute-chat-brand">
                 <div class="position-relative qaute-chat-logo-wrap">
-                    <img src="${pageContext.request.contextPath}/assets/images/chatbot-ute.png"
-                         alt="Bot UTE" class="rounded-circle bg-white p-0.5 qaute-chat-logo"
-                         style="width: 36px; height: 36px; object-fit: contain;"
-                         onerror="this.src='${pageContext.request.contextPath}/assets/images/hcmute-logo.png';">
+                    <div class="qaute-chat-logo-inner">
+                        <img src="${pageContext.request.contextPath}/assets/images/chatbot-ute.png"
+                             alt="Bot UTE" class="qaute-chat-logo"
+                             onerror="this.src='${pageContext.request.contextPath}/assets/images/hcmute-logo.png';">
+                    </div>
                     <span class="qaute-online-dot"></span>
                 </div>
                 <div class="qaute-chat-heading-copy">
@@ -65,7 +66,7 @@
                     <button type="button" class="qaute-chat-pill" onclick="sendWidgetQuickMessage('Thủ tục xin bảo lưu kết quả học tập?')">
                         <i class="bi bi-journal-check"></i><span>Thủ tục bảo lưu</span>
                     </button>
-                    <button type="button" class="qaute-chat-pill" onclick="sendWidgetQuickMessage('Chuẩn đầu ra tiếng Anh tốt nghiệp?')">
+                    <button type="button" class="qaute-chat-pill" onclick="sendWidgetQuickMessage('Chuẩn đầu ra tốt nghiệp?')">
                         <i class="bi bi-translate"></i><span>Chuẩn đầu ra ngoại ngữ</span>
                     </button>
                 </div>
@@ -159,13 +160,14 @@
 .qaute-chat-header::after { content: ""; position: absolute; z-index: -1; right: 60px; bottom: -60px; width: 110px; height: 110px; border-radius: 50%; background: rgba(86, 157, 239, .11); filter: blur(2px); pointer-events: none; }
 .qaute-chat-header-glow { position: absolute; z-index: -1; top: -90%; left: -35%; width: 72%; height: 280%; background: linear-gradient(95deg, transparent, rgba(255, 255, 255, .04), transparent); transform: rotate(18deg); pointer-events: none; }
 .qaute-chat-brand { position: relative; min-width: 0; }
-.qaute-chat-logo-wrap { flex-shrink: 0; }
-.qaute-chat-logo { display: block; border: 2px solid rgba(255, 255, 255, .85); box-shadow: 0 4px 13px rgba(0, 0, 0, .16); }
+.qaute-chat-logo-wrap { position: relative; flex-shrink: 0; width: 38px; height: 38px; }
+.qaute-chat-logo-inner { position: relative; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255, 255, 255, .95); background: radial-gradient(circle at 28% 18%, rgba(111, 184, 255, .95), transparent 43%), linear-gradient(145deg, #347fda, #174b96 75%); box-shadow: 0 4px 13px rgba(0, 0, 0, .18); }
+.qaute-chat-logo { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; transform: scale(1.45); pointer-events: none; border: none; }
 .qaute-chat-heading-copy { min-width: 0; }
 .qaute-chat-title { color: #ffffff; font-size: .94rem; font-weight: 800; line-height: 1.35; letter-spacing: -.015em; }
 .qaute-chat-status { display: flex; align-items: center; gap: 6px; margin-top: 3px; color: rgba(229, 241, 255, .82); font-size: .665rem; line-height: 1.5; }
 .qaute-status-indicator { display: inline-block; width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: #6ae2b1; box-shadow: 0 0 0 3px rgba(106, 226, 177, .13); }
-.qaute-online-dot { position: absolute; right: 0; bottom: 0; width: 11px; height: 11px; border: 2px solid #ffffff; border-radius: 50%; background: #36c58c; box-shadow: 0 1px 4px rgba(0, 0, 0, .12); }
+.qaute-online-dot { position: absolute; right: -1px; bottom: -1px; width: 11px; height: 11px; border: 2px solid #ffffff; border-radius: 50%; background: #36c58c; box-shadow: 0 1px 4px rgba(0, 0, 0, .15); z-index: 2; }
 .qaute-chat-btn-header { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 1px solid rgba(255, 255, 255, .19); border-radius: 11px; background: rgba(255, 255, 255, .12); color: #ffffff; cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .qaute-chat-btn-header:hover { border-color: rgba(255, 255, 255, .34); background: rgba(255, 255, 255, .22); transform: translateY(-1px); }
 .qaute-chat-btn-header:active { transform: scale(.95); }
@@ -191,6 +193,10 @@
 .qaute-bubble { max-width: 100%; padding: 11px 13px; border-radius: 15px; font-size: .82rem; line-height: 1.65; word-break: break-word; overflow-wrap: anywhere; box-shadow: 0 3px 9px rgba(16, 43, 77, .035); }
 .qaute-bubble-bot { border: 1px solid #e0e9f4; border-bottom-left-radius: 5px; background: #ffffff; color: #354c67; }
 .qaute-bubble-bot strong { color: #245b9c; font-weight: 800; }
+.qaute-bubble-bot p { margin-bottom: 0.45rem; }
+.qaute-bubble-bot p:last-child { margin-bottom: 0; }
+.qaute-bubble-bot ul, .qaute-bubble-bot ol { margin-bottom: 0.45rem; padding-left: 1.15rem; }
+.qaute-bubble-bot li { margin-bottom: 0.2rem; }
 .qaute-bubble-user { border: 1px solid rgba(255, 255, 255, .17); border-bottom-right-radius: 5px; background: linear-gradient(135deg, #347fda, #205caa 80%); color: #ffffff; box-shadow: 0 5px 13px rgba(32, 95, 175, .14); }
 .qaute-bubble-user a { color: #ffffff; text-decoration: underline; text-underline-offset: 2px; }
 .qaute-bubble-kicker { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; color: #3979bd; font-size: .67rem; font-weight: 800; }
@@ -276,6 +282,7 @@
 </style>
 
 <script>
+// Khởi tạo widget trò chuyện và các thao tác tương tác của người dùng.
 (function() {
     var root = document.getElementById('qaute-chatbot-widget');
     var trigger = document.getElementById('qaute-chat-trigger');
@@ -284,11 +291,13 @@
     var body = document.getElementById('qaute-chat-body');
     if (!trigger || !panel) return;
 
+    // Mở hoặc thu nhỏ khung trò chuyện theo trạng thái được yêu cầu.
     window.toggleQauteChatbot = function(forceState) {
         var isVisible = panel.style.display !== 'none';
         var nextState = typeof forceState === 'boolean' ? forceState : !isVisible;
         if (nextState) {
             panel.style.display = 'flex';
+            // Đưa tiêu điểm vào ô nhập sau khi mở khung trò chuyện.
             setTimeout(function() {
                 input.focus();
             }, 100);
@@ -298,6 +307,7 @@
         }
     };
 
+    // Mở khung trò chuyện từ các điểm gọi bên ngoài widget.
     window.openQauteChatbot = function() {
         window.toggleQauteChatbot(true);
     };
@@ -307,6 +317,7 @@
     var origX, origY;
     var hasMoved = false;
 
+    // Lấy tọa độ con trỏ hoặc điểm chạm hiện tại.
     function getCoord(e) {
         if (e.touches && e.touches.length > 0) {
             return { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -314,6 +325,7 @@
         return { x: e.clientX, y: e.clientY };
     }
 
+    // Ghi nhận vị trí ban đầu khi bắt đầu kéo nút widget.
     function onDragStart(e) {
         if (e.type === 'mousedown' && e.button !== 0) return;
         var c = getCoord(e);
@@ -330,6 +342,7 @@
         document.addEventListener('touchend', onDragEnd);
     }
 
+    // Cập nhật vị trí widget trong khi người dùng kéo.
     function onDragMove(e) {
         if (!isDragging) return;
         var c = getCoord(e);
@@ -367,6 +380,7 @@
         }
     }
 
+    // Kết thúc thao tác kéo và mở/đóng widget nếu chỉ nhấn.
     function onDragEnd() {
         if (!isDragging) return;
         isDragging = false;
@@ -382,11 +396,13 @@
     trigger.addEventListener('mousedown', onDragStart);
     trigger.addEventListener('touchstart', onDragStart, { passive: true });
 
+    // Gửi câu hỏi gợi ý qua cùng luồng xử lý biểu mẫu trò chuyện.
     window.sendWidgetQuickMessage = function(text) {
         input.value = text;
         window.handleWidgetChatSubmit(new Event('submit'));
     };
 
+    // Hiển thị câu hỏi và xử lý phản hồi từ dịch vụ trò chuyện.
     window.handleWidgetChatSubmit = function(e) {
         if (e && e.preventDefault) e.preventDefault();
         var text = (input.value || '').trim();
@@ -413,25 +429,24 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: text })
         })
+        // Chuyển phản hồi HTTP thành dữ liệu JSON.
         .then(function(res) {
             return res.json();
         })
+        // Thay chỉ báo đang nhập bằng nội dung trả lời.
         .then(function(res) {
             var el = document.getElementById(typingId);
             if (el) el.remove();
             var reply = res && res.data && res.data.reply ? res.data.reply : 'QAUTE đã ghi nhận câu hỏi của bạn. Nếu bạn cần hỗ trợ chi tiết hơn, vui lòng gửi yêu cầu hỗ trợ (Ticket).';
-            var linkHtml = '';
-            if (res && res.data && res.data.faqSlug) {
-                linkHtml = '<div class="mt-2"><a href="/faq/' + res.data.faqSlug + '" class="btn btn-sm btn-outline-danger rounded-pill py-0.5 px-2" style="font-size: 0.74rem;">Xem chi tiết bài viết →</a></div>';
-            }
             var botHtml = '<div class="qaute-msg-row qaute-msg-bot">' +
                 '<div class="qaute-bot-avatar"><img src="/assets/images/chatbot-ute.png" alt="Bot" onerror="this.src=\'/assets/images/hcmute-logo.png\';"></div>' +
                 '<div class="qaute-bubble qaute-bubble-bot">' +
-                reply + linkHtml +
+                reply +
                 '<div class="qaute-msg-time">' + now + '</div></div></div>';
             body.insertAdjacentHTML('beforeend', botHtml);
             body.scrollTop = body.scrollHeight;
         })
+        // Hiển thị thông báo nếu yêu cầu trò chuyện gặp lỗi.
         .catch(function() {
             var el = document.getElementById(typingId);
             if (el) el.remove();
@@ -444,6 +459,7 @@
         });
     };
 
+    // Mã hóa văn bản người dùng trước khi đưa vào nội dung HTML.
     function escapeHtml(str) {
         var p = document.createElement('p');
         p.textContent = str;
