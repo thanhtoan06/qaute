@@ -32,13 +32,6 @@ import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 @Profile("demo")
 @RequiredArgsConstructor
 public class ChatSeeder implements DemoSeeder {
-    private static final String[] LEGACY_STUDENT_EMAILS = {
-        "24162129@student.hcmute.edu.vn",
-        "24162130@student.hcmute.edu.vn"
-    };
-
-    private static final int STUDENT_MSSV_START = 111111;
-    private static final int STUDENT_COUNT = 20;
 
     private static final String[][] MANAGER_ACCOUNTS = {
         {"DT", "manager.daotao@qaute.edu.vn"},
@@ -1025,14 +1018,7 @@ public class ChatSeeder implements DemoSeeder {
             String[] dialogue = DIALOGUES[index];
             int studentNumber = STUDENT_NUMBERS[index];
             String initialQuestion = dialogue[0];
-<<<<<<< HEAD
-            String studentEmail = index < LEGACY_STUDENT_EMAILS.length
-                    ? LEGACY_STUDENT_EMAILS[index]
-                    : String.valueOf(111111 + studentNumber - 1) + "@qaute.edu.vn";
-            User student = user(studentEmail);
-=======
-            User student = user((STUDENT_MSSV_START + (studentNumber - 1) % STUDENT_COUNT) + "@qaute.edu.vn");
->>>>>>> origin/main
+            User student = user("241621" + String.format("%02d", studentNumber) + "@student.hcmute.edu.vn");
             if (sessions.existsByStudentIdAndInitialQuestion(student.getId(), initialQuestion)) {
                 continue;
             }

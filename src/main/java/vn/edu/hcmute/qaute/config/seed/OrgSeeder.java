@@ -927,9 +927,6 @@ public class OrgSeeder implements DemoSeeder {
         ));
     }
 
-<<<<<<< HEAD
-    // Tạo hồ sơ quản lý theo thông tin phòng ban.
-=======
     private void saveMissingProfiles(List<ManagerProfile> profiles) {
         for (ManagerProfile profile : profiles) {
             if (managerProfileRepository.findByUserId(profile.getUserId()).isEmpty()) {
@@ -948,7 +945,7 @@ public class OrgSeeder implements DemoSeeder {
         }
     }
 
->>>>>>> origin/main
+    // Tạo hồ sơ quản lý theo thông tin phòng ban.
     private ManagerProfile profile(
             User manager,
             String employeeCode,
