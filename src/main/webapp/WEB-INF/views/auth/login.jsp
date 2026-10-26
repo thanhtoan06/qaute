@@ -113,6 +113,13 @@
         </div>
     </c:if>
 
+    <c:if test="${param.passwordChanged eq 'true'}">
+        <div class="alert alert-success d-flex align-items-center gap-2 login-premium-alert login-premium-alert--success" role="status">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Đã đổi mật khẩu và đăng xuất các phiên cũ. Vui lòng đăng nhập bằng mật khẩu mới.</span>
+        </div>
+    </c:if>
+
     <c:if test="${not empty errors['global']}">
         <div class="alert alert-danger d-flex align-items-center gap-2 login-premium-alert">
             <i class="bi bi-exclamation-triangle-fill"></i>
