@@ -17,15 +17,27 @@ import vn.edu.hcmute.qaute.repository.identity.RoleRepository;
 import vn.edu.hcmute.qaute.repository.identity.StudentProfileRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 
+// Tạo các tài khoản demo và hồ sơ sinh viên, tư vấn viên còn thiếu.
 @Component
 public class UserSeeder implements DemoSeeder {
 
     private static final String ADMIN_EMAIL = "admin@qaute.edu.vn";
 
-    /** MSSV dải seed: 111111 – 111130 (20 sinh viên). */
+    /** MSSV dải seed mới: 111111 – 111130 (20 sinh viên). */
     private static final int STUDENT_MSSV_START = 111111;
 
-    /** 12 manager mới, mỗi tài khoản phụ trách một nhóm phòng ban. */
+    /** Hai tài khoản sinh viên bổ sung sử dụng MSSV và email cũ. */
+    private static final String[] LEGACY_STUDENT_MSSVS = {
+        "24162129",
+        "24162130"
+    };
+
+    private static final String[] LEGACY_STUDENT_NAMES = {
+        "Lê Thanh Toàn",
+        "Hà Quốc Toản"
+    };
+
+    /** 12 manager, mỗi tài khoản phụ trách một nhóm phòng ban. */
     private static final String[] MANAGER_EMAILS = {
         "manager.daotao@qaute.edu.vn",
         "manager.ctsv@qaute.edu.vn",
@@ -85,6 +97,7 @@ public class UserSeeder implements DemoSeeder {
     private final FacultyRepository facultyRepository;
     private final PasswordEncoder passwordEncoder;
 
+    // Khởi tạo seeder người dùng với các kho dữ liệu cần thiết.
     public UserSeeder(
             UserRepository userRepository,
             RoleRepository roleRepository,
@@ -98,17 +111,19 @@ public class UserSeeder implements DemoSeeder {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // Xác định thứ tự chạy của seeder người dùng.
     @Override
     public int order() {
         return 10;
     }
 
+    // Tạo các tài khoản và hồ sơ demo còn thiếu.
     @Override
     @Transactional
     public void seed() {
         LocalDateTime now = LocalDateTime.now();
 
-        // Tạo Role khi bảng roles trống.
+        // Tạo Role khi chưa tồn tại.
         seedRoles();
 
         Role adminRole = role(RoleCode.ADMIN);
@@ -126,8 +141,8 @@ public class UserSeeder implements DemoSeeder {
                     now);
         }
 
-        // Chỉ tạo 12 manager mới theo phòng ban.
-        // Không tạo lại các tài khoản manager1, manager2, manager3, manager4.
+        // Tạo 12 manager theo phòng ban.
+        // Không tạo lại nếu tài khoản đã tồn tại.
         for (int i = 0; i < MANAGER_NAMES.length; i++) {
             String email = MANAGER_EMAILS[i];
 
@@ -156,7 +171,14 @@ public class UserSeeder implements DemoSeeder {
                     "Không có khoa đang hoạt động để seed sinh viên");
         }
 
-        // Student accounts: 111111 → 111130.
+        Faculty informationTechnologyFaculty = faculties.stream()
+                .filter(faculty -> "CNTT".equalsIgnoreCase(faculty.getCode()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Không tìm thấy Khoa Công nghệ thông tin (CNTT) để seed sinh viên"));
+
+        // Tạo 20 tài khoản sinh viên mới: 111111 → 111130.
+        // Email: MSSV@qaute.edu.vn.
         for (int i = 0; i < STUDENT_NAMES.length; i++) {
             String mssv = String.valueOf(STUDENT_MSSV_START + i);
             String email = mssv + "@qaute.edu.vn";
@@ -184,11 +206,38 @@ public class UserSeeder implements DemoSeeder {
                     .program("Đại học chính quy")
                     .build());
         }
+
+        // Bổ sung hai tài khoản sinh viên sử dụng MSSV và email cũ.
+        for (int i = 0; i < LEGACY_STUDENT_MSSVS.length; i++) {
+            String mssv = LEGACY_STUDENT_MSSVS[i];
+            String email = mssv + "@student.hcmute.edu.vn";
+            String fullName = LEGACY_STUDENT_NAMES[i];
+            User student = userRepository.findByEmailIgnoreCase(email)
+                    .or(() -> userRepository.findByMssv(mssv))
+                    .orElseGet(() -> saveUser(
+                            studentRole,
+                            email,
+                            fullName,
+                            mssv,
+                            "Student@12345",
+                            now));
+
+            StudentProfile profile = studentProfileRepository.findByUserId(student.getId())
+                    .orElseGet(() -> StudentProfile.builder()
+                            .userId(student.getId())
+                            .build());
+            profile.setFacultyId(informationTechnologyFaculty.getId());
+            profile.setClassCode("241621C");
+            profile.setCohort("2024");
+            profile.setProgram("Đại học chính quy");
+            studentProfileRepository.save(profile);
+        }
     }
 
     /**
      * Tạo các Role được khai báo trong RoleCode nếu chưa tồn tại.
      */
+    // Bổ sung các vai trò chưa có trong cơ sở dữ liệu.
     private void seedRoles() {
         for (RoleCode code : RoleCode.values()) {
             if (roleRepository.findByCode(code).isPresent()) {
@@ -204,6 +253,7 @@ public class UserSeeder implements DemoSeeder {
         }
     }
 
+    // Lấy tên hiển thị tương ứng với mã vai trò.
     private String roleName(RoleCode code) {
         if (code == RoleCode.ADMIN) {
             return "Quản trị viên";
@@ -223,6 +273,7 @@ public class UserSeeder implements DemoSeeder {
     /**
      * Tạo các khoa demo cho sinh viên khi bảng faculties trống.
      */
+    // Tạo dữ liệu khoa mặc định cho môi trường demo.
     private void seedFaculties() {
         List<Faculty> faculties = new ArrayList<>();
 
@@ -301,12 +352,14 @@ public class UserSeeder implements DemoSeeder {
         facultyRepository.saveAll(faculties);
     }
 
+    // Tìm vai trò đã cấu hình theo mã.
     private Role role(RoleCode code) {
         return roleRepository.findByCode(code)
                 .orElseThrow(() ->
                         new IllegalStateException("Chưa cấu hình role " + code));
     }
 
+    // Tạo và lưu tài khoản người dùng với thông tin được cung cấp.
     private User saveUser(
             Role role,
             String email,

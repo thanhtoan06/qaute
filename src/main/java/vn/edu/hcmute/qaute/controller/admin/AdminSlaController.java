@@ -26,17 +26,20 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.admin.AdminSlaService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminSla.
 @Controller
 public class AdminSlaController {
     private final AdminSlaService sla;
     private final CategoryQueryService categories;
 
+    // Khởi tạo bộ điều khiển chính sách SLA.
     public AdminSlaController(AdminSlaService sla, CategoryQueryService categories) {
         this.sla = sla;
         this.categories = categories;
     }
 
     @GetMapping("/admin/sla")
+    // Hiển thị trang SLA theo thẻ được chọn.
     public String page(@RequestParam(required = false, defaultValue = "policy") String tab, Model model) {
         populate(model, sla.getForm(null), Map.of());
         model.addAttribute("activeTab", List.of("policy", "hours", "holidays").contains(tab) ? tab : "policy");
@@ -44,12 +47,14 @@ public class AdminSlaController {
     }
 
     @GetMapping("/admin/sla/policy")
+    // Hiển thị chính sách SLA cho chuyên mục.
     public String policy(@RequestParam(required = false) Long categoryId, Model model) {
         populate(model, sla.getForm(categoryId), Map.of());
         return "admin/sla";
     }
 
     @PostMapping("/admin/sla/policy")
+    // Kiểm tra và lưu chính sách SLA.
     public String save(@Valid @ModelAttribute("form") SlaPolicyForm form,
                        BindingResult result, Model model, RedirectAttributes redirect) {
         Map<String, String> errors = new LinkedHashMap<>();
@@ -77,6 +82,7 @@ public class AdminSlaController {
     }
 
     @PostMapping("/admin/sla/policy/{categoryId}/delete")
+    // Xóa chính sách SLA ghi đè của chuyên mục.
     public String delete(@PathVariable Long categoryId, RedirectAttributes redirect) {
         try {
             sla.deleteOverride(categoryId, SecurityUtils.requireUserId());
@@ -88,6 +94,7 @@ public class AdminSlaController {
     }
 
     @PostMapping("/admin/sla/hours")
+    // Kiểm tra và lưu giờ làm việc.
     public String saveHours(@Valid @ModelAttribute("hoursForm") BusinessHoursForm hoursForm,
                             BindingResult result, Model model, RedirectAttributes redirect) {
         try {
@@ -105,6 +112,7 @@ public class AdminSlaController {
     }
 
     @PostMapping("/admin/sla/holidays")
+    // Kiểm tra và thêm ngày nghỉ.
     public String addHoliday(@Valid @ModelAttribute("holidayForm") HolidayForm holidayForm,
                              BindingResult result, Model model, RedirectAttributes redirect) {
         Map<String, String> holidayErrors = new LinkedHashMap<>();
@@ -129,12 +137,14 @@ public class AdminSlaController {
     }
 
     @PostMapping("/admin/sla/holidays/{id}/delete")
+    // Xóa ngày nghỉ đã chọn.
     public String deleteHoliday(@PathVariable Long id, RedirectAttributes redirect) {
         sla.deleteHoliday(id, SecurityUtils.requireUserId());
         redirect.addFlashAttribute("flashSuccess", "Đã xóa ngày nghỉ");
         return "redirect:/admin/sla?tab=holidays";
     }
 
+    // Nạp chính sách, giờ làm và ngày nghỉ vào trang.
     private void populate(Model model, SlaPolicyForm form, Map<String, String> errors) {
         model.addAttribute("form", form);
         model.addAttribute("matrix", sla.matrix());
@@ -156,6 +166,7 @@ public class AdminSlaController {
         model.addAttribute("pageTitle", "Chính sách SLA");
     }
 
+    // Tạo danh sách chuyên mục có thể chọn cho SLA.
     private List<SlaCategoryOption> categoryOptions(Long selectedId) {
         List<SlaCategoryOption> options = new ArrayList<>();
         for (DepartmentNode department : categories.getActiveTree()) {

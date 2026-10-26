@@ -28,6 +28,7 @@ import vn.edu.hcmute.qaute.security.RateLimitService;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
+// Xử lý nghiệp vụ Media trong hệ thống.
 @Service
 public class MediaServiceImpl implements MediaService {
     private static final long MB = 1024L * 1024L;
@@ -40,6 +41,7 @@ public class MediaServiceImpl implements MediaService {
     private final RateLimitService rateLimits;
     private final Tika tika = new Tika();
 
+    // Khởi tạo dịch vụ quản lý tệp phương tiện.
     public MediaServiceImpl(MediaAssetRepository assets, Cloudinary cloudinary,
                             CloudinaryProperties cloudinaryProperties, SettingsService settings,
                             RateLimitService rateLimits) {
@@ -51,15 +53,18 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override @Transactional
+    // Tải lên tài nguyên với đường dẫn công khai.
     public MediaAssetView uploadPublic(MultipartFile file, MediaUsageType usage, Long ownerId) {
         return upload(file, usage, ownerId, true);
     }
 
     @Override @Transactional
+    // Tải lên tài nguyên với quyền truy cập riêng tư.
     public MediaAssetView uploadPrivate(MultipartFile file, MediaUsageType usage, Long ownerId) {
         return upload(file, usage, ownerId, false);
     }
 
+    // Kiểm tra và lưu tệp tải lên theo cấu hình tài nguyên.
     private MediaAssetView upload(MultipartFile file, MediaUsageType usage, Long ownerId, boolean publicDelivery) {
         if (!cloudinaryProperties.isConfigured()) throw rejected("Chưa cấu hình lưu trữ tệp");
         if (file == null || file.isEmpty()) throw rejected("Tệp tải lên không được để trống");
@@ -102,11 +107,13 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override @Transactional
+    // Gắn tài nguyên với người dùng hiện tại.
     public void attach(Long assetId, MediaUsageType usage, Long refId) {
         attach(assetId, usage, refId, SecurityUtils.requireUserId());
     }
 
     @Override @Transactional
+    // Kiểm tra quyền sở hữu rồi gắn tài nguyên với tham chiếu.
     public void attach(Long assetId, MediaUsageType usage, Long refId, Long ownerId) {
         if (assetId == null || usage == null || refId == null || ownerId == null) throw rejected("Thông tin đính kèm tệp không hợp lệ");
         MediaAsset asset = assets.findById(assetId).orElseThrow(() -> new NotFoundException("Không tìm thấy tệp"));
@@ -121,6 +128,7 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override @Transactional(readOnly = true)
+    // Trả về đường dẫn công khai hợp lệ của tài nguyên.
     public String publicUrl(Long assetId) {
         MediaAsset asset = assets.findById(assetId).orElseThrow(() -> new NotFoundException("Không tìm thấy tệp"));
         if (asset.getDeliveryType() != MediaDeliveryType.UPLOAD || asset.getStatus() == MediaStatus.DELETED || asset.getSecureUrl() == null || asset.getSecureUrl().isBlank()) throw rejected("Tệp không có đường dẫn công khai");
@@ -128,6 +136,7 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override @Transactional
+    // Xóa tài nguyên trên dịch vụ lưu trữ và cập nhật trạng thái.
     public void delete(Long assetId) {
         MediaAsset asset = assets.findById(assetId).orElseThrow(() -> new NotFoundException("Không tìm thấy tệp"));
         if (asset.getStatus() == MediaStatus.DELETED) return;
@@ -141,6 +150,7 @@ public class MediaServiceImpl implements MediaService {
         }
     }
 
+    // Kiểm tra phần mở rộng có được phép theo mục đích sử dụng.
     private static void validateExtension(MediaUsageType usage, String extension) {
         Set<String> allowed = switch (usage) {
             case AVATAR, FAQ_IMAGE, ANNOUNCEMENT_COVER -> IMAGES;
@@ -149,6 +159,7 @@ public class MediaServiceImpl implements MediaService {
         if (!allowed.contains(extension)) throw rejected("Định dạng tệp không được hỗ trợ");
     }
 
+    // Kiểm tra kiểu nội dung thực tế của tệp.
     private static void validateMime(String extension, String mime) {
         if (mime.equals("text/html") || mime.contains("javascript") || mime.contains("executable") || mime.contains("msdownload")) throw rejected("Tệp có kiểu nội dung không an toàn");
         boolean match = switch (extension) {
@@ -161,17 +172,49 @@ public class MediaServiceImpl implements MediaService {
         if (!match) throw rejected("Kiểu nội dung thực tế không khớp với phần mở rộng tệp");
     }
 
+    // Chuẩn hóa tên tệp tải lên.
     private static String normalizedName(String filename) {
         String name = filename == null ? "" : filename.replace('\\', '/');
         name = name.substring(name.lastIndexOf('/') + 1).replaceAll("[\\p{Cntrl}]", "").trim();
         if (name.isBlank()) throw rejected("Tên tệp không hợp lệ");
         return name.length() <= 150 ? name : name.substring(0, 150);
     }
-    private static String extension(String name) { int dot = name.lastIndexOf('.'); if (dot <= 0 || dot == name.length() - 1) throw rejected("Tệp phải có phần mở rộng hợp lệ"); return name.substring(dot + 1).toLowerCase(Locale.ROOT); }
-    private static String folder(MediaUsageType usage) { return "qaute/" + usage.name().toLowerCase(Locale.ROOT); }
-    private static Integer number(Object value) { return value instanceof Number number ? number.intValue() : null; }
-    private static String value(Object value) { return value == null ? "" : String.valueOf(value); }
-    private static String sha256(byte[] bytes) throws Exception { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes)); }
-    private static MediaAssetView view(MediaAsset asset) { return new MediaAssetView(asset.getId(), asset.getOriginalFilename(), asset.getMimeType(), asset.getSizeBytes(), asset.getSecureUrl()); }
-    private static AppException rejected(String message) { return new AppException(ErrorCode.ERR_FILE_REJECTED, message); }
+
+    // Lấy phần mở rộng đã chuẩn hóa từ tên tệp.
+    private static String extension(String name) {
+        int dot = name.lastIndexOf('.');
+        if (dot <= 0 || dot == name.length() - 1) throw rejected("Tệp phải có phần mở rộng hợp lệ");
+        return name.substring(dot + 1).toLowerCase(Locale.ROOT);
+    }
+
+    // Tạo thư mục lưu trữ theo mục đích sử dụng.
+    private static String folder(MediaUsageType usage) {
+        return "qaute/" + usage.name().toLowerCase(Locale.ROOT);
+    }
+
+    // Chuyển giá trị số thành số nguyên khi có thể.
+    private static Integer number(Object value) {
+        return value instanceof Number number ? number.intValue() : null;
+    }
+
+    // Chuyển giá trị thành chuỗi an toàn.
+    private static String value(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    // Tính mã băm SHA-256 của nội dung tệp.
+    private static String sha256(byte[] bytes) throws Exception {
+        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+    }
+
+    // Tạo dữ liệu hiển thị từ tài nguyên tệp.
+    private static MediaAssetView view(MediaAsset asset) {
+        return new MediaAssetView(asset.getId(), asset.getOriginalFilename(), asset.getMimeType(),
+                asset.getSizeBytes(), asset.getSecureUrl());
+    }
+
+    // Tạo ngoại lệ khi tệp bị từ chối.
+    private static AppException rejected(String message) {
+        return new AppException(ErrorCode.ERR_FILE_REJECTED, message);
+    }
 }

@@ -1,25 +1,85 @@
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <title>Soạn thông báo</title>
+<div class="qa-page-admin-announcement-form" data-qa-view="admin-announcement-form">
+<style>
+.qa-page-admin-announcement-form { --page-accent: #2878c5; --page-accent-dark: #205a94; --page-tint: #edf6ff; --page-line: #d9eaff; min-width: 0; color: #344c67; }
+.qa-page-admin-announcement-form > .page-header, .qa-page-admin-announcement-form > .qa-page-heading, .qa-page-admin-announcement-form > .d-flex:has(> .page-title), .qa-page-admin-announcement-form > .d-flex:has(> div > .page-title) { position: relative; isolation: isolate; display: flex; align-items: center; gap: 1rem; margin: 0 0 1.4rem !important; padding: clamp(1rem,2vw,1.45rem); overflow: hidden; border: 1px solid #dfe8f3; border-radius: 20px; background: radial-gradient(circle at 96% 0%, #edf6ff, transparent 34%), linear-gradient(125deg,#fff,#f7faff); box-shadow: 0 9px 26px rgba(16,48,84,.06); }
+.qa-page-admin-announcement-form > .page-header::after, .qa-page-admin-announcement-form > .qa-page-heading::after { content: ""; position: absolute; z-index: -1; right: -42px; bottom: -88px; width: 160px; height: 160px; border: 1px solid #d9eaff; border-radius: 50%; box-shadow: 0 0 0 18px rgba(32,107,196,.014),0 0 0 40px rgba(32,107,196,.009); pointer-events: none; }
+.qa-page-admin-announcement-form .qa-view-title { display: inline-flex; align-items: center; gap: .68rem; max-width: 100%; color: #193858; font-size: clamp(1.3rem,2vw,1.75rem); font-weight: 850; line-height: 1.3; letter-spacing: -.045em; }
+.qa-page-admin-announcement-form .qa-view-title-icon { display: inline-flex; flex: 0 0 36px; width: 36px; height: 36px; align-items: center; justify-content: center; border: 1px solid #d9eaff; border-radius: 12px; color: #205a94; background: linear-gradient(145deg,#fff,#edf6ff); box-shadow: 0 6px 15px rgba(20,55,92,.08); }
+.qa-page-admin-announcement-form .card { position: relative; border: 1px solid #e0e9f3; border-radius: 18px; background: rgba(255,255,255,.98); box-shadow: 0 7px 22px rgba(16,48,84,.05); transition: border-color .22s ease,box-shadow .22s ease,transform .22s ease; }
+.qa-page-admin-announcement-form .card:hover { border-color: #d9eaff; box-shadow: 0 13px 30px rgba(16,48,84,.085); }
+.qa-page-admin-announcement-form .card-header { display: flex; align-items: center; gap: .65rem; min-height: 56px; border-bottom: 1px solid #eaf0f7; border-radius: 18px 18px 0 0; background: linear-gradient(115deg,#fff,#edf6ff); }
+.qa-page-admin-announcement-form .card-title { color: #294664; font-weight: 800; letter-spacing: -.015em; }
+.qa-page-admin-announcement-form .card-body { color: #435b75; }
+.qa-page-admin-announcement-form .card-footer { border-top: 1px solid #eaf0f7; background: linear-gradient(110deg,#fbfdff,#edf6ff); }
+.qa-page-admin-announcement-form .form-label { color: #405a76; font-size: .79rem; font-weight: 750; }
+.qa-page-admin-announcement-form .form-control, .qa-page-admin-announcement-form .form-select { min-height: 42px; border-color: #d7e3f1; border-radius: 10px; color: #2c4562; background-color: #fff; box-shadow: 0 2px 5px rgba(20,50,84,.025); transition: border-color .2s ease,box-shadow .2s ease; }
+.qa-page-admin-announcement-form textarea.form-control { min-height: 112px; line-height: 1.65; }
+.qa-page-admin-announcement-form .form-control:focus, .qa-page-admin-announcement-form .form-select:focus { border-color: #2878c5; box-shadow: 0 0 0 4px #edf6ff; }
+.qa-page-admin-announcement-form .btn { border-radius: 10px; font-weight: 650; transition: transform .18s ease,box-shadow .18s ease,background-color .18s ease; }
+.qa-page-admin-announcement-form .btn:not(:disabled):not(.btn-close):hover { transform: translateY(-1px); }
+.qa-page-admin-announcement-form .btn-primary { border-color: #2878c5; background: linear-gradient(120deg,#2878c5,#205a94); box-shadow: 0 5px 13px #d9eaff; }
+.qa-page-admin-announcement-form .btn-outline-primary { border-color: #d9eaff; color: #205a94; background: #fff; }
+.qa-page-admin-announcement-form .btn-outline-primary:hover { border-color: #2878c5; color: #fff; background: linear-gradient(120deg,#2878c5,#205a94); }
+.qa-page-admin-announcement-form .qa-filter-bar { gap: .9rem; padding: clamp(.95rem,1.8vw,1.25rem); border: 1px solid #dfe8f3; border-radius: 16px; background: linear-gradient(135deg,#fff,#edf6ff); box-shadow: 0 7px 20px rgba(16,48,84,.04); }
+.qa-page-admin-announcement-form .table-responsive { border: 1px solid #e3ebf5; border-radius: 14px; background: #fff; }
+.qa-page-admin-announcement-form .table { margin-bottom: 0; color: #405872; }
+.qa-page-admin-announcement-form .table thead th { color: #607892; font-size: .72rem; font-weight: 800; letter-spacing: .045em; background: linear-gradient(110deg,#edf6ff,#f8faff); border-bottom-color: #dfe8f3; }
+.qa-page-admin-announcement-form .table tbody tr { transition: background-color .18s ease; }
+.qa-page-admin-announcement-form .table tbody tr:hover { background: #edf6ff; }
+.qa-page-admin-announcement-form .alert { border-radius: 13px; box-shadow: 0 5px 15px rgba(16,48,84,.04); }
+.qa-page-admin-announcement-form .nav-tabs { gap: .25rem; border-bottom-color: #dce7f3; }
+.qa-page-admin-announcement-form .nav-tabs .nav-link { border-radius: 10px 10px 0 0; font-weight: 650; }
+.qa-page-admin-announcement-form .nav-tabs .nav-link.active { color: #205a94; box-shadow: inset 0 -2px #2878c5; }
+.qa-page-admin-announcement-form .nav-pills .nav-link.active { color: #205a94; background: #edf6ff; box-shadow: inset 0 0 0 1px #d9eaff; }
+.qa-page-admin-announcement-form .progress { overflow: hidden; border-radius: 999px; background: #e9eff6; }
+.qa-page-admin-announcement-form .progress-bar { border-radius: inherit; }
+.qa-page-admin-announcement-form form:not(.qa-filter-bar) { --form-accent: var(--page-accent); }
+.qa-page-admin-announcement-form form:not(.qa-filter-bar) > .card, .qa-page-admin-announcement-form form:not(.qa-filter-bar) .card { border-radius: 20px; }
+.qa-page-admin-announcement-form form:not(.qa-filter-bar) .form-control:focus, .qa-page-admin-announcement-form form:not(.qa-filter-bar) .form-select:focus { border-color: var(--page-accent); box-shadow: 0 0 0 4px var(--page-tint); }
+@media (max-width: 767.98px) {
+  .qa-page-admin-announcement-form > .page-header, .qa-page-admin-announcement-form > .qa-page-heading, .qa-page-admin-announcement-form > .d-flex:has(> .page-title), .qa-page-admin-announcement-form > .d-flex:has(> div > .page-title) { align-items: flex-start; padding: .95rem; }
+  .qa-page-admin-announcement-form .card { border-radius: 15px; }
+  .qa-page-admin-announcement-form .card-body { padding: 1rem; }
+  .qa-page-admin-announcement-form .table-responsive { border-radius: 11px; }
+  .qa-page-admin-announcement-form .qa-view-title-icon { flex-basis: 31px; width: 31px; height: 31px; border-radius: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qa-page-admin-announcement-form *, .qa-page-admin-announcement-form *::before, .qa-page-admin-announcement-form *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css"/>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
-<div class="d-flex justify-content-between align-items-center mb-3"><h2 class="page-title mb-0">Soạn thông báo</h2><a href="${ctx}/admin/announcements" class="btn btn-outline-secondary">Danh sách</a></div>
+<!-- Tiêu đề trang và nút quay lại danh sách -->
+<div class="d-flex justify-content-between align-items-center mb-3"><h2 class="page-title mb-0 qa-view-title" data-qa-page="admin-announcement-form"><span class="qa-view-title-icon" aria-hidden="true"><i class="bi bi-megaphone"></i></span>Soạn thông báo</h2><a href="${ctx}/admin/announcements" class="btn btn-outline-secondary">Danh sách</a></div>
+<%-- Soạn nội dung, đối tượng nhận, lịch đăng và tùy chọn thông báo. --%>
+<!-- Form soạn thông báo: tiêu đề, tóm tắt, nội dung, đối tượng, ảnh bìa, thời gian -->
 <div class="card"><div class="card-body"><c:if test="${not empty errors.global}"><div class="alert alert-danger"><c:out value="${errors.global}"/></div></c:if>
 <form method="post" action="${ctx}/admin/announcements" id="announcement-form">
   <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
   <input type="hidden" name="id" value="<c:out value='${form.id}'/>"/>
   <input type="hidden" name="coverAssetId" id="cover-asset-id" value="<c:out value='${form.coverAssetId}'/>"/>
+  <!-- Nhập tiêu đề thông báo -->
   <div class="mb-3"><label class="form-label" for="announcement-title">Tiêu đề</label><input id="announcement-title" class="form-control" name="title" minlength="5" maxlength="200" required value="<c:out value='${form.title}'/>"/><div class="text-danger small"><c:out value="${errors.title}"/></div></div>
+  <!-- Nhập tóm tắt thông báo -->
   <div class="mb-3"><label class="form-label" for="announcement-summary">Tóm tắt</label><textarea id="announcement-summary" class="form-control" name="summary" minlength="10" maxlength="500" required><c:out value="${form.summary}"/></textarea><div class="text-danger small"><c:out value="${errors.summary}"/></div></div>
+  <!-- Nhập nội dung chi tiết bằng trình soạn thảo -->
   <div class="mb-3"><label class="form-label" for="announcement-body">Nội dung</label><textarea id="announcement-body" class="form-control" name="bodyHtml" required><c:out value="${form.bodyHtml}"/></textarea><div class="text-danger small"><c:out value="${errors.bodyHtml}"/></div></div>
+  <!-- Chọn đối tượng nhận và tải ảnh bìa -->
   <div class="row"><div class="col-md-6 mb-3"><label class="form-label" for="announcement-audience">Đối tượng</label><select id="announcement-audience" name="audience" class="form-select" required><c:forEach var="aud" items="${audiences}"><option value="${aud}" ${form.audience eq aud ? 'selected' : ''}><c:out value="${aud}"/></option></c:forEach></select></div>
   <div class="col-md-6 mb-3"><label class="form-label">Ảnh bìa</label><div id="announcement-cover-uploader"></div><c:if test="${not empty form.coverAssetId}"><div class="small text-secondary">Ảnh hiện tại: #<c:out value="${form.coverAssetId}"/></div></c:if><div id="announcement-upload-error" class="text-danger small"></div></div></div>
+  <!-- Thiết lập thời gian đăng và hết hạn -->
   <div class="row"><div class="col-md-6 mb-3"><label class="form-label" for="announcement-publish">Thời gian đăng</label><input id="announcement-publish" class="form-control" type="datetime-local" name="publishAt" value="<c:out value='${form.publishAt}'/>"/></div>
   <div class="col-md-6 mb-3"><label class="form-label" for="announcement-expires">Hết hạn</label><input id="announcement-expires" class="form-control" type="datetime-local" name="expiresAt" value="<c:out value='${form.expiresAt}'/>"/></div></div>
+  <!-- Tùy chọn: ghim, tự động đăng, gửi thông báo đẩy -->
   <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="announcement-pin" name="pinned" value="true" ${form.pinned ? 'checked' : ''}/><label class="form-check-label" for="announcement-pin">Ghim lên đầu</label></div>
   <div class="form-check mb-2"><input class="form-check-input" type="checkbox" id="announcement-auto" name="autoPublish" value="true" ${form.autoPublish ? 'checked' : ''}/><label class="form-check-label" for="announcement-auto">Tự động đăng đúng thời gian đã chọn</label></div>
   <div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="announcement-notify" name="notifyOnPublish" value="true" ${form.notifyOnPublish ? 'checked' : ''}/><label class="form-check-label" for="announcement-notify">Gửi thông báo đẩy khi đăng</label></div>
+  <!-- Nút lưu bản nháp -->
   <button type="submit" class="btn btn-primary">Lưu bản nháp</button>
 </form></div></div>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js" defer></script>
 <script src="${ctx}/assets/js/common/file-uploader.js" defer></script>
 <script src="${ctx}/assets/js/admin/announcement-form.js" defer></script>
+</div>

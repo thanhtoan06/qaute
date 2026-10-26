@@ -18,22 +18,26 @@ import vn.edu.hcmute.qaute.dto.view.ImportReport;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.admin.UserImportService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminUserImport.
 @Controller
 public class AdminUserImportController {
     private static final List<String> ERROR_HEADER = List.of("line", "mssv", "email", "message");
     private final UserImportService imports;
 
+    // Khởi tạo bộ điều khiển nhập người dùng.
     public AdminUserImportController(UserImportService imports) {
         this.imports = imports;
     }
 
     @GetMapping("/admin/users/import")
+    // Hiển thị trang nhập sinh viên từ CSV.
     public String page(Model model) {
         model.addAttribute("pageTitle", "Nhập sinh viên từ CSV");
         return "admin/user-import";
     }
 
     @GetMapping("/admin/users/import/template")
+    // Tải tệp CSV mẫu nhập sinh viên.
     public ResponseEntity<byte[]> template() {
         String csv = CsvUtil.row("mssv", "fullName", "email", "facultyCode", "classCode", "cohort")
                 + CsvUtil.row("12345678", "Nguyễn Văn A", "student@example.edu.vn", "", "20DTH1", "2024");
@@ -41,6 +45,7 @@ public class AdminUserImportController {
     }
 
     @PostMapping("/admin/users/import")
+    // Xử lý tệp CSV nhập người dùng.
     public String importUsers(@RequestParam("file") MultipartFile file,
                               @RequestParam(defaultValue = "true") boolean dryRun, Model model) {
         model.addAttribute("pageTitle", "Nhập sinh viên từ CSV");
@@ -61,6 +66,7 @@ public class AdminUserImportController {
     }
 
     @PostMapping("/admin/users/import/errors")
+    // Kiểm tra và tải tệp CSV chứa các dòng lỗi.
     public ResponseEntity<byte[]> errors(@RequestParam String csv) {
         if (csv == null || csv.length() > 2_000_000) {
             throw new BadRequestException("CSV lỗi không hợp lệ");
@@ -85,6 +91,7 @@ public class AdminUserImportController {
         return csvDownload(output.toString(), "qaute-dong-loi.csv");
     }
 
+    // Tạo phản hồi tải xuống tệp CSV.
     private static ResponseEntity<byte[]> csvDownload(String csv, String filename) {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()

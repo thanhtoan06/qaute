@@ -1,3 +1,4 @@
+// Khởi tạo và quản lý chức năng tải tệp dùng chung.
 (function (window, document) {
     'use strict';
 
@@ -13,6 +14,7 @@
 
     const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
+    // Mã hóa nội dung để hiển thị an toàn trong HTML.
     function escapeHtml(value) {
         if (window.Qaute && typeof window.Qaute.escapeHtml === 'function') {
             return window.Qaute.escapeHtml(value);
@@ -22,11 +24,13 @@
         return element.innerHTML;
     }
 
+    // Kiểm tra tên tệp có phần mở rộng là ảnh hay không.
     function isImageName(name) {
         const ext = String(name || '').split('.').pop().toLowerCase();
         return ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext);
     }
 
+    // Khởi tạo vùng tải tệp và trả về các thao tác quản lý tệp.
     window.Qaute.initUploader = function (container, purpose, maxCount) {
         const root = typeof container === 'string' ? document.querySelector(container) : container;
         if (!root) {
@@ -76,6 +80,7 @@
             isUploading: false
         };
 
+        // Chọn biểu tượng tương ứng với loại tệp.
         function getFileIcon(name) {
             const ext = name.split('.').pop().toLowerCase();
             if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) {
@@ -96,6 +101,7 @@
             return 'bi-file-earmark text-secondary';
         }
 
+        // Định dạng dung lượng tệp để hiển thị.
         function formatSize(bytes) {
             if (bytes < 1024) return bytes + ' B';
             if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
@@ -104,6 +110,7 @@
 
         const pickBtn = root.querySelector('.uploader-pick-btn');
         if (pickBtn) {
+            // Mở hộp chọn tệp mà không kích hoạt sự kiện của vùng thả.
             pickBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -111,6 +118,7 @@
             });
         }
 
+        // Mở hộp chọn tệp khi người dùng nhấn vùng thả.
         dropzone.addEventListener('click', function (e) {
             if (e.target && e.target.closest && e.target.closest('.uploader-pick-btn')) {
                 return;
@@ -118,18 +126,21 @@
             fileInput.click();
         });
 
+        // Đánh dấu vùng thả khi tệp được kéo qua.
         dropzone.addEventListener('dragover', function (e) {
             e.preventDefault();
             e.stopPropagation();
             dropzone.classList.add('bg-light');
         });
 
+        // Gỡ đánh dấu khi tệp rời khỏi vùng thả.
         dropzone.addEventListener('dragleave', function (e) {
             e.preventDefault();
             e.stopPropagation();
             dropzone.classList.remove('bg-light');
         });
 
+        // Nhận các tệp được thả vào vùng tải lên.
         dropzone.addEventListener('drop', function (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -139,6 +150,7 @@
             }
         });
 
+        // Xử lý lựa chọn tệp và đặt lại trường chọn.
         fileInput.addEventListener('change', function () {
             if (fileInput.files) {
                 handleFiles(fileInput.files);
@@ -146,6 +158,7 @@
             fileInput.value = '';
         });
 
+        // Kiểm tra tệp và bắt đầu tải các tệp hợp lệ.
         function handleFiles(files) {
             const activeFiles = state.files.filter(f => f.status !== 'error');
             if (activeFiles.length + files.length > maxCount) {
@@ -155,6 +168,7 @@
                 return;
             }
 
+            // Kiểm tra từng tệp trước khi đưa vào hàng đợi tải lên.
             Array.from(files).forEach(function (file) {
                 const ext = file.name.split('.').pop().toLowerCase();
                 const uid = 'file_' + Math.random().toString(36).substring(2, 10);
@@ -184,6 +198,7 @@
             });
         }
 
+        // Hiển thị mục lỗi cho tệp không hợp lệ.
         function renderErrorItem(name, errorMsg) {
             const el = document.createElement('div');
             el.className = 'border rounded p-2 bg-danger-lt d-flex justify-content-between align-items-center small';
@@ -196,12 +211,14 @@
                 '<button type="button" class="btn btn-sm btn-link text-danger p-0 ms-auto" aria-label="Đóng">' +
                     '<i class="bi bi-x-lg"></i>' +
                 '</button>';
+            // Xóa mục lỗi khỏi danh sách.
             el.querySelector('button').addEventListener('click', function () {
                 el.remove();
             });
             fileList.appendChild(el);
         }
 
+        // Hiển thị thông tin và trạng thái của tệp đang tải.
         function renderFileItem(item, file) {
             const el = document.createElement('div');
             el.className = 'border rounded p-2 bg-white small position-relative file-item-' + item.uid;
@@ -234,6 +251,7 @@
                     '<div class="progress-bar progress-bar-indeterminate bg-primary" style="width: 0%;"></div>' +
                 '</div>';
 
+            // Gỡ tệp khỏi danh sách khi người dùng nhấn xóa.
             el.querySelector('.btn-remove-file').addEventListener('click', function () {
                 removeFile(item.uid);
             });
@@ -241,6 +259,7 @@
             fileList.appendChild(el);
         }
 
+        // Gửi tệp lên máy chủ và cập nhật trạng thái tải.
         function uploadFile(file, item) {
             const xhr = new XMLHttpRequest();
             const formData = new FormData();
@@ -250,6 +269,7 @@
             item.xhr = xhr;
             updateStateUploading();
 
+            // Cập nhật tiến độ tải lên trên giao diện.
             xhr.upload.addEventListener('progress', function (e) {
                 if (e.lengthComputable) {
                     const percent = Math.round((e.loaded / e.total) * 100);
@@ -269,6 +289,7 @@
                 }
             });
 
+            // Xử lý kết quả trả về sau khi tải lên.
             xhr.addEventListener('load', function () {
                 const el = fileList.querySelector('.file-item-' + item.uid);
                 if (xhr.status >= 200 && xhr.status < 300) {
@@ -314,22 +335,29 @@
                 updateStateUploading();
             });
 
+            // Hiển thị lỗi khi kết nối tải tệp thất bại.
             xhr.addEventListener('error', function () {
                 handleUploadError(item, 'Lỗi kết nối mạng khi tải tệp');
                 updateStateUploading();
             });
 
-            xhr.open('POST', '/api/media/upload');
-            if (window.Qaute && typeof window.Qaute.csrfToken === 'function') {
-                const token = window.Qaute.csrfToken();
-                if (token) {
-                    xhr.setRequestHeader(window.Qaute.csrfHeader(), token);
-                    formData.append('_csrf', token);
-                }
+            xhr.open('POST', root.dataset.uploadUrl || '/api/media/upload');
+            xhr.withCredentials = true;
+            const formToken = root.closest('form')?.querySelector('input[name="_csrf"]')?.value;
+            const token = window.Qaute && typeof window.Qaute.csrfToken === 'function'
+                ? window.Qaute.csrfToken() || formToken
+                : formToken;
+            if (token) {
+                const header = window.Qaute && typeof window.Qaute.csrfHeader === 'function'
+                    ? window.Qaute.csrfHeader()
+                    : document.querySelector('meta[name="_csrf_header"]')?.content || 'X-XSRF-TOKEN';
+                xhr.setRequestHeader(header, token);
+                formData.append('_csrf', token);
             }
             xhr.send(formData);
         }
 
+        // Đánh dấu mục tệp khi quá trình tải lên gặp lỗi.
         function handleUploadError(item, message) {
             item.status = 'error';
             const el = fileList.querySelector('.file-item-' + item.uid);
@@ -345,6 +373,7 @@
             }
         }
 
+        // Hủy tải lên và xóa tệp khỏi giao diện cùng trạng thái.
         function removeFile(uid) {
             const index = state.files.findIndex(f => f.uid === uid);
             if (index !== -1) {
@@ -364,31 +393,38 @@
             updateStateUploading();
         }
 
+        // Đồng bộ cờ tải lên với trạng thái các tệp.
         function updateStateUploading() {
             state.isUploading = state.files.some(f => f.status === 'uploading');
         }
 
         const api = {
+            // Trả về mã tài sản của các tệp tải thành công.
             getAssetIds: function () {
                 return state.files
                     .filter(f => f.status === 'success' && f.assetId)
                     .map(f => f.assetId);
             },
+            // Trả về tên tệp đang tải hoặc đã tải thành công.
             getFileNames: function () {
                 return state.files
                     .filter(f => f.status === 'success' || f.status === 'uploading')
                     .map(f => f.name);
             },
+            // Trả về dữ liệu xem trước của các tệp chưa lỗi.
             getPreviewItems: function () {
                 return state.files
                     .filter(f => f.status !== 'error')
+                    // Chọn các trường dùng để hiển thị bản xem trước.
                     .map(function (f) {
                         return { name: f.name, previewUrl: f.previewUrl || '', status: f.status };
                     });
             },
+            // Đếm các tệp tải lên thành công.
             getFilesCount: function () {
                 return state.files.filter(f => f.status === 'success').length;
             },
+            // Cho biết còn tệp nào đang tải lên hay không.
             isUploading: function () {
                 return state.isUploading;
             }
@@ -397,4 +433,3 @@
         return api;
     };
 })(window, document);
-

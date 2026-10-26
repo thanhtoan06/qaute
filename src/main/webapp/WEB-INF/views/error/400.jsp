@@ -1,5 +1,4 @@
 <%@ page pageEncoding="UTF-8" %>
-<%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -7,6 +6,7 @@
     <title>Yêu cầu không hợp lệ - QAUTE</title>
 </head>
 <body>
+<%-- Thông báo yêu cầu sai định dạng và liên kết quay về trang chủ. --%>
 <div class="page page-center">
     <div class="container container-tight py-4">
         <div class="empty">

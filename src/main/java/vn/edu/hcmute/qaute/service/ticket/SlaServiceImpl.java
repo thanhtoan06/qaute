@@ -22,6 +22,7 @@ import vn.edu.hcmute.qaute.repository.governance.HolidayRepository;
 import vn.edu.hcmute.qaute.repository.governance.SlaPolicyRepository;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
+// Xử lý nghiệp vụ Sla trong hệ thống.
 @Service
 public class SlaServiceImpl implements SlaService {
     private static final int MAX_DAYS = 400;
@@ -31,6 +32,7 @@ public class SlaServiceImpl implements SlaService {
     private final HolidayRepository holidays;
     private final SettingsService settings;
 
+    // Khởi tạo dịch vụ SLA với chính sách, giờ làm việc, ngày nghỉ và cài đặt.
     public SlaServiceImpl(SlaPolicyRepository policies, BusinessHourRepository hours,
                           HolidayRepository holidays, SettingsService settings) {
         this.policies = policies;
@@ -40,6 +42,7 @@ public class SlaServiceImpl implements SlaService {
     }
 
     @Override
+    // Tính thời hạn phản hồi và giải quyết ban đầu cho ticket.
     public SlaSnapshot computeInitial(Long categoryId, TicketPriority priority, LocalDateTime start) {
         if (priority == null || start == null) throw new IllegalArgumentException("Thiếu dữ liệu để tính SLA");
         SlaPolicy policy = categoryId == null ? null : policies
@@ -53,6 +56,7 @@ public class SlaServiceImpl implements SlaService {
     }
 
     @Override
+    // Cộng số phút làm việc vào thời điểm bắt đầu.
     public LocalDateTime addBusinessMinutes(LocalDateTime from, long minutes) {
         if (from == null || minutes < 0) throw new IllegalArgumentException("Thời gian SLA không hợp lệ");
         if (minutes == 0) return from;
@@ -79,6 +83,7 @@ public class SlaServiceImpl implements SlaService {
     }
 
     @Override
+    // Tính tổng số phút làm việc trong khoảng thời gian.
     public long businessMinutesBetween(LocalDateTime from, LocalDateTime to) {
         if (from == null || to == null || !to.isAfter(from)) return 0;
         List<BusinessHour> configured = hours.findByActiveTrueOrderByDayOfWeekAscStartTimeAsc();
@@ -100,6 +105,7 @@ public class SlaServiceImpl implements SlaService {
     }
 
     @Override
+    // Đánh giá ticket đang đúng hạn, có nguy cơ hay đã vi phạm SLA.
     public SlaStatus evaluate(Ticket ticket, LocalDateTime now) {
         if (ticket == null || now == null) throw new IllegalArgumentException("Thiếu dữ liệu để đánh giá SLA");
         if (ticket.getSlaPausedAt() != null || ticket.getResolvedAt() != null || ticket.getClosedAt() != null
@@ -114,11 +120,13 @@ public class SlaServiceImpl implements SlaService {
     }
 
     @Override
+    // Ghi nhận thời điểm tạm dừng SLA nếu ticket chưa tạm dừng.
     public void pause(Ticket ticket, LocalDateTime now) {
         if (ticket != null && now != null && ticket.getSlaPausedAt() == null) ticket.setSlaPausedAt(now);
     }
 
     @Override
+    // Tiếp tục SLA và dời các thời hạn theo thời gian tạm dừng.
     public void resume(Ticket ticket, LocalDateTime now) {
         if (ticket == null || now == null || ticket.getSlaPausedAt() == null) return;
         LocalDateTime pausedAt = ticket.getSlaPausedAt();
@@ -131,6 +139,7 @@ public class SlaServiceImpl implements SlaService {
     }
 
     @Override
+    // Tính lại chỉ tiêu, thời hạn và trạng thái SLA của ticket.
     public void recompute(Ticket ticket, LocalDateTime now) {
         if (ticket == null || ticket.getCreatedAt() == null) throw new IllegalArgumentException("Ticket chưa có thời điểm tạo");
         SlaSnapshot snapshot = computeInitial(ticket.getCategoryId(), ticket.getPriority(), ticket.getCreatedAt());
@@ -142,6 +151,7 @@ public class SlaServiceImpl implements SlaService {
         ticket.setSlaStatus(evaluate(ticket, now == null ? LocalDateTime.now() : now));
     }
 
+    // Lấy các khung giờ làm việc áp dụng cho ngày được chỉ định.
     private static List<TimeWindow> windows(LocalDate date, List<BusinessHour> configured) {
         if (configured.isEmpty()) return List.of(new TimeWindow(LocalTime.MIN, LocalTime.MAX));
         List<TimeWindow> result = new ArrayList<>();
@@ -151,11 +161,13 @@ public class SlaServiceImpl implements SlaService {
         return result;
     }
 
+    // Tính thời điểm kết thúc của khung giờ trong ngày.
     private static LocalDateTime endOf(LocalDate date, TimeWindow window) {
         return window.end().equals(LocalTime.MAX) ? date.plusDays(1).atStartOfDay()
                 : LocalDateTime.of(date, window.end());
     }
 
+    // Tạo bảng thời hạn SLA mặc định theo mức ưu tiên.
     private static Map<TicketPriority, int[]> defaults() {
         Map<TicketPriority, int[]> result = new EnumMap<>(TicketPriority.class);
         result.put(TicketPriority.NORMAL, new int[]{480, 2880});

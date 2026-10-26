@@ -1,3 +1,4 @@
+// Khởi tạo hộp thoại phân công yêu cầu.
 (function () {
   'use strict';
 
@@ -12,16 +13,19 @@
   const error = document.getElementById('assign-ticket-error');
   let pendingRequest = null;
 
+  // Hiển thị lỗi trong hộp thoại phân công.
   function showError(message) {
     error.textContent = message;
     error.classList.remove('d-none');
   }
 
+  // Xóa lỗi hiện tại khỏi hộp thoại.
   function clearError() {
     error.textContent = '';
     error.classList.add('d-none');
   }
 
+  // Tạo nhãn tư vấn viên gồm trạng thái và chức danh.
   function optionLabel(advisor) {
     const state = { ONLINE: 'Trực tuyến', BUSY: 'Bận', OFFLINE: 'Ngoại tuyến' };
     const parts = [advisor.fullName || ('#' + advisor.id)];
@@ -30,6 +34,7 @@
     return parts.join(' · ');
   }
 
+  // Tải danh sách tư vấn viên khi hộp thoại mở.
   modal.addEventListener('show.bs.modal', async function (event) {
     const trigger = event.relatedTarget;
     if (!trigger) return;
@@ -69,11 +74,13 @@
     }
   });
 
+  // Hủy yêu cầu đang chờ khi đóng hộp thoại.
   modal.addEventListener('hidden.bs.modal', function () {
     if (pendingRequest) pendingRequest.abort();
     pendingRequest = null;
   });
 
+  // Xác thực dữ liệu trước khi gửi yêu cầu phân công.
   form.addEventListener('submit', function (event) {
     const length = reason.value.trim().length;
     if (!select.value || length < 10 || length > 500) {

@@ -25,6 +25,7 @@ public class TicketUsageGuard {
     @PersistenceContext
     private EntityManager entityManager;
 
+    // Đếm ticket đang mở thuộc các chuyên mục đã cho.
     public long countOpenTicketsByCategoryIds(Collection<Long> categoryIds) {
         if (categoryIds == null || categoryIds.isEmpty() || !ticketEntityExists()) {
             return 0;
@@ -38,6 +39,7 @@ public class TicketUsageGuard {
                 .getSingleResult();
     }
 
+    // Đếm ticket đang mở do Manager phụ trách.
     public long countOpenTicketsByAssignee(Long managerId) {
         if (managerId == null || !ticketEntityExists()) {
             return 0;
@@ -52,6 +54,7 @@ public class TicketUsageGuard {
     }
 
     /** Kiểm tra bằng metamodel để không phải chạy JPQL lỗi (làm transaction rollback-only). */
+    // Kiểm tra entity Ticket có được đăng ký hay không.
     private boolean ticketEntityExists() {
         return entityManager.getMetamodel().getEntities().stream()
                 .anyMatch(e -> "Ticket".equals(e.getName()));

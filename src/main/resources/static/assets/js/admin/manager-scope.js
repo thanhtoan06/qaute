@@ -3,6 +3,7 @@
  * Chuyên mục con vẫn có thể được bỏ chọn độc lập; ô "phụ trách chính" chỉ hợp lệ
  * khi chính chuyên mục đó đang được giao.
  */
+// Khởi tạo đồng bộ phạm vi chuyên mục và lựa chọn phụ trách chính.
 (function () {
   'use strict';
 
@@ -14,10 +15,12 @@
   var categoryCheckboxes = Array.prototype.slice.call(
     form.querySelectorAll('.js-scope-category'));
 
+  // Tạo bộ chọn cho ô chuyên mục có mã đã cho.
   function selectorForCategory(categoryId) {
     return '.js-scope-category[data-category-id="' + categoryId + '"]';
   }
 
+  // Bật ô phụ trách chính chỉ khi chuyên mục được giao.
   function syncPrimary(categoryId) {
     var category = form.querySelector(selectorForCategory(categoryId));
     var primary = form.querySelector('.js-primary-category[data-category-id="' + categoryId + '"]');
@@ -31,6 +34,7 @@
     }
   }
 
+  // Đồng bộ trạng thái phụ trách chính của mọi chuyên mục.
   function syncAllPrimary() {
     categoryCheckboxes.forEach(function (category) {
       syncPrimary(category.getAttribute('data-category-id'));
@@ -38,19 +42,23 @@
   }
 
   categoryCheckboxes.forEach(function (category) {
-    category.addEventListener('change', function () {
-      var categoryId = category.getAttribute('data-category-id');
+    category.addEventListener('change',
+      // Cập nhật các chuyên mục con và trạng thái phụ trách chính khi đổi lựa chọn.
+      function () {
+        var categoryId = category.getAttribute('data-category-id');
 
-      // Bỏ/chọn cha tác động tới toàn bộ con; sau đó người dùng có thể chỉnh từng con.
-      if (category.classList.contains('js-parent-category')) {
-        form.querySelectorAll('.js-child-category[data-parent-id="' + categoryId + '"]')
-          .forEach(function (child) {
-            child.checked = category.checked;
-            syncPrimary(child.getAttribute('data-category-id'));
-          });
-      }
-      syncPrimary(categoryId);
-    });
+        // Bỏ/chọn cha tác động tới toàn bộ con; sau đó người dùng có thể chỉnh từng con.
+        if (category.classList.contains('js-parent-category')) {
+          form.querySelectorAll('.js-child-category[data-parent-id="' + categoryId + '"]')
+            .forEach(
+              // Áp dụng trạng thái của chuyên mục cha cho từng chuyên mục con.
+              function (child) {
+                child.checked = category.checked;
+                syncPrimary(child.getAttribute('data-category-id'));
+              });
+        }
+        syncPrimary(categoryId);
+      });
   });
 
   syncAllPrimary();

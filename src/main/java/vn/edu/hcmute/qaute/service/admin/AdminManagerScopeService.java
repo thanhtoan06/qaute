@@ -61,6 +61,7 @@ public class AdminManagerScopeService {
     private final ManagerScopeService managerScopeService;
     private final AuditService auditService;
 
+    // Khởi tạo dịch vụ quản trị hồ sơ và phạm vi Manager.
     public AdminManagerScopeService(UserRepository userRepository,
                                     UserLookupService userLookupService,
                                     ManagerProfileRepository managerProfileRepository,
@@ -80,11 +81,13 @@ public class AdminManagerScopeService {
     }
 
     /** Danh sách toàn bộ Manager, có thể lọc không phân biệt hoa thường theo tên hoặc email. */
+    // Liệt kê Manager theo từ khóa.
     @Transactional(readOnly = true)
     public List<ManagerListItem> list(String keyword) {
         return page(keyword, BoundedPages.of(0, 100)).getContent();
     }
 
+    // Lấy trang Manager cùng hồ sơ và phạm vi phụ trách.
     @Transactional(readOnly = true)
     public Page<ManagerListItem> page(String keyword, Pageable requested) {
         Specification<User> spec = (root, query, cb) -> {
@@ -100,6 +103,7 @@ public class AdminManagerScopeService {
         return new PageImpl<>(summaries(managers.getContent()), managers.getPageable(), managers.getTotalElements());
     }
 
+    // Tạo dữ liệu tóm tắt cho danh sách Manager.
     private List<ManagerListItem> summaries(List<User> managers) {
         if (managers.isEmpty()) {
             return List.of();
@@ -149,6 +153,7 @@ public class AdminManagerScopeService {
     }
 
     /** Thông tin gọn dùng làm tiêu đề trang cấu hình, đồng thời chặn id không phải Manager. */
+    // Lấy thông tin tiêu đề hồ sơ Manager.
     @Transactional(readOnly = true)
     public ManagerHeader getManagerHeader(Long managerId) {
         requireManager(managerId);
@@ -157,6 +162,7 @@ public class AdminManagerScopeService {
     }
 
     /** Lấy form hiện tại; Manager chưa có profile nhận các giới hạn mặc định. */
+    // Tạo biểu mẫu cấu hình cho Manager.
     @Transactional(readOnly = true)
     public ManagerScopeForm getForm(Long managerId) {
         requireManager(managerId);
@@ -174,6 +180,7 @@ public class AdminManagerScopeService {
     }
 
     /** Danh sách phòng ban cho phần hồ sơ; vẫn hiển thị cả phòng ban đã tắt để sửa dữ liệu cũ. */
+    // Liệt kê phòng ban để chọn cho Manager.
     @Transactional(readOnly = true)
     public List<DepartmentOption> departmentOptions() {
         return departmentRepository.findAllByOrderBySortOrderAscNameAsc().stream()
@@ -186,6 +193,7 @@ public class AdminManagerScopeService {
      * Lưu hồ sơ và thay toàn bộ phạm vi. Chuyên mục đã chọn phải tồn tại, đang hoạt động,
      * và chuyên mục chính phải là tập con của danh sách được giao.
      */
+    // Cập nhật hồ sơ và chuyên mục được giao cho Manager.
     public void save(ManagerScopeForm form, Long actorId) {
         if (form == null || form.getManagerId() == null) {
             throw new BadRequestException("Manager không hợp lệ", Map.of("managerId", "Manager không hợp lệ"));
@@ -238,6 +246,7 @@ public class AdminManagerScopeService {
     }
 
     /** Cây checkbox theo phòng ban, chỉ bao gồm các chuyên mục đang hoạt động. */
+    // Tạo cây chuyên mục đang hoạt động cho cấu hình phạm vi.
     @Transactional(readOnly = true)
     public List<ScopeDepartment> categoryTree() {
         List<ScopeDepartment> result = new ArrayList<>();
@@ -271,6 +280,7 @@ public class AdminManagerScopeService {
     }
 
     /** Các chuyên mục active không có dòng giao trực tiếp, cũng không được bao phủ bởi chuyên mục cha. */
+    // Tìm chuyên mục chưa được Manager nào bao phủ.
     @Transactional(readOnly = true)
     public List<UncoveredCategory> uncoveredCategories() {
         List<Category> activeCategories = categoryRepository.findByActiveTrueOrderBySortOrderAscNameAsc();
@@ -302,6 +312,7 @@ public class AdminManagerScopeService {
         return List.copyOf(result);
     }
 
+    // Lấy tài khoản Manager hoặc báo không tìm thấy.
     private User requireManager(Long managerId) {
         if (managerId == null) {
             throw new NotFoundException("Không tìm thấy Manager");
@@ -314,6 +325,7 @@ public class AdminManagerScopeService {
         return user;
     }
 
+    // Kiểm tra phòng ban được chỉ định có tồn tại.
     private void validateDepartment(Long departmentId) {
         if (departmentId != null && !departmentRepository.existsById(departmentId)) {
             throw new BadRequestException("Phòng ban không tồn tại",
@@ -321,6 +333,7 @@ public class AdminManagerScopeService {
         }
     }
 
+    // Lấy chuyên mục giao hợp lệ và đang hoạt động.
     private Map<Long, Category> validateActiveCategories(Set<Long> categoryIds) {
         Map<Long, Category> categories = categoriesById(categoryIds);
         if (categories.size() != categoryIds.size()) {
@@ -335,6 +348,7 @@ public class AdminManagerScopeService {
         return categories;
     }
 
+    // Kiểm tra giới hạn ticket và chat đồng thời.
     private static void validateConcurrencyLimits(ManagerScopeForm form) {
         Map<String, String> fieldErrors = new HashMap<>();
         if (form.getMaxConcurrentTickets() < 1 || form.getMaxConcurrentTickets() > 50) {
@@ -348,6 +362,7 @@ public class AdminManagerScopeService {
         }
     }
 
+    // Kiểm tra và khử trùng lặp danh sách mã chuyên mục.
     private static LinkedHashSet<Long> normalizedIds(List<Long> ids, String field) {
         if (ids == null || ids.isEmpty()) {
             return new LinkedHashSet<>();
@@ -359,6 +374,7 @@ public class AdminManagerScopeService {
         return new LinkedHashSet<>(ids);
     }
 
+    // Kiểm tra một tổ tiên của chuyên mục đã được giao.
     private boolean hasAssignedAncestor(Category category, Map<Long, Category> categoriesById,
                                         Set<Long> assignedCategoryIds) {
         Long parentId = category.getParentId();
@@ -372,11 +388,13 @@ public class AdminManagerScopeService {
         return false;
     }
 
+    // Chuyển chuyên mục thành nút cây phạm vi.
     private ScopeCategory toScopeCategory(Category category, List<Category> children) {
         return new ScopeCategory(category.getId(), category.getCode(), category.getName(),
                 children.stream().map(child -> toScopeCategory(child, List.of())).toList());
     }
 
+    // Tạo tên chuyên mục kèm tên chuyên mục cha.
     private String displayCategoryName(Category category, Map<Long, Category> categoriesById) {
         if (category.getParentId() == null) {
             return category.getName();
@@ -385,6 +403,7 @@ public class AdminManagerScopeService {
         return parent == null ? category.getName() : parent.getName() + " › " + category.getName();
     }
 
+    // Lấy phòng ban theo các mã được yêu cầu.
     private Map<Long, Department> departmentsById(Collection<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return Map.of();
@@ -393,6 +412,7 @@ public class AdminManagerScopeService {
                 .collect(Collectors.toMap(Department::getId, department -> department));
     }
 
+    // Lấy chuyên mục theo các mã được yêu cầu.
     private Map<Long, Category> categoriesById(Collection<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return Map.of();
@@ -401,6 +421,7 @@ public class AdminManagerScopeService {
                 .collect(Collectors.toMap(Category::getId, category -> category));
     }
 
+    // Chép cấu hình hồ sơ Manager vào biểu mẫu.
     private static void applyProfileToForm(ManagerProfile profile, ManagerScopeForm form) {
         form.setEmployeeCode(profile.getEmployeeCode());
         form.setJobTitle(profile.getJobTitle());
@@ -410,6 +431,7 @@ public class AdminManagerScopeService {
         form.setMaxConcurrentChats(profile.getMaxConcurrentChats());
     }
 
+    // Áp dụng biểu mẫu lên hồ sơ Manager.
     private static void applyFormToProfile(ManagerScopeForm form, ManagerProfile profile) {
         profile.setEmployeeCode(clean(form.getEmployeeCode()));
         profile.setJobTitle(clean(form.getJobTitle()));
@@ -419,6 +441,7 @@ public class AdminManagerScopeService {
         profile.setMaxConcurrentChats(form.getMaxConcurrentChats());
     }
 
+    // Tạo chuỗi mã chuyên mục để ghi nhật ký.
     private String categoryCodes(Collection<Long> categoryIds) {
         return categoriesById(categoryIds).values().stream()
                 .map(Category::getCode)
@@ -427,6 +450,7 @@ public class AdminManagerScopeService {
                 .toString();
     }
 
+    // Chuẩn hóa chuỗi rỗng thành null và cắt khoảng trắng.
     private static String clean(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

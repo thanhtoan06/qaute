@@ -19,16 +19,19 @@ import vn.edu.hcmute.qaute.dto.request.manager.AppointmentOutcomeForm;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.manager.ManagerAppointmentService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ManagerAppointment.
 @Controller
 @RequestMapping("/manager/appointments")
 public class ManagerAppointmentController {
     private final ManagerAppointmentService service;
 
+    // Khởi tạo bộ điều khiển lịch hẹn của quản lý.
     public ManagerAppointmentController(ManagerAppointmentService service) {
         this.service = service;
     }
 
     @GetMapping
+    // Hiển thị danh sách lịch hẹn theo tab và trang.
     public String list(@RequestParam(defaultValue = "today") String tab,
             @RequestParam(defaultValue = "0") int page, Model model) {
         model.addAttribute("tab", tab);
@@ -38,6 +41,7 @@ public class ManagerAppointmentController {
     }
 
     @GetMapping("/{id}")
+    // Hiển thị chi tiết lịch hẹn.
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("appointment", service.detail(id, SecurityUtils.requireUserId()));
         if (!model.containsAttribute("outcomeForm")) {
@@ -47,6 +51,7 @@ public class ManagerAppointmentController {
     }
 
     @PostMapping("/{id}/complete")
+    // Xác nhận hoàn tất lịch hẹn và lưu kết quả.
     public String complete(@PathVariable Long id,
             @Valid @ModelAttribute("outcomeForm") AppointmentOutcomeForm form,
             BindingResult result, RedirectAttributes redirect) {
@@ -65,6 +70,7 @@ public class ManagerAppointmentController {
     }
 
     @PostMapping("/{id}/no-show")
+    // Đánh dấu sinh viên vắng mặt trong lịch hẹn.
     public String noShow(@PathVariable Long id, RedirectAttributes redirect) {
         try {
             service.markNoShow(id, SecurityUtils.requireUserId());
@@ -76,6 +82,7 @@ public class ManagerAppointmentController {
     }
 
     @PostMapping("/{id}/cancel")
+    // Hủy lịch hẹn và thông báo kết quả.
     public String cancel(@PathVariable Long id,
             @Valid @ModelAttribute AppointmentCancelForm form, BindingResult result,
             RedirectAttributes redirect) {
@@ -92,6 +99,7 @@ public class ManagerAppointmentController {
         return detailRedirect(id);
     }
 
+    // Tạo đường dẫn quay lại trang chi tiết lịch hẹn.
     private String detailRedirect(Long id) {
         return "redirect:/manager/appointments/" + id;
     }

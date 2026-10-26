@@ -139,6 +139,7 @@
         </ol>
     </nav>
 
+    <%-- Giới thiệu danh mục chủ đề và liên kết tra cứu FAQ. --%>
     <section class="topics-hero">
         <div class="topics-hero-copy">
             <div class="topics-eyebrow">
@@ -180,6 +181,17 @@
         </div>
     </div>
 
+    <%-- Ô tìm kiếm chủ đề --%>
+    <div class="mb-4">
+        <form action="/topics" method="get" class="input-group">
+            <input type="search" name="q" class="form-control" placeholder="Tìm kiếm chủ đề, phòng ban..." value="${searchQuery}" aria-label="Tìm kiếm chủ đề">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+            <c:if test="${isSearch}">
+                <a href="/topics" class="btn btn-outline-secondary">Xóa tìm kiếm</a>
+            </c:if>
+        </form>
+    </div>
+
     <c:choose>
         <c:when test="${empty tree}">
             <div class="topics-empty text-center">
@@ -190,7 +202,21 @@
             </div>
         </c:when>
         <c:otherwise>
+            <c:if test="${isSearch}">
+                <c:set var="hasResults" value="false"/>
+            </c:if>
+            <%-- Liệt kê chủ đề theo từng đơn vị và các câu hỏi tương ứng. --%>
             <c:forEach var="dept" items="${tree}">
+                <c:set var="deptMatches" value="${false}"/>
+                <c:if test="${not empty searchQuery}">
+                    <c:if test="${fn:containsIgnoreCase(dept.name, searchQuery) or fn:containsIgnoreCase(dept.description, searchQuery)}">
+                        <c:set var="deptMatches" value="true"/>
+                    </c:if>
+                </c:if>
+                <c:if test="${not isSearch or deptMatches}">
+                    <c:if test="${deptMatches}">
+                        <c:set var="hasResults" value="true"/>
+                    </c:if>
                 <section class="topics-department">
                     <div class="topics-department-header">
                         <div class="topics-department-heading">
@@ -200,43 +226,43 @@
                                 </div>
                                 <div class="min-width-0">
                                     <h2 class="topics-department-name">
-                                        <c:out value="${dept.name()}"/>
+                                        <c:out value="${dept.name}"/>
                                     </h2>
-                                    <c:if test="${not empty dept.description()}">
+                                    <c:if test="${not empty dept.description}">
                                         <div class="topics-department-description">
-                                            <c:out value="${dept.description()}"/>
+                                            <c:out value="${dept.description}"/>
                                         </div>
                                     </c:if>
                                 </div>
                             </div>
-                            <c:if test="${not empty dept.code()}">
+                            <c:if test="${not empty dept.code}">
                                 <span class="topics-department-code">
-                                    <c:out value="${dept.code()}"/>
+                                    <c:out value="${dept.code}"/>
                                 </span>
                             </c:if>
                         </div>
 
-                        <c:if test="${not empty dept.location() or not empty dept.email() or not empty dept.phone()}">
+                        <c:if test="${not empty dept.location or not empty dept.email or not empty dept.phone}">
                             <div class="topics-contact-strip">
-                                <c:if test="${not empty dept.location()}">
+                                <c:if test="${not empty dept.location}">
                                     <span class="topics-contact-item">
                                         <i class="bi bi-geo-alt-fill text-danger"></i>
-                                        <c:out value="${dept.location()}"/>
+                                        <c:out value="${dept.location}"/>
                                     </span>
                                 </c:if>
-                                <c:if test="${not empty dept.email()}">
+                                <c:if test="${not empty dept.email}">
                                     <span class="topics-contact-item">
                                         <i class="bi bi-envelope-fill text-primary"></i>
-                                        <a href="mailto:<c:out value='${dept.email()}'/>">
-                                            <c:out value="${dept.email()}"/>
+                                        <a href="mailto:<c:out value='${dept.email}'/>">
+                                            <c:out value="${dept.email}"/>
                                         </a>
                                     </span>
                                 </c:if>
-                                <c:if test="${not empty dept.phone()}">
+                                <c:if test="${not empty dept.phone}">
                                     <span class="topics-contact-item">
                                         <i class="bi bi-telephone-fill text-success"></i>
-                                        <a href="tel:<c:out value='${dept.phone()}'/>">
-                                            <c:out value="${dept.phone()}"/>
+                                        <a href="tel:<c:out value='${dept.phone}'/>">
+                                            <c:out value="${dept.phone}"/>
                                         </a>
                                     </span>
                                 </c:if>
@@ -246,106 +272,134 @@
 
                     <div class="topics-department-body">
                         <c:choose>
-                            <c:when test="${not empty dept.categories()}">
+                            <c:when test="${not empty dept.categories}">
+                                <c:set var="hasMatchingCats" value="false"/>
                                 <div class="topics-category-grid">
-                                    <c:forEach var="cat" items="${dept.categories()}">
-                                        <c:set var="faqCount" value="${counts[cat.id()] != null ? counts[cat.id()] : 0}"/>
-                                        <div class="topics-category-card ${faqCount == 0 ? 'topics-category-empty' : ''}">
-                                            <div class="topics-category-top">
-                                                <div class="topics-category-icon">
-                                                    <i class="bi <c:out value='${empty cat.icon() ? "bi-folder" : cat.icon()}'/>"></i>
+                                    <c:forEach var="cat" items="${dept.categories}">
+                                        <c:set var="catMatches" value="false"/>
+                                        <c:if test="${not empty searchQuery}">
+                                            <c:if test="${fn:containsIgnoreCase(cat.name, searchQuery)}">
+                                                <c:set var="catMatches" value="true"/>
+                                            </c:if>
+                                        </c:if>
+                                        <c:if test="${not isSearch or catMatches}">
+                                            <c:set var="hasMatchingCats" value="true"/>
+                                            <c:if test="${catMatches}">
+                                                <c:set var="hasResults" value="true"/>
+                                            </c:if>
+                                            <c:set var="faqCount" value="${counts[cat.id] != null ? counts[cat.id] : 0}"/>
+                                            <div class="topics-category-card ${faqCount == 0 ? 'topics-category-empty' : ''}">
+                                                <div class="topics-category-top">
+                                                    <div class="topics-category-icon">
+                                                        <i class="bi <c:out value='${empty cat.icon ? "bi-folder" : cat.icon}'/>"></i>
+                                                    </div>
+                                                    <div class="topics-category-copy">
+                                                        <c:choose>
+                                                            <c:when test="${faqCount > 0}">
+                                                                <h3 class="topics-category-name">
+                                                                    <a href="/faq?category=<c:out value='${cat.id}'/>">
+                                                                        <c:out value="${cat.name}"/>
+                                                                    </a>
+                                                                </h3>
+                                                                <div class="topics-faq-count">
+                                                                    <i class="bi bi-chat-square-text-fill"></i>
+                                                                    <c:out value="${faqCount}"/> câu hỏi FAQ
+                                                                </div>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <h3 class="topics-category-name">
+                                                                    <c:out value="${cat.name}"/>
+                                                                </h3>
+                                                                <div class="topics-faq-count">
+                                                                    <i class="bi bi-chat-square-text"></i>
+                                                                    0 câu hỏi FAQ
+                                                                </div>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
                                                 </div>
-                                                <div class="topics-category-copy">
+
+                                                <c:if test="${not empty cat.children}">
+                                                    <div class="topics-subcategories">
+                                                        <div class="topics-subcategories-heading">
+                                                            <i class="bi bi-diagram-2-fill"></i>
+                                                            Chủ đề con
+                                                        </div>
+                                                        <div class="topics-subcategory-list">
+                                                            <c:forEach var="sub" items="${cat.children}">
+                                                                <c:set var="subCount" value="${counts[sub.id] != null ? counts[sub.id] : 0}"/>
+                                                                <c:choose>
+                                                                    <c:when test="${subCount > 0}">
+                                                                        <a href="/faq?category=<c:out value='${sub.id}'/>"
+                                                                           class="topics-subcategory-link"
+                                                                           title="<c:out value='${subCount}'/> câu hỏi">
+                                                                            <c:out value="${sub.name}"/>
+                                                                            <span class="topics-subcategory-count">(<c:out value="${subCount}"/>)</span>
+                                                                        </a>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <span class="topics-subcategory-empty">
+                                                                            <c:out value="${sub.name}"/>
+                                                                        </span>
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </c:forEach>
+                                                        </div>
+                                                    </div>
+                                                </c:if>
+
+                                                <div class="topics-category-footer">
                                                     <c:choose>
                                                         <c:when test="${faqCount > 0}">
-                                                            <h3 class="topics-category-name">
-                                                                <a href="/faq?category=<c:out value='${cat.id()}'/>">
-                                                                    <c:out value="${cat.name()}"/>
-                                                                </a>
-                                                            </h3>
-                                                            <div class="topics-faq-count">
-                                                                <i class="bi bi-chat-square-text-fill"></i>
-                                                                <c:out value="${faqCount}"/> câu hỏi FAQ
-                                                            </div>
+                                                            <a href="/faq?category=<c:out value='${cat.id}'/>" class="topics-category-action">
+                                                                Xem FAQ
+                                                                <i class="bi bi-arrow-right"></i>
+                                                            </a>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <h3 class="topics-category-name">
-                                                                <c:out value="${cat.name()}"/>
-                                                            </h3>
-                                                            <div class="topics-faq-count">
-                                                                <i class="bi bi-chat-square-text"></i>
-                                                                0 câu hỏi FAQ
-                                                            </div>
+                                                            <span class="badge bg-secondary-subtle text-secondary">
+                                                                Chưa có FAQ
+                                                            </span>
+                                                            <a href="/student/tickets/new?categoryId=<c:out value='${cat.id}'/>" class="topics-category-action topics-action-ticket">
+                                                                <i class="bi bi-chat-dots-fill"></i>
+                                                                Hỏi tư vấn viên
+                                                            </a>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </div>
                                             </div>
-
-                                            <c:if test="${not empty cat.children()}">
-                                                <div class="topics-subcategories">
-                                                    <div class="topics-subcategories-heading">
-                                                        <i class="bi bi-diagram-2-fill"></i>
-                                                        Chủ đề con
-                                                    </div>
-                                                    <div class="topics-subcategory-list">
-                                                        <c:forEach var="sub" items="${cat.children()}">
-                                                            <c:set var="subCount" value="${counts[sub.id()] != null ? counts[sub.id()] : 0}"/>
-                                                            <c:choose>
-                                                                <c:when test="${subCount > 0}">
-                                                                    <a href="/faq?category=<c:out value='${sub.id()}'/>"
-                                                                       class="topics-subcategory-link"
-                                                                       title="<c:out value='${subCount}'/> câu hỏi">
-                                                                        <c:out value="${sub.name()}"/>
-                                                                        <span class="topics-subcategory-count">(<c:out value="${subCount}"/>)</span>
-                                                                    </a>
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    <span class="topics-subcategory-empty">
-                                                                        <c:out value="${sub.name()}"/>
-                                                                    </span>
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </c:forEach>
-                                                    </div>
-                                                </div>
-                                            </c:if>
-
-                                            <div class="topics-category-footer">
-                                                <c:choose>
-                                                    <c:when test="${faqCount > 0}">
-                                                        <a href="/faq?category=<c:out value='${cat.id()}'/>" class="topics-category-action">
-                                                            Xem FAQ
-                                                            <i class="bi bi-arrow-right"></i>
-                                                        </a>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span class="badge bg-secondary-subtle text-secondary">
-                                                            Chưa có FAQ
-                                                        </span>
-                                                        <a href="/student/tickets/new?categoryId=<c:out value='${cat.id()}'/>" class="topics-category-action topics-action-ticket">
-                                                            <i class="bi bi-chat-dots-fill"></i>
-                                                            Hỏi tư vấn viên
-                                                        </a>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </div>
-                                        </div>
+                                        </c:if>
                                     </c:forEach>
+                                    <c:if test="${isSearch and not hasMatchingCats}">
+                                        <div class="text-secondary small fst-italic py-2">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Không tìm thấy chuyên mục nào phù hợp với từ khóa "${searchQuery}".
+                                        </div>
+                                    </c:if>
                                 </div>
                             </c:when>
                             <c:otherwise>
-                                <div class="text-secondary small fst-italic py-2">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Hiện tại chưa có chuyên mục nào thuộc phòng ban này.
-                                </div>
+                                <c:if test="${not isSearch}">
+                                    <div class="text-secondary small fst-italic py-2">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Hiện tại chưa có chuyên mục nào thuộc phòng ban này.
+                                    </div>
+                                </c:if>
                             </c:otherwise>
                         </c:choose>
                     </div>
                 </section>
+                </c:if>
             </c:forEach>
+            <c:if test="${isSearch and not hasResults}">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Không tìm thấy phòng ban hoặc chuyên mục nào phù hợp với từ khóa "${searchQuery}".
+                </div>
+            </c:if>
         </c:otherwise>
     </c:choose>
 
+    <%-- Hướng dẫn lựa chọn kênh hỗ trợ khi chưa tìm thấy chủ đề phù hợp. --%>
     <section class="topics-help-banner">
         <div class="topics-help-copy">
             <div class="topics-help-icon">

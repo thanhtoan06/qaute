@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.ChatContentType;
 import vn.edu.hcmute.qaute.common.constant.ChatSenderType;
 import vn.edu.hcmute.qaute.common.constant.ChatSessionStatus;
+import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.common.constant.MediaStatus;
 import vn.edu.hcmute.qaute.common.constant.MediaUsageType;
 import vn.edu.hcmute.qaute.common.constant.SettingKeys;
@@ -25,9 +26,11 @@ import vn.edu.hcmute.qaute.repository.chat.ChatMessageRepository;
 import vn.edu.hcmute.qaute.repository.chat.ChatSessionRepository;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
+import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.media.MediaService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
+// Xử lý nghiệp vụ ChatMessaging trong hệ thống.
 @Service
 @Transactional
 public class ChatMessagingService {
@@ -39,10 +42,13 @@ public class ChatMessagingService {
     private final UserLookupService users;
     private final ChatEventPublisher publisher;
     private final ApplicationEventPublisher events;
+    private final AuditService audit;
 
+    // Khởi tạo dịch vụ nhắn tin với kho dữ liệu và các dịch vụ phụ trợ.
     public ChatMessagingService(ChatSessionRepository sessions, ChatMessageRepository messages,
             MediaAssetRepository assets, MediaService media, SettingsService settings,
-            UserLookupService users, ChatEventPublisher publisher, ApplicationEventPublisher events) {
+            UserLookupService users, ChatEventPublisher publisher, ApplicationEventPublisher events,
+            AuditService audit) {
         this.sessions = sessions;
         this.messages = messages;
         this.assets = assets;
@@ -51,8 +57,10 @@ public class ChatMessagingService {
         this.users = users;
         this.publisher = publisher;
         this.events = events;
+        this.audit = audit;
     }
 
+    // Gửi tin nhắn văn bản hoặc tệp đính kèm vào phiên chat.
     public ChatMessageView send(Long sessionId, Long senderId, String clientMessageId,
             String content, Long assetId) {
         ChatSession session = sessions.findLockedById(sessionId)
@@ -110,16 +118,20 @@ public class ChatMessagingService {
     }
 
     @Transactional(readOnly = true)
+    // Phát trạng thái nhập liệu của người tham gia phiên chat.
     public void typing(Long sessionId, Long userId, boolean isTyping) {
         ChatSession session = requireSession(sessionId);
         requireParticipant(session, userId);
         if (session.getStatus() != ChatSessionStatus.ACTIVE) {
             throw new InvalidTransitionException("Phiên chat không hoạt động");
         }
-        publisher.sendToSession(sessionId, Map.of("type", "TYPING", "userId", userId,
-                "isTyping", isTyping));
+        ChatSenderType senderType = Objects.equals(userId, session.getStudentId())
+                ? ChatSenderType.STUDENT : ChatSenderType.MANAGER;
+        publisher.sendToSession(sessionId, Map.of("type", "TYPING", "sessionId", sessionId, "userId", userId,
+                "senderType", senderType, "isTyping", isTyping));
     }
 
+    // Đánh dấu tin nhắn đã đọc và thông báo cập nhật nếu có thay đổi.
     public void read(Long sessionId, Long userId, Long lastReadMessageId) {
         ChatSession session = requireSession(sessionId);
         requireParticipant(session, userId);
@@ -135,6 +147,7 @@ public class ChatMessagingService {
         }
     }
 
+    // Kết thúc phiên chat do một trong các bên tham gia yêu cầu.
     public void end(Long sessionId, Long userId) {
         ChatSession session = sessions.findLockedById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
@@ -149,6 +162,8 @@ public class ChatMessagingService {
         session.setEndReason(Objects.equals(userId, session.getStudentId()) ? "STUDENT_END" : "MANAGER_END");
         session.setEndedAt(LocalDateTime.now());
         sessions.saveAndFlush(session);
+        audit.log(AuditActions.CHAT_SESSION_ENDED, "ChatSession", sessionId,
+                "status=" + previous, "status=ENDED; reason=" + session.getEndReason());
         systemMessage(session, "Phiên chat đã kết thúc.");
         publisher.sendToSession(sessionId, Map.of("type", "SESSION_ENDED"));
         if (previous == ChatSessionStatus.WAITING) {
@@ -156,6 +171,7 @@ public class ChatMessagingService {
         }
     }
 
+    // Tạo và phát tin nhắn hệ thống trong phiên chat.
     public ChatMessageView systemMessage(ChatSession session, String content) {
         ChatMessage message = new ChatMessage();
         message.setSessionId(session.getId());
@@ -171,11 +187,13 @@ public class ChatMessagingService {
         return view;
     }
 
+    // Tìm phiên chat theo mã hoặc báo không tìm thấy.
     private ChatSession requireSession(Long sessionId) {
         return sessions.findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
     }
 
+    // Xác nhận người dùng là sinh viên hoặc tư vấn viên của phiên chat.
     private void requireParticipant(ChatSession session, Long userId) {
         if (userId == null || (!Objects.equals(session.getStudentId(), userId)
                 && !Objects.equals(session.getManagerId(), userId))) {
@@ -183,6 +201,7 @@ public class ChatMessagingService {
         }
     }
 
+    // Chuyển tin nhắn thành dữ liệu hiển thị kèm tên người gửi.
     private ChatMessageView toView(ChatMessage message) {
         UserSummary sender = message.getSenderId() == null ? null : users.getSummary(message.getSenderId());
         String senderName = sender == null

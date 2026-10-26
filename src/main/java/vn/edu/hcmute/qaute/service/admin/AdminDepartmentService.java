@@ -13,21 +13,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import vn.edu.hcmute.qaute.common.constant.AuditActions;
-import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.exception.DuplicateException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.dto.request.admin.DepartmentForm;
 import vn.edu.hcmute.qaute.dto.view.DepartmentListItem;
-import vn.edu.hcmute.qaute.entity.organization.Category;
 import vn.edu.hcmute.qaute.entity.organization.Department;
 import vn.edu.hcmute.qaute.repository.organization.CategoryRepository;
 import vn.edu.hcmute.qaute.repository.organization.DepartmentRepository;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
-import vn.edu.hcmute.qaute.service.organization.TicketUsageGuard;
 
 /**
  * Quản trị phòng ban (ADM-05). Không xóa cứng phòng ban đã có dữ liệu,
- * chỉ tắt bằng cờ active sau khi kiểm tra không còn yêu cầu đang xử lý.
+ * chỉ tắt bằng cờ active để giữ nguyên liên kết của dữ liệu cũ.
  */
 @Service
 @Transactional
@@ -35,19 +32,18 @@ public class AdminDepartmentService {
 
     private final DepartmentRepository departmentRepository;
     private final CategoryRepository categoryRepository;
-    private final TicketUsageGuard ticketUsageGuard;
     private final AuditService auditService;
 
+    // Khởi tạo dịch vụ quản trị phòng ban.
     public AdminDepartmentService(DepartmentRepository departmentRepository,
                                   CategoryRepository categoryRepository,
-                                  TicketUsageGuard ticketUsageGuard,
                                   AuditService auditService) {
         this.departmentRepository = departmentRepository;
         this.categoryRepository = categoryRepository;
-        this.ticketUsageGuard = ticketUsageGuard;
         this.auditService = auditService;
     }
 
+    // Liệt kê phòng ban cùng số lượng chuyên mục.
     @Transactional(readOnly = true)
     public List<DepartmentListItem> list() {
         List<Department> departments = departmentRepository.findAllByOrderBySortOrderAscNameAsc();
@@ -59,6 +55,7 @@ public class AdminDepartmentService {
         return result;
     }
 
+    // Lấy trang phòng ban đã giới hạn kích thước.
     @Transactional(readOnly = true)
     public Page<DepartmentListItem> page(Pageable requested) {
         Pageable page = BoundedPages.of(requested);
@@ -67,6 +64,7 @@ public class AdminDepartmentService {
                 toListItem(department, categoryRepository.countByDepartmentId(department.getId())));
     }
 
+    // Lấy biểu mẫu của phòng ban cần sửa.
     @Transactional(readOnly = true)
     public DepartmentForm get(Long id) {
         return toForm(requireDepartment(id));
@@ -76,6 +74,7 @@ public class AdminDepartmentService {
      * Tạo mới khi form.id null, ngược lại cập nhật. Mã phòng ban phải duy nhất.
      * Chuẩn hóa mã thành chữ hoa để mã "DAOTAO" và "daotao" không thành hai phòng ban.
      */
+    // Tạo hoặc cập nhật phòng ban từ biểu mẫu.
     public DepartmentForm save(DepartmentForm form, Long actorId) {
         String code = form.getCode() == null ? null : form.getCode().trim().toUpperCase();
         if (form.getId() == null) {
@@ -96,7 +95,6 @@ public class AdminDepartmentService {
             throw new DuplicateException("code", "Mã phòng ban đã được sử dụng");
         }
         String before = summarize(department);
-        if (department.isActive() && !form.isActive()) ensureCanDisable(department.getId());
         applyForm(department, form, code);
         Department saved = departmentRepository.save(department);
         auditService.log(AuditActions.DEPARTMENT_UPDATED, "department", saved.getId(),
@@ -104,32 +102,18 @@ public class AdminDepartmentService {
         return toForm(saved);
     }
 
-    /**
-     * Bật/tắt phòng ban. Tắt khi còn yêu cầu đang xử lý thì từ chối để dữ liệu
-     * cũ không bị mồ côi khỏi cây chuyên mục đang hoạt động.
-     */
+    /** Bật/tắt phòng ban mà không thay đổi liên kết của các yêu cầu hiện hữu. */
+    // Đổi trạng thái hoạt động của phòng ban.
     public void toggleActive(Long id, Long actorId) {
         Department department = requireDepartment(id);
         boolean before = department.isActive();
-        if (before) ensureCanDisable(id);
         department.setActive(!before);
         departmentRepository.save(department);
         auditService.log(AuditActions.DEPARTMENT_TOGGLED, "department", id,
                 "active=" + before, "active=" + (!before));
     }
 
-    private void ensureCanDisable(Long id) {
-        List<Long> categoryIds = categoryRepository
-                .findByDepartmentIdOrderBySortOrderAscNameAsc(id).stream()
-                .map(Category::getId)
-                .toList();
-        long openTickets = ticketUsageGuard.countOpenTicketsByCategoryIds(categoryIds);
-        if (openTickets > 0) {
-            throw new BadRequestException("Còn " + openTickets
-                    + " yêu cầu đang xử lý, hãy chuyển sang chuyên mục khác trước");
-        }
-    }
-
+    // Lấy phòng ban hoặc báo không tìm thấy.
     private Department requireDepartment(Long id) {
         if (id == null) {
             throw new NotFoundException("Không tìm thấy phòng ban");
@@ -138,6 +122,7 @@ public class AdminDepartmentService {
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phòng ban"));
     }
 
+    // Áp dụng dữ liệu biểu mẫu lên phòng ban.
     private void applyForm(Department department, DepartmentForm form, String code) {
         department.setCode(code);
         department.setName(form.getName() == null ? null : form.getName().trim());
@@ -151,6 +136,7 @@ public class AdminDepartmentService {
         department.setActive(form.isActive());
     }
 
+    // Chuyển phòng ban thành biểu mẫu chỉnh sửa.
     private DepartmentForm toForm(Department department) {
         DepartmentForm form = new DepartmentForm();
         form.setId(department.getId());
@@ -165,6 +151,7 @@ public class AdminDepartmentService {
         return form;
     }
 
+    // Tạo mục danh sách phòng ban kèm số chuyên mục.
     private DepartmentListItem toListItem(Department department, long categoryCount) {
         return new DepartmentListItem(
                 department.getId(),
@@ -179,11 +166,13 @@ public class AdminDepartmentService {
                 categoryCount);
     }
 
+    // Tạo nội dung tóm tắt phòng ban để ghi nhật ký.
     private static String summarize(Department department) {
         return "code=" + department.getCode() + ", name=" + department.getName()
                 + ", active=" + department.isActive();
     }
 
+    // Chuyển chuỗi rỗng thành null sau khi cắt khoảng trắng.
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value;
     }

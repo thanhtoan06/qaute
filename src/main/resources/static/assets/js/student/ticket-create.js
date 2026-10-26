@@ -8,6 +8,7 @@
     let fileUploader = null;
     let summernoteEditor = null;
 
+    // Khởi tạo các phần của biểu mẫu tạo yêu cầu hỗ trợ.
     function init() {
         try { initCategoryTree(); } catch (e) { console.error('initCategoryTree failed', e); }
         try { initRichText(); } catch (e) { console.error('initRichText failed', e); }
@@ -21,6 +22,7 @@
     }
 
     // --- 1. Category Tree & Cascade Select ---
+    // Nạp cây chuyên mục và thiết lập các ô chọn liên tiếp.
     function initCategoryTree() {
         const treeEl = document.getElementById('categoryTreeData');
         if (!treeEl) return;
@@ -49,6 +51,7 @@
             deptSelect.appendChild(opt);
         });
 
+        // Cập nhật danh sách chuyên mục theo phòng ban đã chọn.
         deptSelect.addEventListener('change', function () {
             const deptId = Number(deptSelect.value);
             cat1Select.innerHTML = '<option value="">-- Chọn chuyên mục --</option>';
@@ -75,6 +78,7 @@
             }
         });
 
+        // Cập nhật chủ đề chi tiết theo chuyên mục đã chọn.
         cat1Select.addEventListener('change', function () {
             const deptId = Number(deptSelect.value);
             const c1Id = Number(cat1Select.value);
@@ -104,6 +108,7 @@
             }
         });
 
+        // Ghi nhận mã chủ đề chi tiết đã chọn.
         cat2Select.addEventListener('change', function () {
             const c2Id = Number(cat2Select.value);
             if (c2Id) {
@@ -120,6 +125,7 @@
         }
     }
 
+    // Chọn lại phòng ban và chuyên mục theo mã có sẵn.
     function preselectCategory(targetId) {
         const deptSelect = document.getElementById('selectDepartment');
         const cat1Select = document.getElementById('selectCategoryLevel1');
@@ -152,6 +158,7 @@
         }
     }
 
+    // Tạo tên đường dẫn chuyên mục đang được chọn.
     function getSelectedCategoryPath() {
         const deptSelect = document.getElementById('selectDepartment');
         const cat1Select = document.getElementById('selectCategoryLevel1');
@@ -171,11 +178,13 @@
     }
 
     // --- 2. Rich Text & Char Counters ---
+    // Khởi tạo trình soạn thảo và cập nhật bộ đếm nội dung.
     function initRichText() {
         if (window.Qaute && typeof window.Qaute.initRichText === 'function') {
             summernoteEditor = window.Qaute.initRichText('#descriptionHtml', {
                 height: 220,
                 placeholder: 'Mô tả chi tiết câu hỏi hoặc vướng mắc của bạn (tối thiểu 30 ký tự)...',
+                // Cập nhật bộ đếm khi nội dung trình soạn thảo thay đổi.
                 onChange: function () {
                     updateDescCount();
                 }
@@ -183,9 +192,11 @@
         }
     }
 
+    // Khởi tạo bộ đếm ký tự cho tiêu đề và nội dung.
     function initCharCounters() {
         const titleInput = document.getElementById('ticketTitle');
         if (titleInput) {
+            // Cập nhật bộ đếm tiêu đề khi người dùng nhập.
             titleInput.addEventListener('input', function () {
                 const count = titleInput.value.length;
                 const counter = document.getElementById('titleCharCount');
@@ -198,6 +209,7 @@
         updateDescCount();
     }
 
+    // Đếm ký tự nội dung mô tả hiện tại.
     function updateDescCount() {
         const descArea = document.getElementById('descriptionHtml');
         const counter = document.getElementById('descCharCount');
@@ -216,12 +228,14 @@
     }
 
     // --- 3. File Uploader ---
+    // Khởi tạo bộ tải tệp và thử lại nếu thư viện chưa sẵn sàng.
     function initFileUploader() {
         if (window.Qaute && typeof window.Qaute.initUploader === 'function') {
             fileUploader = window.Qaute.initUploader('#fileUploaderContainer', 'TICKET_ATTACHMENT', 5);
             return;
         }
         console.warn('File uploader is not available; retrying after scripts load.');
+        // Thử khởi tạo lại bộ tải sau khi các tập lệnh khác tải xong.
         window.setTimeout(function () {
             if (!fileUploader && window.Qaute && typeof window.Qaute.initUploader === 'function') {
                 fileUploader = window.Qaute.initUploader('#fileUploaderContainer', 'TICKET_ATTACHMENT', 5);
@@ -230,12 +244,14 @@
     }
 
     // --- 4. Urgent Toggle ---
+    // Thiết lập hiển thị lý do khi yêu cầu xử lý gấp.
     function initUrgentToggle() {
         const checkbox = document.getElementById('urgentRequested');
         const container = document.getElementById('urgentReasonContainer');
         const reasonInput = document.getElementById('urgentReason');
         if (!checkbox || !container) return;
 
+        // Đồng bộ trường lý do với trạng thái chọn xử lý gấp.
         function update() {
             if (checkbox.checked) {
                 container.classList.remove('d-none');
@@ -251,20 +267,24 @@
     }
 
     // --- 5. FAQ Suggestions ---
+    // Thiết lập gợi ý FAQ dựa trên tiêu đề yêu cầu.
     function initFaqSuggestions() {
         const titleInput = document.getElementById('ticketTitle');
         const box = document.getElementById('faqSuggestionsBox');
         const list = document.getElementById('faqSuggestionsList');
         if (!titleInput || !box || !list) return;
 
+        // Dùng bộ trì hoãn dự phòng nếu tiện ích debounce chưa sẵn sàng.
         const debouncedFetch = window.Qaute && typeof window.Qaute.debounce === 'function'
             ? window.Qaute.debounce(fetchFaqSuggestions, 400)
             : function () { setTimeout(fetchFaqSuggestions, 400); };
 
+        // Tải gợi ý khi tiêu đề thay đổi.
         titleInput.addEventListener('input', function () {
             debouncedFetch(titleInput.value.trim());
         });
 
+        // Tải và hiển thị FAQ phù hợp với truy vấn.
         function fetchFaqSuggestions(q) {
             if (!q || q.length < 3) {
                 box.classList.add('d-none');
@@ -274,10 +294,12 @@
 
             fetch('/api/faqs/suggestions?q=' + encodeURIComponent(q) + '&source=TICKET_FORM')
                 .then(function (res) { return res.json(); })
+                // Vẽ danh sách gợi ý hoặc ẩn vùng kết quả trống.
                 .then(function (data) {
                     if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
                         const items = data.data.slice(0, 5);
                         list.innerHTML = '';
+                        // Tạo liên kết cho từng FAQ phù hợp.
                         items.forEach(function (faq) {
                             const a = document.createElement('a');
                             a.href = '/faq/' + encodeURIComponent(faq.slug);
@@ -298,6 +320,7 @@
                         list.innerHTML = '';
                     }
                 })
+                // Ẩn gợi ý nếu không tải được kết quả.
                 .catch(function () {
                     box.classList.add('d-none');
                 });
@@ -305,7 +328,9 @@
     }
 
     // --- 6. Wizard Navigation ---
+    // Gắn thao tác chuyển bước và điều hướng qua các thẻ.
     function initWizardNavigation() {
+        // Kiểm tra bước hiện tại trước khi chuyển tiếp.
         document.querySelectorAll('.btn-next').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 const nextStep = currentStep + 1;
@@ -315,6 +340,7 @@
             });
         });
 
+        // Quay về bước trước khi được yêu cầu.
         document.querySelectorAll('.btn-prev').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 const prevStep = currentStep - 1;
@@ -325,6 +351,7 @@
         });
 
         // Step tabs click
+        // Cho phép chuyển đến các bước đã hoàn tất hoặc hợp lệ.
         document.querySelectorAll('.step-tab-btn').forEach(function (tab) {
             tab.addEventListener('click', function () {
                 const target = Number(tab.getAttribute('data-step'));
@@ -339,6 +366,7 @@
         });
     }
 
+    // Kiểm tra dữ liệu bắt buộc của bước hiện tại.
     function validateStep(step) {
         hideStepErrors();
 
@@ -400,6 +428,7 @@
         return true;
     }
 
+    // Hiển thị bước biểu mẫu và cập nhật các chỉ báo tiến độ.
     function goToStep(step) {
         currentStep = Math.max(1, Math.min(4, step));
 
@@ -436,6 +465,7 @@
         }
     }
 
+    // Hiển thị lỗi xác thực cho bước được chỉ định.
     function showStepError(step, message) {
         const errorEl = document.getElementById('stepError' + step);
         if (errorEl) {
@@ -446,6 +476,7 @@
         }
     }
 
+    // Xóa lỗi đang hiển thị trên các bước của biểu mẫu.
     function hideStepErrors() {
         for (let i = 1; i <= 4; i++) {
             const errorEl = document.getElementById('stepError' + i);
@@ -456,6 +487,7 @@
         }
     }
 
+    // Hiển thị bản tóm tắt yêu cầu trước khi gửi.
     function renderReviewSummary() {
         const reviewCategory = document.getElementById('reviewCategory');
         const reviewTitle = document.getElementById('reviewTitle');
@@ -488,6 +520,7 @@
                 : [];
             if (items.length > 0) {
                 reviewFiles.innerHTML = '<div class="d-flex flex-wrap gap-2">' +
+                    // Tạo nội dung xem trước cho từng tệp đính kèm.
                     items.map(function (item) {
                         const name = window.Qaute && typeof window.Qaute.escapeHtml === 'function'
                             ? window.Qaute.escapeHtml(item.name)
@@ -527,6 +560,7 @@
     }
 
     // --- 7. LocalStorage Draft Save/Restore ---
+    // Lưu tự động và khôi phục bản nháp của biểu mẫu.
     function initDraftStorage() {
         const titleInput = document.getElementById('ticketTitle');
         const descArea = document.getElementById('descriptionHtml');
@@ -534,6 +568,7 @@
         const urgentReason = document.getElementById('urgentReason');
         const allowFaqCheck = document.getElementById('allowPublicFaq');
 
+        // Ghi nội dung biểu mẫu hiện tại vào bộ nhớ cục bộ.
         function saveDraft() {
             try {
                 let content = '';
@@ -606,11 +641,13 @@
     }
 
     // --- 8. Form Submit Handling ---
+    // Đồng bộ nội dung và khóa nút khi gửi biểu mẫu.
     function initFormSubmit() {
         const form = document.getElementById('ticketCreateForm');
         const submitBtn = document.getElementById('submitTicketBtn');
         if (!form || !submitBtn) return;
 
+        // Chuẩn bị nội dung và trạng thái trước khi gửi yêu cầu.
         form.addEventListener('submit', function (e) {
             // Sync summernote code to textarea
             const descArea = document.getElementById('descriptionHtml');

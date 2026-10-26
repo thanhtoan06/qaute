@@ -17,6 +17,7 @@ import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.UserStatus;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu User được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "users")
 @Getter

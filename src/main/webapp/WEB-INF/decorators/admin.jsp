@@ -1,9 +1,11 @@
 <%@ page pageEncoding="UTF-8" %>
     <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
         <%@ page import="org.sitemesh.content.Content" %>
-            <% Content pageContent=(Content) request.getAttribute("org.sitemesh.content.Content"); %>
+<%-- Lấy nội dung trang hiện tại để hiển thị trong giao diện quản trị.
+--%>            <% Content pageContent=(Content) request.getAttribute("org.sitemesh.content.Content"); %>
                 <c:set var="ctx" value="${pageContext.request.contextPath}" />
-                <%@ include file="/WEB-INF/views/common/tv2-workspace-user.jspf" %>
+                <c:set var="notificationsUrl" value="${ctx}/admin/notifications"/>
+                <%@ include file="/WEB-INF/views/common/workspace-user.jspf" %>
 
                     <c:set var="rawUri"
                         value="${not empty requestScope['jakarta.servlet.forward.request_uri'] ? requestScope['jakarta.servlet.forward.request_uri'] : pageContext.request.requestURI}" />
@@ -11,7 +13,7 @@
                         value="${fn:startsWith(rawUri, ctx) ? fn:substring(rawUri, fn:length(ctx), fn:length(rawUri)) : rawUri}" />
 
                     <c:set var="menuPaths"
-                        value="/admin/dashboard,/admin/users,/admin/users/import,/admin/departments,/admin/categories,/admin/managers,/admin/faq,/admin/faq/tags,/admin/faq/synonyms,/admin/tickets,/admin/sla,/admin/settings,/admin/announcements,/admin/audit-logs,/admin/reports,/admin/health" />
+                        value="/admin/dashboard,/admin/users,/admin/users/import,/admin/departments,/admin/categories,/admin/managers,/admin/faq,/admin/faq/tags,/admin/faq/synonyms,/admin/guest-home-faq,/admin/tickets,/admin/chat-history,/admin/appointments,/admin/notifications,/admin/notifications/preferences,/admin/sla,/admin/settings,/admin/announcements,/admin/audit-logs,/admin/reports,/admin/health,/admin/profile/security,/admin/profile" />
                     <c:set var="activePath" value="" />
                     <c:forTokens items="${menuPaths}" delims="," var="menuPath">
                         <c:if test="${currentPath == menuPath or fn:startsWith(currentPath, menuPath.concat('/'))}">
@@ -21,23 +23,13 @@
                         </c:if>
                     </c:forTokens>
 
-                    <c:set var="grpUsers"
-                        value="${activePath == '/admin/users' or activePath == '/admin/users/import'}" />
-                    <c:set var="grpOrg"
-                        value="${activePath == '/admin/departments' or activePath == '/admin/categories' or activePath == '/admin/managers'}" />
-                    <c:set var="grpKnowledge"
-                        value="${activePath == '/admin/faq' or activePath == '/admin/faq/tags' or activePath == '/admin/faq/synonyms'}" />
-                    <c:set var="grpPolicy" value="${activePath == '/admin/sla' or activePath == '/admin/settings'}" />
-                    <c:set var="grpMonitor"
-                        value="${activePath == '/admin/audit-logs' or activePath == '/admin/reports' or activePath == '/admin/health'}" />
-
                     <!DOCTYPE html>
                     <html lang="vi">
 
                     <head>
                         <meta charset="UTF-8">
                         <%@ include file="/WEB-INF/views/common/head-assets.jspf" %>
-                            <link rel="stylesheet" href="${ctx}/assets/css/tv2-workspace.css">
+                            <link rel="stylesheet" href="${ctx}/assets/css/workspace.css">
 <style>
 :root { --adm-accent: #3478e5; --adm-accent-dark: #205bc0; --adm-accent-deep: #17458f; --adm-accent-soft: #edf4ff; --adm-ink: #1a3454; --adm-text: #405772; --adm-muted: #8192a9; --adm-border: #e2eaf4; --adm-radius: 16px; --adm-shadow-sm: 0 4px 14px rgba(19, 46, 81, .045); --adm-shadow: 0 12px 30px rgba(19, 46, 81, .075); --adm-shadow-lg: 0 22px 54px rgba(10, 30, 59, .15); --adm-ease: cubic-bezier(.2, .75, .3, 1); }
 html { scroll-behavior: smooth; scroll-padding-top: 88px; }
@@ -52,60 +44,63 @@ body.qa-workspace--admin ::selection { color: #ffffff; background: #285fbd; }
 body.qa-workspace--admin :focus-visible { outline: 3px solid rgba(52, 120, 229, .35); outline-offset: 3px; }
 body.qa-workspace--admin .qa-workspace-skip { border-radius: 10px; box-shadow: var(--adm-shadow); }
 body.qa-workspace--admin .page { min-height: 100vh; min-height: 100dvh; }
-body.qa-workspace--admin .qa-workspace-sidebar { position: fixed; isolation: isolate; background: radial-gradient(ellipse at 90% 0%, rgba(49, 117, 199, .23), transparent 36%), radial-gradient(ellipse at 0% 76%, rgba(37, 87, 147, .13), transparent 40%), linear-gradient(170deg, #102c50 0%, #0a1b34 49%, #07172c 100%); border-right: 1px solid rgba(255, 255, 255, .07); box-shadow: 8px 0 32px rgba(7, 23, 44, .105); scrollbar-width: thin; scrollbar-color: #345172 transparent; }
+body.qa-workspace--admin .qa-workspace-sidebar { position: fixed; isolation: isolate; background: radial-gradient(ellipse at 90% 0%, rgba(49, 117, 199, .23), transparent 36%), radial-gradient(ellipse at 0% 76%, rgba(37, 87, 147, .13), transparent 40%), linear-gradient(170deg, #102c50 0%, #0a1b34 49%, #07172c 100%); border-right: 1px solid rgba(255, 255, 255, .07); box-shadow: 8px 0 32px rgba(7, 23, 44, .105); scrollbar-width: thin; scrollbar-color: #345172 transparent; display: flex; flex-direction: column; }
 body.qa-workspace--admin .qa-workspace-sidebar::before { content: ""; position: absolute; z-index: 0; top: 115px; right: -185px; width: 320px; height: 320px; border: 1px solid rgba(255, 255, 255, .065); border-radius: 50%; box-shadow: 0 0 0 29px rgba(255, 255, 255, .017), 0 0 0 66px rgba(255, 255, 255, .012); pointer-events: none; }
 body.qa-workspace--admin .qa-workspace-sidebar::after { content: ""; position: absolute; z-index: 0; left: -145px; bottom: 100px; width: 230px; height: 230px; border-radius: 50%; background: radial-gradient(circle, rgba(48, 128, 225, .12), transparent 70%); pointer-events: none; }
-body.qa-workspace--admin .qa-workspace-sidebar>.container-fluid { position: relative; z-index: 1; }
+body.qa-workspace--admin .qa-workspace-sidebar > * { position: relative; z-index: 1; }
 body.qa-workspace--admin .qa-workspace-sidebar::-webkit-scrollbar { width: 4px; }
 body.qa-workspace--admin .qa-workspace-sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .18); border-radius: 5px; }
 body.qa-workspace--admin .qa-workspace-sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .3); }
-body.qa-workspace--admin .navbar-brand { padding-top: 1.15rem; padding-bottom: 1.1rem; }
-body.qa-workspace--admin .navbar-brand>a { display: flex; align-items: center; gap: .75rem; width: fit-content; max-width: 100%; text-decoration: none; }
-body.qa-workspace--admin .qa-role-logo { width: 40px; height: 40px; padding: 3px; object-fit: contain; background: #ffffff; border: 1px solid rgba(255, 255, 255, .2); border-radius: 12px; box-shadow: 0 6px 18px rgba(0, 0, 0, .15); transition: transform .25s var(--adm-ease), box-shadow .25s ease; }
-body.qa-workspace--admin .navbar-brand>a:hover .qa-role-logo { transform: translateY(-2px) rotate(-3deg); box-shadow: 0 10px 23px rgba(0, 0, 0, .21); }
-body.qa-workspace--admin .qa-workspace-brand-copy { color: #ffffff; font-size: 1.08rem; font-weight: 850; line-height: 1.1; letter-spacing: -.045em; }
-body.qa-workspace--admin .qa-workspace-brand-copy>span { color: #ffffff; }
-body.qa-workspace--admin .qa-workspace-brand-copy small { display: block; margin-top: 4px; color: #9eb2cc; font-size: .62rem; line-height: 1.5; letter-spacing: .03em; font-weight: 650; }
-body.qa-workspace--admin .qa-workspace-user-card { display: flex; align-items: center; gap: .75rem; margin: .9rem .75rem .3rem; padding: .85rem .9rem; border: 1px solid rgba(255, 255, 255, .07); border-radius: 15px; background: linear-gradient(135deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .035)); text-decoration: none; transition: background .22s ease, border-color .22s ease, transform .22s ease, box-shadow .22s ease; }
-body.qa-workspace--admin .qa-workspace-user-card:hover { background: linear-gradient(135deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, .055)); border-color: rgba(137, 196, 255, .22); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0, 0, 0, .1); }
-body.qa-workspace--admin .qa-workspace-avatar { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 40px; height: 40px; border: 2px solid rgba(255, 255, 255, .19); border-radius: 13px; background: linear-gradient(135deg, #4b96ef, #245fb8); color: #ffffff; font-size: .88rem; font-weight: 850; letter-spacing: -.02em; box-shadow: 0 5px 15px rgba(29, 89, 166, .25); transition: transform .25s ease, box-shadow .25s ease; }
-body.qa-workspace--admin .qa-workspace-user-card:hover .qa-workspace-avatar { transform: translateY(-1px) rotate(-3deg); box-shadow: 0 8px 20px rgba(29, 89, 166, .34); }
-body.qa-workspace--admin .qa-workspace-user-copy { display: flex; flex: 1 1 auto; flex-direction: column; gap: 4px; min-width: 0; }
-body.qa-workspace--admin .qa-workspace-user-copy strong { overflow: hidden; color: #ffffff; font-size: .82rem; font-weight: 700; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; }
-body.qa-workspace--admin .qa-workspace-user-copy small { color: #a2b7d2; font-size: .68rem; }
-body.qa-workspace--admin .qa-workspace-user-card>.bi-shield-check { flex-shrink: 0; color: #8fc4ff; font-size: 1rem; transition: transform .2s ease, color .2s ease; }
-body.qa-workspace--admin .qa-workspace-user-card:hover>.bi-shield-check { color: #ffffff; transform: scale(1.1); }
-body.qa-workspace--admin .qa-workspace-nav-label { padding: 1.3rem 1.25rem .5rem; color: #8099b8; font-size: .63rem; font-weight: 800; letter-spacing: .12em; }
-body.qa-workspace--admin .qa-workspace-sidebar .navbar-nav { gap: 4px; }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-item { position: relative; margin: 0; border-radius: 11px; }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-link { position: relative; display: flex; align-items: center; gap: .75rem; min-height: 43px; margin: 0; padding: .65rem .85rem; border: 1px solid transparent; border-radius: 11px; color: rgba(225, 236, 250, .72); font-size: .81rem; font-weight: 550; text-decoration: none; transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-link-icon { display: inline-flex; align-items: center; justify-content: center; width: 21px; min-width: 21px; color: #9cb7d7; font-size: 1.02rem; text-align: center; transition: color .2s ease, transform .2s ease; }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-link-title { min-width: 0; line-height: 1.45; }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-link:hover { color: #ffffff; background: rgba(255, 255, 255, .075); border-color: rgba(255, 255, 255, .035); transform: translateX(2px); }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-link:hover .nav-link-icon { color: #bedcff; transform: scale(1.08); }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-item.active>.nav-link, body.qa-workspace--admin .qa-workspace-sidebar .nav-item.dropdown.active>.nav-link { color: #ffffff; font-weight: 700; background: linear-gradient(110deg, #206bc4, #3286db); border-color: rgba(255, 255, 255, .1); box-shadow: 0 6px 16px rgba(9, 61, 121, .28), inset 0 1px 0 rgba(255, 255, 255, .1); }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-item.active>.nav-link::after, body.qa-workspace--admin .qa-workspace-sidebar .nav-item.dropdown.active>.nav-link::after { content: ""; position: absolute; top: 9px; right: 0; bottom: 9px; width: 3px; border-radius: 4px 0 0 4px; background: #c1e2ff; box-shadow: 0 0 12px rgba(193, 226, 255, .46); }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-item.active>.nav-link .nav-link-icon { color: #ffffff; }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-item.dropdown>.nav-link.dropdown-toggle::after { margin-left: auto; color: #8ba8ca; opacity: .75; transition: transform .2s ease, color .2s ease; }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-item.dropdown>.nav-link[aria-expanded="true"]::after { color: #d1e5ff; transform: rotate(180deg); }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-item.dropdown>.dropdown-menu { position: static !important; inset: auto !important; float: none; transform: none !important; width: auto; min-width: 0; margin: .25rem 0 .55rem 2.15rem; padding: .3rem; border: 1px solid rgba(255, 255, 255, .075); border-radius: 11px; background: rgba(3, 15, 30, .32); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .08); }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-item.dropdown>.dropdown-menu:not(.show) { display: none; }
-body.qa-workspace--admin .qa-workspace-sidebar .nav-item.dropdown>.dropdown-menu.show { display: block; animation: qa-workspace-page-enter .2s ease both; }
-body.qa-workspace--admin .qa-workspace-sidebar .dropdown-menu .dropdown-item { display: flex; align-items: center; min-height: 36px; padding: .52rem .65rem; border: 1px solid transparent; border-radius: 8px; color: rgba(220, 234, 250, .72); background: transparent; font-size: .77rem; line-height: 1.4; white-space: normal; transition: color .18s ease, background .18s ease, border-color .18s ease, transform .18s ease; }
-body.qa-workspace--admin .qa-workspace-sidebar .dropdown-menu .dropdown-item:hover, body.qa-workspace--admin .qa-workspace-sidebar .dropdown-menu .dropdown-item:focus { color: #ffffff; background: rgba(255, 255, 255, .085); border-color: rgba(255, 255, 255, .04); transform: translateX(2px); }
-body.qa-workspace--admin .qa-workspace-sidebar .dropdown-menu .dropdown-item.active, body.qa-workspace--admin .qa-workspace-sidebar .dropdown-menu .dropdown-item:active { color: #ffffff; background: linear-gradient(110deg, rgba(52, 120, 229, .84), rgba(43, 101, 190, .84)); border-color: rgba(255, 255, 255, .08); box-shadow: 0 3px 9px rgba(0, 0, 0, .1); }
+body.qa-workspace--admin .stu-brand { display: flex; align-items: center; gap: .7rem; padding: 1.25rem 1.3rem 1.15rem; border-bottom: 1px solid rgba(255, 255, 255, .085); text-decoration: none; flex-shrink: 0; transition: background .2s ease; }
+body.qa-workspace--admin .stu-brand:hover { background: rgba(255, 255, 255, .025); }
+body.qa-workspace--admin .stu-brand-logo { width: 40px; height: 40px; object-fit: contain; background: #ffffff; border: 1px solid rgba(255, 255, 255, .15); border-radius: 12px; padding: 3px; flex-shrink: 0; box-shadow: 0 5px 15px rgba(0, 0, 0, .13); transition: transform .25s var(--adm-ease), box-shadow .25s ease; }
+body.qa-workspace--admin .stu-brand:hover .stu-brand-logo { transform: translateY(-2px) rotate(-3deg); box-shadow: 0 8px 19px rgba(0, 0, 0, .2); }
+body.qa-workspace--admin .stu-brand-text { min-width: 0; }
+body.qa-workspace--admin .stu-brand-text .t1 { color: #ffffff; font-weight: 850; font-size: 1.08rem; line-height: 1.1; letter-spacing: -.045em; }
+body.qa-workspace--admin .stu-brand-text .t2 { color: #9eb2cc; font-size: .62rem; line-height: 1.5; margin-top: 4px; white-space: nowrap; }
+body.qa-workspace--admin .stu-user-card { display: flex; align-items: center; gap: .75rem; padding: .85rem .9rem; margin: .9rem .75rem .3rem; background: linear-gradient(135deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .035)); border: 1px solid rgba(255, 255, 255, .07); border-radius: 15px; text-decoration: none; transition: background .22s ease, border-color .22s ease, transform .22s ease, box-shadow .22s ease; }
+body.qa-workspace--admin .stu-user-card:hover { background: linear-gradient(135deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .05)); border-color: rgba(135, 193, 255, .2); transform: translateY(-1px); box-shadow: 0 7px 18px rgba(0, 0, 0, .09); }
+body.qa-workspace--admin .stu-user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #4b96ef, #245fb8); border: 2px solid rgba(255, 255, 255, .18); border-radius: 13px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: .85rem; flex-shrink: 0; box-shadow: 0 5px 14px rgba(32, 107, 196, .25); }
+body.qa-workspace--admin .stu-user-name { color: #ffffff; font-weight: 700; font-size: .82rem; line-height: 1.45; }
+body.qa-workspace--admin .stu-user-role { display: inline-flex; align-items: center; gap: 6px; color: #a9bdd6; font-size: .68rem; margin-top: 4px; }
+body.qa-workspace--admin .stu-user-role::before { content: ""; width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: #53c6a1; box-shadow: 0 0 0 3px rgba(83, 198, 161, .1); }
+body.qa-workspace--admin .stu-nav-label { color: #8099b8; font-size: .63rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; padding: 1.3rem 1.25rem .5rem; }
+body.qa-workspace--admin .qa-workspace-nav-label { display: none; }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav { list-style: none; padding: 0 .75rem; margin: 0; }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav li { margin-bottom: 4px; }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav a { position: relative; display: flex; align-items: center; gap: .75rem; min-height: 43px; margin: 0; padding: .65rem .85rem; border: 1px solid transparent; border-radius: 11px; color: rgba(225, 236, 250, .72); font-size: .81rem; font-weight: 550; text-decoration: none; transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav a i:not(.dropdown-chevron) { display: inline-flex; align-items: center; justify-content: center; width: 30px; min-width: 30px; height: 30px; border: 1px solid rgba(162, 192, 226, .1); border-radius: 9px; background: rgba(255, 255, 255, .045); color: #9cb7d7; font-size: 1.02rem; text-align: center; transition: color .2s ease, transform .2s ease, background .2s ease, border-color .2s ease; }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav a .dropdown-chevron { width: auto; height: auto; border: none; background: none; color: #8ba8ca; opacity: .75; font-size: .7rem; transition: transform .2s ease, color .2s ease; }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav a .dropdown-chevron:hover { color: #d1e5ff; }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav a span { min-width: 0; line-height: 1.45; }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav a:hover { color: #ffffff; background: rgba(255, 255, 255, .075); border-color: rgba(255, 255, 255, .035); transform: translateX(2px); }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav a:hover i:not(.dropdown-chevron) { color: #bedcff; transform: scale(1.08); border-color: rgba(173, 217, 255, .18); background: rgba(143, 195, 251, .12); }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav li.active>a, body.qa-workspace--admin .qa-workspace-sidebar li.dropdown.active>a { color: #ffffff; font-weight: 700; background: linear-gradient(110deg, #206bc4, #3286db); border-color: rgba(255, 255, 255, .1); box-shadow: 0 6px 16px rgba(9, 61, 121, .28), inset 0 1px 0 rgba(255, 255, 255, .1); }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav li.active>a::after, body.qa-workspace--admin .qa-workspace-sidebar li.dropdown.active>a::after { content: ""; position: absolute; top: 9px; right: 0; bottom: 9px; width: 3px; border-radius: 4px 0 0 4px; background: #c1e2ff; box-shadow: 0 0 12px rgba(193, 226, 255, .46); }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav li.active>a i:not(.dropdown-chevron) { color: #ffffff; border-color: rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .13); }
+body.qa-workspace--admin .qa-workspace-sidebar .stu-nav li.dropdown>a[aria-expanded="true"] .dropdown-chevron { transform: rotate(180deg); color: #d1e5ff; }
+body.qa-workspace--admin .qa-workspace-sidebar li.dropdown>.dropdown-menu { position: static !important; inset: auto !important; float: none; transform: none !important; width: auto; min-width: 0; margin: .25rem 0 .55rem 2.15rem; padding: .3rem; border: 1px solid rgba(255, 255, 255, .075); border-radius: 11px; background: rgba(3, 15, 30, .32); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .08); }
+body.qa-workspace--admin .qa-workspace-sidebar li.dropdown>.dropdown-menu:not(.show) { display: none; }
+body.qa-workspace--admin .qa-workspace-sidebar li.dropdown>.dropdown-menu.show { display: block; animation: qa-workspace-page-enter .2s ease both; }
+body.qa-workspace--admin .qa-workspace-sidebar .dropdown-menu a { display: flex; align-items: center; min-height: 36px; padding: .52rem .65rem; border: 1px solid transparent; border-radius: 8px; color: rgba(220, 234, 250, .72); background: transparent; font-size: .77rem; line-height: 1.4; white-space: normal; transition: color .18s ease, background .18s ease, border-color .18s ease, transform .18s ease; text-decoration: none; }
+body.qa-workspace--admin .qa-workspace-sidebar .dropdown-menu a:hover, body.qa-workspace--admin .qa-workspace-sidebar .dropdown-menu a:focus { color: #ffffff; background: rgba(255, 255, 255, .085); border-color: rgba(255, 255, 255, .04); transform: translateX(2px); }
+body.qa-workspace--admin .qa-workspace-sidebar .dropdown-menu a.active, body.qa-workspace--admin .qa-workspace-sidebar .dropdown-menu a:active { color: #ffffff; background: linear-gradient(110deg, rgba(52, 120, 229, .84), rgba(43, 101, 190, .84)); border-color: rgba(255, 255, 255, .08); box-shadow: 0 3px 9px rgba(0, 0, 0, .1); }
 body.qa-workspace--admin .qa-workspace-sidebar .navbar-toggler { width: 39px; height: 39px; padding: .4rem; border: 1px solid rgba(255, 255, 255, .15); border-radius: 11px; background: rgba(255, 255, 255, .075); box-shadow: none; transition: background .2s ease, transform .2s ease, border-color .2s ease; }
 body.qa-workspace--admin .qa-workspace-sidebar .navbar-toggler:hover { background: rgba(255, 255, 255, .13); border-color: rgba(255, 255, 255, .23); transform: translateY(-1px); }
-body.qa-workspace--admin .qa-workspace-sidebar-footer { display: flex; align-items: center; gap: .55rem; margin-top: auto; padding: .85rem .75rem; border-top: 1px solid rgba(255, 255, 255, .085); color: #9db2cc; font-size: .69rem; }
+body.qa-workspace--admin .stu-sidebar-footer { display: flex; flex-direction: column; align-items: stretch; gap: 0; margin-top: auto; padding: .85rem .75rem; border-top: 1px solid rgba(255, 255, 255, .085); color: #9db2cc; font-size: .69rem; }
+body.qa-workspace--admin .qa-sidebar-workspace-status { display: flex; align-items: center; gap: .55rem; padding: 0 .25rem .8rem; color: #9db2cc; font-size: .69rem; }
+body.qa-workspace--admin .stu-sidebar-footer form button { display: flex; align-items: center; gap: .7rem; width: 100%; min-height: 42px; padding: .65rem .85rem; border: 1px solid rgba(255, 255, 255, .035); border-radius: 11px; background: rgba(255, 255, 255, .045); color: rgba(225, 236, 250, .67); font-size: .81rem; font-weight: 550; cursor: pointer; transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease; }
+body.qa-workspace--admin .stu-sidebar-footer form button:hover { transform: translateY(-1px); border-color: rgba(240, 100, 117, .18); background: rgba(220, 53, 69, .17); color: #ffffff; }
+body.qa-workspace--admin .stu-sidebar-footer form button i { font-size: 1.05rem; }
 body.qa-workspace--admin .qa-workspace-role-dot { width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: #43c99b; box-shadow: 0 0 0 3px rgba(67, 201, 155, .12); animation: adm-online-pulse 3s ease-in-out infinite; }
-body.qa-workspace--admin .qa-workspace-sidebar-footer a { display: inline-flex; align-items: center; justify-content: center; width: 29px; height: 29px; margin-left: auto; border: 1px solid rgba(255, 255, 255, .1); border-radius: 9px; background: rgba(255, 255, 255, .045); color: #b5c8df; text-decoration: none; transition: background .2s ease, color .2s ease, transform .2s ease; }
-body.qa-workspace--admin .qa-workspace-sidebar-footer a:hover { color: #ffffff; background: rgba(255, 255, 255, .12); transform: translateY(-1px); }
-body.qa-workspace--admin .qa-workspace-topbar { position: fixed; top: 0; right: 0; left: var(--qa-workspace-sidebar-width); z-index: 1030; height: var(--qa-workspace-topbar-height); min-height: var(--qa-workspace-topbar-height); background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border-bottom: 1px solid rgba(224, 233, 245, .9); box-shadow: 0 5px 23px rgba(16, 43, 77, .045); transition: left .25s ease, background .25s ease, box-shadow .25s ease; }
-body.qa-workspace--admin .qa-workspace-topbar::after { content: ""; position: absolute; right: 0; bottom: -1px; left: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(52, 120, 229, .19), transparent); pointer-events: none; }
+body.qa-workspace--admin .qa-workspace-sidebar-footer { display: none; }
+body.qa-workspace--admin .qa-workspace-topbar { position: fixed; top: 0; right: 0; left: var(--qa-workspace-sidebar-width); z-index: 1030; height: var(--qa-workspace-topbar-height); min-height: var(--qa-workspace-topbar-height); background: linear-gradient(110deg, rgba(255, 255, 255, .97), rgba(243, 248, 255, .94) 58%, rgba(255, 255, 255, .97)); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border-bottom: 1px solid rgba(224, 233, 245, .9); box-shadow: 0 6px 22px rgba(13, 43, 79, .065); transition: left .25s ease, background .25s ease, box-shadow .25s ease; }
+body.qa-workspace--admin .qa-workspace-topbar::after { content: ""; position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(52, 120, 229, .36), rgba(112, 201, 210, .3), transparent); pointer-events: none; }
 body.qa-workspace--admin .qa-workspace-topbar>.container-xl { display: flex; align-items: center; gap: 1rem; min-height: var(--qa-workspace-topbar-height); padding: 0 1.5rem; }
 body.qa-workspace--admin .qa-sidebar-toggle { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 39px; width: 39px; height: 39px; padding: 0; border: 1px solid #206bc4; border-radius: 11px; background: linear-gradient(135deg, #287be0, #185caf); color: #ffffff; box-shadow: 0 4px 12px rgba(32, 107, 196, .2); font-size: 1.2rem; transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease; }
 body.qa-workspace--admin .qa-sidebar-toggle:hover { color: #ffffff; border-color: #154c91; background: linear-gradient(135deg, #206bc4, #154c91); box-shadow: 0 7px 17px rgba(32, 107, 196, .27); transform: translateY(-1px); }
 body.qa-workspace--admin .qa-sidebar-toggle:active { transform: scale(.97); }
+body.qa-workspace--admin .qa-sidebar-toggle:focus-visible { outline: 3px solid rgba(32, 107, 196, .3); outline-offset: 3px; }
 body.qa-workspace--admin .qa-topbar-brand { display: inline-flex; align-items: center; gap: .45rem; color: var(--adm-ink); text-decoration: none; }
 body.qa-workspace--admin .qa-topbar-brand img { width: 31px; height: 31px; padding: 2px; object-fit: contain; border: 1px solid #e1eaf5; border-radius: 9px; background: #ffffff; }
 body.qa-workspace--admin .qa-topbar-brand strong { color: #183756; font-size: 1rem; font-weight: 850; letter-spacing: -.04em; }
@@ -250,6 +245,51 @@ body.qa-workspace--admin .qa-workspace-overlay[hidden] { display: none !importan
   body.qa-workspace--admin *, body.qa-workspace--admin *::before, body.qa-workspace--admin *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   body.qa-workspace--admin::before { animation: none !important; }
 }
+body.qa-workspace--admin .navbar-brand { min-height: 72px; padding: 1rem 1.3rem !important; }
+body.qa-workspace--admin .qa-role-logo { border-radius: 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, .13); }
+body.qa-workspace--admin .qa-workspace-user-card { min-height: 58px; }
+body.qa-workspace--admin .qa-workspace-avatar { width: 40px; height: 40px; border-radius: 12px; }
+body.qa-workspace--admin .qa-workspace-nav-label { padding-top: 1.25rem; }
+body.qa-workspace--admin .qa-workspace-sidebar .nav-link { min-height: 44px; }
+body.qa-workspace--admin .qa-workspace-sidebar .nav-link-icon { width: 30px; min-width: 30px; height: 30px; border: 1px solid rgba(162, 192, 226, .1); border-radius: 9px; background: rgba(255, 255, 255, .045); }
+body.qa-workspace--admin .qa-workspace-sidebar .nav-link:hover .nav-link-icon { border-color: rgba(173, 217, 255, .18); background: rgba(143, 195, 251, .12); }
+body.qa-workspace--admin .qa-workspace-sidebar .nav-item.active > .nav-link .nav-link-icon,
+body.qa-workspace--admin .qa-workspace-sidebar .nav-item.dropdown.active > .nav-link .nav-link-icon { border-color: rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .13); }
+body.qa-workspace--admin .qa-workspace-topbar { background: linear-gradient(110deg, rgba(255, 255, 255, .97), rgba(243, 248, 255, .94) 58%, rgba(255, 255, 255, .97)); box-shadow: 0 6px 22px rgba(13, 43, 79, .065); }
+body.qa-workspace--admin .qa-workspace-topbar::after { height: 2px; background: linear-gradient(90deg, transparent, rgba(32, 107, 196, .36), rgba(112, 201, 210, .3), transparent); }
+body.qa-workspace--admin .qa-workspace-location strong { color: #1b385a; font-weight: 800; }
+body.qa-workspace--admin .qa-sidebar-toggle { width: 39px; height: 39px; flex-basis: 39px; }
+body.qa-workspace--admin .qa-workspace-avatar--small { border-radius: 12px; background: linear-gradient(135deg, #3988e5, #55b2f5); }
+body.qa-workspace--admin .qa-workspace-topbar .nav-item.dropdown > .nav-link:hover,
+body.qa-workspace--admin .qa-workspace-topbar .nav-item.dropdown > .nav-link[aria-expanded="true"] { border-color: #dce8f6; background: linear-gradient(135deg, #f4f8ff, #ffffff); }
+body.qa-workspace--admin .qa-workspace-topbar .nav-item.dropdown>.qa-account-toggle { display: flex; align-items: center; gap: .55rem; min-height: 43px; padding: .28rem .45rem; border: 1px solid transparent; border-radius: 12px; color: inherit; text-decoration: none; transition: background .2s ease, border-color .2s ease, box-shadow .2s ease; }
+body.qa-workspace--admin .qa-account-toggle:hover,
+body.qa-workspace--admin .qa-account-toggle[aria-expanded="true"] { border-color: #dce8f6; background: linear-gradient(135deg, #f4f8ff, #ffffff); }
+body.qa-workspace--admin .qa-account-toggle:focus-visible { outline: 2px solid rgba(52, 120, 229, .42); outline-offset: 2px; }
+body.qa-workspace--admin .qa-account-toggle .qa-account-name { overflow: hidden; max-width: 190px; color: #2c425c; font-size: .8rem; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+body.qa-workspace--admin .qa-account-toggle .qa-account-role { margin-top: 3px; color: #8a9bb0; font-size: .69rem; font-weight: 500; }
+body.qa-workspace--admin .qa-account-chevron { color: #8295aa; font-size: .68rem; transition: transform .2s ease; }
+body.qa-workspace--admin .qa-account-toggle[aria-expanded="true"] .qa-account-chevron { transform: rotate(180deg); }
+body.qa-workspace--admin .qa-workspace-topbar .qa-account-menu { width: 328px; max-width: min(328px, calc(100vw - 24px)); padding: .55rem; border: 1px solid #e1e9f4; border-radius: 14px; background: linear-gradient(180deg, #ffffff, #fbfdff); box-shadow: 0 18px 42px rgba(14, 39, 74, .14); }
+body.qa-workspace--admin .qa-workspace-topbar .qa-account-menu::before { display: none; }
+body.qa-workspace--admin .qa-account-menu-heading { padding: .8rem .85rem .75rem; margin-bottom: .3rem; border-bottom: 1px solid #e8eef6; }
+body.qa-workspace--admin .qa-account-menu-heading strong { display: block; overflow: hidden; color: #263e5b; font-size: .88rem; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+body.qa-workspace--admin .qa-account-menu-heading span { display: block; overflow: hidden; margin-top: 4px; color: #7f90a6; font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
+body.qa-workspace--admin .qa-account-menu .dropdown-item { min-height: 42px; gap: .55rem; padding: .62rem .8rem; border-radius: 9px; font-size: .82rem; }
+body.qa-workspace--admin .qa-account-menu .dropdown-item .bi { width: 18px; color: #7488a2; text-align: center; }
+body.qa-workspace--admin .qa-account-menu .dropdown-item:hover,
+body.qa-workspace--admin .qa-account-menu .dropdown-item:focus-visible { color: #1f63b3; background: #eef5ff; }
+body.qa-workspace--admin .qa-account-menu .dropdown-item:hover .bi,
+body.qa-workspace--admin .qa-account-menu .dropdown-item:focus-visible .bi { color: #2874c6; }
+body.qa-workspace--admin .qa-account-menu .dropdown-divider { margin: .35rem .45rem; border-color: #e8eef6; }
+body.qa-workspace--admin .qa-account-menu .qa-account-logout { width: 100%; color: #c93e55; }
+body.qa-workspace--admin .qa-account-menu .qa-account-logout .bi { color: #c93e55; }
+body.qa-workspace--admin .qa-account-menu .qa-account-logout:hover,
+body.qa-workspace--admin .qa-account-menu .qa-account-logout:focus-visible { color: #a72b40; background: #fff0f2; }
+@media (max-width: 575.98px) {
+  body.qa-workspace--admin .qa-workspace-topbar .nav-item.dropdown>.qa-account-toggle { gap: .25rem; padding: .2rem; }
+  body.qa-workspace--admin .qa-workspace-topbar .qa-account-menu { width: min(328px, calc(100vw - 24px)); }
+}
 @media print {
   body.qa-workspace--admin { background: #ffffff !important; background-image: none !important; }
   body.qa-workspace--admin::before, body.qa-workspace--admin::after { display: none !important; }
@@ -257,6 +297,7 @@ body.qa-workspace--admin .qa-workspace-overlay[hidden] { display: none !importan
   body.qa-workspace--admin .card { box-shadow: none !important; break-inside: avoid; }
 }
 </style>
+<link rel="stylesheet" href="${ctx}/assets/css/role-shell.css">
 
                             <title>
                                 <%= pageContent.getExtractedProperties().getChild("title").getValue() %> - QAUTE
@@ -271,173 +312,156 @@ body.qa-workspace--admin .qa-workspace-overlay[hidden] { display: none !importan
                             aria-label="Đóng menu điều hướng"></button>
                         <div class="page">
 
+                            <%-- Thanh bên gồm nhận diện quản trị viên và các nhóm quản lý hệ thống. --%>
                             <aside class="qa-workspace-sidebar" id="workspace-sidebar" data-bs-theme="dark"
                                 aria-label="Điều hướng quản trị viên">
-                                <div class="container-fluid">
-                                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#qa-sidebar-menu" aria-controls="qa-sidebar-menu"
-                                        aria-expanded="false" aria-label="Mở menu">
-                                        <span class="navbar-toggler-icon"></span>
-                                    </button>
-                                    <h1 class="navbar-brand navbar-brand-autodark">
-                                        <a href="${ctx}/admin/dashboard" class="text-decoration-none">
-                                            <img src="${ctx}/assets/images/hcmute-logo.png" alt="Logo HCMUTE"
-                                                class="qa-role-logo">
-                                            <span class="qa-workspace-brand-copy">QA<span>UTE</span><small>CỔNG HỖ TRỢ
-                                                    SINH VIÊN</small></span>
-                                        </a>
-                                    </h1>
-                                    <a class="qa-workspace-user-card" href="${ctx}/admin/dashboard">
-                                        <span class="qa-workspace-avatar">
-                                            <c:out value="${workspaceInitial}" />
-                                        </span>
-                                        <span class="qa-workspace-user-copy"><strong>
-                                                <c:out value="${workspaceName}" />
-                                            </strong><small>Quản trị viên</small></span>
-                                        <i class="bi bi-shield-check" aria-hidden="true"></i>
-                                    </a>
-                                    <div class="collapse navbar-collapse" id="qa-sidebar-menu">
-                                        <ul class="navbar-nav pt-lg-3">
-                                            <li class="qa-workspace-nav-label">QUẢN TRỊ HỆ THỐNG</li>
-
-                                            <li class="nav-item">
-                                                <a class="nav-link" href="${ctx}/" aria-label="Quay về trang chủ Guest">
-                                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i
-                                                            class="bi bi-globe2"></i></span>
-                                                    <span class="nav-link-title">Trang chủ</span>
-                                                </a>
-                                            </li>
-
-                                            <li class="nav-item ${activePath == '/admin/dashboard' ? 'active' : ''}">
-                                                <a class="nav-link" href="${ctx}/admin/dashboard">
-                                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i
-                                                            class="bi bi-speedometer2"></i></span>
-                                                    <span class="nav-link-title">Tổng quan</span>
-                                                </a>
-                                            </li>
-
-                                            <li class="nav-item dropdown ${grpUsers ? 'active' : ''}">
-                                                <a class="nav-link dropdown-toggle ${grpUsers ? 'show' : ''}"
-                                                    href="#qa-nav-users" data-bs-toggle="dropdown"
-                                                    data-bs-auto-close="false" role="button"
-                                                    aria-expanded="${grpUsers}">
-                                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i
-                                                            class="bi bi-people"></i></span>
-                                                    <span class="nav-link-title">Người dùng</span>
-                                                </a>
-                                                <div class="dropdown-menu ${grpUsers ? 'show' : ''}">
-                                                    <a class="dropdown-item ${activePath == '/admin/users' ? 'active' : ''}"
-                                                        href="${ctx}/admin/users">Danh sách người dùng</a>
-                                                    <a class="dropdown-item ${activePath == '/admin/users/import' ? 'active' : ''}"
-                                                        href="${ctx}/admin/users/import">Nhập hàng loạt</a>
-                                                </div>
-                                            </li>
-
-                                            <li class="nav-item dropdown ${grpOrg ? 'active' : ''}">
-                                                <a class="nav-link dropdown-toggle ${grpOrg ? 'show' : ''}"
-                                                    href="#qa-nav-org" data-bs-toggle="dropdown"
-                                                    data-bs-auto-close="false" role="button" aria-expanded="${grpOrg}">
-                                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i
-                                                            class="bi bi-diagram-3"></i></span>
-                                                    <span class="nav-link-title">Tổ chức</span>
-                                                </a>
-                                                <div class="dropdown-menu ${grpOrg ? 'show' : ''}">
-                                                    <a class="dropdown-item ${activePath == '/admin/departments' ? 'active' : ''}"
-                                                        href="${ctx}/admin/departments">Phòng ban</a>
-                                                    <a class="dropdown-item ${activePath == '/admin/categories' ? 'active' : ''}"
-                                                        href="${ctx}/admin/categories">Chuyên mục</a>
-                                                    <a class="dropdown-item ${activePath == '/admin/managers' ? 'active' : ''}"
-                                                        href="${ctx}/admin/managers">Manager và phạm vi</a>
-                                                </div>
-                                            </li>
-
-                                            <li class="nav-item dropdown ${grpKnowledge ? 'active' : ''}">
-                                                <a class="nav-link dropdown-toggle ${grpKnowledge ? 'show' : ''}"
-                                                    href="#qa-nav-knowledge" data-bs-toggle="dropdown"
-                                                    data-bs-auto-close="false" role="button"
-                                                    aria-expanded="${grpKnowledge}">
-                                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i
-                                                            class="bi bi-journal-text"></i></span>
-                                                    <span class="nav-link-title">Tri thức</span>
-                                                </a>
-                                                <div class="dropdown-menu ${grpKnowledge ? 'show' : ''}">
-                                                    <a class="dropdown-item ${activePath == '/admin/faq' ? 'active' : ''}"
-                                                        href="${ctx}/admin/faq">Bài FAQ</a>
-                                                    <a class="dropdown-item ${activePath == '/admin/faq/tags' ? 'active' : ''}"
-                                                        href="${ctx}/admin/faq/tags">Thẻ (tag)</a>
-                                                    <a class="dropdown-item ${activePath == '/admin/faq/synonyms' ? 'active' : ''}"
-                                                        href="${ctx}/admin/faq/synonyms">Từ đồng nghĩa</a>
-                                                </div>
-                                            </li>
-
-                                            <li class="nav-item ${activePath == '/admin/tickets' ? 'active' : ''}">
-                                                <a class="nav-link" href="${ctx}/admin/tickets">
-                                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i
-                                                            class="bi bi-ticket-detailed"></i></span>
-                                                    <span class="nav-link-title">Yêu cầu tư vấn</span>
-                                                </a>
-                                            </li>
-
-                                            <li class="nav-item dropdown ${grpPolicy ? 'active' : ''}">
-                                                <a class="nav-link dropdown-toggle ${grpPolicy ? 'show' : ''}"
-                                                    href="#qa-nav-policy" data-bs-toggle="dropdown"
-                                                    data-bs-auto-close="false" role="button"
-                                                    aria-expanded="${grpPolicy}">
-                                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i
-                                                            class="bi bi-sliders"></i></span>
-                                                    <span class="nav-link-title">Chính sách</span>
-                                                </a>
-                                                <div class="dropdown-menu ${grpPolicy ? 'show' : ''}">
-                                                    <a class="dropdown-item ${activePath == '/admin/sla' ? 'active' : ''}"
-                                                        href="${ctx}/admin/sla">SLA và giờ làm việc</a>
-                                                    <a class="dropdown-item ${activePath == '/admin/settings' ? 'active' : ''}"
-                                                        href="${ctx}/admin/settings">Cấu hình hệ thống</a>
-                                                </div>
-                                            </li>
-
-                                            <li
-                                                class="nav-item ${activePath == '/admin/announcements' ? 'active' : ''}">
-                                                <a class="nav-link" href="${ctx}/admin/announcements">
-                                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i
-                                                            class="bi bi-megaphone"></i></span>
-                                                    <span class="nav-link-title">Thông báo chính thức</span>
-                                                </a>
-                                            </li>
-
-                                            <li class="nav-item dropdown ${grpMonitor ? 'active' : ''}">
-                                                <a class="nav-link dropdown-toggle ${grpMonitor ? 'show' : ''}"
-                                                    href="#qa-nav-monitor" data-bs-toggle="dropdown"
-                                                    data-bs-auto-close="false" role="button"
-                                                    aria-expanded="${grpMonitor}">
-                                                    <span class="nav-link-icon d-md-none d-lg-inline-block"><i
-                                                            class="bi bi-shield-check"></i></span>
-                                                    <span class="nav-link-title">Giám sát</span>
-                                                </a>
-                                                <div class="dropdown-menu ${grpMonitor ? 'show' : ''}">
-                                                    <a class="dropdown-item ${activePath == '/admin/audit-logs' ? 'active' : ''}"
-                                                        href="${ctx}/admin/audit-logs">Nhật ký hệ thống</a>
-                                                    <a class="dropdown-item ${activePath == '/admin/reports' ? 'active' : ''}"
-                                                        href="${ctx}/admin/reports">Báo cáo</a>
-                                                    <a class="dropdown-item ${activePath == '/admin/health' ? 'active' : ''}"
-                                                        href="${ctx}/admin/health">Sức khỏe hệ thống</a>
-                                                </div>
-                                            </li>
-
-                                        </ul>
+                                <a href="${ctx}/admin/dashboard" class="stu-brand">
+                                    <img src="${ctx}/assets/images/hcmute-logo.png" alt="Logo HCMUTE" class="stu-brand-logo">
+                                    <div class="stu-brand-text">
+                                        <div class="t1">QAUTE</div>
+                                        <div class="t2">CỔNG HỖ TRỢ SINH VIÊN</div>
                                     </div>
-                                    <div class="qa-workspace-sidebar-footer"><span
-                                            class="qa-workspace-role-dot"></span>Không gian quản trị<a
-                                            href="${ctx}/guide" aria-label="Hướng dẫn sử dụng"><i
-                                                class="bi bi-question-circle"></i></a></div>
+                                </a>
+
+                                <a href="${ctx}/admin/dashboard" class="stu-user-card">
+                                    <c:choose>
+                                        <c:when test="${not empty workspaceAvatarUrl}">
+                                            <img class="stu-user-avatar" src="<c:out value='${workspaceAvatarUrl}'/>" alt="Ảnh đại diện" style="object-fit:cover"/>
+                                        </c:when>
+                                        <c:otherwise><div class="stu-user-avatar"><c:out value="${workspaceInitial}"/></div></c:otherwise>
+                                    </c:choose>
+                                    <div class="overflow-hidden">
+                                        <div class="stu-user-name text-truncate"><c:out value="${workspaceName}"/></div>
+                                        <div class="stu-user-role">Quản trị viên</div>
+                                    </div>
+                                </a>
+
+                                <%-- Các nhóm menu đồng nhất với sinh viên, giữ nguyên toàn bộ lối vào hiện có. --%>
+                                <div class="stu-nav-label">Tổng quan</div>
+                                <ul class="stu-nav">
+                                    <li class="${activePath == '/admin/dashboard' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/dashboard">
+                                            <i class="bi bi-house-door-fill"></i>
+                                            <span>Bảng điều khiển</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="${ctx}/" aria-label="Quay về trang chủ Guest">
+                                            <i class="bi bi-globe2"></i>
+                                            <span>Trang chủ</span>
+                                        </a>
+                                    </li>
+                                    <li class="${activePath == '/admin/notifications' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/notifications">
+                                            <i class="bi bi-bell-fill"></i>
+                                            <span>Thông báo</span>
+                                            <span class="nav-badge qa-sidebar-notification-badge d-none"
+                                                data-sidebar-notification-badge>0</span>
+                                        </a>
+                                    </li>
+                                </ul>
+
+                                <div class="stu-nav-label">Yêu cầu & Hỗ trợ</div>
+                                <ul class="stu-nav">
+                                    <li class="${activePath == '/admin/tickets' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/tickets"><i class="bi bi-inbox-fill"></i><span>Yêu cầu tư vấn</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/chat-history' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/chat-history"><i class="bi bi-clock-history"></i><span>Lịch sử tư vấn trực tuyến</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/appointments' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/appointments"><i class="bi bi-calendar-check"></i><span>Lịch hẹn</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/audit-logs' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/audit-logs"><i class="bi bi-journal-text"></i><span>Nhật ký hệ thống</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/reports' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/reports"><i class="bi bi-bar-chart-line"></i><span>Báo cáo</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/health' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/health"><i class="bi bi-heart-pulse"></i><span>Sức khỏe hệ thống</span></a>
+                                    </li>
+                                </ul>
+
+                                <div class="stu-nav-label">Quản trị hệ thống</div>
+                                <ul class="stu-nav">
+                                    <li class="${activePath == '/admin/users' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/users"><i class="bi bi-people"></i><span>Danh sách người dùng</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/users/import' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/users/import"><i class="bi bi-person-plus"></i><span>Nhập hàng loạt</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/departments' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/departments"><i class="bi bi-building"></i><span>Phòng ban</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/categories' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/categories"><i class="bi bi-diagram-3"></i><span>Chuyên mục</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/managers' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/managers"><i class="bi bi-person-gear"></i><span>Manager và phạm vi</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/sla' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/sla"><i class="bi bi-clock-history"></i><span>SLA và giờ làm việc</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/settings' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/settings"><i class="bi bi-sliders"></i><span>Cấu hình hệ thống</span></a>
+                                    </li>
+                                </ul>
+
+                                <div class="stu-nav-label">Kiến thức</div>
+                                <ul class="stu-nav">
+                                    <li class="${activePath == '/admin/faq' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/faq"><i class="bi bi-question-circle-fill"></i><span>Quản lý FAQ</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/faq/tags' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/faq/tags"><i class="bi bi-tags"></i><span>Thẻ (tag)</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/faq/synonyms' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/faq/synonyms"><i class="bi bi-arrow-left-right"></i><span>Từ đồng nghĩa</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/guest-home-faq' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/guest-home-faq"><i class="bi bi-house-heart"></i><span>FAQ trang chủ</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/announcements' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/announcements">
+                                            <i class="bi bi-megaphone"></i>
+                                            <span>Thông báo chính thức</span>
+                                        </a>
+                                    </li>
+                                </ul>
+
+                                <div class="stu-nav-label">Tài khoản</div>
+                                <ul class="stu-nav">
+                                    <li class="${activePath == '/admin/profile' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/profile"><i class="bi bi-person-fill"></i><span>Hồ sơ cá nhân</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/profile/security' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/profile/security"><i class="bi bi-shield-lock-fill"></i><span>Bảo mật</span></a>
+                                    </li>
+                                    <li class="${activePath == '/admin/notifications/preferences' ? 'active' : ''}">
+                                        <a href="${ctx}/admin/notifications/preferences"><i class="bi bi-gear-fill"></i><span>Cài đặt thông báo</span></a>
+                                    </li>
+                                </ul>
+
+                                <div class="stu-sidebar-footer">
+                                    <div class="qa-sidebar-workspace-status"><span class="qa-workspace-role-dot"></span><span class="qa-sidebar-workspace-copy">Không gian quản trị</span></div>
+                                    <form method="post" action="${ctx}/auth/logout">
+                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                                        <button type="submit">
+                                            <i class="bi bi-box-arrow-left"></i>
+                                            <span>Đăng xuất</span>
+                                        </button>
+                                    </form>
                                 </div>
                             </aside>
 
+                            <%-- Thanh trên cung cấp nút thu gọn menu và menu tài khoản quản trị. --%>
                             <header class="navbar navbar-expand-md d-print-none qa-workspace-topbar">
                                 <div class="container-xl">
                                     <button class="btn qa-sidebar-toggle" type="button" data-workspace-toggle
                                         aria-controls="workspace-sidebar" aria-expanded="true"
                                         aria-label="Thu gọn hoặc mở menu">
-                                        <i class="bi bi-list"></i>
+                                        <i class="bi bi-layout-sidebar"></i>
                                     </button>
                                     <a href="${ctx}/admin/dashboard" class="qa-topbar-brand d-lg-none">
                                         <img src="${ctx}/assets/images/hcmute-logo.png" alt="Logo HCMUTE">
@@ -448,32 +472,56 @@ body.qa-workspace--admin .qa-workspace-overlay[hidden] { display: none !importan
                                         </strong></div>
                                     <div class="navbar-nav flex-row ms-auto align-items-center gap-3">
 
-                                        <div class="nav-item dropdown">
-                                            <a href="#" class="nav-link d-flex lh-1 text-reset p-0"
-                                                data-bs-toggle="dropdown" aria-label="Mở menu người dùng">
-                                                <span class="qa-workspace-avatar qa-workspace-avatar--small">
-                                                    <c:out value="${workspaceInitial}" />
-                                                </span>
-                                                <div class="d-none d-xl-block ps-2">
-                                                    <div>
-                                                        <c:out value="${workspaceName}" />
+                                            <%@ include file="/WEB-INF/views/common/notification-bell.jspf" %>
+
+                                            <%-- Menu tài khoản quản trị. --%>
+                                            <div class="nav-item dropdown qa-account-dropdown">
+                                                <a href="#" class="nav-link qa-account-toggle"
+                                                    data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"
+                                                    aria-label="Mở menu người dùng">
+                                                    <span class="qa-workspace-avatar qa-workspace-avatar--small">
+                                                        <c:choose>
+                                                            <c:when test="${not empty workspaceAvatarUrl}">
+                                                                <img src="<c:out value='${workspaceAvatarUrl}'/>" alt="Ảnh đại diện" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"/>
+                                                            </c:when>
+                                                            <c:otherwise><c:out value="${workspaceInitial}" /></c:otherwise>
+                                                        </c:choose>
+                                                    </span>
+                                                    <span class="d-none d-xl-block text-start">
+                                                        <span class="qa-account-name d-block"><c:out value="${workspaceName}" /></span>
+                                                        <span class="qa-account-role d-block">Quản trị viên</span>
+                                                    </span>
+                                                    <i class="bi bi-chevron-down qa-account-chevron" aria-hidden="true"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-end qa-account-menu">
+                                                    <div class="qa-account-menu-heading">
+                                                        <strong><c:out value="${workspaceName}" /></strong>
+                                                        <span><c:out value="${workspaceEmail}" /></span>
                                                     </div>
-                                                    <div class="mt-1 small text-secondary">Quản trị viên</div>
+                                                    <a href="${ctx}/admin/profile" class="dropdown-item">
+                                                        <i class="bi bi-person me-2" aria-hidden="true"></i>Hồ sơ cá nhân
+                                                    </a>
+                                                    <a href="${ctx}/admin/profile/security" class="dropdown-item">
+                                                        <i class="bi bi-shield-lock me-2" aria-hidden="true"></i>Bảo mật
+                                                    </a>
+                                                    <a href="${ctx}/admin/notifications/preferences" class="dropdown-item">
+                                                        <i class="bi bi-gear me-2" aria-hidden="true"></i>Cài đặt thông báo
+                                                    </a>
+                                                    <div class="dropdown-divider"></div>
+                                                    <form method="post" action="${ctx}/auth/logout" class="m-0">
+                                                        <input type="hidden" name="${_csrf.parameterName}"
+                                                            value="${_csrf.token}" />
+                                                        <button type="submit" class="dropdown-item qa-account-logout">
+                                                            <i class="bi bi-box-arrow-left me-2" aria-hidden="true"></i>Đăng xuất
+                                                        </button>
+                                                    </form>
                                                 </div>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                                <form method="post" action="${ctx}/auth/logout" class="m-0">
-                                                    <input type="hidden" name="${_csrf.parameterName}"
-                                                        value="${_csrf.token}" />
-                                                    <button type="submit" class="dropdown-item"><i
-                                                            class="bi bi-box-arrow-right me-2"></i>Đăng xuất</button>
-                                                </form>
                                             </div>
-                                        </div>
                                     </div>
                                 </div>
                             </header>
 
+                            <%-- Hiển thị đường dẫn trang, thông báo và nội dung do trang con cung cấp. --%>
                             <main class="page-wrapper" id="workspace-main" tabindex="-1">
 
                                 <c:if test="${not empty requestScope.pageTitle}">
@@ -490,6 +538,7 @@ body.qa-workspace--admin .qa-workspace-overlay[hidden] { display: none !importan
                                     </div>
                                 </c:if>
 
+                                <%-- Hiển thị cảnh báo và nội dung trang quản trị hiện tại. --%>
                                 <div class="page-body">
                                     <div class="container-xl qa-workspace-container">
                                         <qa:alert />
@@ -498,14 +547,20 @@ body.qa-workspace--admin .qa-workspace-overlay[hidden] { display: none !importan
                                 </div>
                                 <footer class="footer footer-transparent d-print-none">
                                     <div class="container-xl qa-workspace-footer"><span>&copy; QAUTE · Cổng hỗ trợ sinh
-                                            viên</span><a href="${ctx}/guide">Hướng dẫn sử dụng <i
-                                                class="bi bi-arrow-up-right"></i></a></div>
+                                            viên</span></div>
                                 </footer>
                             </main>
                         </div>
 
+                        <script>
+                            document.querySelectorAll("body.qa-workspace--admin .modal").forEach(function (modal) {
+                                document.body.appendChild(modal);
+                            });
+                        </script>
+
                         <%@ include file="/WEB-INF/views/common/scripts.jspf" %>
-                            <script src="${pageContext.request.contextPath}/assets/js/tv2-layout.js" defer></script>
+                        <%@ include file="/WEB-INF/views/common/ws-scripts.jspf" %>
+                            <script src="${pageContext.request.contextPath}/assets/js/workspace.js" defer></script>
                     </body>
 
                     </html>

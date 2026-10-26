@@ -17,12 +17,14 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
 import vn.edu.hcmute.qaute.service.knowledge.SearchLogService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho FaqSuggestionApi.
 @RestController
 public class FaqSuggestionApiController {
 
     private final FaqQueryService faqQueryService;
     private final SearchLogService searchLogService;
 
+    // Khởi tạo bộ điều khiển gợi ý câu hỏi thường gặp.
     public FaqSuggestionApiController(FaqQueryService faqQueryService,
                                      SearchLogService searchLogService) {
         this.faqQueryService = faqQueryService;
@@ -30,6 +32,7 @@ public class FaqSuggestionApiController {
     }
 
     @GetMapping("/api/faqs/suggestions")
+    // Lấy các gợi ý câu hỏi thường gặp phù hợp với từ khóa.
     public ApiResponse<List<FaqSuggestion>> suggestions(@RequestParam(required = false) String q,
                                                          @RequestParam(required = false) String source) {
         if (q == null || q.trim().length() < 2) {
@@ -40,6 +43,7 @@ public class FaqSuggestionApiController {
     }
 
     @PostMapping("/api/public/search-click")
+    // Ghi nhận lượt nhấp vào kết quả tìm kiếm.
     public ApiResponse<Void> recordClick(@RequestBody(required = false) SearchClickRequest request,
                                          HttpServletRequest httpRequest) {
         if (request != null) {
@@ -51,4 +55,3 @@ public class FaqSuggestionApiController {
         return ApiResponse.ok(null);
     }
 }
-

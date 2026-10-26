@@ -26,6 +26,7 @@ import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.student.StudentTicketService;
 import vn.edu.hcmute.qaute.service.ticket.command.CreateTicketCommand;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho StudentTicketCreate.
 @Controller
 public class StudentTicketCreateController {
 
@@ -33,6 +34,7 @@ public class StudentTicketCreateController {
     private final CategoryQueryService categoryQueryService;
     private final ObjectMapper objectMapper;
 
+    // Khởi tạo bộ điều khiển tạo yêu cầu cùng dịch vụ và bộ chuyển đổi JSON.
     public StudentTicketCreateController(StudentTicketService studentTicketService,
                                         CategoryQueryService categoryQueryService,
                                         ObjectMapper objectMapper) {
@@ -42,6 +44,7 @@ public class StudentTicketCreateController {
     }
 
     @GetMapping("/student/tickets/new")
+    // Hiển thị biểu mẫu tạo yêu cầu với dữ liệu danh mục ban đầu.
     public String newTicketForm(@RequestParam(required = false) Long categoryId,
                                 @RequestParam(required = false) String q,
                                 Model model) {
@@ -64,6 +67,7 @@ public class StudentTicketCreateController {
     }
 
     @PostMapping("/student/tickets")
+    // Kiểm tra biểu mẫu và tạo yêu cầu mới cho sinh viên.
     public String createTicket(@Valid @ModelAttribute("form") TicketCreateForm form,
                                BindingResult bindingResult,
                                Model model,
@@ -109,6 +113,7 @@ public class StudentTicketCreateController {
         }
     }
 
+    // Chuẩn bị lại dữ liệu trang tạo yêu cầu khi có lỗi.
     private String returnWithError(Model model, Map<String, String> errors) {
         List<DepartmentNode> tree = categoryQueryService.getActiveTree();
         model.addAttribute("errors", errors);
@@ -117,6 +122,7 @@ public class StudentTicketCreateController {
         return "student/ticket-create";
     }
 
+    // Chuyển đổi dữ liệu sang JSON hoặc trả về mảng rỗng nếu không thể chuyển đổi.
     private String toJson(Object obj) {
         try {
             return objectMapper.writeValueAsString(obj);

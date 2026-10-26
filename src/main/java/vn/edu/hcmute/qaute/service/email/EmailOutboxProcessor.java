@@ -19,6 +19,7 @@ import vn.edu.hcmute.qaute.common.job.JobExecutionTemplate;
 import vn.edu.hcmute.qaute.entity.notification.EmailOutbox;
 import vn.edu.hcmute.qaute.repository.notification.EmailOutboxRepository;
 
+// Xử lý nghiệp vụ EmailOutboxProcessor trong hệ thống.
 @Component
 public class EmailOutboxProcessor {
 
@@ -33,6 +34,7 @@ public class EmailOutboxProcessor {
     private final String mailUsername;
     private final String mailFromName;
 
+    // Khởi tạo bộ xử lý email chờ cùng kho dữ liệu và dịch vụ gửi email.
     public EmailOutboxProcessor(EmailOutboxRepository emailOutboxRepository,
                                 EmailTemplateRenderer templateRenderer,
                                 JavaMailSender mailSender,
@@ -49,12 +51,14 @@ public class EmailOutboxProcessor {
         this.mailFromName = mailFromName;
     }
 
+    // Chạy định kỳ việc xử lý email đang chờ.
     @Scheduled(fixedDelay = 5000)
     @Transactional
     public void processScheduled() {
         jobExecutionTemplate.run("email-outbox", this::processPending);
     }
 
+    // Lấy và xử lý các email đang đến hạn gửi.
     protected void processPending() {
         List<EmailOutbox> messages = emailOutboxRepository
                 .findTop20ByStatusAndNextAttemptAtLessThanEqualOrderByIdAsc(
@@ -64,6 +68,7 @@ public class EmailOutboxProcessor {
         }
     }
 
+    // Gửi một email và lưu kết quả xử lý.
     private void processOne(EmailOutbox message) {
         try {
             Map<String, String> model = objectMapper.readValue(
@@ -95,6 +100,7 @@ public class EmailOutboxProcessor {
         emailOutboxRepository.save(message);
     }
 
+    // Cập nhật trạng thái và lịch thử lại khi gửi email thất bại.
     private void registerFailure(EmailOutbox message, Exception exception) {
         int attempts = message.getAttempts() + 1;
         message.setAttempts(attempts);
@@ -108,6 +114,7 @@ public class EmailOutboxProcessor {
         LOG.error("Gửi email thất bại, id={}, lần thử {}", message.getId(), attempts, exception);
     }
 
+    // Giới hạn nội dung lỗi lưu trong bản ghi email.
     private String truncateError(String message) {
         String value = message == null || message.isBlank() ? "Lỗi không xác định" : message;
         return value.length() <= 500 ? value : value.substring(0, 500);

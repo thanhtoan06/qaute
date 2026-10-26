@@ -36,6 +36,7 @@ import vn.edu.hcmute.qaute.repository.governance.SlaPolicyRepository;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
+// Xử lý nghiệp vụ AdminSla trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class AdminSlaService {
@@ -50,6 +51,7 @@ public class AdminSlaService {
     private final BusinessHourRepository hours;
     private final HolidayRepository holidays;
 
+    // Khởi tạo dịch vụ quản trị chính sách SLA.
     public AdminSlaService(SlaPolicyRepository policies, CategoryQueryService categories,
                            AuditService audit, BusinessHourRepository hours, HolidayRepository holidays) {
         this.policies = policies;
@@ -59,6 +61,7 @@ public class AdminSlaService {
         this.holidays = holidays;
     }
 
+    // Nhóm các khoảng giờ làm việc theo ngày trong tuần.
     public Map<Integer, List<BusinessHour>> businessHours() {
         Map<Integer, List<BusinessHour>> grouped = new LinkedHashMap<>();
         for (int day = 1; day <= 7; day++) {
@@ -70,6 +73,7 @@ public class AdminSlaService {
         return grouped;
     }
 
+    // Kiểm tra và lưu các khoảng giờ làm việc.
     @Transactional
     public void saveBusinessHours(BusinessHoursForm form, Long actorId) {
         if (form == null || form.getIntervals() == null) {
@@ -122,10 +126,12 @@ public class AdminSlaService {
                 before, summarizeHours(replacement));
     }
 
+    // Liệt kê ngày nghỉ theo thứ tự ngày.
     public List<Holiday> holidays() {
         return holidays.findAllByOrderByDateAsc();
     }
 
+    // Kiểm tra và thêm ngày nghỉ mới.
     @Transactional
     public void addHoliday(HolidayForm form, Long actorId) {
         if (form == null || form.getDate() == null || form.getName() == null
@@ -145,6 +151,7 @@ public class AdminSlaService {
                 holiday.getDate() + " " + holiday.getName());
     }
 
+    // Xóa ngày nghỉ theo mã.
     @Transactional
     public void deleteHoliday(Long id, Long actorId) {
         Holiday holiday = holidays.findById(id)
@@ -154,6 +161,7 @@ public class AdminSlaService {
                 holiday.getDate() + " " + holiday.getName(), null);
     }
 
+    // Phân tích giờ theo định dạng HH:mm.
     private static LocalTime parseTime(String value) {
         if (value == null || !value.matches("[0-2][0-9]:[0-5][0-9]")) return null;
         try {
@@ -164,6 +172,7 @@ public class AdminSlaService {
         }
     }
 
+    // Tạo chuỗi tóm tắt các khoảng giờ làm việc.
     private static String summarizeHours(List<BusinessHour> rows) {
         return rows.stream().sorted(Comparator.comparingInt(BusinessHour::getDayOfWeek)
                 .thenComparing(BusinessHour::getStartTime))
@@ -172,6 +181,7 @@ public class AdminSlaService {
                 .reduce((a, b) -> a + ";" + b).orElse("");
     }
 
+    // Tạo ma trận chính sách SLA theo chuyên mục.
     public SlaPolicyMatrix matrix() {
         Map<TicketPriority, SlaPolicy> defaults = new EnumMap<>(TicketPriority.class);
         Map<Long, Map<TicketPriority, SlaPolicy>> overrides = new LinkedHashMap<>();
@@ -192,6 +202,7 @@ public class AdminSlaService {
         return new SlaPolicyMatrix(toRows(defaults), List.copyOf(categoryRows));
     }
 
+    // Tạo biểu mẫu chính sách SLA cho chuyên mục.
     public SlaPolicyForm getForm(Long categoryId) {
         requireCategory(categoryId);
         SlaPolicyForm form = new SlaPolicyForm();
@@ -211,6 +222,7 @@ public class AdminSlaService {
         return form;
     }
 
+    // Kiểm tra và lưu các chính sách SLA trong biểu mẫu.
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void save(SlaPolicyForm form, Long actorId) {
         if (form == null) {
@@ -245,6 +257,7 @@ public class AdminSlaService {
         }
     }
 
+    // Xóa chính sách SLA ghi đè của chuyên mục.
     @Transactional
     public void deleteOverride(Long categoryId, Long actorId) {
         if (categoryId == null) {
@@ -261,18 +274,21 @@ public class AdminSlaService {
                 before, "override deleted");
     }
 
+    // Kiểm tra chuyên mục được chỉ định có tồn tại.
     private void requireCategory(Long categoryId) {
         if (categoryId != null && categories.findCategory(categoryId).isEmpty()) {
             throw new BadRequestException("Chuyên mục không tồn tại");
         }
     }
 
+    // Tìm chính sách theo chuyên mục và mức ưu tiên.
     private SlaPolicy findPolicy(Long categoryId, TicketPriority priority) {
         return categoryId == null
                 ? policies.findFirstByCategoryIdIsNullAndPriorityOrderByIdAsc(priority).orElse(null)
                 : policies.findByCategoryIdAndPriority(categoryId, priority).orElse(null);
     }
 
+    // Lấy nội dung tóm tắt chính sách của chuyên mục.
     private String summary(Long categoryId) {
         List<SlaPolicy> rows = categoryId == null
                 ? policies.findAllByOrderByCategoryIdAscPriorityAsc().stream()
@@ -281,6 +297,7 @@ public class AdminSlaService {
         return summarize(rows);
     }
 
+    // Tạo chuỗi tóm tắt danh sách chính sách SLA.
     private static String summarize(List<SlaPolicy> rows) {
         StringBuilder result = new StringBuilder();
         for (SlaPolicy policy : rows) {
@@ -295,6 +312,7 @@ public class AdminSlaService {
         return result.toString();
     }
 
+    // Chuyển các chính sách thành hàng biểu mẫu.
     private static List<PolicyRow> toRows(Map<TicketPriority, SlaPolicy> policies) {
         List<PolicyRow> rows = new ArrayList<>();
         for (TicketPriority priority : TicketPriority.values()) {
@@ -307,14 +325,17 @@ public class AdminSlaService {
         return List.copyOf(rows);
     }
 
+    // Đổi số phút thành số giờ.
     private static BigDecimal toHours(int minutes) {
         return BigDecimal.valueOf(minutes).divide(SIXTY, 2, RoundingMode.HALF_UP);
     }
 
+    // Đổi số giờ thành số phút.
     private static int toMinutes(BigDecimal hours) {
         return hours.multiply(SIXTY).setScale(0, RoundingMode.HALF_UP).intValueExact();
     }
 
+    // Kiểm tra tính đầy đủ và giới hạn của biểu mẫu SLA.
     private static void validate(SlaPolicyForm form) {
         Map<String, String> errors = new LinkedHashMap<>();
         List<SlaPolicyForm.Row> rows = form.getRows();
@@ -343,6 +364,7 @@ public class AdminSlaService {
         }
     }
 
+    // Kiểm tra giá trị có nằm trong khoảng cho phép.
     private static boolean inRange(BigDecimal value, BigDecimal min, BigDecimal max) {
         return value != null && value.compareTo(min) >= 0 && value.compareTo(max) <= 0;
     }

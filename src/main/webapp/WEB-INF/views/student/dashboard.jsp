@@ -1,46 +1,1107 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <title>Tổng quan sinh viên</title>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<div class="qa-page-student-dashboard" data-qa-view="student-dashboard">
+<style>
+/* ==========================================================================
+   STUDENT DASHBOARD - MODERN DESIGN SYSTEM 2026
+   ========================================================================== */
+.qa-page-student-dashboard {
+  --stu-primary: #1d72f2;
+  --stu-primary-rgb: 29, 114, 242;
+  --stu-primary-dark: #0f4699;
+  --stu-accent-cyan: #06b6d4;
+  --stu-accent-teal: #0d9488;
+  --stu-accent-amber: #f59e0b;
+  --stu-accent-rose: #f43f5e;
+  --stu-accent-emerald: #10b981;
+  --stu-accent-indigo: #6366f1;
+  --stu-bg-surface: #ffffff;
+  --stu-card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 251, 255, 0.95) 100%);
+  --stu-border-soft: rgba(186, 210, 240, 0.45);
+  --stu-border-hover: rgba(29, 114, 242, 0.35);
+  --stu-shadow-subtle: 0 10px 30px rgba(15, 45, 84, 0.05);
+  --stu-shadow-card: 0 18px 40px rgba(15, 45, 84, 0.08);
+  --stu-shadow-hover: 0 26px 54px rgba(15, 45, 84, 0.14);
+  --stu-text-main: #1e3a5f;
+  --stu-text-muted: #5e7696;
+  min-width: 0;
+  color: var(--stu-text-main);
+}
 
-<div class="page-header d-print-none">
-    <div class="container-xl">
-        <div class="row g-2 align-items-center">
-            <div class="col">
-                <div class="page-pretitle">Bảng điều khiển</div>
-                <h2 class="page-title">
-                    Xin chào, <c:out value="${me.fullName}"/>
-                </h2>
-            </div>
-            <%-- 3 Nút thao tác nhanh --%>
-            <div class="col-auto ms-auto d-flex flex-wrap gap-2">
-                <a href="${ctx}/student/tickets/new" class="btn btn-primary shadow-sm">
-                    <i class="bi bi-pencil-square me-1"></i>Tạo yêu cầu
-                </a>
-                <a href="${ctx}/student/chat" class="btn btn-teal shadow-sm">
-                    <i class="bi bi-chat-dots me-1"></i>Chat trực tuyến
-                </a>
-                <a href="${ctx}/student/appointments/book" class="btn btn-outline-primary shadow-sm">
-                    <i class="bi bi-calendar-plus me-1"></i>Đặt lịch hẹn
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+.qa-page-student-dashboard .page-body {
+  min-height: 100vh;
+  padding: clamp(1.25rem, 2.8vw, 2.5rem) 0 4.5rem;
+  background:
+    radial-gradient(ellipse 60% 40% at 5% 0%, rgba(29, 114, 242, 0.14), transparent 45%),
+    radial-gradient(ellipse 50% 35% at 95% 15%, rgba(6, 182, 212, 0.13), transparent 40%),
+    radial-gradient(ellipse 40% 30% at 50% 85%, rgba(99, 102, 241, 0.08), transparent 50%),
+    linear-gradient(180deg, #f4f8fe 0%, #eef4fc 40%, #f7fbff 100%);
+}
+
+.qa-page-student-dashboard .container-xl {
+  max-width: 1560px;
+  padding-right: clamp(1rem, 2.5vw, 2.25rem);
+  padding-left: clamp(1rem, 2.5vw, 2.25rem);
+}
+
+/* ---------- Typography & Utility Enhancements ---------- */
+.qa-page-student-dashboard .fw-800 { font-weight: 800; }
+.qa-page-student-dashboard .fw-850 { font-weight: 850; }
+
+/* ---------- Unified Hero Banner ---------- */
+.qa-page-student-dashboard .qa-dashboard-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(290px, 0.85fr);
+  gap: 1.75rem;
+  margin-bottom: 1.6rem;
+  padding: clamp(1.8rem, 3.2vw, 2.75rem);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 32px;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 92% 10%, rgba(56, 189, 248, 0.32), transparent 30%),
+    radial-gradient(circle at 5% 95%, rgba(129, 140, 248, 0.28), transparent 36%),
+    linear-gradient(135deg, #091e3e 0%, #124991 48%, #087d92 100%);
+  box-shadow: 0 28px 65px rgba(12, 43, 85, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: qaStuRise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.qa-page-student-dashboard .qa-dashboard-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -140px;
+  right: -50px;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 28px rgba(255, 255, 255, 0.03), 0 0 0 72px rgba(255, 255, 255, 0.015);
+  pointer-events: none;
+}
+
+.qa-page-student-dashboard .qa-dashboard-hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 48%;
+  bottom: -160px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 68%);
+  pointer-events: none;
+}
+
+.qa-page-student-dashboard .qa-dashboard-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+}
+
+.qa-page-student-dashboard .qa-dashboard-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1.1rem;
+  padding: 0.45rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #d8eeff;
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.qa-page-student-dashboard .qa-dashboard-eyebrow .qa-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #38bdf8;
+  box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+  animation: qaStuPulse 2s infinite;
+}
+
+.qa-page-student-dashboard .qa-view-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.95rem;
+  margin: 0 0 0.85rem;
+  color: #ffffff;
+  font-size: clamp(1.85rem, 3.2vw, 3rem);
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+
+.qa-page-student-dashboard .qa-view-title-icon {
+  display: inline-grid;
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 18px;
+  color: #0d4b8f;
+  background: linear-gradient(145deg, #ffffff, #e0f2fe);
+  box-shadow: 0 12px 24px rgba(3, 20, 48, 0.28);
+  font-size: 1.55rem;
+}
+
+.qa-page-student-dashboard .qa-dashboard-hero p {
+  max-width: 660px;
+  margin: 0 0 1.35rem;
+  color: #d7eaff;
+  font-size: 1.02rem;
+  line-height: 1.75;
+}
+
+.qa-page-student-dashboard .qa-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0 0 1.6rem;
+}
+
+.qa-page-student-dashboard .qa-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.68rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f8ff;
+  font-size: 0.85rem;
+  font-weight: 650;
+  backdrop-filter: blur(14px);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.qa-page-student-dashboard .qa-hero-badge:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.qa-page-student-dashboard .qa-hero-badge .bi {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 0.98rem;
+  color: #67e8f9;
+}
+
+.qa-page-student-dashboard .qa-dashboard-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+/* ---------- Button Enhancements ---------- */
+.qa-page-student-dashboard .btn {
+  border-radius: 16px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  padding: 0.75rem 1.35rem;
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.qa-page-student-dashboard .btn-sm {
+  padding: 0.45rem 0.95rem;
+  border-radius: 12px;
+  font-size: 0.82rem;
+}
+
+.qa-page-student-dashboard .btn:not(:disabled):not(.btn-close):hover {
+  transform: translateY(-2px);
+}
+
+.qa-page-student-dashboard .btn-white {
+  color: #0b3874;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, #ffffff 0%, #eaf3fe 100%);
+  box-shadow: 0 10px 24px rgba(4, 21, 48, 0.22);
+}
+
+.qa-page-student-dashboard .btn-white:hover {
+  color: #082d5e;
+  background: #ffffff;
+  box-shadow: 0 14px 28px rgba(4, 21, 48, 0.28);
+}
+
+.qa-page-student-dashboard .btn-outline-light {
+  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  backdrop-filter: blur(12px);
+}
+
+.qa-page-student-dashboard .btn-outline-light:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.qa-page-student-dashboard .btn-primary {
+  border-color: #1d72f2;
+  background: linear-gradient(135deg, #1d72f2 0%, #0d54b8 100%);
+  box-shadow: 0 10px 22px rgba(29, 114, 242, 0.28);
+  color: #ffffff;
+}
+
+.qa-page-student-dashboard .btn-primary:hover {
+  background: linear-gradient(135deg, #257dfd 0%, #0e5dc9 100%);
+  box-shadow: 0 14px 28px rgba(29, 114, 242, 0.38);
+  color: #ffffff;
+}
+
+.qa-page-student-dashboard .btn-ghost-secondary,
+.qa-page-student-dashboard .btn-ghost-primary {
+  border: 1px solid rgba(162, 191, 230, 0.38);
+  background: rgba(243, 248, 255, 0.85);
+  color: #2e517a;
+}
+
+.qa-page-student-dashboard .btn-ghost-primary:hover,
+.qa-page-student-dashboard .btn-ghost-secondary:hover {
+  color: #0e488d;
+  border-color: rgba(29, 114, 242, 0.35);
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(20, 60, 110, 0.08);
+}
+
+/* ---------- Hero Aside & Visual ---------- */
+.qa-page-student-dashboard .qa-dashboard-hero-aside {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: space-between;
+  gap: 1.1rem;
+}
+
+.qa-page-student-dashboard .qa-dashboard-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  margin-left: 0;
+  padding: 0.6rem 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #eaf4ff;
+  font-size: 0.82rem;
+  font-weight: 750;
+  backdrop-filter: blur(14px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.qa-page-student-dashboard .qa-dashboard-hero-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.qa-page-student-dashboard .qa-dashboard-hero-mark {
+  display: grid;
+  flex: 0 0 50px;
+  width: 50px;
+  height: 50px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(224, 247, 255, 0.92);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 10px 24px rgba(3, 16, 38, 0.16);
+  backdrop-filter: blur(14px);
+  font-size: 1.55rem;
+  animation: qaStuFloat 4.6s ease-in-out infinite;
+}
+
+.qa-page-student-dashboard .qa-dashboard-hero-visual {
+  position: relative;
+  min-height: 270px;
+  padding: 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 20px 40px rgba(4, 18, 42, 0.2);
+  backdrop-filter: blur(18px);
+}
+
+.qa-page-student-dashboard .qa-hero-note {
+  position: absolute;
+  left: 1.25rem;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.qa-page-student-dashboard .qa-hero-note-card {
+  padding: 0.95rem 1.05rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #f0f7ff;
+  backdrop-filter: blur(12px);
+}
+
+.qa-page-student-dashboard .qa-hero-note-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.3rem;
+  font-weight: 850;
+  font-size: 0.88rem;
+  letter-spacing: -0.01em;
+}
+
+.qa-page-student-dashboard .qa-hero-note-title .bi {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 0.88rem;
+  color: #38bdf8;
+}
+
+.qa-page-student-dashboard .qa-hero-note-card p {
+  margin: 0;
+  color: #d6eaff;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+/* ---------- 3 Highlights Cards (Synchronized with Manager & Admin) ---------- */
+.qa-page-student-dashboard .qa-student-overview-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.15rem;
+  margin-bottom: 1.65rem;
+}
+
+.qa-page-student-dashboard .qa-overview-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 156px;
+  padding: 1.35rem 1.4rem;
+  border: 1px solid var(--stu-border-soft);
+  border-radius: 26px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 250, 255, 0.94) 100%);
+  box-shadow: var(--stu-shadow-subtle);
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+}
+
+.qa-page-student-dashboard .qa-overview-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--stu-border-hover);
+  box-shadow: var(--stu-shadow-card);
+}
+
+.qa-page-student-dashboard .qa-overview-card::after {
+  content: "";
+  position: absolute;
+  right: -32px;
+  bottom: -44px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 1px solid rgba(29, 114, 242, 0.08);
+  box-shadow: 0 0 0 20px rgba(29, 114, 242, 0.03);
+  pointer-events: none;
+}
+
+.qa-page-student-dashboard .qa-overview-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.55rem;
+  color: #14355c;
+  font-size: 1.05rem;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+}
+
+.qa-page-student-dashboard .qa-overview-card h3 .bi {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 15px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #1d72f2 0%, #0e4ea8 100%);
+  box-shadow: 0 10px 20px rgba(29, 114, 242, 0.25);
+  font-size: 1.15rem;
+}
+
+.qa-page-student-dashboard .qa-overview-card:nth-child(2) h3 .bi {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  box-shadow: 0 10px 20px rgba(139, 92, 246, 0.25);
+}
+
+.qa-page-student-dashboard .qa-overview-card:nth-child(3) h3 .bi {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  box-shadow: 0 10px 20px rgba(13, 148, 136, 0.25);
+}
+
+.qa-page-student-dashboard .qa-overview-card p {
+  margin: 0 0 1rem;
+  color: var(--stu-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.qa-page-student-dashboard .qa-overview-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.qa-page-student-dashboard .qa-overview-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.42rem 0.82rem;
+  border-radius: 999px;
+  background: #edf5ff;
+  color: #275283;
+  font-size: 0.77rem;
+  font-weight: 750;
+  border: 1px solid rgba(190, 215, 245, 0.6);
+}
+
+/* ---------- Announcements Area ---------- */
+.qa-page-student-dashboard #system-announcement-area {
+  margin-bottom: 1.6rem !important;
+}
+
+.qa-page-student-dashboard .qa-student-announcement {
+  position: relative;
+  margin-bottom: 0.95rem !important;
+  padding: 1.15rem 1.35rem;
+  border: 1px solid rgba(142, 194, 255, 0.45);
+  border-left: 5px solid #1d72f2;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 247, 255, 0.96) 100%);
+  box-shadow: 0 14px 30px rgba(20, 60, 110, 0.07);
+}
+
+.qa-page-student-dashboard .qa-student-announcement .bi-megaphone-fill {
+  display: inline-grid;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 16px;
+  color: #1d72f2 !important;
+  background: linear-gradient(135deg, #e0efff, #f3f8ff);
+  box-shadow: 0 8px 18px rgba(29, 114, 242, 0.15);
+  font-size: 1.35rem;
+}
+
+.qa-page-student-dashboard .qa-student-announcement .alert-title {
+  color: #133966;
+  font-size: 1.02rem;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Section Header Labels ---------- */
+.qa-page-student-dashboard .qa-dashboard-section-label {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1.15rem;
+  padding: 0 0.25rem;
+}
+
+.qa-page-student-dashboard .qa-dashboard-section-label h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin: 0;
+  color: #12345e;
+  font-size: 1.25rem;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+
+.qa-page-student-dashboard .qa-dashboard-section-label h2 .bi {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 14px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #1d72f2 0%, #0d4a96 100%);
+  box-shadow: 0 12px 24px rgba(29, 114, 242, 0.25);
+  font-size: 1.15rem;
+}
+
+.qa-page-student-dashboard .qa-dashboard-section-label > span {
+  color: var(--stu-text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ---------- KPI Grid (Synchronized Metric Cards) ---------- */
+.qa-page-student-dashboard .qa-student-kpi-grid {
+  --tblr-gutter-x: 1.25rem;
+  row-gap: 1.25rem;
+  margin: 0 0 2.2rem;
+}
+
+.qa-page-student-dashboard .qa-student-kpi {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 205px;
+  border: 1px solid var(--stu-border-soft) !important;
+  border-radius: 28px !important;
+  background:
+    radial-gradient(circle at 100% 0%, var(--stu-kpi-tint) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(247, 251, 255, 0.96) 100%) !important;
+  box-shadow: var(--stu-shadow-subtle);
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.26s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.26s ease;
+  text-decoration: none;
+}
+
+.qa-page-student-dashboard .qa-student-kpi::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--stu-kpi-accent), color-mix(in srgb, var(--stu-kpi-accent) 40%, transparent));
+}
+
+.qa-page-student-dashboard .qa-student-kpi::after {
+  content: "";
+  position: absolute;
+  right: -24px;
+  bottom: -32px;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--stu-kpi-accent) 15%, transparent);
+  box-shadow: 0 0 0 20px color-mix(in srgb, var(--stu-kpi-accent) 4%, transparent);
+  pointer-events: none;
+  transition: transform 0.3s ease;
+}
+
+.qa-page-student-dashboard .qa-student-kpi:hover {
+  transform: translateY(-5px);
+  border-color: color-mix(in srgb, var(--stu-kpi-accent) 35%, var(--stu-border-soft)) !important;
+  box-shadow: 0 24px 50px rgba(15, 45, 84, 0.13);
+}
+
+.qa-page-student-dashboard .qa-student-kpi:hover::after {
+  transform: scale(1.1);
+}
+
+.qa-page-student-dashboard .qa-student-kpi--new {
+  --stu-kpi-accent: #0284c7;
+  --stu-kpi-tint: rgba(2, 132, 199, 0.12);
+}
+
+.qa-page-student-dashboard .qa-student-kpi--progress {
+  --stu-kpi-accent: #ea580c;
+  --stu-kpi-tint: rgba(234, 88, 12, 0.12);
+}
+
+.qa-page-student-dashboard .qa-student-kpi--waiting {
+  --stu-kpi-accent: #d97706;
+  --stu-kpi-tint: rgba(217, 119, 6, 0.12);
+}
+
+.qa-page-student-dashboard .qa-student-kpi--resolved {
+  --stu-kpi-accent: #059669;
+  --stu-kpi-tint: rgba(5, 150, 105, 0.12);
+}
+
+.qa-page-student-dashboard .qa-student-kpi .card-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 205px;
+  flex-direction: column;
+  padding: 1.45rem 1.4rem;
+}
+
+.qa-page-student-dashboard .qa-student-kpi-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.qa-page-student-dashboard .qa-student-kpi-icon {
+  display: inline-grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--stu-kpi-accent) 22%, transparent);
+  border-radius: 17px;
+  color: var(--stu-kpi-accent);
+  background: color-mix(in srgb, var(--stu-kpi-accent) 10%, #ffffff);
+  font-size: 1.45rem;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--stu-kpi-accent) 12%, transparent);
+}
+
+.qa-page-student-dashboard .qa-student-kpi .subheader {
+  margin-bottom: 0.25rem;
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.qa-page-student-dashboard .qa-student-kpi .badge {
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.qa-page-student-dashboard .qa-student-kpi .h1 {
+  margin: 0.85rem 0 0.35rem !important;
+  font-size: clamp(2.3rem, 3.2vw, 3rem);
+  font-weight: 850;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+.qa-page-student-dashboard .qa-student-kpi .small {
+  color: var(--stu-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.qa-page-student-dashboard .qa-student-kpi-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.85rem;
+  color: #647b99;
+  font-size: 0.76rem;
+  font-weight: 750;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.qa-page-student-dashboard .qa-student-kpi:hover .qa-student-kpi-foot {
+  color: var(--stu-kpi-accent);
+  transform: translateX(3px);
+}
+
+.qa-page-student-dashboard .qa-student-kpi-foot .bi {
+  color: var(--stu-kpi-accent);
+  font-size: 0.95rem;
+}
+
+/* ---------- Main Dashboard Grid Layout ---------- */
+.qa-page-student-dashboard .qa-student-dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(330px, 0.88fr);
+  gap: 1.45rem;
+  align-items: start;
+  margin: 0;
+}
+
+.qa-page-student-dashboard .qa-student-dashboard-grid > [class*="col-"] {
+  display: contents;
+}
+
+.qa-page-student-dashboard .qa-student-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--stu-border-soft);
+  border-radius: 28px;
+  background: var(--stu-card-bg);
+  box-shadow: var(--stu-shadow-subtle);
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+}
+
+.qa-page-student-dashboard .qa-student-panel:hover {
+  border-color: var(--stu-border-hover);
+  box-shadow: var(--stu-shadow-card);
+}
+
+.qa-page-student-dashboard .qa-student-panel--actions {
+  grid-column: 1 / -1;
+  margin-bottom: 0.5rem;
+}
+
+.qa-page-student-dashboard .qa-student-panel--faq {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.qa-page-student-dashboard .qa-student-dashboard-side {
+  display: grid;
+  grid-column: 2;
+  grid-row: 2;
+  align-content: start;
+  gap: 1.45rem;
+  min-width: 0;
+}
+
+.qa-page-student-dashboard .qa-student-panel .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 84px;
+  padding: 1.25rem 1.45rem;
+  border-bottom: 1px solid rgba(215, 230, 248, 0.7);
+  border-radius: 28px 28px 0 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 246, 255, 0.9) 100%);
+}
+
+.qa-page-student-dashboard .qa-student-panel-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.qa-page-student-dashboard .qa-student-panel-heading-icon {
+  display: inline-grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 16px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #1d72f2 0%, #0d4a96 100%);
+  box-shadow: 0 10px 20px rgba(29, 114, 242, 0.24);
+  font-size: 1.15rem;
+}
+
+.qa-page-student-dashboard .qa-student-panel-heading-icon--warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 10px 20px rgba(245, 158, 11, 0.24);
+}
+
+.qa-page-student-dashboard .qa-student-panel-heading-icon--teal {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  box-shadow: 0 10px 20px rgba(13, 148, 136, 0.24);
+}
+
+.qa-page-student-dashboard .qa-student-panel-heading-icon--yellow {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+  box-shadow: 0 10px 20px rgba(234, 179, 8, 0.24);
+}
+
+.qa-page-student-dashboard .qa-student-panel-heading-icon--violet {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  box-shadow: 0 10px 20px rgba(139, 92, 246, 0.24);
+}
+
+.qa-page-student-dashboard .qa-student-panel .card-title {
+  margin: 0;
+  color: #12345e;
+  font-size: 1.06rem;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+}
+
+.qa-page-student-dashboard .qa-student-panel .card-subtitle {
+  color: var(--stu-text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* ---------- Table Styling ---------- */
+.qa-page-student-dashboard .qa-student-panel .table-responsive {
+  margin: 0 1.15rem 1.15rem;
+  width: calc(100% - 2.3rem);
+  border: 1px solid rgba(212, 226, 244, 0.8);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(15, 45, 84, 0.03);
+}
+
+.qa-page-student-dashboard .qa-student-panel .table {
+  margin-bottom: 0;
+  color: #2b4566;
+}
+
+.qa-page-student-dashboard .qa-student-panel .table thead th {
+  padding: 1rem 1.25rem;
+  border-bottom-color: rgba(215, 230, 248, 0.9);
+  color: #647b99;
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #f0f6ff 0%, #f9fcff 100%);
+}
+
+.qa-page-student-dashboard .qa-student-panel .table tbody tr {
+  border-bottom: 1px solid rgba(234, 242, 252, 0.95);
+  transition: background 0.18s ease;
+}
+
+.qa-page-student-dashboard .qa-student-panel .table tbody td {
+  padding: 1.2rem 1.25rem;
+  vertical-align: middle;
+}
+
+.qa-page-student-dashboard .qa-student-panel .table tbody tr:hover {
+  background: linear-gradient(90deg, rgba(240, 247, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+}
+
+.qa-page-student-dashboard .qa-student-panel--actions .table tbody td:nth-child(2) .fw-semibold {
+  font-size: 0.98rem;
+  font-weight: 750;
+  line-height: 1.55;
+  color: #12345e;
+}
+
+/* ---------- FAQ & Support Lists ---------- */
+.qa-page-student-dashboard .qa-student-panel--faq .list-group,
+.qa-page-student-dashboard .qa-student-panel--support .list-group {
+  padding: 0.4rem 0.85rem 0.95rem;
+}
+
+.qa-page-student-dashboard .qa-student-panel .list-group-item {
+  margin: 0.55rem 0;
+  border: 1px solid rgba(224, 235, 248, 0.95);
+  border-radius: 20px !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 252, 255, 0.96) 100%);
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.qa-page-student-dashboard .qa-student-panel .list-group-item:hover {
+  transform: translateY(-3px);
+  border-color: rgba(29, 114, 242, 0.28);
+  box-shadow: 0 16px 30px rgba(15, 45, 84, 0.08);
+}
+
+.qa-page-student-dashboard .qa-student-panel--faq .list-group-item {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center !important;
+  padding: 1.2rem 1.35rem !important;
+}
+
+.qa-page-student-dashboard .qa-student-panel--faq .fw-semibold {
+  color: #12345e;
+  font-size: 0.98rem;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.qa-page-student-dashboard .qa-student-panel--appointment .card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.45rem;
+}
+
+.qa-page-student-dashboard .qa-student-panel--appointment .card-body > .card.bg-primary-lt {
+  border: 1px solid rgba(29, 114, 242, 0.2) !important;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(235, 244, 255, 0.95) 0%, rgba(247, 251, 255, 0.95) 100%) !important;
+}
+
+.qa-page-student-dashboard .qa-student-panel--support .list-group-item {
+  min-height: 94px;
+  gap: 1rem;
+  padding: 1.05rem 1.15rem !important;
+}
+
+.qa-page-student-dashboard .qa-student-panel--support .avatar {
+  display: inline-grid;
+  flex: 0 0 50px;
+  width: 50px;
+  height: 50px;
+  place-items: center;
+  border-radius: 17px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04);
+}
+
+.qa-page-student-dashboard .qa-student-empty {
+  padding: 2.6rem 1.6rem !important;
+}
+
+.qa-page-student-dashboard .qa-student-empty .avatar {
+  display: inline-grid;
+  width: 66px;
+  height: 66px;
+  place-items: center;
+  border: 1px solid rgba(200, 222, 246, 0.9);
+  border-radius: 22px;
+  box-shadow: 0 8px 20px rgba(15, 45, 84, 0.06);
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes qaStuPulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(56, 189, 248, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+}
+
+@keyframes qaStuRise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes qaStuFloat {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-10px) rotate(4deg); }
+}
+
+@media (max-width: 1199.98px) {
+  .qa-page-student-dashboard .qa-dashboard-hero { grid-template-columns: minmax(0, 1fr); }
+  .qa-page-student-dashboard .qa-student-overview-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .qa-page-student-dashboard .qa-student-dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+  .qa-page-student-dashboard .qa-student-dashboard-side {
+    grid-column: 1;
+    grid-row: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .qa-page-student-dashboard .qa-student-panel--faq { grid-column: 1; grid-row: auto; }
+}
+
+@media (max-width: 767.98px) {
+  .qa-page-student-dashboard .qa-dashboard-hero { padding: 1.45rem; border-radius: 24px; }
+  .qa-page-student-dashboard .qa-view-title { font-size: clamp(1.5rem, 6.2vw, 2.2rem); }
+  .qa-page-student-dashboard .qa-view-title-icon { flex-basis: 44px; width: 44px; height: 44px; }
+  .qa-page-student-dashboard .qa-dashboard-hero-visual { min-height: 210px; }
+  .qa-page-student-dashboard .qa-student-overview-strip { grid-template-columns: minmax(0, 1fr); }
+  .qa-page-student-dashboard .qa-student-dashboard-side { grid-template-columns: minmax(0, 1fr); }
+  .qa-page-student-dashboard .qa-dashboard-section-label { flex-direction: column; align-items: flex-start; }
+  .qa-page-student-dashboard .qa-student-panel .table-responsive { margin: 0 0.75rem 0.75rem; width: calc(100% - 1.5rem); }
+  .qa-page-student-dashboard .qa-student-panel--faq .list-group-item { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qa-page-student-dashboard *,
+  .qa-page-student-dashboard *::before,
+  .qa-page-student-dashboard *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<fmt:setLocale value="vi_VN"/>
+<jsp:useBean id="studentDashboardDate" class="java.util.Date"/>
 
 <div class="page-body">
     <div class="container-xl">
         <qa:alert/>
 
-        <%-- Khu vực dành riêng cho thông báo chung / banner hệ thống (T1-62) --%>
+        <%-- ==================== HERO BANNER ==================== --%>
+        <section class="qa-dashboard-hero" aria-labelledby="student-welcome">
+            <div class="qa-dashboard-hero-content">
+                <span class="qa-dashboard-eyebrow">
+                    <span class="qa-pulse-dot" aria-hidden="true"></span>
+                    <i class="bi bi-mortarboard-fill me-1" aria-hidden="true"></i>Không gian sinh viên
+                </span>
+                <h1 id="student-welcome" class="qa-view-title" data-qa-page="student-dashboard">
+                    <span class="qa-view-title-icon" aria-hidden="true"><i class="bi bi-stars"></i></span>
+                    Xin chào, <c:out value="${me.fullName}"/>!
+                </h1>
+                <p>
+                    Trung tâm giải đáp thắc mắc và hỗ trợ học vụ một cửa của bạn. Theo dõi yêu cầu, lịch hẹn tư vấn và tra cứu thông tin nhanh chóng, chính xác.
+                </p>
+                <div class="qa-hero-badges">
+                    <span class="qa-hero-badge"><i class="bi bi-lightning-charge-fill"></i>Theo dõi tiến độ thời gian thực</span>
+                    <span class="qa-hero-badge"><i class="bi bi-shield-check"></i>Bảo mật và hỗ trợ chính thức</span>
+                    <span class="qa-hero-badge"><i class="bi bi-compass-fill"></i>Tập trung vào việc cần xử lý ngay</span>
+                </div>
+                <div class="qa-dashboard-hero-actions">
+                    <a href="${ctx}/student/tickets/new" class="btn btn-white shadow-sm">
+                        <i class="bi bi-pencil-square me-1"></i>Tạo yêu cầu
+                    </a>
+                    <a href="${ctx}/student/chat" class="btn btn-outline-light">
+                        <i class="bi bi-chat-dots-fill me-1"></i>Chat trực tuyến
+                    </a>
+                    <a href="${ctx}/student/appointments/book" class="btn btn-outline-light">
+                        <i class="bi bi-calendar-plus-fill me-1"></i>Đặt lịch hẹn
+                    </a>
+                </div>
+            </div>
+            <div class="qa-dashboard-hero-aside" aria-hidden="true">
+                <div class="qa-dashboard-hero-meta">
+                    <span class="qa-dashboard-date"><i class="bi bi-calendar3 me-1"></i><fmt:formatDate value="${studentDashboardDate}" pattern="EEEE, dd/MM/yyyy" timeZone="Asia/Ho_Chi_Minh"/></span>
+                    <span class="qa-dashboard-hero-mark"><i class="bi bi-mortarboard-fill"></i></span>
+                </div>
+                <div class="qa-dashboard-hero-visual">
+                    <div class="qa-hero-note">
+                        <div class="qa-hero-note-card">
+                            <div class="qa-hero-note-title"><i class="bi bi-clipboard-check"></i>Ưu tiên hôm nay</div>
+                            <p>Xử lý nhanh các yêu cầu đang chờ phản hồi và xem lịch hẹn sắp tới ngay bên dưới.</p>
+                        </div>
+                        <div class="qa-hero-note-card">
+                            <div class="qa-hero-note-title"><i class="bi bi-journal-richtext"></i>Kho kiến thức</div>
+                            <p>FAQ gợi ý được đặt gần vùng công việc để bạn tra cứu ngắn đường thao tác.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <%-- ==================== 3 HIGHLIGHTS CARDS ==================== --%>
+        <section class="qa-student-overview-strip" aria-label="Điểm nhấn hỗ trợ">
+            <div class="qa-overview-card">
+                <h3><i class="bi bi-send-check-fill"></i>Tạo & theo dõi yêu cầu</h3>
+                <p>Khởi tạo yêu cầu mới, theo dõi người phụ trách và phản hồi ngay khi hệ thống cần thêm thông tin.</p>
+                <div class="qa-overview-meta">
+                    <span><i class="bi bi-ticket-detailed-fill"></i>Ticket tập trung</span>
+                    <span><i class="bi bi-arrow-repeat"></i>Cập nhật liên tục</span>
+                </div>
+            </div>
+            <div class="qa-overview-card">
+                <h3><i class="bi bi-calendar2-week-fill"></i>Lịch hẹn rõ ràng</h3>
+                <p>Phiên tư vấn sắp tới, hình thức tham gia và điểm vào phòng họp được ưu tiên hiển thị nổi bật hơn.</p>
+                <div class="qa-overview-meta">
+                    <span><i class="bi bi-clock-history"></i>Nhìn nhanh thời gian</span>
+                    <span><i class="bi bi-camera-video-fill"></i>Online hoặc trực tiếp</span>
+                </div>
+            </div>
+            <div class="qa-overview-card">
+                <h3><i class="bi bi-life-preserver"></i>Trợ giúp đa kênh</h3>
+                <p>Chat trực tuyến, gửi yêu cầu, đặt lịch và tra cứu FAQ luôn sẵn sàng đồng hành cùng học tập của bạn.</p>
+                <div class="qa-overview-meta">
+                    <span><i class="bi bi-headset"></i>Chat nhanh</span>
+                    <span><i class="bi bi-search-heart-fill"></i>FAQ hữu ích</span>
+                </div>
+            </div>
+        </section>
+
+        <%-- ==================== ANNOUNCEMENTS ==================== --%>
         <div id="system-announcement-area" class="mb-3">
             <c:if test="${not empty announcements}">
                 <c:forEach var="ann" items="${announcements}">
-                    <div class="alert alert-info alert-dismissible shadow-sm mb-2" role="alert">
+                    <div class="alert alert-info alert-dismissible qa-student-announcement" role="alert">
                         <div class="d-flex align-items-start">
                             <i class="bi bi-megaphone-fill me-3 fs-3 text-info"></i>
                             <div class="flex-fill">
-                                <div class="d-flex align-items-center gap-2 mb-1">
+                                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                                     <c:if test="${ann.pinned()}">
                                         <span class="badge bg-danger-lt"><i class="bi bi-pin-angle-fill me-1"></i>Đã ghim</span>
                                     </c:if>
@@ -64,95 +1125,92 @@
             </c:if>
         </div>
 
-        <%-- Khối / badge thông báo chưa đọc --%>
-        <c:if test="${dashboard.unreadNotifications() > 0}">
-            <div class="alert alert-warning alert-important d-flex align-items-center justify-content-between mb-3 shadow-sm" role="alert">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-bell-fill fs-2 me-3"></i>
-                    <div>
-                        <strong>Thông báo mới!</strong> Bạn có <strong>${dashboard.unreadNotifications()}</strong> thông báo chưa đọc.
-                    </div>
-                </div>
-                <div>
-                    <a href="${ctx}/student/notifications" class="btn btn-sm btn-light text-nowrap">
-                        Xem thông báo <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
-                </div>
-            </div>
-        </c:if>
-
-        <%-- Hàng thẻ số liệu thống kê yêu cầu --%>
-        <div class="row row-cards mb-3">
-            <div class="col-6 col-md-3">
-                <a href="${ctx}/student/tickets?status=NEW" class="card card-link card-link-pop text-reset h-100 shadow-sm border-0 border-start border-azure border-3">
+        <%-- ==================== KPI PROGRESS ==================== --%>
+        <div class="qa-dashboard-section-label">
+            <h2><i class="bi bi-graph-up-arrow" aria-hidden="true"></i>Tiến độ yêu cầu</h2>
+            <span>Bốn trạng thái quan trọng nhất được làm rõ để bạn biết việc nào cần chú ý trước</span>
+        </div>
+        <div class="row row-cards qa-student-kpi-grid">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="${ctx}/student/tickets?status=NEW" class="card card-link card-link-pop text-reset h-100 qa-student-kpi qa-student-kpi--new">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="subheader text-azure">Mới tạo</div>
-                            <div class="ms-auto lh-1">
+                        <div class="qa-student-kpi-header">
+                            <div>
+                                <div class="subheader text-azure">Mới tạo</div>
                                 <span class="badge bg-azure-lt"><i class="bi bi-file-earmark-plus me-1"></i>MỚI</span>
                             </div>
+                            <span class="qa-student-kpi-icon" aria-hidden="true"><i class="bi bi-file-earmark-plus-fill"></i></span>
                         </div>
-                        <div class="h1 mb-1 mt-2 text-azure">${dashboard.getNewCount()}</div>
-                        <div class="text-secondary small">Chờ tiếp nhận xử lý</div>
+                        <div class="h1 text-azure">${dashboard.getNewCount()}</div>
+                        <div class="small">Các yêu cầu vừa được gửi và đang chờ hệ thống tiếp nhận xử lý.</div>
+                        <div class="qa-student-kpi-foot"><i class="bi bi-arrow-up-right-circle-fill"></i>Xem danh sách mới tạo</div>
                     </div>
                 </a>
             </div>
-            <div class="col-6 col-md-3">
-                <a href="${ctx}/student/tickets?status=IN_PROGRESS" class="card card-link card-link-pop text-reset h-100 shadow-sm border-0 border-start border-orange border-3">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="${ctx}/student/tickets?status=IN_PROGRESS" class="card card-link card-link-pop text-reset h-100 qa-student-kpi qa-student-kpi--progress">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="subheader text-orange">Đang xử lý</div>
-                            <div class="ms-auto lh-1">
+                        <div class="qa-student-kpi-header">
+                            <div>
+                                <div class="subheader text-orange">Đang xử lý</div>
                                 <span class="badge bg-orange-lt"><i class="bi bi-arrow-repeat me-1"></i>TIẾN ĐỘ</span>
                             </div>
+                            <span class="qa-student-kpi-icon" aria-hidden="true"><i class="bi bi-arrow-repeat"></i></span>
                         </div>
-                        <div class="h1 mb-1 mt-2 text-orange">${dashboard.getInProgressCount()}</div>
-                        <div class="text-secondary small">Tư vấn viên đang hỗ trợ</div>
+                        <div class="h1 text-orange">${dashboard.getInProgressCount()}</div>
+                        <div class="small">Tư vấn viên đang theo dõi và hỗ trợ, bạn có thể mở chi tiết để xem cập nhật.</div>
+                        <div class="qa-student-kpi-foot"><i class="bi bi-chat-square-text-fill"></i>Theo dõi hỗ trợ đang diễn ra</div>
                     </div>
                 </a>
             </div>
-            <div class="col-6 col-md-3">
-                <a href="${ctx}/student/tickets?status=WAITING_STUDENT" class="card card-link card-link-pop text-reset h-100 shadow-sm border-0 border-start border-warning border-3">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="${ctx}/student/tickets?status=WAITING_STUDENT" class="card card-link card-link-pop text-reset h-100 qa-student-kpi qa-student-kpi--waiting">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="subheader text-warning">Chờ tôi</div>
-                            <div class="ms-auto lh-1">
+                        <div class="qa-student-kpi-header">
+                            <div>
+                                <div class="subheader text-warning">Chờ tôi</div>
                                 <span class="badge bg-yellow-lt"><i class="bi bi-hourglass-split me-1"></i>CHỜ TÔI</span>
                             </div>
+                            <span class="qa-student-kpi-icon" aria-hidden="true"><i class="bi bi-hourglass-split"></i></span>
                         </div>
-                        <div class="h1 mb-1 mt-2 text-warning">${dashboard.getWaitingStudentCount()}</div>
-                        <div class="text-secondary small">Cần bạn phản hồi</div>
+                        <div class="h1 text-warning">${dashboard.getWaitingStudentCount()}</div>
+                        <div class="small">Những yêu cầu đang cần bạn phản hồi thêm thông tin hoặc xác nhận bước tiếp theo.</div>
+                        <div class="qa-student-kpi-foot"><i class="bi bi-reply-fill"></i>Ưu tiên xử lý càng sớm càng tốt</div>
                     </div>
                 </a>
             </div>
-            <div class="col-6 col-md-3">
-                <a href="${ctx}/student/tickets?status=RESOLVED" class="card card-link card-link-pop text-reset h-100 shadow-sm border-0 border-start border-success border-3">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="${ctx}/student/tickets?status=RESOLVED" class="card card-link card-link-pop text-reset h-100 qa-student-kpi qa-student-kpi--resolved">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="subheader text-success">Đã giải quyết</div>
-                            <div class="ms-auto lh-1">
+                        <div class="qa-student-kpi-header">
+                            <div>
+                                <div class="subheader text-success">Đã giải quyết</div>
                                 <span class="badge bg-green-lt"><i class="bi bi-check2-circle me-1"></i>XÁC NHẬN</span>
                             </div>
+                            <span class="qa-student-kpi-icon" aria-hidden="true"><i class="bi bi-check2-circle"></i></span>
                         </div>
-                        <div class="h1 mb-1 mt-2 text-success">${dashboard.getResolvedCount()}</div>
-                        <div class="text-secondary small">Chờ xác nhận & đánh giá</div>
+                        <div class="h1 text-success">${dashboard.getResolvedCount()}</div>
+                        <div class="small">Các yêu cầu đã hoàn tất xử lý và sẵn sàng để bạn xác nhận hoặc đánh giá.</div>
+                        <div class="qa-student-kpi-foot"><i class="bi bi-star-fill"></i>Hoàn tất đánh giá dịch vụ</div>
                     </div>
                 </a>
             </div>
         </div>
 
-        <div class="row g-3">
-            <%-- Cột chính bên trái: Cần bạn xử lý & FAQ gợi ý --%>
+        <%-- ==================== MAIN CONTENT ==================== --%>
+        <div class="row g-3 qa-student-dashboard-grid">
             <div class="col-12 col-lg-8">
-                <%-- Khối Cần bạn xử lý --%>
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <h3 class="card-title mb-0">
-                                <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Cần bạn xử lý
-                            </h3>
+                <%-- Bảng yêu cầu cần sinh viên xử lý --%>
+                <div class="card qa-student-panel qa-student-panel--actions">
+                    <div class="card-header">
+                        <div class="qa-student-panel-heading">
+                            <span class="qa-student-panel-heading-icon qa-student-panel-heading-icon--warning"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                            <div>
+                                <h3 class="card-title mb-1">Cần bạn xử lý</h3>
+                                <div class="card-subtitle">Những yêu cầu đang chờ bạn phản hồi hoặc xác nhận hoàn tất</div>
+                            </div>
                             <c:if test="${not empty dashboard.needMyAction()}">
-                                <span class="badge bg-danger-lt ms-2">${fn:length(dashboard.needMyAction())}</span>
+                                <span class="badge bg-danger-lt ms-2 font-monospace fw-bold">${fn:length(dashboard.needMyAction())}</span>
                             </c:if>
                         </div>
                         <a href="${ctx}/student/tickets" class="btn btn-sm btn-ghost-secondary">
@@ -181,14 +1239,14 @@
                                                 </td>
                                                 <td>
                                                     <div class="fw-semibold">
-                                                        <a href="${ctx}/student/tickets/${item.id()}" class="text-reset">
+                                                        <a href="${ctx}/student/tickets/${item.id()}" class="text-reset text-decoration-none">
                                                             <c:out value="${item.title()}"/>
                                                         </a>
                                                     </div>
-                                                    <div class="text-secondary small">
-                                                        <i class="bi bi-folder2-open me-1"></i><c:out value="${item.categoryName()}"/>
+                                                    <div class="text-secondary small mt-1">
+                                                        <span><i class="bi bi-folder2-open me-1 text-primary"></i><c:out value="${item.categoryName()}"/></span>
                                                         <c:if test="${not empty item.assigneeName()}">
-                                                            <span class="ms-2"><i class="bi bi-person me-1"></i><c:out value="${item.assigneeName()}"/></span>
+                                                            <span class="ms-2"><i class="bi bi-person-fill me-1 text-teal"></i><c:out value="${item.assigneeName()}"/></span>
                                                         </c:if>
                                                     </div>
                                                 </td>
@@ -199,12 +1257,12 @@
                                                     <c:choose>
                                                         <c:when test="${item.status() == 'WAITING_STUDENT'}">
                                                             <a href="${ctx}/student/tickets/${item.id()}" class="btn btn-sm btn-warning">
-                                                                <i class="bi bi-reply me-1"></i>Phản hồi ngay
+                                                                <i class="bi bi-reply-fill me-1"></i>Phản hồi ngay
                                                             </a>
                                                         </c:when>
                                                         <c:when test="${item.status() == 'RESOLVED'}">
                                                             <a href="${ctx}/student/tickets/${item.id()}" class="btn btn-sm btn-success">
-                                                                <i class="bi bi-check-circle me-1"></i>Xác nhận & Đánh giá
+                                                                <i class="bi bi-check-circle-fill me-1"></i>Xác nhận & Đánh giá
                                                             </a>
                                                         </c:when>
                                                         <c:otherwise>
@@ -221,7 +1279,7 @@
                             </div>
                         </c:when>
                         <c:otherwise>
-                            <div class="card-body text-center py-4">
+                            <div class="card-body text-center qa-student-empty">
                                 <div class="avatar avatar-md rounded-circle bg-green-lt mb-3">
                                     <i class="bi bi-check-lg fs-2"></i>
                                 </div>
@@ -232,14 +1290,15 @@
                     </c:choose>
                 </div>
 
-                <%-- Khối FAQ gợi ý --%>
-                <div class="card shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <div>
-                            <h3 class="card-title mb-0">
-                                <i class="bi bi-lightbulb text-yellow me-2"></i>Câu hỏi thường gặp gợi ý
-                            </h3>
-                            <div class="card-subtitle mt-1">Dựa trên các chuyên mục bạn từng quan tâm hoặc câu hỏi phổ biến</div>
+                <%-- Câu hỏi thường gặp gợi ý --%>
+                <div class="card qa-student-panel qa-student-panel--faq">
+                    <div class="card-header">
+                        <div class="qa-student-panel-heading">
+                            <span class="qa-student-panel-heading-icon qa-student-panel-heading-icon--yellow"><i class="bi bi-lightbulb-fill"></i></span>
+                            <div>
+                                <h3 class="card-title mb-1">Câu hỏi thường gặp gợi ý</h3>
+                                <div class="card-subtitle">Dựa trên chuyên mục bạn từng quan tâm và những thắc mắc phổ biến nhất</div>
+                            </div>
                         </div>
                         <a href="${ctx}/student/faq" class="btn btn-sm btn-ghost-secondary">
                             Xem tất cả <i class="bi bi-arrow-right ms-1"></i>
@@ -249,15 +1308,15 @@
                         <c:when test="${not empty dashboard.suggestedFaqs()}">
                             <div class="list-group list-group-flush">
                                 <c:forEach var="faq" items="${dashboard.suggestedFaqs()}">
-                                    <div class="list-group-item list-group-item-action d-flex align-items-start justify-content-between p-3">
+                                    <div class="list-group-item list-group-item-action">
                                         <div class="me-3">
-                                            <div class="fw-semibold mb-1">
-                                                <a href="${ctx}/faq/${faq.slug()}" class="text-reset">
+                                            <div class="fw-semibold">
+                                                <a href="${ctx}/faq/${faq.slug()}" class="text-reset text-decoration-none">
                                                     <c:out value="${faq.title()}"/>
                                                 </a>
                                             </div>
                                             <c:if test="${not empty faq.summary()}">
-                                                <div class="text-secondary small mb-2 text-truncate" style="max-width: 600px;">
+                                                <div class="text-secondary small mb-2 text-truncate" style="max-width: 640px;">
                                                     <c:out value="${faq.summary()}"/>
                                                 </div>
                                             </c:if>
@@ -267,8 +1326,8 @@
                                                         <i class="bi bi-folder2 me-1"></i><c:out value="${faq.categoryName()}"/>
                                                     </span>
                                                 </c:if>
-                                                <span><i class="bi bi-eye me-1"></i>${faq.viewCount()} lượt xem</span>
-                                                <span><i class="bi bi-hand-thumbs-up me-1"></i>${faq.helpfulCount()} hữu ích</span>
+                                                <span><i class="bi bi-eye-fill me-1 text-muted"></i>${faq.viewCount()} lượt xem</span>
+                                                <span><i class="bi bi-hand-thumbs-up-fill me-1 text-success"></i>${faq.helpfulCount()} hữu ích</span>
                                             </div>
                                         </div>
                                         <div>
@@ -281,7 +1340,7 @@
                             </div>
                         </c:when>
                         <c:otherwise>
-                            <div class="card-body text-center py-4">
+                            <div class="card-body text-center qa-student-empty">
                                 <div class="avatar avatar-md rounded-circle bg-secondary-lt mb-3">
                                     <i class="bi bi-question-circle fs-2"></i>
                                 </div>
@@ -296,143 +1355,153 @@
                 </div>
             </div>
 
-            <%-- Cột phụ bên phải: Lịch hẹn sắp tới & Trung tâm trợ giúp --%>
             <div class="col-12 col-lg-4">
-                <%-- Card Lịch hẹn sắp tới --%>
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="card-title mb-0">
-                            <i class="bi bi-calendar2-event text-primary me-2"></i>Lịch hẹn sắp tới
-                        </h3>
-                        <c:if test="${dashboard.nextAppointment() != null}">
-                            <a href="${ctx}/student/appointments" class="btn btn-sm btn-ghost-secondary">
-                                Tất cả <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </c:if>
-                    </div>
-                    <c:choose>
-                        <c:when test="${dashboard.nextAppointment() != null}">
-                            <div class="card-body">
-                                <div class="card bg-primary-lt p-2 mb-3 border-0">
-                                    <div class="fw-bold text-primary">
-                                        <i class="bi bi-clock me-1"></i>
-                                        <c:out value="${dashboard.nextAppointment().startAt()}"/> – <c:out value="${dashboard.nextAppointment().endAt().toLocalTime()}"/>
-                                    </div>
-                                </div>
-                                <h4 class="card-title mb-2">
-                                    <a href="${ctx}/student/appointments/${dashboard.nextAppointment().id()}" class="text-reset">
-                                        <c:out value="${dashboard.nextAppointment().topic()}"/>
-                                    </a>
-                                </h4>
-                                <c:if test="${not empty dashboard.nextAppointment().categoryPath()}">
-                                    <div class="text-secondary small mb-2">
-                                        <i class="bi bi-tag me-1"></i><c:out value="${dashboard.nextAppointment().categoryPath()}"/>
-                                    </div>
-                                </c:if>
-                                <div class="small mb-2">
-                                    <i class="bi bi-person me-1 text-secondary"></i>Tư vấn viên:
-                                    <strong><c:out value="${dashboard.nextAppointment().managerName()}"/></strong>
-                                </div>
-                                <div class="small mb-3">
-                                    <i class="bi bi-broadcast me-1 text-secondary"></i>Hình thức:
-                                    <c:choose>
-                                        <c:when test="${dashboard.nextAppointment().modality() == 'ONLINE'}">
-                                            <span class="badge bg-blue-lt"><i class="bi bi-camera-video me-1"></i>Trực tuyến</span>
-                                        </c:when>
-                                        <c:when test="${dashboard.nextAppointment().modality() == 'IN_PERSON'}">
-                                            <span class="badge bg-green-lt"><i class="bi bi-geo-alt me-1"></i>Trực tiếp</span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="badge bg-secondary-lt"><c:out value="${dashboard.nextAppointment().modality()}"/></span>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                                <c:if test="${not empty dashboard.nextAppointment().meetingLink()}">
-                                    <a href="<c:out value='${dashboard.nextAppointment().meetingLink()}'/>" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary w-100 mb-2">
-                                        <i class="bi bi-camera-video me-1"></i>Vào phòng họp trực tuyến
-                                    </a>
-                                </c:if>
-                                <c:if test="${not empty dashboard.nextAppointment().location()}">
-                                    <div class="small text-secondary mb-3">
-                                        <i class="bi bi-geo-alt me-1"></i>Địa điểm: <strong><c:out value="${dashboard.nextAppointment().location()}"/></strong>
-                                    </div>
-                                </c:if>
-                                <div class="d-flex gap-2">
-                                    <a href="${ctx}/student/appointments/${dashboard.nextAppointment().id()}" class="btn btn-sm btn-outline-primary w-100">
-                                        Chi tiết
-                                    </a>
-                                    <a href="${ctx}/student/appointments" class="btn btn-sm btn-ghost-secondary w-100">
-                                        Lịch của tôi
-                                    </a>
+                <div class="qa-student-dashboard-side">
+                    <%-- Lịch hẹn sắp tới --%>
+                    <div class="card qa-student-panel qa-student-panel--appointment">
+                        <div class="card-header">
+                            <div class="qa-student-panel-heading">
+                                <span class="qa-student-panel-heading-icon qa-student-panel-heading-icon--violet"><i class="bi bi-calendar2-event-fill"></i></span>
+                                <div>
+                                    <h3 class="card-title mb-1">Lịch hẹn sắp tới</h3>
+                                    <div class="card-subtitle">Thời gian, hình thức và điểm vào cuộc hẹn</div>
                                 </div>
                             </div>
-                        </c:when>
-                        <c:otherwise>
-                            <div class="card-body text-center py-4">
-                                <div class="avatar avatar-md rounded-circle bg-secondary-lt mb-3">
-                                    <i class="bi bi-calendar-x fs-2"></i>
-                                </div>
-                                <h4 class="text-secondary mb-1">Không có lịch hẹn</h4>
-                                <p class="text-secondary small mb-3">Bạn chưa có lịch hẹn tư vấn nào sắp diễn ra.</p>
-                                <a href="${ctx}/student/appointments/book" class="btn btn-sm btn-outline-primary w-100">
-                                    <i class="bi bi-calendar-plus me-1"></i>Đặt lịch tư vấn mới
+                            <c:if test="${dashboard.nextAppointment() != null}">
+                                <a href="${ctx}/student/appointments" class="btn btn-sm btn-ghost-secondary">
+                                    Tất cả <i class="bi bi-arrow-right ms-1"></i>
                                 </a>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-
-                <%-- Card Hướng dẫn & Kênh hỗ trợ nhanh --%>
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h3 class="card-title mb-0">
-                            <i class="bi bi-headset text-azure me-2"></i>Kênh hỗ trợ sinh viên
-                        </h3>
+                            </c:if>
+                        </div>
+                        <c:choose>
+                            <c:when test="${dashboard.nextAppointment() != null}">
+                                <div class="card-body">
+                                    <div class="card bg-primary-lt p-2 border-0">
+                                        <div class="fw-bold text-primary">
+                                            <i class="bi bi-clock-fill me-1"></i>
+                                            <c:out value="${dashboard.nextAppointment().startAt()}"/> – <c:out value="${dashboard.nextAppointment().endAt().toLocalTime()}"/>
+                                        </div>
+                                    </div>
+                                    <h4 class="card-title">
+                                        <a href="${ctx}/student/appointments/${dashboard.nextAppointment().id()}" class="text-reset">
+                                            <c:out value="${dashboard.nextAppointment().topic()}"/>
+                                        </a>
+                                    </h4>
+                                    <c:if test="${not empty dashboard.nextAppointment().categoryPath()}">
+                                        <div class="text-secondary small">
+                                            <i class="bi bi-tag-fill me-1 text-primary"></i><c:out value="${dashboard.nextAppointment().categoryPath()}"/>
+                                        </div>
+                                    </c:if>
+                                    <div class="small">
+                                        <i class="bi bi-person-badge-fill me-1 text-secondary"></i>Tư vấn viên:
+                                        <strong><c:out value="${dashboard.nextAppointment().managerName()}"/></strong>
+                                    </div>
+                                    <div class="small">
+                                        <i class="bi bi-broadcast me-1 text-secondary"></i>Hình thức:
+                                        <c:choose>
+                                            <c:when test="${dashboard.nextAppointment().modality() == 'ONLINE'}">
+                                                <span class="badge bg-blue-lt"><i class="bi bi-camera-video-fill me-1"></i>Trực tuyến</span>
+                                            </c:when>
+                                            <c:when test="${dashboard.nextAppointment().modality() == 'IN_PERSON'}">
+                                                <span class="badge bg-green-lt"><i class="bi bi-geo-alt-fill me-1"></i>Trực tiếp</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="badge bg-secondary-lt"><c:out value="${dashboard.nextAppointment().modality()}"/></span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                    <c:if test="${not empty dashboard.nextAppointment().meetingLink()}">
+                                        <a href="<c:out value='${dashboard.nextAppointment().meetingLink()}'/>" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary w-100">
+                                            <i class="bi bi-camera-video-fill me-1"></i>Vào phòng họp trực tuyến
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${not empty dashboard.nextAppointment().location()}">
+                                        <div class="small text-secondary">
+                                            <i class="bi bi-geo-alt-fill me-1 text-danger"></i>Địa điểm: <strong><c:out value="${dashboard.nextAppointment().location()}"/></strong>
+                                        </div>
+                                    </c:if>
+                                    <div class="d-flex gap-2 mt-1">
+                                        <a href="${ctx}/student/appointments/${dashboard.nextAppointment().id()}" class="btn btn-sm btn-outline-primary w-100">
+                                            Chi tiết
+                                        </a>
+                                        <a href="${ctx}/student/appointments" class="btn btn-sm btn-ghost-secondary w-100">
+                                            Lịch của tôi
+                                        </a>
+                                    </div>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="card-body text-center qa-student-empty">
+                                    <div class="avatar avatar-md rounded-circle bg-secondary-lt mb-3">
+                                        <i class="bi bi-calendar-x fs-2"></i>
+                                    </div>
+                                    <h4 class="text-secondary mb-1">Không có lịch hẹn</h4>
+                                    <p class="text-secondary small mb-3">Bạn chưa có lịch hẹn tư vấn nào sắp diễn ra.</p>
+                                    <a href="${ctx}/student/appointments/book" class="btn btn-sm btn-outline-primary w-100">
+                                        <i class="bi bi-calendar-plus-fill me-1"></i>Đặt lịch tư vấn mới
+                                    </a>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
-                    <div class="list-group list-group-flush">
-                        <a href="${ctx}/student/chat" class="list-group-item list-group-item-action d-flex align-items-center p-3">
-                            <div class="avatar bg-teal-lt me-3">
-                                <i class="bi bi-chat-dots fs-3"></i>
+
+                    <%-- Kênh hỗ trợ sinh viên --%>
+                    <div class="card qa-student-panel qa-student-panel--support">
+                        <div class="card-header">
+                            <div class="qa-student-panel-heading">
+                                <span class="qa-student-panel-heading-icon qa-student-panel-heading-icon--teal"><i class="bi bi-headset"></i></span>
+                                <div>
+                                    <h3 class="card-title mb-1">Kênh hỗ trợ sinh viên</h3>
+                                    <div class="card-subtitle">Lối vào các dịch vụ hỗ trợ trực tuyến chính thức</div>
+                                </div>
                             </div>
-                            <div class="flex-fill">
-                                <div class="fw-semibold">Chat trực tuyến</div>
-                                <div class="text-secondary small">Trò chuyện với Chatbot hoặc tư vấn viên trong giờ hành chính</div>
-                            </div>
-                            <i class="bi bi-chevron-right text-secondary"></i>
-                        </a>
-                        <a href="${ctx}/student/tickets/new" class="list-group-item list-group-item-action d-flex align-items-center p-3">
-                            <div class="avatar bg-primary-lt me-3">
-                                <i class="bi bi-envelope-paper fs-3"></i>
-                            </div>
-                            <div class="flex-fill">
-                                <div class="fw-semibold">Gửi yêu cầu tư vấn</div>
-                                <div class="text-secondary small">Gửi yêu cầu chi tiết kèm tệp tin tài liệu minh chứng</div>
-                            </div>
-                            <i class="bi bi-chevron-right text-secondary"></i>
-                        </a>
-                        <a href="${ctx}/student/appointments/book" class="list-group-item list-group-item-action d-flex align-items-center p-3">
-                            <div class="avatar bg-cyan-lt me-3">
-                                <i class="bi bi-calendar-check fs-3"></i>
-                            </div>
-                            <div class="flex-fill">
-                                <div class="fw-semibold">Đặt lịch hẹn 1-1</div>
-                                <div class="text-secondary small">Gặp trực tiếp hoặc qua video call với chuyên viên tư vấn</div>
-                            </div>
-                            <i class="bi bi-chevron-right text-secondary"></i>
-                        </a>
-                        <a href="${ctx}/student/faq" class="list-group-item list-group-item-action d-flex align-items-center p-3">
-                            <div class="avatar bg-yellow-lt me-3">
-                                <i class="bi bi-search fs-3"></i>
-                            </div>
-                            <div class="flex-fill">
-                                <div class="fw-semibold">Tra cứu FAQ</div>
-                                <div class="text-secondary small">Tìm câu trả lời nhanh cho các vấn đề phổ biến</div>
-                            </div>
-                            <i class="bi bi-chevron-right text-secondary"></i>
-                        </a>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <a href="${ctx}/student/chat" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <div class="avatar bg-teal-lt me-3">
+                                    <i class="bi bi-chat-dots-fill fs-3"></i>
+                                </div>
+                                <div class="flex-fill">
+                                    <div class="fw-semibold">Chat trực tuyến</div>
+                                    <div class="text-secondary small">Trò chuyện với Chatbot hoặc tư vấn viên trong giờ hành chính</div>
+                                </div>
+                                <i class="bi bi-chevron-right text-secondary"></i>
+                            </a>
+                            <a href="${ctx}/student/tickets/new" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <div class="avatar bg-primary-lt me-3">
+                                    <i class="bi bi-envelope-paper-fill fs-3"></i>
+                                </div>
+                                <div class="flex-fill">
+                                    <div class="fw-semibold">Gửi yêu cầu tư vấn</div>
+                                    <div class="text-secondary small">Gửi yêu cầu chi tiết kèm tệp tin tài liệu minh chứng</div>
+                                </div>
+                                <i class="bi bi-chevron-right text-secondary"></i>
+                            </a>
+                            <a href="${ctx}/student/appointments/book" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <div class="avatar bg-cyan-lt me-3">
+                                    <i class="bi bi-calendar-check-fill fs-3"></i>
+                                </div>
+                                <div class="flex-fill">
+                                    <div class="fw-semibold">Đặt lịch hẹn 1-1</div>
+                                    <div class="text-secondary small">Gặp trực tiếp hoặc qua video call với chuyên viên tư vấn</div>
+                                </div>
+                                <i class="bi bi-chevron-right text-secondary"></i>
+                            </a>
+                            <a href="${ctx}/student/faq" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <div class="avatar bg-yellow-lt me-3">
+                                    <i class="bi bi-search fs-3"></i>
+                                </div>
+                                <div class="flex-fill">
+                                    <div class="fw-semibold">Tra cứu FAQ</div>
+                                    <div class="text-secondary small">Tìm câu trả lời nhanh cho các vấn đề phổ biến</div>
+                                </div>
+                                <i class="bi bi-chevron-right text-secondary"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>

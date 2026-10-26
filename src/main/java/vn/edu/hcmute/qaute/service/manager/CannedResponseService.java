@@ -35,6 +35,7 @@ import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.ticket.TicketAccessService;
 
+// Xử lý nghiệp vụ CannedResponse trong hệ thống.
 @Service
 @Transactional
 public class CannedResponseService {
@@ -46,6 +47,7 @@ public class CannedResponseService {
     private final UserLookupService users;
     private final CategoryQueryService categories;
 
+    // Khởi tạo dịch vụ quản lý mẫu trả lời.
     public CannedResponseService(CannedResponseRepository repository, ManagerScopeService scopes,
             TicketAccessService ticketAccess, UserLookupService users,
             CategoryQueryService categories) {
@@ -56,11 +58,13 @@ public class CannedResponseService {
         this.categories = categories;
     }
 
+    // Liệt kê tối đa 100 mẫu trả lời đang hiển thị.
     @Transactional(readOnly = true)
     public List<CannedResponseView> list(Long managerId) {
         return page(managerId, BoundedPages.of(0, 100)).getContent();
     }
 
+    // Tìm kiếm và phân trang các mẫu trả lời có thể xem.
     @Transactional(readOnly = true)
     public Page<CannedResponseView> page(Long managerId, Pageable requested) {
         return visiblePage(managerId, requested, false).map(item -> new CannedResponseView(
@@ -69,12 +73,14 @@ public class CannedResponseService {
                 item.isActive(), item.getUsageCount(), managerId.equals(item.getOwnerId())));
     }
 
+    // Liệt kê các mẫu đang hoạt động để chọn nhanh.
     @Transactional(readOnly = true)
     public List<CannedResponseOption> listActive(Long managerId) {
         return visiblePage(managerId, BoundedPages.of(0, 100), true).stream()
                 .map(item -> new CannedResponseOption(item.getId(), item.getTitle(), item.getScope())).toList();
     }
 
+    // Tạo trang mẫu trả lời phù hợp với phạm vi tư vấn viên.
     private Page<CannedResponse> visiblePage(Long managerId, Pageable requested, boolean activeOnly) {
         List<Long> categoryIds = scopes.getScopeCategoryIds(managerId);
         Specification<CannedResponse> spec = (root, query, cb) -> {
@@ -95,6 +101,7 @@ public class CannedResponseService {
         return repository.findAll(spec, PageRequest.of(page.getPageNumber(), page.getPageSize(), Sort.by("title", "id")));
     }
 
+    // Lấy biểu mẫu chỉnh sửa của mẫu thuộc tư vấn viên.
     @Transactional(readOnly = true)
     public CannedResponseForm getForm(Long id, Long managerId) {
         CannedResponse item = owned(id, managerId);
@@ -108,6 +115,7 @@ public class CannedResponseService {
         return form;
     }
 
+    // Tạo hoặc cập nhật mẫu trả lời của tư vấn viên.
     public Long save(CannedResponseForm form, Long managerId) {
         if (form == null) throw new BadRequestException("Mẫu trả lời không hợp lệ");
         String title = form.getTitle() == null ? "" : form.getTitle().trim();
@@ -142,10 +150,12 @@ public class CannedResponseService {
         return repository.save(item).getId();
     }
 
+    // Xóa mẫu trả lời thuộc sở hữu tư vấn viên.
     public void delete(Long id, Long managerId) {
         repository.delete(owned(id, managerId));
     }
 
+    // Thay biến mẫu bằng thông tin yêu cầu và ghi nhận lượt dùng.
     public String render(Long templateId, Long managerId, Long ticketId) {
         Ticket ticket = ticketAccess.requireViewable(ticketId, managerId, RoleCode.MANAGER);
         CannedResponse item = repository.findById(templateId)
@@ -164,6 +174,7 @@ public class CannedResponseService {
         return html;
     }
 
+    // Kiểm tra mẫu trả lời có hiển thị với tư vấn viên hay không.
     private boolean canView(CannedResponse item, Long managerId, List<Long> scopeIds) {
         if (item.getScope() == CannedResponseScope.PERSONAL) {
             return managerId.equals(item.getOwnerId());
@@ -176,6 +187,7 @@ public class CannedResponseService {
         return owner.role() == RoleCode.ADMIN;
     }
 
+    // Lấy mẫu và xác nhận tư vấn viên là chủ sở hữu.
     private CannedResponse owned(Long id, Long managerId) {
         CannedResponse item = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy mẫu trả lời"));
@@ -185,10 +197,12 @@ public class CannedResponseService {
         return item;
     }
 
+    // Mã hóa văn bản để chèn an toàn vào HTML.
     private static String escape(String value) {
         return HtmlUtils.htmlEscape(value == null ? "" : value);
     }
 
+    // Làm sạch HTML nhưng giữ nguyên các biến mẫu hợp lệ.
     private static String sanitizeTemplate(String html) {
         Map<String, String> placeholders = new LinkedHashMap<>();
         String masked = html;

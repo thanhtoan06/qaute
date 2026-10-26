@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.TicketPriority;
 
+// Đóng gói dữ liệu đầu vào cho thao tác SlaPolicy.
 @Getter
 @Setter
 public class SlaPolicyForm {
@@ -22,6 +23,7 @@ public class SlaPolicyForm {
     @Size(min = 4, max = 4)
     private List<Row> rows = new ArrayList<>();
 
+    // Khởi tạo các dòng chính sách cho từng mức độ ưu tiên.
     public SlaPolicyForm() {
         for (TicketPriority priority : TicketPriority.values()) {
             Row row = new Row();

@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+// Lớp cơ sở bổ sung thời điểm tạo và cập nhật cho các thực thể.
 @Getter
 @Setter
 @MappedSuperclass

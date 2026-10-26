@@ -13,13 +13,16 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.security.QauteUserDetails;
 import vn.edu.hcmute.qaute.service.admin.AdminDashboardService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminDashboard.
 @Controller
 public class AdminDashboardController {
     private final AdminDashboardService dashboards;
 
+    // Khởi tạo bộ điều khiển trang tổng quan.
     public AdminDashboardController(AdminDashboardService dashboards) { this.dashboards = dashboards; }
 
     @GetMapping("/admin/dashboard")
+    // Hiển thị trang tổng quan quản trị.
     public String dashboard(@AuthenticationPrincipal QauteUserDetails me, Model model) {
         model.addAttribute("me", me);
         model.addAttribute("pageTitle", "Tổng quan");
@@ -28,6 +31,7 @@ public class AdminDashboardController {
 
     @GetMapping("/api/admin/dashboard")
     @ResponseBody
+    // Trả về dữ liệu tổng quan dành cho quản trị viên.
     public ApiResponse<AdminDashboardService.Dashboard> data() {
         if (!SecurityUtils.hasRole(RoleCode.ADMIN)) throw new ForbiddenException();
         return ApiResponse.ok(dashboards.get());

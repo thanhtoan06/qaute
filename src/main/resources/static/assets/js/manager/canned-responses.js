@@ -1,3 +1,4 @@
+// Khởi tạo biểu mẫu mẫu trả lời sau khi tài liệu được tải.
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('canned-response-form');
   if (!form) return;
@@ -8,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const error = document.getElementById('canned-body-error');
   const submit = form.querySelector('button[type="submit"]');
 
+  // Cập nhật các trường chuyên mục theo phạm vi sử dụng.
   function updateScope() {
     const shared = scope.value === 'SHARED';
     categoryGroup.hidden = !shared;
@@ -30,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Kiểm tra nội dung trước khi gửi biểu mẫu.
   form.addEventListener('submit', event => {
     if (window.jQuery?.fn?.summernote) body.value = window.jQuery(body).summernote('code');
     const text = new DOMParser().parseFromString(body.value, 'text/html').body.textContent.trim();

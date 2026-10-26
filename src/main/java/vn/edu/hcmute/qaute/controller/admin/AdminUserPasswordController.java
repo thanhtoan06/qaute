@@ -24,6 +24,7 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.admin.AdminUserPasswordService;
 import vn.edu.hcmute.qaute.service.admin.AdminUserQueryService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminUserPassword.
 @Controller
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUserPasswordController {
@@ -31,6 +32,7 @@ public class AdminUserPasswordController {
     private final AdminUserPasswordService passwords;
     private final CookieService cookies;
 
+    // Khởi tạo bộ điều khiển đổi mật khẩu người dùng.
     public AdminUserPasswordController(AdminUserQueryService userQueries,
             AdminUserPasswordService passwords, CookieService cookies) {
         this.userQueries = userQueries;
@@ -39,11 +41,13 @@ public class AdminUserPasswordController {
     }
 
     @GetMapping("/admin/users/{id}/password")
+    // Hiển thị biểu mẫu đổi mật khẩu người dùng.
     public String passwordPage(@PathVariable Long id, Model model) {
         return form(id, model, Map.of());
     }
 
     @PostMapping("/admin/users/{id}/password")
+    // Kiểm tra và đổi mật khẩu người dùng.
     public String changePassword(@PathVariable Long id,
             @Valid @ModelAttribute("form") UserPasswordForm form, BindingResult result,
             Model model, RedirectAttributes redirect, HttpServletRequest request,
@@ -73,6 +77,7 @@ public class AdminUserPasswordController {
         }
     }
 
+    // Nạp biểu mẫu và thông tin người dùng vào trang.
     private String form(Long id, Model model, Map<String, String> errors) {
         model.asMap().remove(BindingResult.MODEL_KEY_PREFIX + "form");
         model.addAttribute("form", new UserPasswordForm());

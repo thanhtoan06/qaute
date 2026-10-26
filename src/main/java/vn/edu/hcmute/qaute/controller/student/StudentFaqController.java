@@ -24,6 +24,7 @@ import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
 import vn.edu.hcmute.qaute.service.knowledge.SearchService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho StudentFaq.
 @Controller
 public class StudentFaqController {
     private static final int PAGE_SIZE = 20;
@@ -34,6 +35,7 @@ public class StudentFaqController {
     private final CategoryQueryService categories;
     private final FaqViewRepository views;
 
+    // Khởi tạo bộ điều khiển FAQ với các dịch vụ truy vấn cần thiết.
     public StudentFaqController(FaqQueryService faqs, SearchService search,
                                 CategoryQueryService categories, FaqViewRepository views) {
         this.faqs = faqs;
@@ -43,6 +45,7 @@ public class StudentFaqController {
     }
 
     @GetMapping("/student/faq")
+    // Hiển thị FAQ theo từ khóa, danh mục, tab và trang hiện tại.
     public String list(@RequestParam(required = false) String tab,
                        @RequestParam(required = false) Long category,
                        @RequestParam(required = false) String q,
@@ -84,18 +87,21 @@ public class StudentFaqController {
         return "student/faq-list";
     }
 
+    // Lấy danh mục đã chọn cùng các danh mục con của nó.
     private List<Long> categoryIds(Long category) {
         if (category == null) return null;
         List<Long> descendants = categories.getDescendantIds(category);
         return descendants == null || descendants.isEmpty() ? List.of(category) : descendants;
     }
 
+    // Chuẩn hóa tab yêu cầu về một giá trị được hỗ trợ.
     private static String normalizeTab(String tab) {
         if (tab == null) return "latest";
         String value = tab.trim().toLowerCase(Locale.ROOT);
         return TABS.contains(value) ? value : "latest";
     }
 
+    // Chọn thứ tự sắp xếp tương ứng với tab FAQ.
     private static FaqSort sortFor(String tab) {
         return switch (tab) {
             case "views" -> FaqSort.MOST_VIEWED;
@@ -104,11 +110,13 @@ public class StudentFaqController {
         };
     }
 
+    // Chuyển kết quả tìm kiếm thành mục hiển thị trong danh sách FAQ.
     private static FaqListItem toListItem(SearchResultItem item) {
         return new FaqListItem(item.id(), item.title(), item.slug(), item.summary(), null,
                 item.categoryName(), item.viewCount(), item.helpfulCount(), 0, item.updatedAt(), List.of());
     }
 
+    // Tạo chuỗi tham số truy vấn để giữ bộ lọc khi phân trang.
     private static String queryString(String tab, Long category, String q) {
         List<String> params = new ArrayList<>();
         params.add("tab=" + tab);

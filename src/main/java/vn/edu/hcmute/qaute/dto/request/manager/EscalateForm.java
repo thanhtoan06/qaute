@@ -7,7 +7,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+// Đóng gói dữ liệu đầu vào cho thao tác Escalate.
+@Getter
+@Setter
 public class EscalateForm {
     @NotNull(message = "Vui lòng chọn chuyên mục đích")
     @Positive(message = "Chuyên mục đích không hợp lệ")

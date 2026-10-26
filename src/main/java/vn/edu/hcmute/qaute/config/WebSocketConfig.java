@@ -15,6 +15,7 @@ import vn.edu.hcmute.qaute.websocket.WsHandshakeHandler;
 import vn.edu.hcmute.qaute.websocket.WsHandshakeInterceptor;
 import vn.edu.hcmute.qaute.websocket.WsSessionDecoratorFactory;
 
+// Cấu hình thành phần WebSocketConfig cho ứng dụng.
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
@@ -24,6 +25,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final StompChannelInterceptor channelInterceptor;
     private final WsSessionDecoratorFactory decoratorFactory;
 
+    // Khởi tạo cấu hình WebSocket với các thành phần xử lý kết nối.
     public WebSocketConfig(AppProperties properties, WsHandshakeInterceptor handshakeInterceptor,
             WsHandshakeHandler handshakeHandler, StompChannelInterceptor channelInterceptor,
             WsSessionDecoratorFactory decoratorFactory) {
@@ -34,6 +36,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         this.decoratorFactory = decoratorFactory;
     }
 
+    // Đăng ký endpoint STOMP và các origin được phép.
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         List<String> origins = new ArrayList<>(List.of("http://localhost:*", "https://localhost:*",
@@ -52,6 +55,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .withSockJS();
     }
 
+    // Cấu hình broker và tiền tố đích tin nhắn.
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic", "/queue");
@@ -59,11 +63,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setUserDestinationPrefix("/user");
     }
 
+    // Gắn interceptor cho kênh tin nhắn đến.
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(channelInterceptor);
     }
 
+    // Thiết lập giới hạn truyền tải và bộ trang trí phiên WebSocket.
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
         registration.setMessageSizeLimit(16 * 1024);

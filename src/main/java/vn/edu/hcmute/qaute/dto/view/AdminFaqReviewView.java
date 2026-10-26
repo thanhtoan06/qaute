@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import vn.edu.hcmute.qaute.common.constant.FaqStatus;
 
+// Đóng gói dữ liệu AdminFaqReview để hiển thị hoặc trả về API.
 public record AdminFaqReviewView(
         Long id, String title, String slug, String summary, String bodyHtml,
         String categoryPath, String authorName, FaqStatus status, boolean featured,

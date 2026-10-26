@@ -1,10 +1,12 @@
 (function (window, document) {
     'use strict';
 
+    // Lấy số sao đang được chọn trong biểu mẫu.
     function selectedRating(form) {
         return Number(form.querySelector('input[name="rating"]:checked')?.value || 0);
     }
 
+    // Đồng bộ giao diện sao và yêu cầu nhận xét.
     function updateRatingState(form) {
         const rating = selectedRating(form);
         const comment = form.querySelector('#ticket-review-comment');
@@ -23,10 +25,12 @@
             : 'Tối đa 500 ký tự.';
     }
 
+    // Khởi tạo biểu mẫu đánh giá sau khi trang tải xong.
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.querySelector('#ticket-review-form');
         if (!form) return;
         const editButton = document.querySelector('[data-review-edit]');
+        // Mở biểu mẫu để chỉnh sửa đánh giá hiện có.
         editButton?.addEventListener('click', function () {
             form.classList.remove('d-none');
             editButton.classList.add('d-none');
@@ -35,6 +39,7 @@
         form.querySelectorAll('input[name="rating"]').forEach(function (input) {
             input.addEventListener('change', function () { updateRatingState(form); });
         });
+        // Ngăn gửi đánh giá sao thấp nếu nhận xét chưa đủ dài.
         form.addEventListener('submit', function (event) {
             const rating = selectedRating(form);
             const comment = form.querySelector('#ticket-review-comment');

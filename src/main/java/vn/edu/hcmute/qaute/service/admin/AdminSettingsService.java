@@ -12,6 +12,7 @@ import vn.edu.hcmute.qaute.dto.view.SettingView;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
+// Xử lý nghiệp vụ AdminSettings trong hệ thống.
 @Service
 public class AdminSettingsService {
     private static final List<String> GROUP_ORDER = List.of(
@@ -21,11 +22,13 @@ public class AdminSettingsService {
     private final SettingsService settings;
     private final AuditService audit;
 
+    // Khởi tạo dịch vụ quản trị cài đặt.
     public AdminSettingsService(SettingsService settings, AuditService audit) {
         this.settings = settings;
         this.audit = audit;
     }
 
+    // Nhóm cài đặt theo thứ tự hiển thị.
     public Map<String, List<SettingView>> groups() {
         Map<String, List<SettingView>> found = new LinkedHashMap<>();
         settings.listAll().forEach(setting -> found
@@ -40,6 +43,7 @@ public class AdminSettingsService {
         return ordered;
     }
 
+    // Lưu giá trị cài đặt trong một nhóm và trả lỗi xác thực.
     public Map<String, String> saveGroup(String groupName, Map<String, String> values, Long actorId) {
         List<SettingView> group = groups().get(groupName);
         if (group == null) {

@@ -24,6 +24,7 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.knowledge.SearchService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho Search.
 @Controller
 public class SearchController {
 
@@ -32,12 +33,14 @@ public class SearchController {
     private final SearchService searchService;
     private final CategoryQueryService categoryQueryService;
 
+    // Khởi tạo controller tìm kiếm.
     public SearchController(SearchService searchService,
                             CategoryQueryService categoryQueryService) {
         this.searchService = searchService;
         this.categoryQueryService = categoryQueryService;
     }
 
+    // Tìm kiếm câu hỏi thường gặp theo các tiêu chí yêu cầu.
     @GetMapping("/search")
     public String search(@RequestParam(required = false) String q,
                          @RequestParam(required = false) Long category,
@@ -117,4 +120,3 @@ public class SearchController {
         return "guest/search-results";
     }
 }
-

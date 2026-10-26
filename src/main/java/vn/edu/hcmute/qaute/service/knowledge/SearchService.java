@@ -6,8 +6,10 @@ import org.springframework.data.domain.Pageable;
 import vn.edu.hcmute.qaute.common.constant.FaqSort;
 import vn.edu.hcmute.qaute.dto.view.SearchResultItem;
 
+// Xử lý nghiệp vụ Search trong hệ thống.
 public interface SearchService {
 
+    // Tìm kiếm FAQ theo nội dung, danh mục, thẻ và thứ tự sắp xếp.
     Page<SearchResultItem> search(String rawQuery,
                                   List<Long> categoryIds,
                                   String tagSlug,
@@ -17,4 +19,3 @@ public interface SearchService {
                                   String ipHash,
                                   String source);
 }
-

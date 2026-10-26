@@ -8,6 +8,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
+// Đóng gói dữ liệu đầu vào cho thao tác TicketReview.
 @Getter
 @Setter
 public class TicketReviewForm {

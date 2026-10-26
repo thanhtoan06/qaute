@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import vn.edu.hcmute.qaute.common.response.ApiResponse;
 import vn.edu.hcmute.qaute.common.web.ClientIpResolver;
 
+// Hỗ trợ xác thực và kiểm soát truy cập qua RateLimitFilter.
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class RateLimitFilter extends OncePerRequestFilter {
@@ -22,11 +23,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final RateLimitService rateLimitService;
     private final ObjectMapper objectMapper;
 
+    // Khởi tạo bộ lọc giới hạn tốc độ với dịch vụ và bộ chuyển đổi JSON.
     public RateLimitFilter(RateLimitService rateLimitService, ObjectMapper objectMapper) {
         this.rateLimitService = rateLimitService;
         this.objectMapper = objectMapper;
     }
 
+    // Áp dụng giới hạn theo yêu cầu và trả lỗi khi vượt ngưỡng.
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
@@ -53,6 +56,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
     }
 
+    // Chọn cấu hình giới hạn dựa trên phương thức và đường dẫn yêu cầu.
     private Limit limitFor(HttpServletRequest request) {
         String method = request.getMethod();
         String path = request.getRequestURI();
@@ -77,6 +81,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         return null;
     }
 
+    // Kiểm tra yêu cầu cần nhận phản hồi theo định dạng API hay không.
     private boolean isApi(HttpServletRequest request) {
         return request.getRequestURI().startsWith("/api/")
                 || "XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"));

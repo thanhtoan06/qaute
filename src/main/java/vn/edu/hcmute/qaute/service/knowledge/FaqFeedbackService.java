@@ -15,6 +15,7 @@ import vn.edu.hcmute.qaute.entity.knowledge.FaqFeedback;
 import vn.edu.hcmute.qaute.repository.knowledge.FaqFeedbackRepository;
 import vn.edu.hcmute.qaute.repository.knowledge.FaqRepository;
 
+// Xử lý nghiệp vụ FaqFeedback trong hệ thống.
 @Service
 @Transactional
 public class FaqFeedbackService {
@@ -23,11 +24,13 @@ public class FaqFeedbackService {
     private final FaqRepository faqs;
     private final FaqFeedbackRepository feedbacks;
 
+    // Khởi tạo dịch vụ bình chọn FAQ.
     public FaqFeedbackService(FaqRepository faqs, FaqFeedbackRepository feedbacks) {
         this.faqs = faqs;
         this.feedbacks = feedbacks;
     }
 
+    // Ghi nhận hoặc cập nhật bình chọn của người dùng cho FAQ.
     public VoteResult vote(Long userId, Long faqId, FaqVoteForm form) {
         if (userId == null || form == null) throw new BadRequestException("Dữ liệu bình chọn không hợp lệ");
         Faq faq = faqs.findById(faqId).filter(this::isPublishedNow)
@@ -78,15 +81,18 @@ public class FaqFeedbackService {
         return new VoteResult(faq.getHelpfulCount(), faq.getNotHelpfulCount(), form.isHelpful());
     }
 
+    // Kiểm tra FAQ đang được xuất bản và đã đến thời điểm hiển thị.
     private boolean isPublishedNow(Faq faq) {
         return faq.getStatus() == FaqStatus.PUBLISHED
                 && (faq.getPublishAt() == null || !faq.getPublishAt().isAfter(LocalDateTime.now()));
     }
 
+    // Chuẩn hóa mã lý do bình chọn.
     private static String normalizeReasonCode(String reasonCode) {
         return reasonCode == null ? "" : reasonCode.trim().toUpperCase(Locale.ROOT);
     }
 
+    // Chuẩn hóa nhận xét và giới hạn độ dài nội dung.
     private static String normalizeComment(String comment) {
         String value = comment == null ? "" : comment.trim();
         if (value.length() > 500) {

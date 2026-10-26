@@ -7,10 +7,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ErrorPage.
 @Controller
 public class ErrorPageController implements ErrorController {
 
     @RequestMapping("/error")
+    // Xử lý lỗi và chọn trang hiển thị theo mã trạng thái HTTP.
     public String error(HttpServletRequest request, HttpServletResponse response, Model model) {
         Object statusAttribute = request.getAttribute("jakarta.servlet.error.status_code");
         int status = statusAttribute instanceof Integer ? (Integer) statusAttribute : 500;

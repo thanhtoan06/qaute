@@ -19,6 +19,7 @@ import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
 
+// Hỗ trợ xác thực và kiểm soát truy cập qua GoogleSsoSuccessHandler.
 @Component
 @Profile("google")
 public class GoogleSsoSuccessHandler implements AuthenticationSuccessHandler {
@@ -30,6 +31,7 @@ public class GoogleSsoSuccessHandler implements AuthenticationSuccessHandler {
     private final AuthSessionService authSessionService;
     private final CookieService cookieService;
 
+    // Khởi tạo bộ xử lý đăng nhập Google cùng các dịch vụ phiên và tài khoản.
     public GoogleSsoSuccessHandler(UserRepository userRepository,
                                    AuthSessionService authSessionService,
                                    CookieService cookieService) {
@@ -38,6 +40,7 @@ public class GoogleSsoSuccessHandler implements AuthenticationSuccessHandler {
         this.cookieService = cookieService;
     }
 
+    // Xác minh tài khoản Google rồi tạo phiên đăng nhập cho sinh viên hợp lệ.
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
@@ -79,11 +82,13 @@ public class GoogleSsoSuccessHandler implements AuthenticationSuccessHandler {
         response.sendRedirect("/student/dashboard");
     }
 
+    // Từ chối đăng nhập và chuyển người dùng về trang đăng nhập kèm lý do.
     private void reject(HttpServletResponse response, String message) throws IOException {
         response.sendRedirect("/auth/login?oauthError="
                 + java.net.URLEncoder.encode(message, java.nio.charset.StandardCharsets.UTF_8));
     }
 
+    // Giới hạn chuỗi đầu vào tối đa 255 ký tự.
     private String shorten(String value) {
         if (value == null) {
             return "";

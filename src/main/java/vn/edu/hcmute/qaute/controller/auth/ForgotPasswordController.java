@@ -23,12 +23,14 @@ import vn.edu.hcmute.qaute.dto.request.auth.ResetPasswordForm;
 import vn.edu.hcmute.qaute.service.identity.PasswordResetService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ForgotPassword.
 @Controller
 public class ForgotPasswordController {
 
     private final PasswordResetService passwordResetService;
     private final SettingsService settingsService;
 
+    // Khởi tạo bộ điều khiển quên mật khẩu.
     public ForgotPasswordController(PasswordResetService passwordResetService,
                                     SettingsService settingsService) {
         this.passwordResetService = passwordResetService;
@@ -36,6 +38,7 @@ public class ForgotPasswordController {
     }
 
     @GetMapping("/auth/forgot-password")
+    // Hiển thị biểu mẫu yêu cầu đặt lại mật khẩu.
     public String forgotPasswordPage(Model model) {
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", new ForgotPasswordForm());
@@ -44,6 +47,7 @@ public class ForgotPasswordController {
     }
 
     @PostMapping("/auth/forgot-password")
+    // Gửi yêu cầu cấp mã OTP đặt lại mật khẩu.
     public String forgotPassword(@Valid @ModelAttribute("form") ForgotPasswordForm form,
                                  BindingResult bindingResult,
                                  Model model,
@@ -67,6 +71,7 @@ public class ForgotPasswordController {
     }
 
     @GetMapping("/auth/reset-password")
+    // Hiển thị bước nhập OTP để đặt lại mật khẩu.
     public String resetPasswordPage(@RequestParam(defaultValue = "") String identifier,
                                     Model model) {
         model.addAttribute("step", "otp");
@@ -85,6 +90,7 @@ public class ForgotPasswordController {
     }
 
     @PostMapping("/auth/reset-password/verify")
+    // Xác minh OTP và chuyển sang bước đặt mật khẩu mới.
     public String verifyOtp(@Valid @ModelAttribute("form") ResetOtpForm form,
                             BindingResult bindingResult,
                             Model model) {
@@ -115,6 +121,7 @@ public class ForgotPasswordController {
     }
 
     @PostMapping("/auth/reset-password")
+    // Kiểm tra và lưu mật khẩu mới.
     public String resetPassword(@Valid @ModelAttribute("passwordForm") ResetPasswordForm form,
                                 BindingResult bindingResult,
                                 Model model,

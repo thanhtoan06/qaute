@@ -13,12 +13,14 @@ import vn.edu.hcmute.qaute.config.AppProperties;
 import vn.edu.hcmute.qaute.security.CookieService;
 import vn.edu.hcmute.qaute.security.TokenAuthenticationService;
 
+// Hỗ trợ giao tiếp thời gian thực qua WsHandshakeInterceptor.
 @Component
 public class WsHandshakeInterceptor implements HandshakeInterceptor {
     private final AppProperties properties;
     private final CookieService cookies;
     private final TokenAuthenticationService tokens;
 
+    // Khởi tạo dịch vụ xác thực và cấu hình ứng dụng.
     public WsHandshakeInterceptor(AppProperties properties, CookieService cookies,
             TokenAuthenticationService tokens) {
         this.properties = properties;
@@ -27,6 +29,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
     }
 
     @Override
+    // Kiểm tra nguồn gốc và xác thực phiên trước khi bắt tay.
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
             WebSocketHandler handler, Map<String, Object> attributes) {
         String origin = request.getHeaders().getOrigin();
@@ -57,6 +60,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
         return true;
     }
 
+    // Kiểm tra origin có thuộc danh sách được cho phép hay không.
     private boolean allowedOrigin(String origin) {
         try {
             URI uri = URI.create(origin);
@@ -74,6 +78,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
     }
 
     @Override
+    // Xử lý bước hoàn tất handshake.
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
             WebSocketHandler handler, Exception exception) {
     }

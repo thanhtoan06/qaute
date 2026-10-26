@@ -1,3 +1,4 @@
+-- Quản lý metadata, chủ sở hữu và mục đích sử dụng của tệp media.
 CREATE TABLE media_assets (
     id                 BIGINT       NOT NULL AUTO_INCREMENT,
     public_id          VARCHAR(255) NOT NULL,

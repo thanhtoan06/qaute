@@ -30,6 +30,7 @@ import vn.edu.hcmute.qaute.repository.appointment.AvailabilityRuleRepository;
 import vn.edu.hcmute.qaute.service.appointment.SlotGenerationService;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 
+// Xử lý nghiệp vụ ManagerSchedule trong hệ thống.
 @Service
 @Transactional
 public class ManagerScheduleService {
@@ -40,6 +41,7 @@ public class ManagerScheduleService {
     private final SlotGenerationService generation;
     private final UserLookupService users;
 
+    // Khởi tạo dịch vụ quản lý lịch làm việc của tư vấn viên.
     public ManagerScheduleService(AvailabilityRuleRepository rules, AvailabilityBlockRepository blocks,
             AppointmentSlotRepository slots, AppointmentRepository appointments,
             SlotGenerationService generation, UserLookupService users) {
@@ -51,17 +53,20 @@ public class ManagerScheduleService {
         this.users = users;
     }
 
+    // Lấy các quy tắc lịch đang hoạt động của tư vấn viên.
     @Transactional(readOnly = true)
     public List<AvailabilityRule> rules(Long managerId) {
         return rules.findByManagerIdOrderByDayOfWeekAscStartTimeAsc(managerId).stream()
                 .filter(AvailabilityRule::isActive).toList();
     }
 
+    // Lấy các khoảng thời gian đã chặn còn hiệu lực.
     @Transactional(readOnly = true)
     public List<AvailabilityBlock> blocks(Long managerId) {
         return blocks.findByManagerIdAndEndAtAfterOrderByStartAtAsc(managerId, LocalDateTime.now());
     }
 
+    // Tạo quy tắc lịch và sinh các khung giờ tương ứng.
     public AvailabilityRule saveRule(AvailabilityRuleForm form, Long managerId) {
         validateRule(form);
         for (AvailabilityRule other : rules(managerId)) {
@@ -90,6 +95,7 @@ public class ManagerScheduleService {
         return rule;
     }
 
+    // Ngừng quy tắc và xóa hoặc chặn các khung giờ liên quan.
     public int deleteRule(Long id, Long managerId) {
         AvailabilityRule rule = rules.findById(id)
                 .filter(item -> Objects.equals(item.getManagerId(), managerId))
@@ -117,6 +123,7 @@ public class ManagerScheduleService {
         return booked;
     }
 
+    // Tạo khoảng chặn và cập nhật các khung giờ bị ảnh hưởng.
     public AvailabilityBlock addBlock(AvailabilityBlockForm form, Long managerId) {
         if (form == null || form.getStartAt() == null || form.getEndAt() == null
                 || !form.getStartAt().isBefore(form.getEndAt())) {
@@ -140,6 +147,7 @@ public class ManagerScheduleService {
         return block;
     }
 
+    // Xóa khoảng chặn và mở lại khung giờ còn phù hợp.
     public void deleteBlock(Long id, Long managerId) {
         AvailabilityBlock block = blocks.findById(id)
                 .filter(item -> Objects.equals(item.getManagerId(), managerId))
@@ -158,6 +166,7 @@ public class ManagerScheduleService {
                 .forEach(slot -> slot.setStatus(SlotStatus.AVAILABLE));
     }
 
+    // Lấy danh sách khung giờ trong tuần để hiển thị.
     @Transactional(readOnly = true)
     public List<ManagerScheduleSlotView> weekView(Long managerId, LocalDate weekStart) {
         LocalDate monday = weekStart.minusDays(weekStart.getDayOfWeek().getValue() - 1L);
@@ -182,6 +191,7 @@ public class ManagerScheduleService {
         return result;
     }
 
+    // Kiểm tra tính hợp lệ của quy tắc lịch làm việc.
     private void validateRule(AvailabilityRuleForm form) {
         if (form == null || form.getDayOfWeek() == null || form.getDayOfWeek() < 1 || form.getDayOfWeek() > 7
                 || form.getStartTime() == null || form.getEndTime() == null
@@ -212,6 +222,7 @@ public class ManagerScheduleService {
         }
     }
 
+    // Kiểm tra hai khoảng hiệu lực có trùng ngày áp dụng hay không.
     private static boolean dateRangesOverlap(LocalDate firstFrom, LocalDate firstTo,
             LocalDate secondFrom, LocalDate secondTo, int dayOfWeek) {
         LocalDate start = firstFrom.isAfter(secondFrom) ? firstFrom : secondFrom;
@@ -221,10 +232,12 @@ public class ManagerScheduleService {
         return end == null || !occurrence.isAfter(end);
     }
 
+    // Kiểm tra khoảng chặn có giao với khung giờ hay không.
     private static boolean overlaps(AvailabilityBlock block, AppointmentSlot slot) {
         return block.getStartAt().isBefore(slot.getEndAt()) && block.getEndAt().isAfter(slot.getStartAt());
     }
 
+    // Kiểm tra khung giờ có khớp quy tắc lịch hay không.
     private static boolean matchesRule(AvailabilityRule rule, AppointmentSlot slot) {
         LocalDate day = slot.getStartAt().toLocalDate();
         return day.getDayOfWeek().getValue() == rule.getDayOfWeek()
@@ -235,6 +248,7 @@ public class ManagerScheduleService {
                 && slot.getModality() == rule.getModality();
     }
 
+    // Cắt khoảng trắng và chuyển chuỗi rỗng thành null.
     private static String trimToNull(String text) {
         return text == null || text.isBlank() ? null : text.trim();
     }

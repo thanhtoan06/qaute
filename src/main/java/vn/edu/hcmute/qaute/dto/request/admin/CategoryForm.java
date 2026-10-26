@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+// Đóng gói dữ liệu đầu vào cho thao tác Category.
 @Getter
 @Setter
 public class CategoryForm {

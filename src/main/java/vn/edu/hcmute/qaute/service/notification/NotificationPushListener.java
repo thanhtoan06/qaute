@@ -8,16 +8,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+// Xử lý nghiệp vụ NotificationPushListener trong hệ thống.
 @Component
 public class NotificationPushListener {
 
     private final ObjectProvider<SimpMessagingTemplate> templateProvider;
 
+    // Khởi tạo bộ lắng nghe và nhận nhà cung cấp kênh gửi thông báo.
     public NotificationPushListener(ObjectProvider<SimpMessagingTemplate> templateProvider) {
         this.templateProvider = templateProvider;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    // Gửi thông báo đến hàng đợi riêng của người dùng sau khi giao dịch hoàn tất.
     public void onNotificationCreated(NotificationCreatedEvent event) {
         if (event == null || event.userId() == null) {
             return;
@@ -41,4 +44,3 @@ public class NotificationPushListener {
         }
     }
 }
-

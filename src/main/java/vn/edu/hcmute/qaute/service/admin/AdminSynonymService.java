@@ -22,6 +22,7 @@ import vn.edu.hcmute.qaute.repository.knowledge.SearchLogRepository;
 import vn.edu.hcmute.qaute.repository.knowledge.SearchSynonymRepository;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 
+// Xử lý nghiệp vụ AdminSynonym trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class AdminSynonymService {
@@ -29,6 +30,7 @@ public class AdminSynonymService {
     private final SearchLogRepository logs;
     private final AuditService audit;
 
+    // Khởi tạo dịch vụ quản trị từ đồng nghĩa tìm kiếm.
     public AdminSynonymService(SearchSynonymRepository synonyms, SearchLogRepository logs,
                                AuditService audit) {
         this.synonyms = synonyms;
@@ -36,22 +38,26 @@ public class AdminSynonymService {
         this.audit = audit;
     }
 
+    // Liệt kê các cặp từ đồng nghĩa.
     public List<SearchSynonym> list() {
         return synonyms.findAllByOrderByTermAscSynonymAsc();
     }
 
+    // Lấy trang các cặp từ đồng nghĩa.
     public Page<SearchSynonym> page(Pageable requested) {
         Pageable bounded = BoundedPages.of(requested);
         return synonyms.findAll(PageRequest.of(bounded.getPageNumber(), bounded.getPageSize(),
                 Sort.by("term", "synonym", "id")));
     }
 
+    // Liệt kê các truy vấn không có kết quả gần đây.
     public List<NoResultQueryView> noResultQueries() {
         return logs.findTopNoResultQueries(LocalDateTime.now().minusDays(30), PageRequest.of(0, 30))
                 .stream().map(row -> new NoResultQueryView((String) row[0],
                         ((Number) row[1]).longValue())).toList();
     }
 
+    // Tạo cặp từ đồng nghĩa mới.
     @Transactional
     public void create(String term, String synonym) {
         String cleanedTerm = clean(term, "Từ khóa");
@@ -72,6 +78,7 @@ public class AdminSynonymService {
         }
     }
 
+    // Bật hoặc tắt cặp từ đồng nghĩa.
     @Transactional
     public void toggle(Long id) {
         SearchSynonym pair = require(id);
@@ -82,6 +89,7 @@ public class AdminSynonymService {
                 Boolean.toString(before), Boolean.toString(pair.isActive()));
     }
 
+    // Xóa cặp từ đồng nghĩa.
     @Transactional
     public void delete(Long id) {
         SearchSynonym pair = require(id);
@@ -90,11 +98,13 @@ public class AdminSynonymService {
                 pair.getTerm() + " ↔ " + pair.getSynonym(), null);
     }
 
+    // Lấy cặp từ hoặc báo không tìm thấy.
     private SearchSynonym require(Long id) {
         return synonyms.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy cặp từ đồng nghĩa"));
     }
 
+    // Chuẩn hóa và kiểm tra một từ khóa.
     private static String clean(String value, String label) {
         String cleaned = value == null ? "" : value.trim().replaceAll("\\s+", " ");
         if (cleaned.length() < 2 || cleaned.length() > 100) {

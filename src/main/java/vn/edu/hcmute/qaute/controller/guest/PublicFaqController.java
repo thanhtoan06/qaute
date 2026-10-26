@@ -29,6 +29,7 @@ import vn.edu.hcmute.qaute.service.knowledge.FaqPersonalService;
 import vn.edu.hcmute.qaute.service.knowledge.FaqViewCounter;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho PublicFaq.
 @Controller
 public class PublicFaqController {
 
@@ -39,6 +40,7 @@ public class PublicFaqController {
     private final FaqViewCounter faqViewCounter;
     private final FaqPersonalService faqPersonalService;
 
+    // Khởi tạo controller xử lý câu hỏi thường gặp công khai.
     public PublicFaqController(FaqQueryService faqQueryService,
                                CategoryQueryService categoryQueryService,
                                FaqViewCounter faqViewCounter,
@@ -49,10 +51,12 @@ public class PublicFaqController {
         this.faqPersonalService = faqPersonalService;
     }
 
+    // Hiển thị danh sách câu hỏi thường gặp theo bộ lọc.
     @GetMapping("/faq")
     public String listFaqs(@RequestParam(required = false) Long category,
                            @RequestParam(required = false) String tag,
                            @RequestParam(required = false) String sort,
+                           @RequestParam(required = false) String q,
                            @RequestParam(defaultValue = "0") int page,
                            Model model) {
         FaqSort faqSort = FaqSort.LATEST;
@@ -80,10 +84,12 @@ public class PublicFaqController {
         }
 
         String tagSlug = (tag != null && !tag.isBlank()) ? tag.trim() : null;
+        String searchQuery = (q != null && !q.isBlank()) ? q.trim() : null;
 
         FaqFilter filter = FaqFilter.builder()
                 .categoryIds(categoryIds)
                 .tagSlug(tagSlug)
+                .query(searchQuery)
                 .sort(faqSort)
                 .build();
 
@@ -92,6 +98,9 @@ public class PublicFaqController {
         Page<FaqListItem> faqPage = faqQueryService.list(filter, pageable);
 
         List<String> queryParams = new ArrayList<>();
+        if (searchQuery != null) {
+            queryParams.add("q=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8));
+        }
         if (category != null) {
             queryParams.add("category=" + category);
         }
@@ -114,10 +123,13 @@ public class PublicFaqController {
         model.addAttribute("category", category);
         model.addAttribute("tag", tagSlug);
         model.addAttribute("sort", faqSort.name());
+        model.addAttribute("searchQuery", searchQuery);
+        model.addAttribute("isSearch", searchQuery != null && !searchQuery.isBlank());
 
         return "guest/faq-list";
     }
 
+    // Hiển thị chi tiết câu hỏi thường gặp và dữ liệu cá nhân liên quan.
     @GetMapping("/faq/{slug}")
     public String viewFaq(@PathVariable String slug,
                           HttpServletRequest request,

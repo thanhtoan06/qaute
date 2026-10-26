@@ -23,6 +23,7 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
 
+// Xử lý nghiệp vụ AdminUserPassword trong hệ thống.
 @Service
 @Transactional
 @PreAuthorize("hasRole('ADMIN')")
@@ -35,6 +36,7 @@ public class AdminUserPasswordService {
     private final AuditService audit;
     private final Validator validator;
 
+    // Khởi tạo dịch vụ đặt lại mật khẩu người dùng.
     public AdminUserPasswordService(UserRepository users, PasswordEncoder encoder,
             AuthSessionService sessions, PasswordResetTokenRepository resetTokens,
             AccountActivationTokenRepository activationTokens, AuditService audit,
@@ -48,6 +50,7 @@ public class AdminUserPasswordService {
         this.validator = validator;
     }
 
+    // Đặt mật khẩu mới và thu hồi các phiên hiện tại.
     public void changePassword(Long userId, UserPasswordForm form) {
         var actor = SecurityUtils.requireUser();
         if (actor.getRoleCode() != RoleCode.ADMIN || !actor.isEnabled()) {
@@ -75,6 +78,7 @@ public class AdminUserPasswordService {
                 "passwordChanged=true,sessionsRevoked=true");
     }
 
+    // Kiểm tra mật khẩu mới, xác nhận và giới hạn độ dài.
     private void validate(UserPasswordForm form) {
         if (form == null) throw new BadRequestException("Vui lòng nhập mật khẩu mới");
         Map<String, String> errors = new LinkedHashMap<>();

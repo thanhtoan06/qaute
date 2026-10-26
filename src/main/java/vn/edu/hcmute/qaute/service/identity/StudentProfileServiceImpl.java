@@ -21,6 +21,7 @@ import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
 import vn.edu.hcmute.qaute.service.media.MediaService;
 
+// Xử lý nghiệp vụ StudentProfile trong hệ thống.
 @Service
 @Transactional
 public class StudentProfileServiceImpl implements StudentProfileService {
@@ -31,6 +32,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     private final MediaAssetRepository mediaAssetRepository;
     private final MediaService mediaService;
 
+    // Khởi tạo dịch vụ quản lý hồ sơ sinh viên.
     public StudentProfileServiceImpl(UserRepository userRepository,
                                      StudentProfileRepository studentProfileRepository,
                                      FacultyRepository facultyRepository,
@@ -43,6 +45,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         this.mediaService = mediaService;
     }
 
+    // Lấy thông tin hồ sơ cùng tên khoa và URL ảnh đại diện.
     @Override
     @Transactional(readOnly = true)
     public ProfileView getProfile(Long userId) {
@@ -82,6 +85,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         );
     }
 
+    // Cập nhật thông tin cá nhân và hồ sơ sinh viên.
     @Override
     public void updateProfile(Long userId, ProfileForm form) {
         if (userId == null) {
@@ -113,6 +117,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         studentProfileRepository.save(profile);
     }
 
+    // Gắn ảnh đại diện hợp lệ cho người dùng.
     @Override
     public void updateAvatar(Long userId, Long assetId) {
         if (userId == null) {
@@ -151,4 +156,3 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         userRepository.save(user);
     }
 }
-

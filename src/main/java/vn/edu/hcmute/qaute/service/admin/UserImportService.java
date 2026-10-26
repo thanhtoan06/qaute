@@ -29,6 +29,7 @@ import vn.edu.hcmute.qaute.repository.identity.FacultyRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 
+// Xử lý nghiệp vụ UserImport trong hệ thống.
 @Service
 public class UserImportService {
     private static final long MAX_BYTES = 2L * 1024 * 1024;
@@ -43,6 +44,7 @@ public class UserImportService {
     private final AuditService audit;
     private final TransactionTemplate rowTransaction;
 
+    // Khởi tạo dịch vụ nhập tài khoản sinh viên từ CSV.
     public UserImportService(AdminUserService adminUsers, UserRepository users,
                              FacultyRepository faculties, Validator validator,
                              AuditService audit, PlatformTransactionManager transactionManager) {
@@ -55,6 +57,7 @@ public class UserImportService {
         this.rowTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
+    // Xử lý các dòng CSV và tổng hợp kết quả nhập.
     public ImportReport process(MultipartFile file, boolean dryRun, Long actorId) {
         List<CsvUtil.Row> data = readRows(file);
         Set<String> seenMssv = new HashSet<>();
@@ -77,6 +80,7 @@ public class UserImportService {
         return report;
     }
 
+    // Đọc, giải mã và kiểm tra dữ liệu CSV.
     private List<CsvUtil.Row> readRows(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("Vui lòng chọn tệp CSV");
@@ -124,6 +128,7 @@ public class UserImportService {
         return data;
     }
 
+    // Kiểm tra hoặc nhập một dòng dữ liệu sinh viên.
     private RowResult processRow(CsvUtil.Row row, boolean dryRun, Long actorId,
                                  Set<String> seenMssv, Set<String> seenEmail) {
         List<String> cells = row.cells();

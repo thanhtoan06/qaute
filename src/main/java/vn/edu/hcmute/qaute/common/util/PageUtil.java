@@ -5,11 +5,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+// Cung cấp tiện ích dùng chung cho PageUtil.
 public final class PageUtil {
 
+    /** Ngăn khởi tạo lớp tiện ích. */
     private PageUtil() {
     }
 
+    /** Tạo yêu cầu phân trang với kích thước và trường sắp xếp hợp lệ. */
     public static Pageable of(int page, int size, String sortField, boolean desc,
                               Set<String> allowedSortFields, String defaultSortField) {
         int safePage = Math.max(page, 0);

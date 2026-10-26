@@ -1,5 +1,4 @@
 <%@ page pageEncoding="UTF-8" %>
-<%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -7,6 +6,7 @@
     <title>Không tìm thấy trang - QAUTE</title>
 </head>
 <body>
+<%-- Thông báo trang không tồn tại và cung cấp liên kết trang chủ, FAQ. --%>
 <div class="page page-center">
     <div class="container container-tight py-4">
         <div class="empty">

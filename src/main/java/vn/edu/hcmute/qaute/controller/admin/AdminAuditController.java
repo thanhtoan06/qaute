@@ -24,6 +24,7 @@ import vn.edu.hcmute.qaute.dto.view.AuditLogView;
 import vn.edu.hcmute.qaute.service.admin.AdminAuditService;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminAudit.
 @Controller
 @RequestMapping("/admin/audit-logs")
 public class AdminAuditController {
@@ -33,12 +34,14 @@ public class AdminAuditController {
     private final AdminAuditService logs;
     private final AuditService audit;
 
+    // Khởi tạo bộ điều khiển nhật ký kiểm toán.
     public AdminAuditController(AdminAuditService logs, AuditService audit) {
         this.logs = logs;
         this.audit = audit;
     }
 
     @GetMapping
+    // Tìm kiếm và hiển thị nhật ký kiểm toán.
     public String list(@ModelAttribute("filter") AuditFilter filter,
                        @RequestParam(defaultValue = "0") int page, Model model) {
         model.addAttribute("logs", logs.search(filter, PageRequest.of(Math.max(0, page), 25,
@@ -52,11 +55,13 @@ public class AdminAuditController {
 
     @GetMapping("/{id}")
     @ResponseBody
+    // Lấy chi tiết một mục nhật ký.
     public AuditLogView detail(@PathVariable Long id) {
         return logs.get(id);
     }
 
     @GetMapping("/export")
+    // Xuất nhật ký kiểm toán thành tệp CSV.
     public ResponseEntity<byte[]> export(@ModelAttribute AuditFilter filter) {
         byte[] csv = logs.exportCsv(filter);
         audit.log(AuditActions.REPORT_EXPORT, "audit_log", null, null,
@@ -68,6 +73,7 @@ public class AdminAuditController {
         return ResponseEntity.ok().headers(headers).body(csv);
     }
 
+    // Tạo chuỗi tham số lọc cho phân trang.
     private static String params(AuditFilter filter) {
         StringJoiner values = new StringJoiner("&amp;");
         add(values, "actorId", filter.getActorId());
@@ -80,6 +86,7 @@ public class AdminAuditController {
         return values.toString();
     }
 
+    // Thêm tham số không rỗng vào chuỗi lọc.
     private static void add(StringJoiner values, String key, Object value) {
         if (value != null && !value.toString().isBlank()) {
             values.add(key + "=" + URLEncoder.encode(value.toString().trim(), StandardCharsets.UTF_8));

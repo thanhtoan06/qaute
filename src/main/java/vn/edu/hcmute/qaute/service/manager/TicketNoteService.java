@@ -32,6 +32,7 @@ import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.ticket.TicketAccessService;
 
+// Xử lý nghiệp vụ TicketNote trong hệ thống.
 @Service
 @Transactional
 public class TicketNoteService {
@@ -43,6 +44,7 @@ public class TicketNoteService {
     private final UserLookupService users;
     private final TicketRepository tickets;
 
+    // Khởi tạo dịch vụ quản lý ghi chú nội bộ, bản nháp và thẻ yêu cầu.
     public TicketNoteService(TicketAccessService access, TicketInternalNoteRepository notes,
             TicketTagRepository tags, TicketTagMapRepository tagMap,
             TicketDraftRepository drafts, UserLookupService users, TicketRepository tickets) {
@@ -55,6 +57,7 @@ public class TicketNoteService {
         this.tickets = tickets;
     }
 
+    // Thêm ghi chú nội bộ vào yêu cầu.
     public void addNote(Long ticketId, Long managerId, String html) {
         access.requireViewable(ticketId, managerId, RoleCode.MANAGER);
         String safe = sanitizeNote(html);
@@ -62,6 +65,7 @@ public class TicketNoteService {
                 .contentHtml(safe).pinned(false).build());
     }
 
+    // Đảo trạng thái ghim của ghi chú thuộc tư vấn viên.
     public Long togglePin(Long noteId, Long managerId) {
         TicketInternalNote note = ownedNote(noteId, managerId);
         note.setPinned(!note.isPinned());
@@ -69,12 +73,14 @@ public class TicketNoteService {
         return note.getTicketId();
     }
 
+    // Xóa ghi chú thuộc tư vấn viên.
     public Long deleteNote(Long noteId, Long managerId) {
         TicketInternalNote note = ownedNote(noteId, managerId);
         notes.delete(note);
         return note.getTicketId();
     }
 
+    // Liệt kê ghi chú nội bộ của yêu cầu.
     @Transactional(readOnly = true)
     public List<TicketInternalNoteView> listNotes(Long ticketId, Long userId, RoleCode role) {
         if (role != RoleCode.MANAGER && role != RoleCode.ADMIN) throw new ForbiddenException();
@@ -89,6 +95,7 @@ public class TicketNoteService {
                 userId.equals(note.getAuthorId()), note.getCreatedAt())).toList();
     }
 
+    // Lưu bản nháp phản hồi cho yêu cầu.
     public TicketDraftView saveDraft(Long ticketId, Long managerId, String html) {
         access.requireViewable(ticketId, managerId, RoleCode.MANAGER);
         lockTicket(ticketId);
@@ -102,6 +109,7 @@ public class TicketNoteService {
         return new TicketDraftView(draft.getContentHtml(), draft.getUpdatedAt());
     }
 
+    // Lấy bản nháp phản hồi của tư vấn viên.
     @Transactional(readOnly = true)
     public TicketDraftView getDraft(Long ticketId, Long managerId) {
         access.requireViewable(ticketId, managerId, RoleCode.MANAGER);
@@ -110,11 +118,13 @@ public class TicketNoteService {
                         draft.getUpdatedAt())).orElse(new TicketDraftView("", null));
     }
 
+    // Xóa bản nháp phản hồi của tư vấn viên.
     public void deleteDraft(Long ticketId, Long managerId) {
         access.requireViewable(ticketId, managerId, RoleCode.MANAGER);
         drafts.deleteByTicketIdAndManagerId(ticketId, managerId);
     }
 
+    // Thêm thẻ vào yêu cầu nếu chưa vượt giới hạn.
     public void addTag(Long ticketId, Long managerId, String name) {
         access.requireViewable(ticketId, managerId, RoleCode.MANAGER);
         lockTicket(ticketId);
@@ -134,11 +144,13 @@ public class TicketNoteService {
         }
     }
 
+    // Gỡ thẻ khỏi yêu cầu.
     public void removeTag(Long ticketId, Long managerId, Long tagId) {
         access.requireViewable(ticketId, managerId, RoleCode.MANAGER);
         tagMap.deleteByTicketIdAndTagId(ticketId, tagId);
     }
 
+    // Liệt kê các thẻ gắn với yêu cầu.
     @Transactional(readOnly = true)
     public List<TicketTagView> listTags(Long ticketId, Long userId, RoleCode role) {
         if (role != RoleCode.MANAGER && role != RoleCode.ADMIN) throw new ForbiddenException();
@@ -150,6 +162,7 @@ public class TicketNoteService {
                 .sorted(java.util.Comparator.comparing(TicketTagView::name)).toList();
     }
 
+    // Lấy ghi chú và xác nhận tư vấn viên là tác giả.
     private TicketInternalNote ownedNote(Long noteId, Long managerId) {
         TicketInternalNote note = notes.findById(noteId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy ghi chú"));
@@ -158,10 +171,12 @@ public class TicketNoteService {
         return note;
     }
 
+    // Khóa yêu cầu trước khi cập nhật dữ liệu liên quan.
     private void lockTicket(Long ticketId) {
         tickets.lockById(ticketId).orElseThrow(() -> new NotFoundException("Không tìm thấy ticket"));
     }
 
+    // Làm sạch HTML và kiểm tra độ dài ghi chú.
     private static String sanitizeNote(String html) {
         if (html == null || html.length() > 30000) throw new BadRequestException("Ghi chú không hợp lệ");
         String safe = HtmlSanitizerUtil.sanitize(html);

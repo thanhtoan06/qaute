@@ -14,6 +14,7 @@ import vn.edu.hcmute.qaute.repository.identity.StudentProfileRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
+// Xử lý nghiệp vụ UnverifiedAccountCleanupJob trong hệ thống.
 @Component
 public class UnverifiedAccountCleanupJob {
 
@@ -23,6 +24,7 @@ public class UnverifiedAccountCleanupJob {
     private final StudentProfileRepository studentProfileRepository;
     private final OtpCodeRepository otpCodeRepository;
 
+    // Khởi tạo tác vụ dọn tài khoản chưa xác minh.
     public UnverifiedAccountCleanupJob(JobExecutionTemplate jobExecutionTemplate,
                                        SettingsService settingsService,
                                        UserRepository userRepository,
@@ -35,6 +37,7 @@ public class UnverifiedAccountCleanupJob {
         this.otpCodeRepository = otpCodeRepository;
     }
 
+    // Xóa tài khoản chờ xác minh đã quá thời hạn cấu hình.
     @Scheduled(cron = "0 15 * * * *")
     @Transactional
     public void cleanup() {

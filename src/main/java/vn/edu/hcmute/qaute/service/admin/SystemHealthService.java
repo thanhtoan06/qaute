@@ -17,6 +17,7 @@ import vn.edu.hcmute.qaute.config.CloudinaryConfig.CloudinaryProperties;
 import vn.edu.hcmute.qaute.service.email.EmailService;
 import vn.edu.hcmute.qaute.websocket.PresenceService;
 
+// Xử lý nghiệp vụ SystemHealth trong hệ thống.
 @Service
 public class SystemHealthService {
     public enum Status { OK, WARN, FAIL }
@@ -34,6 +35,7 @@ public class SystemHealthService {
     private final String mailUsername;
     private final String fallbackVersion;
 
+    // Khởi tạo dịch vụ kiểm tra tình trạng hệ thống.
     public SystemHealthService(EntityManager entityManager, EmailService emails,
             Cloudinary cloudinary, CloudinaryProperties cloudinaryProperties,
             PresenceService presence, AppProperties appProperties,
@@ -51,6 +53,7 @@ public class SystemHealthService {
         this.fallbackVersion = fallbackVersion;
     }
 
+    // Tổng hợp trạng thái các thành phần hệ thống.
     public Map<String, HealthCheck> checks() {
         Map<String, HealthCheck> result = new LinkedHashMap<>();
         result.put("database", database());
@@ -63,10 +66,12 @@ public class SystemHealthService {
         return result;
     }
 
+    // Kiểm tra tài khoản gửi email đã được cấu hình.
     public boolean isEmailConfigured() {
         return mailUsername != null && !mailUsername.isBlank();
     }
 
+    // Đưa email kiểm tra vào hàng đợi gửi.
     public void queueTestEmail(String adminEmail) {
         if (!isEmailConfigured()) {
             throw new BadRequestException("Chưa cấu hình tài khoản gửi email");
@@ -80,6 +85,7 @@ public class SystemHealthService {
                         "linkUrl", healthLink(), "linkLabel", "Mở trang kiểm tra"));
     }
 
+    // Kiểm tra khả năng truy vấn cơ sở dữ liệu.
     private HealthCheck database() {
         long started = System.nanoTime();
         try {
@@ -91,6 +97,7 @@ public class SystemHealthService {
         }
     }
 
+    // Kiểm tra cấu hình và hàng đợi email.
     private HealthCheck email() {
         try {
             List<Object[]> counts = entityManager.createQuery(
@@ -113,6 +120,7 @@ public class SystemHealthService {
         }
     }
 
+    // Kiểm tra cấu hình và kết nối Cloudinary.
     private HealthCheck cloudinary() {
         if (!cloudinaryProperties.isConfigured()) {
             return new HealthCheck("Cloudinary", Status.WARN, "Chưa cấu hình lưu trữ tệp");
@@ -125,6 +133,7 @@ public class SystemHealthService {
         }
     }
 
+    // Đánh giá mức sử dụng bộ nhớ JVM.
     private HealthCheck memory() {
         Runtime runtime = Runtime.getRuntime();
         long used = runtime.totalMemory() - runtime.freeMemory();
@@ -135,6 +144,7 @@ public class SystemHealthService {
         return new HealthCheck("Bộ nhớ JVM", status, detail);
     }
 
+    // Lấy phiên bản và tình trạng cấu hình ứng dụng.
     private HealthCheck application() {
         BuildProperties build = buildProperties.getIfAvailable();
         String version = build == null ? fallbackVersion : build.getVersion();
@@ -144,10 +154,12 @@ public class SystemHealthService {
                 "Phiên bản " + version + " · " + configuration);
     }
 
+    // Đổi dung lượng byte sang MiB.
     private static long mib(long bytes) {
         return bytes / (1024 * 1024);
     }
 
+    // Tạo liên kết trang kiểm tra từ URL cấu hình.
     private String healthLink() {
         try {
             URI configured = URI.create(appProperties.getBaseUrl());

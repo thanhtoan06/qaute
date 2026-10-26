@@ -22,12 +22,15 @@ import org.springframework.web.util.HtmlUtils;
 import vn.edu.hcmute.qaute.common.constant.ChatContentType;
 import vn.edu.hcmute.qaute.common.constant.ChatSenderType;
 import vn.edu.hcmute.qaute.common.constant.ChatSessionStatus;
+import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.common.constant.NotificationType;
+import vn.edu.hcmute.qaute.common.constant.RoleCode;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.exception.InvalidTransitionException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
 import vn.edu.hcmute.qaute.dto.view.CategoryView;
 import vn.edu.hcmute.qaute.dto.view.ChatHistoryItem;
+import vn.edu.hcmute.qaute.dto.view.ChatConversationHistoryItem;
 import vn.edu.hcmute.qaute.dto.view.ChatMessageView;
 import vn.edu.hcmute.qaute.dto.view.ChatSessionView;
 import vn.edu.hcmute.qaute.dto.view.FaqSuggestion;
@@ -38,12 +41,14 @@ import vn.edu.hcmute.qaute.entity.identity.User;
 import vn.edu.hcmute.qaute.repository.chat.ChatMessageRepository;
 import vn.edu.hcmute.qaute.repository.chat.ChatSessionRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
+import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
 import vn.edu.hcmute.qaute.service.notification.NotificationService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
 import vn.edu.hcmute.qaute.service.ticket.command.CreateTicketCommand;
 
+// Xử lý nghiệp vụ Chat trong hệ thống.
 @Service
 @Transactional
 public class ChatServiceImpl implements ChatService {
@@ -59,12 +64,14 @@ public class ChatServiceImpl implements ChatService {
     private final ApplicationEventPublisher events;
     private final EntityManager entityManager;
     private final TicketWorkflowService ticketWorkflow;
+    private final AuditService audit;
 
+    // Khởi tạo dịch vụ chat cùng các dịch vụ nghiệp vụ liên quan.
     public ChatServiceImpl(ChatSessionRepository sessions, ChatMessageRepository messages,
             ChatAvailabilityService availability, CategoryQueryService categories, FaqQueryService faqs,
             UserLookupService users, NotificationService notifications,
             ApplicationEventPublisher events, EntityManager entityManager,
-            TicketWorkflowService ticketWorkflow) {
+            TicketWorkflowService ticketWorkflow, AuditService audit) {
         this.sessions = sessions;
         this.messages = messages;
         this.availability = availability;
@@ -75,9 +82,11 @@ public class ChatServiceImpl implements ChatService {
         this.events = events;
         this.entityManager = entityManager;
         this.ticketWorkflow = ticketWorkflow;
+        this.audit = audit;
     }
 
     @Override
+    // Tạo phiên BOT mới hoặc trả về phiên hiện tại của sinh viên.
     public ChatSessionView start(Long studentId, Long categoryId, String question) {
         // Serialize starts by this student so two browser tabs cannot create two active sessions.
         if (entityManager.find(User.class, studentId, LockModeType.PESSIMISTIC_WRITE) == null) {
@@ -102,6 +111,8 @@ public class ChatServiceImpl implements ChatService {
         session.setStartedAt(now);
         session.setLastMessageAt(now);
         session = sessions.saveAndFlush(session);
+        audit.log(AuditActions.CHAT_SESSION_STARTED, "ChatSession", session.getId(),
+                null, "status=BOT; categoryId=" + categoryId);
 
         ChatMessage bot = new ChatMessage();
         bot.setSessionId(session.getId());
@@ -114,6 +125,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    // Chuyển phiên BOT sang hàng đợi tư vấn viên khi có người đủ điều kiện.
     public ChatSessionView requestAgent(Long sessionId, Long studentId) {
         ChatSession session = requireOwn(sessionId, studentId);
         if (session.getStatus() != ChatSessionStatus.BOT) {
@@ -126,12 +138,16 @@ public class ChatServiceImpl implements ChatService {
             session.setEndReason("NO_AGENT");
             session.setEndedAt(LocalDateTime.now());
             sessions.saveAndFlush(session);
+            audit.log(AuditActions.CHAT_SESSION_EXPIRED, "ChatSession", session.getId(),
+                    "status=BOT", "status=EXPIRED; reason=NO_AGENT");
             return toView(session, List.of(), working,
                     "Hiện chưa có tư vấn viên trực. Bạn có thể chuyển thành yêu cầu tư vấn.");
         }
         session.setStatus(ChatSessionStatus.WAITING);
         session.setLastMessageAt(LocalDateTime.now());
         sessions.saveAndFlush(session);
+        audit.log(AuditActions.CHAT_AGENT_REQUESTED, "ChatSession", session.getId(),
+                "status=BOT", "status=WAITING");
         events.publishEvent(new ChatQueueChangedEvent(session.getCategoryId()));
         notifications.notifyUsers(eligible, NotificationType.CHAT_WAITING_NEW,
                 "Sinh viên đang chờ tư vấn", session.getInitialQuestion(),
@@ -140,21 +156,26 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    // Hủy phiên BOT hoặc phiên đang chờ của sinh viên.
     public void cancel(Long sessionId, Long studentId) {
         ChatSession session = requireOwn(sessionId, studentId);
         if (session.getStatus() != ChatSessionStatus.BOT && session.getStatus() != ChatSessionStatus.WAITING) {
             throw new InvalidTransitionException("Chỉ có thể hủy phiên BOT hoặc đang chờ");
         }
+        ChatSessionStatus previous = session.getStatus();
         session.setStatus(ChatSessionStatus.ENDED);
         session.setEndReason("STUDENT_CANCEL");
         session.setEndedBy(studentId);
         session.setEndedAt(LocalDateTime.now());
         sessions.saveAndFlush(session);
+        audit.log(AuditActions.CHAT_SESSION_CANCELLED, "ChatSession", session.getId(),
+                "status=" + previous, "status=ENDED; reason=STUDENT_CANCEL");
         events.publishEvent(new ChatQueueChangedEvent(session.getCategoryId()));
     }
 
     @Override
     @Transactional(readOnly = true)
+    // Tìm phiên chat đang hoạt động gần nhất của sinh viên.
     public Optional<ChatSessionView> current(Long studentId) {
         return sessions.findFirstByStudentIdAndStatusInOrderByIdDesc(studentId, CURRENT_STATUSES)
                 .map(session -> toView(session, null));
@@ -162,11 +183,13 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional(readOnly = true)
+    // Lấy tin nhắn mới của phiên chat sau khi xác thực người tham gia.
     public List<ChatMessageView> messages(Long sessionId, Long userId, Long afterId) {
         ChatSession session = sessions.findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
         if (userId == null || (!Objects.equals(session.getStudentId(), userId)
-                && !Objects.equals(session.getManagerId(), userId))) {
+                && !Objects.equals(session.getManagerId(), userId)
+                && !vn.edu.hcmute.qaute.security.SecurityUtils.hasRole(RoleCode.ADMIN))) {
             throw new NotFoundException("Không tìm thấy phiên chat");
         }
         long cursor = afterId == null ? 0L : Math.max(0L, afterId);
@@ -185,6 +208,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    // Lưu điểm và nhận xét đánh giá cho phiên chat đã kết thúc.
     public void rate(Long sessionId, Long studentId, int rating, String comment) {
         ChatSession session = requireOwn(sessionId, studentId);
         if (session.getStatus() != ChatSessionStatus.ENDED) {
@@ -200,6 +224,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional(readOnly = true)
+    // Lấy lịch sử phiên chat của sinh viên theo trang yêu cầu.
     public Page<ChatHistoryItem> history(Long studentId, Pageable p) {
         return sessions.findByStudentIdOrderByIdDesc(studentId, BoundedPages.of(p)).map(session -> {
             UserSummary manager = session.getManagerId() == null ? null : users.getSummary(session.getManagerId());
@@ -210,6 +235,32 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<ChatConversationHistoryItem> managerHistory(Long managerId, Pageable p) {
+        return sessions.findByManagerIdOrderByIdDesc(managerId, BoundedPages.of(p))
+                .map(this::toConversationHistoryItem);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ChatConversationHistoryItem> adminHistory(Pageable p) {
+        return sessions.findAllByOrderByIdDesc(BoundedPages.of(p))
+                .map(this::toConversationHistoryItem);
+    }
+
+    private ChatConversationHistoryItem toConversationHistoryItem(ChatSession session) {
+        UserSummary student = users.getSummary(session.getStudentId());
+        UserSummary manager = session.getManagerId() == null ? null : users.getSummary(session.getManagerId());
+        String categoryName = categories.findCategory(session.getCategoryId())
+                .map(CategoryView::name).orElse("");
+        return new ChatConversationHistoryItem(session.getId(), session.getStartedAt(), session.getEndedAt(),
+                student == null ? "Sinh viên" : student.fullName(),
+                manager == null ? null : manager.fullName(), categoryName,
+                session.getInitialQuestion(), session.getStatus());
+    }
+
+    @Override
+    // Tạo yêu cầu tư vấn từ phiên chat và liên kết mã yêu cầu với phiên.
     public Long createTicketFromChat(Long sessionId, Long userId) {
         ChatSession session = sessions.findLockedById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
@@ -231,6 +282,7 @@ public class ChatServiceImpl implements ChatService {
         return ticketId;
     }
 
+    // Tạo bản ghi hội thoại HTML đã giới hạn độ dài để đưa vào yêu cầu tư vấn.
     private String transcript(Long sessionId) {
         StringBuilder html = new StringBuilder("<p>Biên bản hội thoại tư vấn trực tuyến QAUTE</p>");
         int textLength = 40;
@@ -250,20 +302,24 @@ public class ChatServiceImpl implements ChatService {
         return html.toString();
     }
 
+    // Lấy tên hiển thị của người gửi hoặc giá trị dự phòng.
     private String getSenderName(Long senderId) {
         UserSummary sender = users.getSummary(senderId);
         return sender == null ? "Người tham gia" : sender.fullName();
     }
 
+    // Tìm phiên chat thuộc về sinh viên đã chỉ định.
     private ChatSession requireOwn(Long id, Long studentId) {
         return sessions.findById(id).filter(session -> Objects.equals(session.getStudentId(), studentId))
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
     }
 
+    // Tạo dữ liệu hiển thị phiên chat cùng vị trí hàng đợi và FAQ gợi ý.
     private ChatSessionView toView(ChatSession session, List<FaqSuggestion> suggestions) {
         return toView(session, suggestions, availability.isWorkingNow(), null);
     }
 
+    // Tạo dữ liệu hiển thị phiên chat với trạng thái giờ làm việc và thông báo tùy chỉnh.
     private ChatSessionView toView(ChatSession session, List<FaqSuggestion> suggestions,
             boolean working, String message) {
         Integer queuePosition = null;
@@ -280,6 +336,7 @@ public class ChatServiceImpl implements ChatService {
                 working, message, resultSuggestions, session.getStartedAt());
     }
 
+    // Chọn tên hiển thị phù hợp cho người gửi tin nhắn.
     private String senderName(ChatMessage item, Map<Long, UserSummary> summaries) {
         if (item.getSenderId() != null && summaries.containsKey(item.getSenderId())) {
             return summaries.get(item.getSenderId()).fullName();
@@ -287,19 +344,62 @@ public class ChatServiceImpl implements ChatService {
         return item.getSenderType() == ChatSenderType.BOT ? "Trợ lý QAUTE" : "Hệ thống";
     }
 
+    // Tạo nội dung phản hồi BOT từ các FAQ gợi ý.
     private String botContent(List<FaqSuggestion> suggestions) {
         if (suggestions == null || suggestions.isEmpty()) {
             return "Chưa tìm thấy FAQ phù hợp. Bạn có thể yêu cầu tư vấn viên hỗ trợ.";
         }
-        StringBuilder content = new StringBuilder("Một số FAQ có thể giúp bạn:\n");
-        for (FaqSuggestion suggestion : suggestions) {
-            content.append("• ").append(suggestion.title()).append(" (/faq/")
-                    .append(suggestion.slug()).append(")\n");
+
+        // Nếu có FAQ phù hợp, trả lời FAQ đầu tiên với toàn bộ nội dung
+        FaqSuggestion bestMatch = suggestions.get(0);
+        StringBuilder content = new StringBuilder();
+
+        // Chỉ hiển thị toàn bộ nội dung FAQ (bodyHtml)
+        if (bestMatch.bodyHtml() != null && !bestMatch.bodyHtml().isBlank()) {
+            // Loại bỏ thẻ HTML để hiển thị dạng text trong chat
+            String cleanContent = stripHtml(bestMatch.bodyHtml());
+            content.append(cleanContent);
+        } else if (bestMatch.summary() != null && !bestMatch.summary().isBlank()) {
+            // Fallback: dùng summary nếu không có bodyHtml
+            content.append(bestMatch.summary());
         }
-        content.append("Bạn có thể yêu cầu tư vấn viên nếu vẫn cần hỗ trợ.");
-        return content.length() > 2000 ? content.substring(0, 2000) : content.toString();
+
+        content.append("\n\n---\nXem chi tiết: /faq/").append(bestMatch.slug());
+
+        // Nếu có nhiều FAQ phù hợp, liệt kê thêm
+        if (suggestions.size() > 1) {
+            content.append("\n\nCác câu hỏi liên quan khác:\n");
+            for (int i = 1; i < suggestions.size(); i++) {
+                FaqSuggestion suggestion = suggestions.get(i);
+                content.append("• ").append(suggestion.title()).append(" (/faq/")
+                        .append(suggestion.slug()).append(")\n");
+            }
+        }
+
+        content.append("\n\nBạn có thể yêu cầu tư vấn viên nếu vẫn cần hỗ trợ.");
+
+        // Giới hạn độ dài tin nhắn (tối đa 5000 ký tự)
+        return content.length() > 5000 ? content.substring(0, 5000) + "..." : content.toString();
     }
 
+    // Loại bỏ thẻ HTML để lấy nội dung text thuần
+    private String stripHtml(String html) {
+        if (html == null) return "";
+        // Loại bỏ thẻ HTML cơ bản
+        String text = html.replaceAll("<[^>]+>", " ");
+        // Thay thế các ký tự đặc biệt HTML
+        text = text.replace("&nbsp;", " ")
+                  .replace("&amp;", "&")
+                  .replace("&lt;", "<")
+                  .replace("&gt;", ">")
+                  .replace("&quot;", "\"")
+                  .replace("&#39;", "'");
+        // Xóa khoảng trắng thừa
+        text = text.replaceAll("\\s+", " ").trim();
+        return text;
+    }
+
+    // Chuẩn hóa và kiểm tra độ dài của chuỗi bắt buộc.
     private String trimRequired(String value, int min, int max, String error) {
         if (value == null || value.trim().length() < min || value.trim().length() > max) {
             throw new BadRequestException(error);

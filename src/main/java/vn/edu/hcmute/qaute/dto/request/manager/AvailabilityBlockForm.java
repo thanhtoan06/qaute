@@ -7,9 +7,18 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
-@Getter @Setter
+// Đóng gói dữ liệu đầu vào cho thao tác AvailabilityBlock.
+@Getter
+@Setter
 public class AvailabilityBlockForm {
-    @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) private LocalDateTime startAt;
-    @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) private LocalDateTime endAt;
-    @Size(max = 200) private String reason;
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime startAt;
+
+    @NotNull
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime endAt;
+
+    @Size(max = 200)
+    private String reason;
 }

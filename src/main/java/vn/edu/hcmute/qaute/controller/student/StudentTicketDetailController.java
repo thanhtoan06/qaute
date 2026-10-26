@@ -18,12 +18,14 @@ import vn.edu.hcmute.qaute.service.student.StudentTicketDetailService;
 import vn.edu.hcmute.qaute.service.student.StudentReviewService;
 import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho StudentTicketDetail.
 @Controller
 public class StudentTicketDetailController {
     private final StudentTicketDetailService details;
     private final TicketWorkflowService workflow;
     private final StudentReviewService reviews;
 
+    // Khởi tạo bộ điều khiển chi tiết yêu cầu và các dịch vụ xử lý.
     public StudentTicketDetailController(StudentTicketDetailService details, TicketWorkflowService workflow,
                                          StudentReviewService reviews) {
         this.details = details;
@@ -32,6 +34,7 @@ public class StudentTicketDetailController {
     }
 
     @GetMapping("/student/tickets/{id}")
+    // Hiển thị chi tiết yêu cầu cùng biểu mẫu phản hồi và đánh giá.
     public String detail(@PathVariable Long id, Model model) {
         Long studentId = SecurityUtils.requireUserId();
         model.addAttribute("detail", details.getDetail(studentId, id));
@@ -42,6 +45,7 @@ public class StudentTicketDetailController {
     }
 
     @PostMapping("/student/tickets/{id}/reply")
+    // Kiểm tra và gửi phản hồi cho yêu cầu.
     public String reply(@PathVariable Long id, @Valid @ModelAttribute("replyForm") TicketReplyForm form,
                         BindingResult result, RedirectAttributes flash) {
         if (result.hasErrors()) {
@@ -58,6 +62,7 @@ public class StudentTicketDetailController {
     }
 
     @PostMapping("/student/tickets/{id}/cancel")
+    // Kiểm tra lý do và hủy yêu cầu của sinh viên.
     public String cancel(@PathVariable Long id, @Valid TicketActionForm form, BindingResult result,
                          RedirectAttributes flash) {
         if (result.hasErrors()) {
@@ -74,6 +79,7 @@ public class StudentTicketDetailController {
     }
 
     @PostMapping("/student/tickets/{id}/confirm")
+    // Xác nhận yêu cầu đã được giải quyết.
     public String confirm(@PathVariable Long id, RedirectAttributes flash) {
         try {
             workflow.confirmClose(id, SecurityUtils.requireUserId());
@@ -85,6 +91,7 @@ public class StudentTicketDetailController {
     }
 
     @PostMapping("/student/tickets/{id}/reopen")
+    // Kiểm tra lý do và yêu cầu mở lại yêu cầu đã đóng.
     public String reopen(@PathVariable Long id, @Valid TicketActionForm form, BindingResult result,
                          RedirectAttributes flash) {
         String reason = form.getReason() == null ? "" : form.getReason().trim();
@@ -102,6 +109,7 @@ public class StudentTicketDetailController {
     }
 
     @PostMapping("/student/tickets/{id}/review")
+    // Kiểm tra và lưu đánh giá của sinh viên về yêu cầu.
     public String review(@PathVariable Long id, @Valid @ModelAttribute("reviewForm") TicketReviewForm form,
                          BindingResult result, RedirectAttributes flash) {
         if (result.hasErrors()) {

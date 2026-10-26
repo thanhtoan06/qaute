@@ -1,5 +1,6 @@
 package vn.edu.hcmute.qaute.dto.view;
 
+// Đóng gói dữ liệu LoginOutcome để hiển thị hoặc trả về API.
 public record LoginOutcome(Kind kind, SessionTokens tokens, String email, String redirectRole,
                            long lockedMinutes) {
 

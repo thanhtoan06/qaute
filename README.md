@@ -32,11 +32,11 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 #### 1.1. Trang chủ
 
 - Xem danh mục FAQ theo cấu trúc cây
-- Xem FAQ nổi bật (featured)
+- Xem FAQ nổi bật
 - Xem FAQ xem nhiều nhất
 - Xem FAQ mới nhất
 - Xem thông báo công khai
-- Xem thống kê nhanh (số FAQ, thời gian phản hồi trung bình)
+- Xem thống kê nhanh
 - Xem thông tin liên hệ
 
 #### 1.2. Tra cứu FAQ công khai
@@ -58,7 +58,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 #### 1.4. Đăng nhập
 
 - Đăng nhập bằng email hoặc MSSV
-- Đăng nhập bằng Google OAuth2 (nếu được bật)
+- Đăng nhập bằng Google OAuth2
 - Quên mật khẩu: gửi OTP qua email để đặt lại
 
 ---
@@ -159,8 +159,8 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Nhận ticket để xử lý
 - Phản hồi ticket
 - Chuyển ticket cho manager khác (trong phạm vi)
-- Ghi chú nội bộ (internal note)
-- Can thiệp ticket (intervention) với lý do bắt buộc
+- Ghi chú nội bộ
+- Can thiệp ticket với lý do bắt buộc
 - Đóng ticket
 - Đánh dấu ticket khẩn cấp
 - Chuyển ticket thành FAQ
@@ -211,7 +211,7 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 - Xóa khung chặn
 - Tự động tạo khung giờ dựa trên quy tắc
 
-#### 3.7. Hồ sơ sinh viên 360
+#### 3.7. Hồ sơ sinh viên
 
 - Xem thông tin cá nhân sinh viên
 - Xem lịch sử ticket của sinh viên
@@ -367,8 +367,6 @@ Hệ thống QAUTE có 4 vai trò người dùng chính:
 ---
 
 ## Tài khoản demo
-
-
 
 | Vai trò         | Email hoặc MSSV                                    | Mật khẩu        |
 | ---------------- | --------------------------------------------------- | ----------------- |

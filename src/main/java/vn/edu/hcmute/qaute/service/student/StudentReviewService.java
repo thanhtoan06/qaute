@@ -24,6 +24,7 @@ import vn.edu.hcmute.qaute.service.ticket.TicketAccessService;
 import vn.edu.hcmute.qaute.service.ticket.event.TicketEventPublisher;
 import vn.edu.hcmute.qaute.service.ticket.event.TicketEventType;
 
+// Xử lý nghiệp vụ StudentReview trong hệ thống.
 @Service
 @Transactional
 public class StudentReviewService {
@@ -35,6 +36,7 @@ public class StudentReviewService {
     private final TicketEventPublisher events;
     private final SettingsService settings;
 
+    // Khởi tạo dịch vụ đánh giá với các phụ thuộc cần thiết.
     public StudentReviewService(TicketAccessService access, TicketReviewRepository reviews,
                                 TicketEventPublisher events, SettingsService settings) {
         this.access = access;
@@ -43,6 +45,7 @@ public class StudentReviewService {
         this.settings = settings;
     }
 
+    // Lưu hoặc cập nhật đánh giá yêu cầu của sinh viên.
     public void saveReview(Long studentId, Long ticketId, TicketReviewForm form) {
         Ticket ticket = access.requireViewable(ticketId, studentId, RoleCode.STUDENT);
         if (ticket.getStatus() != TicketStatus.RESOLVED && ticket.getStatus() != TicketStatus.CLOSED) {
@@ -77,6 +80,7 @@ public class StudentReviewService {
         }
     }
 
+    // Kiểm tra điểm đánh giá nằm trong khoảng hợp lệ.
     private static void validateRating(int rating) {
         if (rating < 1 || rating > 5) {
             throw new BadRequestException("Vui lòng chọn số sao từ 1 đến 5", Map.of(
@@ -84,6 +88,7 @@ public class StudentReviewService {
         }
     }
 
+    // Chuẩn hóa và kiểm tra các mã lý do đánh giá.
     private static List<String> normalizeReasonCodes(List<String> source) {
         if (source == null || source.isEmpty()) return List.of();
         LinkedHashSet<String> normalized = new LinkedHashSet<>();
@@ -98,6 +103,7 @@ public class StudentReviewService {
         return List.copyOf(normalized);
     }
 
+    // Chuẩn hóa nhận xét và kiểm tra độ dài.
     private static String normalizeComment(String comment) {
         String value = comment == null ? "" : comment.trim();
         if (value.length() > 500) {

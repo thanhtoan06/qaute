@@ -7,17 +7,23 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 import vn.edu.hcmute.qaute.common.constant.TicketStatus;
 
+// Đóng gói dữ liệu đầu vào cho thao tác TicketFilter.
 @Getter
 @Setter
 @NoArgsConstructor
 public class TicketFilter {
+
     private TicketStatus status;
+
     private Long categoryId;
+
     private String q;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate from;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate to;
+
     private String sort;
 }
-

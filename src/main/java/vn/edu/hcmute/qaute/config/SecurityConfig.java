@@ -1,36 +1,38 @@
 package vn.edu.hcmute.qaute.config;
 
 import jakarta.servlet.DispatcherType;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import vn.edu.hcmute.qaute.security.AuthEntryPoint;
 import vn.edu.hcmute.qaute.security.CookieService;
 import vn.edu.hcmute.qaute.security.CsrfCookieFilter;
+import vn.edu.hcmute.qaute.security.GoogleSsoSuccessHandler;
 import vn.edu.hcmute.qaute.security.JwtAuthenticationFilter;
 import vn.edu.hcmute.qaute.security.JwtService;
 import vn.edu.hcmute.qaute.security.QauteAccessDeniedHandler;
 import vn.edu.hcmute.qaute.security.TokenAuthenticationService;
 import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
-import vn.edu.hcmute.qaute.security.GoogleSsoSuccessHandler;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
+// Cấu hình thành phần SecurityConfig cho ứng dụng.
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    // Cấu hình tường lửa HTTP cho phép URL chứa dấu gạch chéo kép.
     @Bean
     public HttpFirewall httpFirewall() {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
@@ -38,11 +40,13 @@ public class SecurityConfig {
         return firewall;
     }
 
+    // Gắn tường lửa HTTP vào cấu hình bảo mật web.
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(HttpFirewall httpFirewall) {
         return web -> web.httpFirewall(httpFirewall);
     }
 
+    // Cấu hình chuỗi lọc xác thực và phân quyền HTTP.
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
@@ -96,7 +100,7 @@ public class SecurityConfig {
                         .contentSecurityPolicy(csp -> csp.policyDirectives(
                                 "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
                                         + "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
-                                        +                                 "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:; "
+                                        + "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com data:; "
                                         + "img-src 'self' data: blob: https://res.cloudinary.com; connect-src 'self' ws: wss:; "
                                         + "frame-ancestors 'self'")));
         if (clientRegistrations.getIfAvailable() != null && googleSuccessHandlers.getIfAvailable() != null) {

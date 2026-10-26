@@ -17,6 +17,7 @@ import vn.edu.hcmute.qaute.service.chat.ChatDeskService;
 import vn.edu.hcmute.qaute.service.chat.ChatEventPublisher;
 import vn.edu.hcmute.qaute.service.chat.ChatMessagingService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ChatStomp.
 @Controller
 public class ChatStompController {
     private final ChatMessagingService messaging;
@@ -25,6 +26,7 @@ public class ChatStompController {
     private final ChatEventPublisher publisher;
     private final SimpMessagingTemplate socket;
 
+    // Khởi tạo bộ điều khiển tin nhắn chat qua WebSocket.
     public ChatStompController(ChatMessagingService messaging, ChatDeskService desk,
             ChatAccessChecker access, ChatEventPublisher publisher, SimpMessagingTemplate socket) {
         this.messaging = messaging;
@@ -34,12 +36,14 @@ public class ChatStompController {
         this.socket = socket;
     }
 
+    // Gửi tin nhắn chat từ người dùng kết nối.
     @MessageMapping("chat.send")
     public void send(ChatSendPayload payload, Principal principal) {
         handle(payload == null ? null : payload.sessionId(), principal, userId -> messaging.send(
                 payload.sessionId(), userId, payload.clientMessageId(), payload.content(), payload.assetId()));
     }
 
+    // Cập nhật trạng thái đang nhập của phiên chat.
     @MessageMapping("chat.typing")
     public void typing(ChatTypingPayload payload, Principal principal) {
         handle(payload == null ? null : payload.sessionId(), principal, userId -> {
@@ -48,30 +52,35 @@ public class ChatStompController {
         });
     }
 
+    // Cập nhật mốc tin nhắn đã đọc của phiên chat.
     @MessageMapping("chat.read")
     public void read(ChatReadPayload payload, Principal principal) {
         handle(payload == null ? null : payload.sessionId(), principal,
                 userId -> messaging.read(payload.sessionId(), userId, payload.lastReadMessageId()));
     }
 
+    // Kết thúc phiên chat.
     @MessageMapping("chat.end")
     public void end(ChatSessionPayload payload, Principal principal) {
         handle(payload == null ? null : payload.sessionId(), principal,
                 userId -> messaging.end(payload.sessionId(), userId));
     }
 
+    // Chấp nhận phiên chat đang chờ.
     @MessageMapping("chat.accept")
     public void accept(ChatSessionPayload payload, Principal principal) {
         handle(payload == null ? null : payload.sessionId(), principal,
                 userId -> desk.accept(payload.sessionId(), userId));
     }
 
+    // Chuyển phiên chat cho quản lý được chỉ định.
     @MessageMapping("chat.transfer")
     public void transfer(ChatTransferPayload payload, Principal principal) {
         handle(payload == null ? null : payload.sessionId(), principal,
                 userId -> desk.transfer(payload.sessionId(), userId, payload.toManagerId()));
     }
 
+    // Kiểm tra người gửi rồi thực thi thao tác chat.
     private void handle(Long sessionId, Principal principal, Action action) {
         if (principal == null || sessionId == null || sessionId <= 0) {
             return;
@@ -95,6 +104,7 @@ public class ChatStompController {
 
     @FunctionalInterface
     private interface Action {
+        // Thực thi thao tác chat với mã người dùng.
         void run(Long userId);
     }
 }

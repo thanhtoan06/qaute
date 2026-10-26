@@ -16,6 +16,7 @@ import vn.edu.hcmute.qaute.repository.identity.AccountActivationTokenRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 
+// Xử lý nghiệp vụ AccountActivation trong hệ thống.
 @Service
 public class AccountActivationService {
 
@@ -25,6 +26,7 @@ public class AccountActivationService {
     private final AuthSessionService authSessionService;
     private final AuditService auditService;
 
+    // Khởi tạo dịch vụ kích hoạt tài khoản.
     public AccountActivationService(AccountActivationTokenRepository accountActivationTokenRepository,
                                     UserRepository userRepository,
                                     PasswordEncoder passwordEncoder,
@@ -37,6 +39,7 @@ public class AccountActivationService {
         this.auditService = auditService;
     }
 
+    // Kiểm tra token kích hoạt có còn hợp lệ hay không.
     @Transactional(readOnly = true)
     public boolean isTokenValid(String rawToken) {
         if (rawToken == null || rawToken.isBlank()) {
@@ -50,6 +53,7 @@ public class AccountActivationService {
                 .isPresent();
     }
 
+    // Kích hoạt tài khoản và thiết lập mật khẩu mới.
     @Transactional
     public void activate(String rawToken, String newPassword) {
         if (!new StrongPasswordValidator().isValid(newPassword, null)) {

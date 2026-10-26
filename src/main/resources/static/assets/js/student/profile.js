@@ -1,6 +1,7 @@
 (function (window, document) {
     'use strict';
 
+    // Khởi tạo quy trình chọn và tải ảnh đại diện.
     function init() {
         const btnChangeAvatar = document.getElementById('btnChangeAvatar');
         const fileInput = document.getElementById('avatarFileInput');
@@ -15,10 +16,12 @@
             return;
         }
 
+        // Mở hộp thoại chọn tệp ảnh.
         btnChangeAvatar.addEventListener('click', function () {
             fileInput.click();
         });
 
+        // Kiểm tra và xử lý ảnh vừa được chọn.
         fileInput.addEventListener('change', function (event) {
             const files = event.target.files;
             if (!files || files.length === 0) {
@@ -36,8 +39,10 @@
             setLoading(true);
 
             const reader = new FileReader();
+            // Tạo ảnh từ dữ liệu tệp để cắt và xem trước.
             reader.onload = function (e) {
                 const img = new Image();
+                // Cắt ảnh thành hình vuông và chuẩn bị tải lên.
                 img.onload = function () {
                     try {
                         const canvas = document.createElement('canvas');
@@ -62,6 +67,7 @@
                         }
 
                         // Convert canvas to blob and upload
+                        // Chuyển ảnh đã xử lý thành tệp để tải lên.
                         canvas.toBlob(function (blob) {
                             if (!blob) {
                                 showError('Không thể xử lý hình ảnh');
@@ -75,12 +81,14 @@
                         setLoading(false);
                     }
                 };
+                // Báo lỗi nếu trình duyệt không đọc được ảnh.
                 img.onerror = function () {
                     showError('Không thể nạp tệp hình ảnh');
                     setLoading(false);
                 };
                 img.src = e.target.result;
             };
+            // Báo lỗi nếu không thể đọc dữ liệu tệp.
             reader.onerror = function () {
                 showError('Không thể đọc tệp hình ảnh');
                 setLoading(false);
@@ -88,6 +96,7 @@
             reader.readAsDataURL(file);
         });
 
+        // Tải ảnh đã xử lý lên và gửi biểu mẫu khi thành công.
         function uploadAvatarBlob(blob) {
             const formData = new FormData();
             formData.append('file', blob, 'avatar.jpg');
@@ -106,7 +115,9 @@
                 headers: headers,
                 body: formData
             })
+                // Kiểm tra phản hồi tải ảnh trước khi xử lý dữ liệu.
                 .then(function (response) {
+                    // Đọc nội dung JSON để kiểm tra lỗi từ máy chủ.
                     return response.json().then(function (data) {
                         if (!response.ok || !data.success) {
                             const message = (data && data.message) ? data.message : 'Tải ảnh lên thất bại';
@@ -115,6 +126,7 @@
                         return data;
                     });
                 })
+                // Lưu mã tài nguyên ảnh và gửi biểu mẫu.
                 .then(function (json) {
                     const asset = json.data;
                     if (asset && asset.id && avatarAssetIdInput && avatarForm) {
@@ -124,6 +136,7 @@
                         throw new Error('Dữ liệu ảnh trả về không hợp lệ');
                     }
                 })
+                // Hiển thị lỗi tải ảnh và khôi phục trạng thái nhập.
                 .catch(function (error) {
                     showError(error.message || 'Không thể tải ảnh đại diện lên, vui lòng thử lại');
                     if (window.Qaute && typeof window.Qaute.toast === 'function') {
@@ -134,6 +147,7 @@
                 });
         }
 
+        // Bật hoặc tắt trạng thái tải ảnh trên giao diện.
         function setLoading(loading) {
             if (btnChangeAvatar) {
                 btnChangeAvatar.disabled = loading;
@@ -147,6 +161,7 @@
             }
         }
 
+        // Hiển thị thông báo lỗi ảnh.
         function showError(message) {
             if (avatarError) {
                 avatarError.textContent = message;
@@ -154,6 +169,7 @@
             }
         }
 
+        // Xóa thông báo lỗi ảnh đang hiển thị.
         function hideError() {
             if (avatarError) {
                 avatarError.textContent = '';

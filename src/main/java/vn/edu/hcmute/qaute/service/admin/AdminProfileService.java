@@ -33,6 +33,7 @@ import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.identity.PasswordService;
 import vn.edu.hcmute.qaute.service.media.MediaService;
 
+// Xử lý nghiệp vụ AdminProfile trong hệ thống.
 @Service
 @Transactional
 public class AdminProfileService {
@@ -45,6 +46,7 @@ public class AdminProfileService {
     private final PasswordResetTokenRepository resetTokens;
     private final AccountActivationTokenRepository activationTokens;
 
+    // Khởi tạo dịch vụ hồ sơ quản trị viên.
     public AdminProfileService(UserRepository users, MediaAssetRepository assets, MediaService media,
             PasswordService passwords, AuditService audit, Validator validator,
             PasswordResetTokenRepository resetTokens, AccountActivationTokenRepository activationTokens) {
@@ -58,6 +60,7 @@ public class AdminProfileService {
         this.activationTokens = activationTokens;
     }
 
+    // Lấy thông tin hồ sơ quản trị viên.
     @Transactional(readOnly = true)
     public AdminProfileView get(Long userId) {
         User user = requireAdmin(userId);
@@ -70,6 +73,7 @@ public class AdminProfileService {
         return new AdminProfileView(user.getFullName(), user.getEmail(), user.getPhone(), avatarUrl);
     }
 
+    // Cập nhật thông tin cá nhân của quản trị viên.
     public void update(Long userId, AdminProfileForm form) {
         User user = requireAdmin(userId);
         if (form == null) throw new BadRequestException("Thông tin hồ sơ không hợp lệ");
@@ -94,6 +98,7 @@ public class AdminProfileService {
         audit.log(AuditActions.USER_UPDATED, "user", userId, before, snapshot(user));
     }
 
+    // Gắn ảnh đại diện mới cho quản trị viên.
     public void updateAvatar(Long userId, Long assetId) {
         User user = requireAdmin(userId);
         if (assetId == null || assetId <= 0) throw new BadRequestException("Ảnh đại diện không hợp lệ");
@@ -116,6 +121,7 @@ public class AdminProfileService {
                 "avatarAssetId=" + previous, "avatarAssetId=" + assetId);
     }
 
+    // Đổi mật khẩu và vô hiệu hóa liên kết cũ.
     public void changePassword(Long userId, ChangePasswordForm form) {
         requireAdmin(userId);
         if (form == null) throw new BadRequestException("Thông tin đổi mật khẩu không hợp lệ");
@@ -134,6 +140,7 @@ public class AdminProfileService {
         activationTokens.findByUserIdAndUsedAtIsNull(userId).forEach(token -> token.setUsedAt(now));
     }
 
+    // Xác thực quyền truy cập hồ sơ của quản trị viên.
     private User requireAdmin(Long userId) {
         if (!SecurityUtils.hasRole(RoleCode.ADMIN)
                 || !Objects.equals(SecurityUtils.requireUserId(), userId)) {
@@ -146,6 +153,7 @@ public class AdminProfileService {
         return user;
     }
 
+    // Kiểm tra dữ liệu bằng các ràng buộc xác thực.
     private void validate(Object form) {
         Map<String, String> errors = new LinkedHashMap<>();
         validator.validate(form).forEach(error ->
@@ -153,14 +161,17 @@ public class AdminProfileService {
         if (!errors.isEmpty()) throw new BadRequestException("Vui lòng kiểm tra thông tin đã nhập", errors);
     }
 
+    // Tạo bản tóm tắt hồ sơ để ghi nhật ký.
     private static String snapshot(User user) {
         return "fullName=" + user.getFullName() + ";email=" + user.getEmail() + ";phone=" + user.getPhone();
     }
 
+    // Cắt khoảng trắng hai đầu chuỗi, giữ nguyên null.
     private static String trim(String value) {
         return value == null ? null : value.trim();
     }
 
+    // Chuyển chuỗi rỗng thành null sau khi cắt khoảng trắng.
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

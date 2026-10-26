@@ -9,17 +9,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
 
+// Xử lý nghiệp vụ PublicStats trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class PublicStatsServiceImpl implements PublicStatsService {
 
     private final TicketRepository ticketRepository;
 
+    // Khởi tạo dịch vụ thống kê với kho lưu trữ ticket.
     public PublicStatsServiceImpl(TicketRepository ticketRepository) {
         this.ticketRepository = ticketRepository;
     }
 
     @Override
+    // Tính trung vị thời gian từ lúc tạo ticket đến phản hồi đầu tiên.
     public Double getMedianFirstResponseMinutes(int days) {
         int windowDays = days > 0 ? days : 30;
         LocalDateTime since = LocalDateTime.now().minusDays(windowDays);
@@ -54,4 +57,3 @@ public class PublicStatsServiceImpl implements PublicStatsService {
         }
     }
 }
-

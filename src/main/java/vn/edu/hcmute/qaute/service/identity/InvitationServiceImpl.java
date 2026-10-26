@@ -16,6 +16,7 @@ import vn.edu.hcmute.qaute.repository.identity.AccountActivationTokenRepository;
 import vn.edu.hcmute.qaute.repository.identity.UserRepository;
 import vn.edu.hcmute.qaute.service.email.EmailService;
 
+// Xử lý nghiệp vụ Invitation trong hệ thống.
 @Service
 @Transactional
 public class InvitationServiceImpl implements InvitationService {
@@ -28,6 +29,7 @@ public class InvitationServiceImpl implements InvitationService {
     private final EmailService emailService;
     private final AppProperties appProperties;
 
+    // Khởi tạo dịch vụ gửi lời mời kích hoạt.
     public InvitationServiceImpl(UserRepository userRepository,
                                  AccountActivationTokenRepository accountActivationTokenRepository,
                                  EmailService emailService,
@@ -38,6 +40,7 @@ public class InvitationServiceImpl implements InvitationService {
         this.appProperties = appProperties;
     }
 
+    // Tạo token và gửi email mời kích hoạt tài khoản.
     @Override
     public void sendInvitation(Long userId) {
         User user = userRepository.findById(userId)

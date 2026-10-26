@@ -1,3 +1,4 @@
+-- Lưu cấu hình hệ thống có kiểu dữ liệu, giới hạn và nhóm quản trị.
 CREATE TABLE system_settings (
     id            BIGINT       NOT NULL AUTO_INCREMENT,
     setting_key   VARCHAR(100) NOT NULL,
@@ -14,6 +15,7 @@ CREATE TABLE system_settings (
     UNIQUE KEY uk_system_settings_key (setting_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Khởi tạo giá trị mặc định cho xác thực, ticket, lịch hẹn và lưu trữ.
 INSERT INTO system_settings
     (setting_key, setting_value, value_type, min_value, max_value, group_name, description)
 VALUES
@@ -33,7 +35,6 @@ VALUES
     ('ticket.reopen.window.days', '7', 'INT', 1, 60, 'TICKET', 'Khoảng thời gian cho phép mở lại yêu cầu'),
     ('ticket.reopen.max', '2', 'INT', 0, 10, 'TICKET', 'Số lần mở lại yêu cầu tối đa'),
     ('ticket.rating.edit.days', '7', 'INT', 0, 60, 'TICKET', 'Số ngày cho phép chỉnh sửa đánh giá'),
-    ('ticket.auto.assign.enabled', 'false', 'BOOL', NULL, NULL, 'TICKET', 'Bật tự động phân công yêu cầu'),
     ('sla.at.risk.percent', '80', 'INT', 50, 99, 'SLA', 'Ngưỡng phần trăm cảnh báo sắp quá hạn'),
     ('file.max.count', '5', 'INT', 1, 10, 'TỆP', 'Số tệp đính kèm tối đa'),
     ('file.max.size.mb', '10', 'INT', 1, 50, 'TỆP', 'Dung lượng mỗi tệp tối đa tính theo MB'),

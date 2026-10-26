@@ -1,109 +1,608 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
-<title>Tạo yêu cầu tư vấn mới</title>
+<title>Tạo yêu cầu tư vấn mới | QAUTE</title>
 
+<div class="qa-page-student-ticket-create" data-qa-view="student-ticket-create">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.css">
 
 <style>
-    .wizard-steps {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 2rem;
-        position: relative;
+/* ==========================================================================
+   STUDENT TICKET CREATE - MODERN DESIGN SYSTEM 2026
+   Palette: Azure Navy (#091e3e) -> Royal Blue (#124991) -> Deep Teal (#087d92)
+   Accent: Electric Cyan (#00d2ff), Emerald (#10b981), Amber (#f59e0b)
+   ========================================================================== */
+.qa-page-student-ticket-create {
+    --student-primary: #124991;
+    --student-primary-dark: #091e3e;
+    --student-teal: #087d92;
+    --student-cyan: #00d2ff;
+    --student-emerald: #10b981;
+    --student-surface: #ffffff;
+    --student-border: #e2e8f0;
+    --student-muted: #64748b;
+    --student-card-shadow: 0 10px 30px -5px rgba(9, 30, 62, 0.07), 0 4px 10px -2px rgba(9, 30, 62, 0.04);
+    min-width: 0;
+    color: #1e293b;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* 1. HERO BANNER */
+.qa-page-student-ticket-create .student-hero-banner {
+    position: relative;
+    background: linear-gradient(135deg, #091e3e 0%, #124991 55%, #087d92 100%);
+    border-radius: 24px;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    color: #ffffff;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px -15px rgba(9, 30, 62, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.qa-page-student-ticket-create .student-hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -10%;
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(0, 210, 255, 0.22) 0%, rgba(18, 73, 145, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.qa-page-student-ticket-create .student-hero-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    left: 20%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, rgba(9, 30, 62, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.qa-page-student-ticket-create .hero-content-wrap {
+    position: relative;
+    z-index: 2;
+}
+.qa-page-student-ticket-create .hero-eyebrow-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    padding: 0.35rem 0.95rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #bbf2f6;
+    margin-bottom: 0.75rem;
+}
+.qa-page-student-ticket-create .hero-eyebrow-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--student-cyan);
+    box-shadow: 0 0 10px var(--student-cyan);
+    animation: studentPulse 2s infinite ease-in-out;
+}
+@keyframes studentPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.35); opacity: 0.7; }
+}
+.qa-page-student-ticket-create .hero-title {
+    font-size: clamp(1.45rem, 2.5vw, 2.15rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+.qa-page-student-ticket-create .hero-subtitle {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 650px;
+    line-height: 1.55;
+    margin: 0;
+}
+.qa-page-student-ticket-create .hero-back-btn {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: 0.6rem 1.15rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.22s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.qa-page-student-ticket-create .hero-back-btn:hover {
+    background: rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+    transform: translateX(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* 2. STEPPER PROGRESS BAR */
+.qa-page-student-ticket-create .wizard-stepper-card {
+    background: #ffffff;
+    border: 1px solid var(--student-border);
+    border-radius: 20px;
+    box-shadow: var(--student-card-shadow);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+}
+.qa-page-student-ticket-create .wizard-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+.qa-page-student-ticket-create .wizard-step-item {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+    padding: 0.35rem 0.5rem;
+    border-radius: 12px;
+}
+.qa-page-student-ticket-create .wizard-step-item:hover {
+    background: #f8fafc;
+}
+.qa-page-student-ticket-create .wizard-step-item .step-badge-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+.qa-page-student-ticket-create .wizard-step-item .step-number {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+    border-radius: 14px;
+    background-color: #f1f5f9;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 750;
+    font-size: 1rem;
+    border: 2px solid #e2e8f0;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.qa-page-student-ticket-create .wizard-step-item.active .step-number {
+    background: linear-gradient(135deg, #124991 0%, #087d92 100%);
+    color: #ffffff;
+    border-color: #00d2ff;
+    box-shadow: 0 0 0 5px rgba(0, 210, 255, 0.25), 0 8px 18px rgba(18, 73, 145, 0.35);
+    transform: translateY(-2px);
+}
+.qa-page-student-ticket-create .wizard-step-item.completed .step-number {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border-color: #34d399;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+.qa-page-student-ticket-create .wizard-step-item.completed .step-number::after {
+    content: '\F272'; /* Bootstrap Icon check-lg */
+    font-family: 'bootstrap-icons';
+    font-size: 1.15rem;
+    font-weight: bold;
+}
+.qa-page-student-ticket-create .wizard-step-item.completed .step-number > span {
+    display: none;
+}
+.qa-page-student-ticket-create .wizard-step-item .step-title {
+    font-size: 0.88rem;
+    font-weight: 650;
+    color: #64748b;
+    display: block;
+    line-height: 1.35;
+    transition: color 0.2s ease;
+}
+.qa-page-student-ticket-create .wizard-step-item.active .step-title {
+    font-weight: 800;
+    color: #091e3e;
+}
+.qa-page-student-ticket-create .wizard-step-item.completed .step-title {
+    color: #10b981;
+    font-weight: 700;
+}
+.qa-page-student-ticket-create .wizard-step-item .step-subtitle {
+    font-size: 0.73rem;
+    color: #94a3b8;
+    display: block;
+    margin-top: 0.15rem;
+}
+/* Progress connecting lines */
+.qa-page-student-ticket-create .wizard-step-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 25px;
+    left: 55%;
+    width: 90%;
+    height: 3px;
+    background-color: #e2e8f0;
+    z-index: 0;
+    transition: background-color 0.3s ease;
+}
+.qa-page-student-ticket-create .wizard-step-item.completed:not(:last-child)::after {
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+/* 3. WIZARD CARD & SECTION HEADERS */
+.qa-page-student-ticket-create .card {
+    border: 1px solid var(--student-border);
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: var(--student-card-shadow);
+    transition: all 0.25s ease;
+    overflow: hidden;
+}
+.qa-page-student-ticket-create .card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.25rem 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.qa-page-student-ticket-create .card-title {
+    color: #091e3e;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+}
+.qa-page-student-ticket-create .step-badge-pill {
+    background: linear-gradient(135deg, #124991 0%, #087d92 100%);
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+    box-shadow: 0 3px 8px rgba(18, 73, 145, 0.2);
+}
+.qa-page-student-ticket-create .card-body {
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+}
+.qa-page-student-ticket-create .card-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 1.15rem 1.6rem;
+}
+
+/* 4. FORM CONTROLS & SELECTION CARDS */
+.qa-page-student-ticket-create .form-label {
+    color: #1e293b;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+}
+.qa-page-student-ticket-create .form-label.required::after {
+    content: " *";
+    color: #ef4444;
+    font-weight: bold;
+}
+.qa-page-student-ticket-create .form-control,
+.qa-page-student-ticket-create .form-select {
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 0.65rem 0.95rem;
+    color: #1e293b;
+    font-size: 0.92rem;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.qa-page-student-ticket-create .form-control:focus,
+.qa-page-student-ticket-create .form-select:focus {
+    border-color: #124991;
+    box-shadow: 0 0 0 4px rgba(18, 73, 145, 0.12);
+    outline: none;
+}
+.qa-page-student-ticket-create .form-control-lg,
+.qa-page-student-ticket-create .form-select-lg {
+    font-size: 1rem;
+    padding: 0.75rem 1.1rem;
+    border-radius: 14px;
+}
+.qa-page-student-ticket-create .selector-tile-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem;
+    transition: all 0.22s ease;
+    height: 100%;
+}
+.qa-page-student-ticket-create .selector-tile-card:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+}
+.qa-page-student-tile-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    margin-bottom: 0.65rem;
+}
+
+/* 5. DROPZONE UPLOADER */
+.qa-page-student-ticket-create .uploader-dropzone {
+    border: 2px dashed #93c5fd !important;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #f0f7ff 0%, #f8faff 100%);
+    padding: 2rem 1.5rem;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+.qa-page-student-ticket-create .uploader-dropzone:hover {
+    border-color: #124991 !important;
+    background: #e9f3ff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(18, 73, 145, 0.08);
+}
+.qa-page-student-ticket-create .uploader-icon-halo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 6px 16px rgba(18, 73, 145, 0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.85rem;
+    transition: transform 0.25s ease;
+}
+.qa-page-student-ticket-create .uploader-dropzone:hover .uploader-icon-halo {
+    transform: scale(1.1) rotate(-6deg);
+}
+
+/* 6. SWITCH TILES & SPECIAL OPTIONS */
+.qa-page-student-ticket-create .option-box-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.15rem 1.35rem;
+    transition: all 0.2s ease;
+}
+.qa-page-student-ticket-create .option-box-card.urgent-card {
+    border-color: #fecdd3;
+    background: linear-gradient(135deg, #fff1f2 0%, #ffffff 100%);
+}
+.qa-page-student-ticket-create .option-box-card.urgent-card:hover {
+    border-color: #f43f5e;
+    box-shadow: 0 8px 20px rgba(244, 63, 94, 0.08);
+}
+.qa-page-student-ticket-create .option-box-card.faq-card {
+    border-color: #dbeafe;
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+}
+
+/* 7. FAQ SMART SUGGESTIONS BOX */
+.qa-page-student-ticket-create #faqSuggestionsBox {
+    border: 1px solid #7dd3fc !important;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.12);
+    overflow: hidden;
+}
+.qa-page-student-ticket-create #faqSuggestionsList .list-group-item {
+    border-color: #e0f2fe;
+    transition: all 0.2s ease;
+}
+.qa-page-student-ticket-create #faqSuggestionsList .list-group-item:hover {
+    background-color: #f8fafc;
+    padding-left: 1.25rem !important;
+}
+
+/* 8. REVIEW SUMMARY TABLE */
+.qa-page-student-ticket-create .review-summary-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+}
+.qa-page-student-ticket-create .review-summary-table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+.qa-page-student-ticket-create .review-summary-table tr:last-child td {
+    border-bottom: none;
+}
+.qa-page-student-ticket-create .review-label-col {
+    width: 200px;
+    font-weight: 700;
+    color: #475569;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+}
+.qa-page-student-ticket-create .review-content-box {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 1.15rem;
+    max-height: 280px;
+    overflow-y: auto;
+    font-size: 0.92rem;
+    line-height: 1.6;
+}
+
+/* 9. BUTTONS & MICRO-INTERACTIONS */
+.qa-page-student-ticket-create .btn {
+    border-radius: 12px;
+    font-weight: 700;
+    padding: 0.65rem 1.45rem;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.qa-page-student-ticket-create .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+.qa-page-student-ticket-create .btn-primary {
+    background: linear-gradient(135deg, #124991 0%, #087d92 100%);
+    border: none;
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(18, 73, 145, 0.28);
+}
+.qa-page-student-ticket-create .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #091e3e 0%, #124991 100%);
+    box-shadow: 0 8px 22px rgba(18, 73, 145, 0.38);
+}
+.qa-page-student-ticket-create .btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
+}
+.qa-page-student-ticket-create .btn-success:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+.qa-page-student-ticket-create .btn-outline-secondary {
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+    background: #ffffff;
+}
+.qa-page-student-ticket-create .btn-outline-secondary:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+/* RESPONSIVE QUERIES */
+@media (max-width: 767.98px) {
+    .qa-page-student-ticket-create .student-hero-banner {
+        border-radius: 18px;
+        padding: 1.25rem;
     }
-    .wizard-step-item {
-        flex: 1;
-        text-align: center;
-        position: relative;
+    .qa-page-student-ticket-create .wizard-stepper-card {
+        padding: 1rem 0.5rem;
+        border-radius: 16px;
     }
-    .wizard-step-item .step-number {
-        width: 38px;
-        height: 38px;
-        line-height: 38px;
-        border-radius: 50%;
-        background-color: var(--tblr-gray-200);
-        color: var(--tblr-gray-600);
-        display: inline-block;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        transition: all 0.2s ease-in-out;
+    .qa-page-student-ticket-create .wizard-step-item .step-number {
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+        font-size: 0.9rem;
+        border-radius: 10px;
     }
-    .wizard-step-item.active .step-number {
-        background-color: var(--tblr-primary);
-        color: #fff;
-        box-shadow: 0 0 0 4px rgba(32, 107, 196, 0.2);
+    .qa-page-student-ticket-create .wizard-step-item .step-title {
+        font-size: 0.76rem;
     }
-    .wizard-step-item.completed .step-number {
-        background-color: var(--tblr-green);
-        color: #fff;
+    .qa-page-student-ticket-create .wizard-step-item .step-subtitle {
+        display: none;
     }
-    .wizard-step-item .step-title {
-        font-size: 0.875rem;
-        color: var(--tblr-secondary);
-        display: block;
+    .qa-page-student-ticket-create .review-label-col {
+        width: 120px;
+        font-size: 0.85rem;
     }
-    .wizard-step-item.active .step-title {
-        font-weight: 600;
-        color: var(--tblr-dark);
+}
+@media (prefers-reduced-motion: reduce) {
+    .qa-page-student-ticket-create * {
+        animation: none !important;
+        transition: none !important;
     }
-    .wizard-step-item:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        top: 19px;
-        left: 50%;
-        width: 100%;
-        height: 2px;
-        background-color: var(--tblr-gray-200);
-        z-index: -1;
-    }
-    .wizard-step-item.completed:not(:last-child)::after {
-        background-color: var(--tblr-green);
-    }
+}
 </style>
 
 <div class="row justify-content-center" id="ticketWizardContainer">
     <div class="col-12 col-xl-10">
-        <!-- Breadcrumb & Title -->
-        <div class="mb-3 d-flex align-items-center justify-content-between">
-            <div>
-                <a href="/student/tickets" class="text-secondary small text-decoration-none">
-                    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách yêu cầu
-                </a>
-                <h2 class="page-title mt-1">Tạo yêu cầu tư vấn mới</h2>
-            </div>
-        </div>
 
-        <!-- Wizard Step Indicators -->
-        <div class="card mb-4">
-            <div class="card-body py-3">
-                <div class="wizard-steps m-0">
-                    <div class="wizard-step-item active" data-step="1">
-                        <span class="step-number">1</span>
-                        <span class="step-title">Chọn chuyên mục</span>
+        <!-- 1. HERO BANNER -->
+        <div class="student-hero-banner">
+            <div class="hero-content-wrap d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div>
+                    <div class="hero-eyebrow-pill">
+                        <span class="hero-eyebrow-dot"></span>
+                        <span>Cổng Tư Vấn Sinh Viên • Hỗ Trợ 24/7</span>
                     </div>
-                    <div class="wizard-step-item" data-step="2">
-                        <span class="step-number">2</span>
-                        <span class="step-title">Nội dung thắc mắc</span>
-                    </div>
-                    <div class="wizard-step-item" data-step="3">
-                        <span class="step-number">3</span>
-                        <span class="step-title">Đính kèm & Tùy chọn</span>
-                    </div>
-                    <div class="wizard-step-item" data-step="4">
-                        <span class="step-number">4</span>
-                        <span class="step-title">Xem lại & Gửi</span>
-                    </div>
+                    <h1 class="hero-title">
+                        <i class="bi bi-patch-question-fill text-info me-2"></i>Tạo Yêu Cầu Tư Vấn Mới
+                    </h1>
+                    <p class="hero-subtitle">
+                        Điền thông tin theo 4 bước hướng dẫn trực quan bên dưới để gửi câu hỏi trực tiếp đến phòng ban phụ trách và nhận phản hồi chính thức nhanh chóng.
+                    </p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="/student/tickets" class="hero-back-btn">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Quay lại danh sách</span>
+                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Hidden tree data -->
+        <!-- 2. WIZARD STEPPERS -->
+        <div class="wizard-stepper-card">
+            <div class="wizard-steps">
+                <div class="wizard-step-item step-tab-btn active" data-step="1">
+                    <div class="step-badge-wrap">
+                        <div class="step-number"><span>1</span></div>
+                    </div>
+                    <span class="step-title">1. Chuyên mục</span>
+                    <span class="step-subtitle">Phòng ban & Lĩnh vực</span>
+                </div>
+                <div class="wizard-step-item step-tab-btn" data-step="2">
+                    <div class="step-badge-wrap">
+                        <div class="step-number"><span>2</span></div>
+                    </div>
+                    <span class="step-title">2. Nội dung</span>
+                    <span class="step-subtitle">Tiêu đề & Câu hỏi</span>
+                </div>
+                <div class="wizard-step-item step-tab-btn" data-step="3">
+                    <div class="step-badge-wrap">
+                        <div class="step-number"><span>3</span></div>
+                    </div>
+                    <span class="step-title">3. Đính kèm</span>
+                    <span class="step-subtitle">Tệp & Tùy chọn</span>
+                </div>
+                <div class="wizard-step-item step-tab-btn" data-step="4">
+                    <div class="step-badge-wrap">
+                        <div class="step-number"><span>4</span></div>
+                    </div>
+                    <span class="step-title">4. Xác nhận</span>
+                    <span class="step-subtitle">Xem lại & Gửi</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden tree data for JS cascade logic -->
         <div id="categoryTreeData" data-tree="<c:out value='${categoriesJson}' escapeXml='true'/>" class="d-none"></div>
 
         <!-- Global Errors -->
         <c:if test="${not empty errors['global']}">
-            <div class="alert alert-danger mb-3" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i><c:out value="${errors['global']}"/>
+            <div class="alert alert-danger d-flex align-items-center mb-4 p-3 rounded-4 shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-danger"></i>
+                <div>
+                    <strong class="d-block">Có lỗi xảy ra:</strong>
+                    <span><c:out value="${errors['global']}"/></span>
+                </div>
             </div>
         </c:if>
 
@@ -112,73 +611,126 @@
             <input type="hidden" name="submitToken" value="<c:out value='${form.submitToken}'/>"/>
             <input type="hidden" name="categoryId" id="categoryId" value="<c:out value='${form.categoryId}'/>"/>
 
-            <!-- BƯỚC 1: Chọn Chuyên mục -->
+            <!-- ==========================================
+                 BƯỚC 1: CHỌN CHUYÊN MỤC & PHÒNG BAN
+                 ========================================== -->
             <div class="wizard-step-pane" data-step="1">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">
-                            <span class="badge bg-primary text-white me-2">Bước 1</span>Chọn lĩnh vực thắc mắc
+                            <span class="step-badge-pill"><i class="bi bi-diagram-3-fill me-1"></i> Bước 1</span>
+                            <span>Chọn Lĩnh Vực & Phòng Ban Tiếp Nhận</span>
                         </h3>
+                        <span class="badge bg-light text-secondary border">Bước 1/4</span>
                     </div>
                     <div class="card-body">
-                        <p class="text-secondary mb-4">
-                            Vui lòng chọn chính xác bộ phận tiếp nhận để yêu cầu của bạn được chuyển đến đúng tư vấn viên phụ trách, giúp bạn nhận được phản hồi nhanh nhất.
-                        </p>
+                        <!-- Helpful hint banner -->
+                        <div class="alert alert-info border-0 rounded-4 d-flex align-items-center p-3 mb-4" style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);">
+                            <div class="me-3 fs-2 text-info">
+                                <i class="bi bi-lightbulb-fill"></i>
+                            </div>
+                            <div class="text-secondary small">
+                                <strong class="text-dark d-block">Mẹo hướng dẫn tiếp nhận nhanh:</strong>
+                                Vui lòng chọn chính xác bộ phận tiếp nhận để yêu cầu được điều hướng đến đúng cán bộ chuyên trách, giúp thắc mắc của bạn được giải đáp nhanh hơn.
+                            </div>
+                        </div>
 
-                        <div id="stepError1" class="alert alert-danger d-none mb-3"></div>
+                        <div id="stepError1" class="alert alert-danger d-none mb-3 rounded-3"></div>
                         <qa:formError field="categoryId"/>
 
-                        <div class="row g-3">
+                        <div class="row g-4">
+                            <!-- 1. Phòng ban -->
                             <div class="col-12">
-                                <label class="form-label required" for="selectDepartment">1. Phòng ban / Đơn vị tiếp nhận</label>
-                                <select class="form-select form-select-lg" id="selectDepartment">
-                                    <option value="">-- Chọn phòng ban phụ trách --</option>
-                                    <c:forEach var="dept" items="${tree}">
-                                        <option value="${dept.id()}"><c:out value="${dept.name()}"/></option>
-                                    </c:forEach>
-                                </select>
+                                <div class="selector-tile-card">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="qa-page-student-tile-icon bg-primary text-white">
+                                            <i class="bi bi-building"></i>
+                                        </span>
+                                        <div>
+                                            <label class="form-label required m-0" for="selectDepartment">1. Phòng ban / Đơn vị tiếp nhận</label>
+                                            <div class="text-muted small">Cơ quan phụ trách chuyên môn trực tiếp</div>
+                                        </div>
+                                    </div>
+                                    <select class="form-select form-select-lg" id="selectDepartment">
+                                        <option value="">-- Chọn phòng ban phụ trách --</option>
+                                        <c:forEach var="dept" items="${tree}">
+                                            <option value="${dept.id()}"><c:out value="${dept.name()}"/></option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
                             </div>
 
+                            <!-- 2. Chuyên mục cấp 1 -->
                             <div class="col-md-6">
-                                <label class="form-label required" for="selectCategoryLevel1">2. Chuyên mục</label>
-                                <select class="form-select" id="selectCategoryLevel1" disabled>
-                                    <option value="">-- Chọn chuyên mục --</option>
-                                </select>
+                                <div class="selector-tile-card">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="qa-page-student-tile-icon bg-info text-white">
+                                            <i class="bi bi-folder2-open"></i>
+                                        </span>
+                                        <div>
+                                            <label class="form-label required m-0" for="selectCategoryLevel1">2. Chuyên mục chính</label>
+                                            <div class="text-muted small">Nhóm nghiệp vụ liên quan</div>
+                                        </div>
+                                    </div>
+                                    <select class="form-select" id="selectCategoryLevel1" disabled>
+                                        <option value="">-- Chọn chuyên mục --</option>
+                                    </select>
+                                </div>
                             </div>
 
+                            <!-- 3. Chủ đề chi tiết cấp 2 -->
                             <div class="col-md-6">
-                                <label class="form-label" for="selectCategoryLevel2">3. Chủ đề chi tiết</label>
-                                <select class="form-select" id="selectCategoryLevel2" disabled>
-                                    <option value="">-- Chọn chủ đề chi tiết --</option>
-                                </select>
-                                <small class="form-hint">Nếu chuyên mục không có chủ đề con, mục này sẽ tự động bỏ qua.</small>
+                                <div class="selector-tile-card">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="qa-page-student-tile-icon bg-teal text-white" style="background-color: var(--student-teal);">
+                                            <i class="bi bi-tags"></i>
+                                        </span>
+                                        <div>
+                                            <label class="form-label m-0" for="selectCategoryLevel2">3. Chủ đề chi tiết</label>
+                                            <div class="text-muted small">Phân loại chi tiết (nếu có)</div>
+                                        </div>
+                                    </div>
+                                    <select class="form-select" id="selectCategoryLevel2" disabled>
+                                        <option value="">-- Chọn chủ đề chi tiết --</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer d-flex justify-content-end">
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <span class="text-muted small"><i class="bi bi-shield-check me-1 text-success"></i>Thông tin yêu cầu được bảo mật theo quy định</span>
                         <button type="button" class="btn btn-primary btn-next px-4">
-                            Tiếp tục <i class="bi bi-arrow-right ms-1"></i>
+                            <span>Tiếp tục bước 2</span>
+                            <i class="bi bi-arrow-right"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- BƯỚC 2: Tiêu đề & Nội dung -->
+            <!-- ==========================================
+                 BƯỚC 2: TIÊU ĐỀ & NỘI DUNG CÂU HỎI
+                 ========================================== -->
             <div class="wizard-step-pane d-none" data-step="2">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">
-                            <span class="badge bg-primary text-white me-2">Bước 2</span>Nội dung câu hỏi tư vấn
+                            <span class="step-badge-pill"><i class="bi bi-pencil-square me-1"></i> Bước 2</span>
+                            <span>Nội Dung Câu Hỏi & Thắc Mắc</span>
                         </h3>
+                        <span class="badge bg-light text-secondary border">Bước 2/4</span>
                     </div>
                     <div class="card-body">
-                        <div id="stepError2" class="alert alert-danger d-none mb-3"></div>
+                        <div id="stepError2" class="alert alert-danger d-none mb-3 rounded-3"></div>
 
                         <!-- Tiêu đề -->
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label class="form-label required m-0" for="ticketTitle">Tiêu đề yêu cầu</label>
-                                <small class="text-secondary"><span id="titleCharCount">0</span>/150 ký tự (tối thiểu 10)</small>
+                                <label class="form-label required m-0" for="ticketTitle">
+                                    <i class="bi bi-chat-left-text me-1 text-primary"></i>Tiêu đề câu hỏi
+                                </label>
+                                <span class="badge bg-light text-secondary border rounded-pill">
+                                    <span id="titleCharCount" class="text-primary fw-bold">0</span> / 150 ký tự (tối thiểu 10)
+                                </span>
                             </div>
                             <input type="text" class="form-control form-control-lg ${not empty errors['title'] ? 'is-invalid' : ''}"
                                    id="ticketTitle" name="title" value="<c:out value='${form.title}'/>"
@@ -187,66 +739,91 @@
                             <qa:formError field="title"/>
                         </div>
 
-                        <!-- FAQ Suggestions box -->
-                        <div id="faqSuggestionsBox" class="card card-sm mb-4 border-info d-none bg-info-lt">
-                            <div class="card-body py-2 px-3">
-                                <div class="d-flex align-items-center text-info fw-semibold mb-2">
-                                    <i class="bi bi-lightbulb-fill me-2 fs-4"></i>
-                                    <span>Có thể bạn quan tâm (câu hỏi thường gặp tương tự)</span>
+                        <!-- Smart FAQ Suggestions Box -->
+                        <div id="faqSuggestionsBox" class="card card-sm mb-4 d-none">
+                            <div class="card-body py-3 px-3">
+                                <div class="d-flex align-items-center text-primary fw-bold mb-2">
+                                    <i class="bi bi-stars me-2 fs-5 text-warning"></i>
+                                    <span>Gợi ý thông minh: Có thể câu hỏi của bạn đã có lời giải đáp sẵn!</span>
                                 </div>
-                                <div class="list-group list-group-flush rounded bg-white" id="faqSuggestionsList"></div>
-                                <small class="text-secondary d-block mt-2">
-                                    Xem các câu trả lời có sẵn có thể giải đáp ngay thắc mắc của bạn mà không cần đợi gửi yêu cầu.
-                                </small>
+                                <div class="list-group list-group-flush rounded-3 bg-white shadow-sm overflow-hidden" id="faqSuggestionsList"></div>
+                                <div class="d-flex align-items-center gap-1 text-muted small mt-2">
+                                    <i class="bi bi-info-circle"></i>
+                                    <span>Bấm vào để xem ngay câu trả lời mà không cần phải đợi giải quyết yêu cầu.</span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Nội dung chi tiết (Rich text) -->
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label class="form-label required m-0" for="descriptionHtml">Nội dung chi tiết</label>
-                                <small class="text-secondary"><span id="descCharCount">0</span> ký tự (tối thiểu 30)</small>
+                                <label class="form-label required m-0" for="descriptionHtml">
+                                    <i class="bi bi-file-text me-1 text-primary"></i>Nội dung chi tiết
+                                </label>
+                                <span class="badge bg-light text-secondary border rounded-pill">
+                                    <span id="descCharCount" class="text-primary fw-bold">0</span> ký tự (tối thiểu 30)
+                                </span>
                             </div>
                             <textarea id="descriptionHtml" name="descriptionHtml"
                                       class="form-control ${not empty errors['descriptionHtml'] ? 'is-invalid' : ''}"
                                       rows="8" required><c:out value='${form.descriptionHtml}'/></textarea>
                             <qa:formError field="descriptionHtml"/>
+                            <div class="form-hint mt-2 text-muted small">
+                                <i class="bi bi-check2-circle text-success me-1"></i>
+                                Khuyên dùng: Mô tả rõ hoàn cảnh, mốc thời gian, MSSV hoặc đính kèm mã học phần nếu liên quan để tư vấn viên xử lý chuẩn xác nhất.
+                            </div>
                         </div>
                     </div>
-                    <div class="card-footer d-flex justify-content-between">
+                    <div class="card-footer d-flex justify-content-between align-items-center">
                         <button type="button" class="btn btn-outline-secondary btn-prev">
-                            <i class="bi bi-arrow-left me-1"></i> Quay lại
+                            <i class="bi bi-arrow-left"></i>
+                            <span>Quay lại bước 1</span>
                         </button>
                         <button type="button" class="btn btn-primary btn-next px-4">
-                            Tiếp tục <i class="bi bi-arrow-right ms-1"></i>
+                            <span>Tiếp tục bước 3</span>
+                            <i class="bi bi-arrow-right"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- BƯỚC 3: Đính kèm & Tùy chọn -->
+            <!-- ==========================================
+                 BƯỚC 3: ĐÍNH KÈM TỆP & THIẾT LẬP
+                 ========================================== -->
             <div class="wizard-step-pane d-none" data-step="3">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">
-                            <span class="badge bg-primary text-white me-2">Bước 3</span>Đính kèm tệp & Thiết lập
+                            <span class="step-badge-pill"><i class="bi bi-paperclip me-1"></i> Bước 3</span>
+                            <span>Đính Kèm Tài Liệu Minh Chứng & Thiết Lập</span>
                         </h3>
+                        <span class="badge bg-light text-secondary border">Bước 3/4</span>
                     </div>
                     <div class="card-body">
-                        <div id="stepError3" class="alert alert-danger d-none mb-3"></div>
+                        <div id="stepError3" class="alert alert-danger d-none mb-3 rounded-3"></div>
 
-                        <!-- Tệp đính kèm -->
+                        <!-- Dropzone File Uploader -->
                         <div class="mb-4">
-                            <label class="form-label">Tệp đính kèm (Hình ảnh, tài liệu minh chứng)</label>
-                            <div id="fileUploaderContainer">
+                            <label class="form-label d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-cloud-arrow-up text-primary me-1"></i>Tệp đính kèm minh chứng (Hình ảnh, đơn từ, bảng điểm)</span>
+                                <span class="badge bg-secondary-lt text-secondary">Tối đa 5 tệp (10MB/tệp)</span>
+                            </label>
+
+                            <div id="fileUploaderContainer" data-upload-url="${pageContext.request.contextPath}/api/media/upload">
                                 <div class="qa-uploader">
-                                    <div class="card card-dashed text-center p-3 mb-2 uploader-dropzone" style="cursor: pointer; border-style: dashed; border-width: 2px;">
+                                    <div class="uploader-dropzone text-center mb-3">
                                         <div class="py-2">
-                                            <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-2 d-block"></i>
-                                            <div class="fw-semibold">Kéo thả tệp vào đây hoặc <span class="text-primary text-decoration-underline">chọn tệp từ máy tính</span></div>
-                                            <small class="text-secondary d-block mt-1">Định dạng: JPG, JPEG, PNG, WEBP, GIF, PDF, DOCX, XLSX, PPTX, TXT (Tối đa 10MB/tệp, tối đa 5 tệp)</small>
-                                            <button type="button" class="btn btn-primary btn-sm mt-2 uploader-pick-btn">
-                                                <i class="bi bi-paperclip me-1"></i>Chọn tệp để tải lên
+                                            <div class="uploader-icon-halo">
+                                                <i class="bi bi-cloud-arrow-up fs-2 text-primary"></i>
+                                            </div>
+                                            <div class="fw-bold text-dark fs-6 mb-1">
+                                                Kéo thả tệp vào đây hoặc <span class="text-primary text-decoration-underline">chọn tệp từ thiết bị</span>
+                                            </div>
+                                            <p class="text-muted small mb-3">
+                                                Hỗ trợ: JPG, PNG, WEBP, GIF, PDF, DOCX, XLSX, PPTX, TXT
+                                            </p>
+                                            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 uploader-pick-btn">
+                                                <i class="bi bi-paperclip me-1"></i>Chọn tệp tải lên
                                             </button>
                                         </div>
                                         <input type="file" multiple class="d-none uploader-file-input" accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.docx,.xlsx,.pptx,.txt">
@@ -258,104 +835,151 @@
                             <qa:formError field="assetIds"/>
                         </div>
 
-                        <hr class="my-4">
+                        <hr class="my-4" style="border-top: 1px dashed #cbd5e1;">
 
                         <!-- Tùy chọn nâng cao -->
-                        <div class="mb-3">
-                            <label class="form-check form-switch mb-2">
-                                <input class="form-check-input" type="checkbox" id="urgentRequested" name="urgentRequested"
-                                       value="true" ${form.urgentRequested ? 'checked' : ''}>
-                                <span class="form-check-label fw-semibold text-danger">
-                                    <i class="bi bi-lightning-fill me-1"></i> Đề nghị xử lý gấp (Khẩn cấp)
-                                </span>
-                            </label>
-                            <div id="urgentReasonContainer" class="ms-4 ps-2 mb-3 d-none">
-                                <label class="form-label required" for="urgentReason">Lý do yêu cầu xử lý khẩn</label>
-                                <textarea class="form-control ${not empty errors['urgentReason'] ? 'is-invalid' : ''}"
-                                          id="urgentReason" name="urgentReason" rows="3"
-                                          placeholder="Nêu rõ lý do cần xử lý gấp (hạn nộp hồ sơ, thủ tục tốt nghiệp, v.v. - 10 đến 500 ký tự)..."
-                                          maxlength="500"><c:out value="${form.urgentReason}"/></textarea>
-                                <small class="form-hint">Yêu cầu khẩn sẽ được ưu tiên tiếp nhận. Vui lòng chỉ sử dụng khi thực sự cần thiết.</small>
-                                <qa:formError field="urgentReason"/>
+                        <div class="row g-3">
+                            <!-- Xử lý gấp (Urgent) -->
+                            <div class="col-12">
+                                <div class="option-box-card urgent-card">
+                                    <div class="form-check form-switch m-0">
+                                        <input class="form-check-input" type="checkbox" id="urgentRequested" name="urgentRequested"
+                                               value="true" ${form.urgentRequested ? 'checked' : ''} style="cursor: pointer; width: 2.5em; height: 1.3em;">
+                                        <label class="form-check-label fw-bold text-danger ms-2" for="urgentRequested" style="cursor: pointer;">
+                                            <i class="bi bi-lightning-charge-fill me-1"></i>Đề nghị xử lý khẩn cấp (Gấp)
+                                        </label>
+                                    </div>
+                                    <div id="urgentReasonContainer" class="mt-3 pt-2 ps-md-4 d-none border-top">
+                                        <label class="form-label required" for="urgentReason">
+                                            Lý do yêu cầu xử lý gấp <span class="text-muted fw-normal">(10 - 500 ký tự)</span>
+                                        </label>
+                                        <textarea class="form-control ${not empty errors['urgentReason'] ? 'is-invalid' : ''}"
+                                                  id="urgentReason" name="urgentReason" rows="3"
+                                                  placeholder="Nêu rõ lý do cần xử lý gấp (ví dụ: hạn nộp hồ sơ xét học bổng còn 24h, thủ tục bảo lưu cấp bách...)"
+                                                  maxlength="500"><c:out value="${form.urgentReason}"/></textarea>
+                                        <small class="form-hint text-danger mt-1 d-block">
+                                            <i class="bi bi-exclamation-circle me-1"></i>Yêu cầu khẩn sẽ được báo động ưu tiên. Vui lòng chỉ sử dụng khi thật sự cấp bách.
+                                        </small>
+                                        <qa:formError field="urgentReason"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FAQ Sharing Authorization -->
+                            <div class="col-12">
+                                <div class="option-box-card faq-card">
+                                    <div class="form-check m-0">
+                                        <input class="form-check-input" type="checkbox" id="allowPublicFaq" name="allowPublicFaq"
+                                               value="true" ${form.allowPublicFaq ? 'checked' : ''} style="cursor: pointer;">
+                                        <label class="form-check-label fw-semibold text-dark ms-1" for="allowPublicFaq" style="cursor: pointer;">
+                                            <i class="bi bi-shield-lock-fill text-success me-1"></i>Cho phép Ban tư vấn biên tập nội dung này thành FAQ công khai ẩn danh
+                                        </label>
+                                    </div>
+                                    <div class="ps-md-4 pt-1">
+                                        <small class="text-muted">
+                                            Toàn bộ thông tin định danh cá nhân của bạn (Họ tên, MSSV, Email, Số điện thoại) sẽ được tự động xóa hoàn toàn để bảo vệ quyền riêng tư.
+                                        </small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-check mb-0">
-                                <input class="form-check-input" type="checkbox" id="allowPublicFaq" name="allowPublicFaq"
-                                       value="true" ${form.allowPublicFaq ? 'checked' : ''}>
-                                <span class="form-check-label">
-                                    Cho phép Ban tư vấn biên tập nội dung câu hỏi thành FAQ công khai ẩn danh để giúp đỡ các sinh viên khác
-                                </span>
-                            </label>
-                            <small class="form-hint ms-4 ps-2 text-muted">
-                                Thông tin cá nhân của bạn (tên, MSSV, email, sđt) sẽ được xóa hoàn toàn khi biên tập FAQ.
-                            </small>
-                        </div>
                     </div>
-                    <div class="card-footer d-flex justify-content-between">
+                    <div class="card-footer d-flex justify-content-between align-items-center">
                         <button type="button" class="btn btn-outline-secondary btn-prev">
-                            <i class="bi bi-arrow-left me-1"></i> Quay lại
+                            <i class="bi bi-arrow-left"></i>
+                            <span>Quay lại bước 2</span>
                         </button>
                         <button type="button" class="btn btn-primary btn-next px-4">
-                            Xem lại yêu cầu <i class="bi bi-arrow-right ms-1"></i>
+                            <span>Xem lại & Xác nhận</span>
+                            <i class="bi bi-arrow-right"></i>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- BƯỚC 4: Xem lại & Gửi -->
+            <!-- ==========================================
+                 BƯỚC 4: XEM LẠI & GỬI YÊU CẦU
+                 ========================================== -->
             <div class="wizard-step-pane d-none" data-step="4">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">
-                            <span class="badge bg-primary text-white me-2">Bước 4</span>Xác nhận thông tin & Gửi yêu cầu
+                            <span class="step-badge-pill" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                <i class="bi bi-check2-circle me-1"></i> Bước 4
+                            </span>
+                            <span>Xác Nhận Thông Tin & Gửi Yêu Cầu</span>
                         </h3>
+                        <span class="badge bg-success-lt text-success border border-success">Bước cuối cùng</span>
                     </div>
                     <div class="card-body">
-                        <p class="text-secondary mb-3">
-                            Vui lòng kiểm tra kỹ lại thông tin trước khi gửi. Sau khi gửi, bạn có thể theo dõi tiến độ xử lý và trao đổi với tư vấn viên tại trang chi tiết yêu cầu.
-                        </p>
+                        <div class="alert alert-success border-0 rounded-4 d-flex align-items-center p-3 mb-4" style="background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);">
+                            <i class="bi bi-check-circle-fill fs-2 text-success me-3"></i>
+                            <div class="small text-secondary">
+                                <strong class="text-success d-block">Kiểm tra thông tin trước khi hoàn tất:</strong>
+                                Vui lòng kiểm tra kỹ các thông tin đã nhập bên dưới. Sau khi bấm <strong>"Gửi yêu cầu tư vấn"</strong>, hệ thống sẽ cấp mã phiếu (Ticket Code) để bạn theo dõi trực tiếp tiến độ phản hồi.
+                            </div>
+                        </div>
 
-                        <div class="table-responsive border rounded mb-3">
-                            <table class="table table-vcenter card-table m-0">
+                        <!-- Review Table -->
+                        <div class="table-responsive mb-4">
+                            <table class="review-summary-table">
                                 <tbody>
                                     <tr>
-                                        <td class="text-secondary text-nowrap" style="width: 180px;">Chuyên mục</td>
-                                        <td class="fw-medium text-primary" id="reviewCategory">—</td>
+                                        <td class="review-label-col">
+                                            <i class="bi bi-diagram-3 me-1 text-primary"></i> Lĩnh vực & Phòng ban
+                                        </td>
+                                        <td class="fw-bold text-primary" id="reviewCategory">—</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-secondary text-nowrap">Tiêu đề</td>
-                                        <td class="fw-bold" id="reviewTitle">—</td>
+                                        <td class="review-label-col">
+                                            <i class="bi bi-chat-left-text me-1 text-primary"></i> Tiêu đề câu hỏi
+                                        </td>
+                                        <td class="fw-bold text-dark fs-6" id="reviewTitle">—</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-secondary text-nowrap align-top">Nội dung thắc mắc</td>
+                                        <td class="review-label-col align-top">
+                                            <i class="bi bi-file-earmark-richtext me-1 text-primary"></i> Nội dung thắc mắc
+                                        </td>
                                         <td>
-                                            <div id="reviewContent" class="border rounded p-3 bg-light overflow-auto" style="max-height: 250px;">—</div>
+                                            <div id="reviewContent" class="review-content-box">—</div>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-secondary text-nowrap">Tệp đính kèm</td>
-                                        <td id="reviewFiles">Không có tệp đính kèm</td>
+                                        <td class="review-label-col">
+                                            <i class="bi bi-paperclip me-1 text-primary"></i> Tệp đính kèm
+                                        </td>
+                                        <td id="reviewFiles">
+                                            <span class="text-muted">Không có tệp đính kèm</span>
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-secondary text-nowrap">Mức ưu tiên</td>
-                                        <td id="reviewUrgent">Mức độ bình thường</td>
+                                        <td class="review-label-col">
+                                            <i class="bi bi-flag me-1 text-primary"></i> Mức độ ưu tiên
+                                        </td>
+                                        <td id="reviewUrgent">
+                                            <span class="badge bg-light text-secondary border">Mức độ bình thường</span>
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td class="text-secondary text-nowrap">Chia sẻ FAQ</td>
-                                        <td id="reviewFaq">—</td>
+                                        <td class="review-label-col">
+                                            <i class="bi bi-share me-1 text-primary"></i> Quyền FAQ ẩn danh
+                                        </td>
+                                        <td id="reviewFaq">
+                                            <span class="text-muted">—</span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="card-footer d-flex justify-content-between">
+                    <div class="card-footer d-flex justify-content-between align-items-center">
                         <button type="button" class="btn btn-outline-secondary btn-prev">
-                            <i class="bi bi-arrow-left me-1"></i> Chỉnh sửa lại
+                            <i class="bi bi-arrow-left"></i>
+                            <span>Chỉnh sửa lại</span>
                         </button>
                         <button type="submit" class="btn btn-success px-4" id="submitTicketBtn">
-                            <i class="bi bi-send-fill me-1"></i> Gửi yêu cầu tư vấn
+                            <i class="bi bi-send-fill me-1"></i>
+                            <span>Gửi Yêu Cầu Tư Vấn Ngay</span>
                         </button>
                     </div>
                 </div>
@@ -366,6 +990,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.js"></script>
 <script src="/assets/js/common/richtext.js?v=20261023b"></script>
-<script src="/assets/js/common/file-uploader.js?v=20261023b"></script>
+<script src="${pageContext.request.contextPath}/assets/js/common/file-uploader.js?v=20261026c"></script>
 <script src="/assets/js/student/ticket-create.js?v=20261023b"></script>
-
+</div>

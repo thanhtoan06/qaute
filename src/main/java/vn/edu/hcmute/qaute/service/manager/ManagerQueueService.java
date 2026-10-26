@@ -32,17 +32,20 @@ import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 
+// Xử lý nghiệp vụ ManagerQueue trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class ManagerQueueService {
     public static final List<String> TABS = List.of("unassigned", "mine", "waiting", "slarisk", "all");
     public static final Set<String> SORT_FIELDS = Set.of("createdAt", "lastActivityAt");
+    private static final Set<String> MINE_STATUSES = Set.of("active", "processed");
 
     private final TicketRepository tickets;
     private final ManagerScopeService scopes;
     private final UserLookupService users;
     private final CategoryQueryService categories;
 
+    // Khởi tạo dịch vụ hàng đợi yêu cầu của tư vấn viên.
     public ManagerQueueService(TicketRepository tickets, ManagerScopeService scopes,
                                UserLookupService users, CategoryQueryService categories) {
         this.tickets = tickets;
@@ -51,10 +54,12 @@ public class ManagerQueueService {
         this.categories = categories;
     }
 
+    // Tìm kiếm và phân trang các yêu cầu trong phạm vi quản lý.
     public Page<ManagerTicketListItem> list(Long managerId, QueueFilter filter, Pageable pageable) {
         pageable = BoundedPages.of(pageable);
         QueueFilter safeFilter = filter == null ? new QueueFilter() : filter;
         String tab = tab(safeFilter.getTab());
+        safeFilter.setMineStatus(mineStatus(safeFilter.getMineStatus()));
         boolean explicitSort = safeFilter.getSort() != null && SORT_FIELDS.contains(safeFilter.getSort());
         List<Long> scopeIds = scopes.getScopeCategoryIds(managerId);
         LocalDateTime now = LocalDateTime.now();
@@ -84,16 +89,31 @@ public class ManagerQueueService {
                         ticket.getCreatedAt(), now).toHours())));
     }
 
+    // Đếm số yêu cầu tương ứng với từng tab hàng đợi.
     public Map<String, Long> tabCounts(Long managerId) {
         List<Long> scopeIds = scopes.getScopeCategoryIds(managerId);
         Map<String, Long> counts = new LinkedHashMap<>();
         for (String tab : TABS) {
-            counts.put(tab, tickets.count(specification(managerId, scopeIds, tab,
-                    new QueueFilter(), LocalDateTime.now(), false)));
+            QueueFilter filter = new QueueFilter();
+            if (tab.equals("mine")) {
+                filter.setMineStatus("active");
+                long active = tickets.count(specification(managerId, scopeIds, tab,
+                        filter, LocalDateTime.now(), false));
+                filter.setMineStatus("processed");
+                long processed = tickets.count(specification(managerId, scopeIds, tab,
+                        filter, LocalDateTime.now(), false));
+                counts.put("mineActive", active);
+                counts.put("mineProcessed", processed);
+                counts.put(tab, active + processed);
+            } else {
+                counts.put(tab, tickets.count(specification(managerId, scopeIds, tab,
+                        filter, LocalDateTime.now(), false)));
+            }
         }
         return counts;
     }
 
+    // Lấy tên các chuyên mục trong phạm vi và đã được giao.
     public Map<Long, String> scopeCategories(Long managerId) {
         Map<Long, String> result = new LinkedHashMap<>();
         Set<Long> visibleCategories = new LinkedHashSet<>(scopes.getScopeCategoryIds(managerId));
@@ -104,10 +124,17 @@ public class ManagerQueueService {
         return result;
     }
 
+    // Chuẩn hóa tab không hợp lệ về tab mặc định.
     public static String tab(String raw) {
         return raw != null && TABS.contains(raw) ? raw : "unassigned";
     }
 
+    // Chuẩn hóa nhóm trạng thái ticket của manager.
+    public static String mineStatus(String raw) {
+        return raw != null && MINE_STATUSES.contains(raw) ? raw : "active";
+    }
+
+    // Tạo điều kiện truy vấn yêu cầu theo phạm vi và bộ lọc.
     private Specification<Ticket> specification(Long managerId, List<Long> scopeIds, String tab,
                                                  QueueFilter filter, LocalDateTime now,
                                                  boolean defaultOrder) {
@@ -121,10 +148,18 @@ public class ManagerQueueService {
                 case "unassigned" -> {
                     where.add(inScope);
                     where.add(cb.equal(root.get("status"), TicketStatus.NEW));
+                    where.add(cb.isNull(root.get("currentAssigneeId")));
                 }
                 case "mine" -> {
                     where.add(assignedToMe);
-                    where.add(notFinished(root.get("status"), cb));
+                    if ("processed".equals(filter.getMineStatus())) {
+                        where.add(root.get("status").in(
+                                TicketStatus.RESOLVED, TicketStatus.CLOSED, TicketStatus.CANCELLED));
+                    } else {
+                        where.add(root.get("status").in(
+                                TicketStatus.ASSIGNED, TicketStatus.IN_PROGRESS,
+                                TicketStatus.WAITING_STUDENT));
+                    }
                 }
                 case "waiting" -> {
                     where.add(assignedToMe);
@@ -172,11 +207,13 @@ public class ManagerQueueService {
         };
     }
 
+    // Tạo điều kiện loại trừ yêu cầu đã đóng hoặc hủy.
     private static Predicate notFinished(Expression<TicketStatus> status,
                                          jakarta.persistence.criteria.CriteriaBuilder cb) {
         return cb.not(status.in(TicketStatus.CLOSED, TicketStatus.CANCELLED));
     }
 
+    // Lấy tên người dùng từ bản đồ tóm tắt.
     private static String name(Map<Long, UserSummary> summaries, Long id) {
         UserSummary summary = id == null ? null : summaries.get(id);
         return summary == null ? "—" : summary.fullName();

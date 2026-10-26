@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.FaqStatus;
 
+// Đóng gói dữ liệu đầu vào cho thao tác AdminFaqFilter.
 @Getter
 @Setter
 public class AdminFaqFilter {

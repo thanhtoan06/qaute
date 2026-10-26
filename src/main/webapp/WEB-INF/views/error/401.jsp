@@ -1,5 +1,4 @@
 <%@ page pageEncoding="UTF-8" %>
-<%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -7,6 +6,7 @@
     <title>Bạn cần đăng nhập - QAUTE</title>
 </head>
 <body>
+<%-- Nhắc người dùng đăng nhập trước khi tiếp tục thao tác. --%>
 <div class="page page-center">
     <div class="container container-tight py-4">
         <div class="empty">

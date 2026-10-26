@@ -150,6 +150,7 @@
                     <li class="breadcrumb-item active" aria-current="page">Hỏi &amp; Đáp</li>
                 </ol>
             </nav>
+            <%-- Giới thiệu kho FAQ và cách tìm câu trả lời phù hợp. --%>
             <section class="faq-hero" aria-label="Giới thiệu kho hỏi đáp">
                 <div class="faq-hero-copy">
                     <div class="faq-eyebrow"><i class="bi bi-stars"></i> QAUTE KNOWLEDGE HUB</div>
@@ -163,6 +164,7 @@
                     <span class="faq-hero-bubble second"><i class="bi bi-stars"></i></span>
                 </div>
             </section>
+            <%-- Bố trí bộ lọc chuyên mục/chủ đề cạnh danh sách câu hỏi. --%>
             <div class="row g-4 faq-layout">
                 <div class="col-lg-3 mb-4 faq-sidebar">
                     <div class="accordion" id="faqFilterAccordion">
@@ -265,20 +267,40 @@
                                 </c:if>
                             </div>
                         </div>
+                        <%-- Cho phép sắp xếp câu hỏi theo ngày, lượt xem hoặc mức hữu ích. --%>
                         <div class="btn-group faq-sort" role="group" aria-label="Sắp xếp câu hỏi">
-                            <a href="<c:url value='/faq'><c:if test='${not empty category}'><c:param name='category' value='${category}'/></c:if><c:if test='${not empty tag}'><c:param name='tag' value='${tag}'/></c:if><c:param name='sort' value='LATEST'/></c:url>"
+                            <a href="<c:url value='/faq'><c:if test='${not empty searchQuery}'><c:param name='q' value='${searchQuery}'/></c:if><c:if test='${not empty category}'><c:param name='category' value='${category}'/></c:if><c:if test='${not empty tag}'><c:param name='tag' value='${tag}'/></c:if><c:param name='sort' value='LATEST'/></c:url>"
                                 class="btn btn-sm ${empty sort or sort == 'LATEST' ? 'btn-primary' : 'btn-outline-secondary'}"><i
                                     class="bi bi-clock-history me-1"></i>Mới cập nhật</a>
-                            <a href="<c:url value='/faq'><c:if test='${not empty category}'><c:param name='category' value='${category}'/></c:if><c:if test='${not empty tag}'><c:param name='tag' value='${tag}'/></c:if><c:param name='sort' value='MOST_VIEWED'/></c:url>"
+                            <a href="<c:url value='/faq'><c:if test='${not empty searchQuery}'><c:param name='q' value='${searchQuery}'/></c:if><c:if test='${not empty category}'><c:param name='category' value='${category}'/></c:if><c:if test='${not empty tag}'><c:param name='tag' value='${tag}'/></c:if><c:param name='sort' value='MOST_VIEWED'/></c:url>"
                                 class="btn btn-sm ${sort == 'MOST_VIEWED' ? 'btn-primary' : 'btn-outline-secondary'}"><i
                                     class="bi bi-fire me-1"></i>Xem nhiều</a>
-                            <a href="<c:url value='/faq'><c:if test='${not empty category}'><c:param name='category' value='${category}'/></c:if><c:if test='${not empty tag}'><c:param name='tag' value='${tag}'/></c:if><c:param name='sort' value='MOST_HELPFUL'/></c:url>"
+                            <a href="<c:url value='/faq'><c:if test='${not empty searchQuery}'><c:param name='q' value='${searchQuery}'/></c:if><c:if test='${not empty category}'><c:param name='category' value='${category}'/></c:if><c:if test='${not empty tag}'><c:param name='tag' value='${tag}'/></c:if><c:param name='sort' value='MOST_HELPFUL'/></c:url>"
                                 class="btn btn-sm ${sort == 'MOST_HELPFUL' ? 'btn-primary' : 'btn-outline-secondary'}"><i
                                     class="bi bi-hand-thumbs-up-fill me-1"></i>Hữu ích nhất</a>
                         </div>
                     </div>
+
+                    <%-- Ô tìm kiếm FAQ --%>
+                    <div class="mb-4">
+                        <form action="/faq" method="get" class="input-group">
+                            <input type="search" name="q" class="form-control" placeholder="Tìm kiếm câu hỏi..." value="${searchQuery}" aria-label="Tìm kiếm câu hỏi">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+                            <c:if test="${isSearch}">
+                                <a href="/faq" class="btn btn-outline-secondary">Xóa tìm kiếm</a>
+                            </c:if>
+                        </form>
+                    </div>
+
+                    <c:if test="${isSearch && empty page.content}">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Không tìm thấy câu hỏi nào phù hợp với từ khóa "${searchQuery}".
+                        </div>
+                    </c:if>
+
                     <c:choose>
                         <c:when test="${not empty page.content}">
+                            <%-- Liệt kê kết quả FAQ cùng thông tin danh mục và lượt xem. --%>
                             <div class="faq-list mb-4">
                                 <c:forEach var="faq" items="${page.content}">
                                     <div class="card faq-item-card">
@@ -330,6 +352,7 @@
                                 <qa:pagination page="${page}" baseUrl="/faq" params="${queryString}" />
                             </div>
                         </c:when>
+                        <%-- Hiển thị trạng thái rỗng và lối tạo yêu cầu khi không có kết quả. --%>
                         <c:otherwise>
                             <div class="card faq-empty-wrap">
                                 <qa:emptyState icon="bi-search" title="Không tìm thấy câu hỏi phù hợp"

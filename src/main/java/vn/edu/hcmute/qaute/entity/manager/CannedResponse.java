@@ -13,6 +13,7 @@ import lombok.Setter;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 import vn.edu.hcmute.qaute.common.constant.CannedResponseScope;
 
+// Biểu diễn dữ liệu CannedResponse được lưu trữ trong hệ thống.
 @Entity @Table(name = "canned_responses")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class CannedResponse extends AuditableEntity {

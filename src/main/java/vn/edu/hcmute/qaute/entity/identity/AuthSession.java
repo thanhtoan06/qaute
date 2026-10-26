@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu AuthSession được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "auth_sessions")
 @Getter

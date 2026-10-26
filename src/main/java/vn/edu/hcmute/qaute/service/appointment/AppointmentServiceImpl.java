@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.AppointmentStatus;
+import vn.edu.hcmute.qaute.common.constant.AuditActions;
 import vn.edu.hcmute.qaute.common.constant.ErrorCode;
 import vn.edu.hcmute.qaute.common.constant.Modality;
 import vn.edu.hcmute.qaute.common.constant.NotificationType;
@@ -25,6 +26,7 @@ import vn.edu.hcmute.qaute.common.exception.AppException;
 import vn.edu.hcmute.qaute.common.exception.BadRequestException;
 import vn.edu.hcmute.qaute.common.exception.InvalidTransitionException;
 import vn.edu.hcmute.qaute.common.exception.NotFoundException;
+import vn.edu.hcmute.qaute.common.util.BoundedPages;
 import vn.edu.hcmute.qaute.dto.view.AppointmentView;
 import vn.edu.hcmute.qaute.dto.view.BookAppointmentCommand;
 import vn.edu.hcmute.qaute.dto.view.ManagerOption;
@@ -38,12 +40,13 @@ import vn.edu.hcmute.qaute.repository.appointment.AppointmentRepository;
 import vn.edu.hcmute.qaute.repository.appointment.AppointmentSlotRepository;
 import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
 import vn.edu.hcmute.qaute.service.identity.UserLookupService;
+import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.notification.NotificationService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
-import vn.edu.hcmute.qaute.common.util.BoundedPages;
 
+// Xử lý nghiệp vụ Appointment trong hệ thống.
 @Service
 @Transactional
 public class AppointmentServiceImpl implements AppointmentService {
@@ -58,11 +61,13 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final SettingsService settings;
     private final NotificationService notifications;
     private final EntityManager entityManager;
+    private final AuditService audit;
 
+    // Khởi tạo dịch vụ đặt và quản lý lịch hẹn.
     public AppointmentServiceImpl(AppointmentRepository appointments, AppointmentSlotRepository slots,
             TicketRepository tickets, ManagerScopeService scopes, CategoryQueryService categories,
             UserLookupService users, SettingsService settings, NotificationService notifications,
-            EntityManager entityManager) {
+            EntityManager entityManager, AuditService audit) {
         this.appointments = appointments;
         this.slots = slots;
         this.tickets = tickets;
@@ -72,9 +77,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         this.settings = settings;
         this.notifications = notifications;
         this.entityManager = entityManager;
+        this.audit = audit;
     }
 
     @Override
+    // Tìm các tư vấn viên thuộc chuyên mục.
     @Transactional(readOnly = true)
     public List<ManagerOption> findAdvisors(Long categoryId) {
         if (categoryId == null) return List.of();
@@ -82,6 +89,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    // Tìm các khung giờ còn trống phù hợp với bộ lọc.
     @Transactional(readOnly = true)
     public List<SlotView> findAvailableSlots(Long categoryId, Long managerId, LocalDate date, Modality modality) {
         if (categoryId == null || date == null) return List.of();
@@ -111,7 +119,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    // Kiểm tra điều kiện và tạo lịch hẹn cho sinh viên.
     public AppointmentView book(Long studentId, BookAppointmentCommand cmd) {
+        // Xác thực dữ liệu, quyền đặt và tính sẵn sàng trước khi chiếm khung giờ.
         if (cmd == null || cmd.slotId() == null || cmd.categoryId() == null) {
             throw new BadRequestException("Thiếu khung giờ hoặc chuyên mục");
         }
@@ -130,6 +140,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new AppException(ErrorCode.ERR_LIMIT_EXCEEDED, "Bạn đã đạt giới hạn lịch hẹn sắp tới");
         }
         rejectStudentOverlap(studentId, null, slot);
+        // Chiếm khung giờ trước khi lưu lịch để ngăn đặt trùng.
         if (slots.markBooked(slot.getId()) == 0) throw slotTaken();
         Appointment appointment = new Appointment();
         appointment.setSlotId(slot.getId());
@@ -147,11 +158,15 @@ public class AppointmentServiceImpl implements AppointmentService {
             if (isActiveSlotConflict(exception)) throw slotTaken();
             throw exception;
         }
+        audit.log(AuditActions.APPOINTMENT_BOOKED, "Appointment", appointment.getId(),
+                null, "status=CONFIRMED; slotId=" + slot.getId() + "; managerId=" + appointment.getManagerId());
+        // Thông báo cho các bên sau khi lịch hẹn đã được lưu thành công.
         notifyBoth(appointment, NotificationType.APPOINTMENT_CONFIRMED, "Lịch hẹn đã được xác nhận");
         return toView(appointment, slot);
     }
 
     @Override
+    // Liệt kê lịch hẹn của sinh viên theo tab được chọn.
     @Transactional(readOnly = true)
     public Page<AppointmentView> listMine(Long studentId, String tab, Pageable pageable) {
         pageable = BoundedPages.of(pageable);
@@ -166,15 +181,18 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    // Lấy chi tiết lịch hẹn thuộc về sinh viên.
     @Transactional(readOnly = true)
     public AppointmentView getMine(Long studentId, Long appointmentId) {
         return toView(requireMine(studentId, appointmentId));
     }
 
     @Override
+    // Hủy lịch hẹn theo yêu cầu của sinh viên.
     public void cancelByStudent(Long studentId, Long appointmentId, String reason) {
         validateReason(reason);
         lockStudent(studentId);
+        // Ghi nhận trạng thái hủy trước khi trả khung giờ và thông báo tư vấn viên.
         Appointment appointment = requireMine(studentId, appointmentId);
         AppointmentSlot slot = requireSlot(appointment.getSlotId());
         requireChangeable(appointment, slot);
@@ -186,9 +204,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         notifications.notifyUser(appointment.getManagerId(), NotificationType.APPOINTMENT_CANCELLED,
                 "Lịch hẹn đã bị hủy", "Sinh viên đã hủy lịch hẹn: " + appointment.getTopic(),
                 "/manager/appointments", "APPOINTMENT", appointment.getId());
+        audit.log(AuditActions.APPOINTMENT_CANCELLED_BY_STUDENT, "Appointment", appointment.getId(),
+                "CONFIRMED", "CANCELLED");
     }
 
     @Override
+    // Chuyển lịch hẹn sang khung giờ khác.
     public AppointmentView reschedule(Long studentId, Long appointmentId, Long newSlotId) {
         if (newSlotId == null) throw new BadRequestException("Thiếu khung giờ mới");
         lockStudent(studentId);
@@ -198,6 +219,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (Objects.equals(newSlotId, oldSlot.getId())) throw new BadRequestException("Khung giờ mới phải khác khung giờ cũ");
         AppointmentSlot newSlot = requireBookableSlot(newSlotId, appointment.getCategoryId(), appointment.getModality());
         rejectStudentOverlap(studentId, appointmentId, newSlot);
+        // Đặt chỗ mới trước khi đổi lịch để giữ nguyên lịch cũ nếu cập nhật thất bại.
         if (slots.markBooked(newSlotId) == 0) throw slotTaken();
         appointment.setSlotId(newSlotId);
         appointment.setManagerId(newSlot.getManagerId());
@@ -209,6 +231,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             if (isActiveSlotConflict(exception)) throw slotTaken();
             throw exception;
         }
+        // Giải phóng khung cũ và gửi thông báo sau khi cập nhật lịch thành công.
         slots.releaseBooked(oldSlot.getId(), LocalDateTime.now());
         notifyBoth(appointment, NotificationType.APPOINTMENT_CHANGED, "Lịch hẹn đã thay đổi");
         if (!Objects.equals(oldSlot.getManagerId(), newSlot.getManagerId())) {
@@ -216,10 +239,14 @@ public class AppointmentServiceImpl implements AppointmentService {
                     "Lịch hẹn đã chuyển", "Lịch hẹn đã chuyển sang tư vấn viên khác",
                     "/manager/appointments", "APPOINTMENT", appointment.getId());
         }
+        audit.log(AuditActions.APPOINTMENT_RESCHEDULED, "Appointment", appointment.getId(),
+                "slotId=" + oldSlot.getId() + "; managerId=" + oldSlot.getManagerId(),
+                "slotId=" + newSlot.getId() + "; managerId=" + newSlot.getManagerId());
         return toView(appointment, newSlot);
     }
 
     @Override
+    // Tạo nội dung lịch hẹn theo định dạng iCalendar.
     @Transactional(readOnly = true)
     public String buildIcs(Long studentId, Long appointmentId) {
         Appointment appointment = requireMine(studentId, appointmentId);
@@ -239,6 +266,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return ics.toString();
     }
 
+    // Kiểm tra và lấy khung giờ có thể đặt cho chuyên mục.
     private AppointmentSlot requireBookableSlot(Long slotId, Long categoryId, Modality requested) {
         AppointmentSlot slot = requireSlot(slotId);
         if (slot.getStatus() != SlotStatus.AVAILABLE) throw slotTaken();
@@ -253,6 +281,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return slot;
     }
 
+    // Xác định hình thức phù hợp với khung giờ.
     private Modality resolveModality(AppointmentSlot slot, Modality requested) {
         if (slot.getModality() == Modality.BOTH) {
             if (requested != Modality.ONLINE && requested != Modality.IN_PERSON) {
@@ -266,12 +295,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         return slot.getModality();
     }
 
+    // Từ chối đặt lịch nếu sinh viên bị trùng giờ.
     private void rejectStudentOverlap(Long studentId, Long excludeId, AppointmentSlot slot) {
         if (appointments.countOverlapping(studentId, excludeId, slot.getStartAt(), slot.getEndAt()) > 0) {
             throw new BadRequestException("Bạn đã có lịch hẹn trùng giờ");
         }
     }
 
+    // Kiểm tra lịch hẹn còn được phép thay đổi hay không.
     private void requireChangeable(Appointment appointment, AppointmentSlot slot) {
         if (appointment.getStatus() != AppointmentStatus.CONFIRMED) {
             throw new InvalidTransitionException("Chỉ lịch đã xác nhận mới được thay đổi");
@@ -282,12 +313,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
+    // Khóa bản ghi sinh viên để tránh thao tác đồng thời.
     private void lockStudent(Long studentId) {
         if (studentId == null || entityManager.find(User.class, studentId, LockModeType.PESSIMISTIC_WRITE) == null) {
             throw new NotFoundException("Không tìm thấy sinh viên");
         }
     }
 
+    // Lấy lịch hẹn thuộc về sinh viên được yêu cầu.
     private Appointment requireMine(Long studentId, Long appointmentId) {
         if (appointmentId == null) throw new NotFoundException("Không tìm thấy lịch hẹn");
         return appointments.findById(appointmentId)
@@ -295,14 +328,17 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy lịch hẹn"));
     }
 
+    // Tìm khung giờ theo mã hoặc báo lỗi không tìm thấy.
     private AppointmentSlot requireSlot(Long slotId) {
         return slots.findById(slotId).orElseThrow(() -> new NotFoundException("Không tìm thấy khung giờ"));
     }
 
+    // Chuyển lịch hẹn thành dữ liệu hiển thị kèm khung giờ.
     private AppointmentView toView(Appointment appointment) {
         return toView(appointment, requireSlot(appointment.getSlotId()));
     }
 
+    // Chuyển lịch hẹn và khung giờ thành dữ liệu hiển thị.
     private AppointmentView toView(Appointment appointment, AppointmentSlot slot) {
         UserSummary manager = users.getSummary(appointment.getManagerId());
         String ticketCode = appointment.getTicketId() == null ? null
@@ -319,6 +355,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointment.getStudentVisibleSummary(), changeable, changeable);
     }
 
+    // Gửi thông báo lịch hẹn cho sinh viên và tư vấn viên.
     private void notifyBoth(Appointment appointment, NotificationType type, String title) {
         notifications.notifyUser(appointment.getStudentId(), type, title, appointment.getTopic(),
                 "/student/appointments/" + appointment.getId(), "APPOINTMENT", appointment.getId());
@@ -326,6 +363,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 "/manager/appointments", "APPOINTMENT", appointment.getId());
     }
 
+    // Kiểm tra độ dài chủ đề và ghi chú lịch hẹn.
     private static void validateText(String topic, String note) {
         if (topic == null || topic.trim().length() < 10 || topic.trim().length() > 200) {
             throw new BadRequestException("Chủ đề phải từ 10 đến 200 ký tự");
@@ -335,20 +373,24 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
+    // Kiểm tra độ dài lý do hủy lịch hẹn.
     private static void validateReason(String reason) {
         if (reason == null || reason.trim().length() < 10 || reason.trim().length() > 500) {
             throw new BadRequestException("Lý do phải từ 10 đến 500 ký tự");
         }
     }
 
+    // Chuẩn hóa chuỗi rỗng thành giá trị null.
     private static String trimToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
 
+    // Tạo lỗi khi khung giờ không còn khả dụng.
     private static AppException slotTaken() {
         return new AppException(ErrorCode.ERR_SLOT_TAKEN);
     }
 
+    // Kiểm tra ngoại lệ có phải do trùng khung giờ đang hoạt động.
     private static boolean isActiveSlotConflict(Throwable exception) {
         for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
             if (cause.getMessage() != null && cause.getMessage().contains("uk_appt_active_slot")) return true;
@@ -356,11 +398,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         return false;
     }
 
+    // Thoát các ký tự đặc biệt trong nội dung iCalendar.
     private static String escapeIcs(String text) {
         return text.replace("\\", "\\\\").replace("\r\n", "\n").replace("\r", "\n")
                 .replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n");
     }
 
+    // Ghi một dòng iCalendar và ngắt dòng theo giới hạn octet.
     private static void appendIcsLine(StringBuilder target, String line) {
         int octets = 0;
         for (int offset = 0; offset < line.length();) {

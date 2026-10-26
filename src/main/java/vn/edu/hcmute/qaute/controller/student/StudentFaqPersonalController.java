@@ -21,6 +21,7 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.knowledge.FaqPersonalService;
 import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho StudentFaqPersonal.
 @Controller
 public class StudentFaqPersonalController {
     private static final int PAGE_SIZE = 20;
@@ -29,6 +30,7 @@ public class StudentFaqPersonalController {
     private final FaqQueryService faqs;
     private final FaqViewRepository views;
 
+    // Khởi tạo bộ điều khiển FAQ cá nhân với các dịch vụ truy vấn.
     public StudentFaqPersonalController(FaqPersonalService personal, FaqQueryService faqs,
                                         FaqViewRepository views) {
         this.personal = personal;
@@ -38,11 +40,13 @@ public class StudentFaqPersonalController {
 
     @PostMapping("/student/faq/{id}/bookmark")
     @ResponseBody
+    // Bật hoặc tắt trạng thái đánh dấu FAQ của sinh viên.
     public ApiResponse<Boolean> toggleBookmark(@PathVariable Long id) {
         return ApiResponse.ok(personal.toggleBookmark(SecurityUtils.requireUserId(), id));
     }
 
     @GetMapping("/student/faq/recent")
+    // Hiển thị các FAQ đã xem gần đây cùng thời điểm xem.
     public String recent(@RequestParam(defaultValue = "0") int page,
                          Model model) {
         Long userId = SecurityUtils.requireUserId();
@@ -58,6 +62,7 @@ public class StudentFaqPersonalController {
     }
 
     @GetMapping("/student/faq/saved")
+    // Chuyển đến danh sách FAQ đã lưu.
     public String saved() {
         return "redirect:/student/faq?tab=saved";
     }

@@ -7,7 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.CannedResponseScope;
 
-@Getter @Setter
+// Đóng gói dữ liệu đầu vào cho thao tác CannedResponse.
+@Getter
+@Setter
 public class CannedResponseForm {
     private Long id;
 

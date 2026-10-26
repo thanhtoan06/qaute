@@ -5,24 +5,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.Map;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import vn.edu.hcmute.qaute.common.constant.EmailStatus;
 import vn.edu.hcmute.qaute.entity.notification.EmailOutbox;
 import vn.edu.hcmute.qaute.repository.notification.EmailOutboxRepository;
 
+// Xử lý nghiệp vụ Email trong hệ thống.
 @Service
 public class EmailServiceImpl implements EmailService {
 
     private final EmailOutboxRepository emailOutboxRepository;
     private final ObjectMapper objectMapper;
 
+    // Khởi tạo dịch vụ email với kho dữ liệu và bộ chuyển đổi JSON.
     public EmailServiceImpl(EmailOutboxRepository emailOutboxRepository, ObjectMapper objectMapper) {
         this.emailOutboxRepository = emailOutboxRepository;
         this.objectMapper = objectMapper;
     }
 
     @Override
+    // Ghi email theo mẫu vào hàng đợi gửi.
     @Transactional(propagation = Propagation.REQUIRED)
     public void sendTemplated(String toEmail, String subject, String templateName,
                               Map<String, String> model) {

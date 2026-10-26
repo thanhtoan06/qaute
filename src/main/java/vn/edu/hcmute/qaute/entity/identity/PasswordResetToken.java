@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu PasswordResetToken được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "password_reset_tokens")
 @Getter

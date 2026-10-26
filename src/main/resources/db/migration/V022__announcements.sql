@@ -1,0 +1,21 @@
+-- Lưu thông báo, đối tượng nhận, lịch xuất bản và trạng thái ghim.
+CREATE TABLE announcements (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    summary VARCHAR(500) NOT NULL,
+    body_html MEDIUMTEXT NOT NULL,
+    audience VARCHAR(10) NOT NULL,
+    pinned TINYINT(1) NOT NULL DEFAULT 0,
+    status VARCHAR(10) NOT NULL,
+    publish_at DATETIME(6) NULL,
+    expires_at DATETIME(6) NULL,
+    cover_asset_id BIGINT NULL,
+    notify_on_publish TINYINT(1) NOT NULL DEFAULT 0,
+    notified TINYINT(1) NOT NULL DEFAULT 0,
+    auto_publish TINYINT(1) NOT NULL DEFAULT 0,
+    created_by BIGINT NULL,
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
+    CONSTRAINT fk_announcement_cover FOREIGN KEY (cover_asset_id) REFERENCES media_assets(id),
+    INDEX idx_announcements_status_publish (status, publish_at)
+);

@@ -20,6 +20,7 @@ import vn.edu.hcmute.qaute.service.chat.ChatDeskService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.report.TicketReportService;
 
+// Xử lý nghiệp vụ ManagerDashboard trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class ManagerDashboardService {
@@ -37,6 +38,7 @@ public class ManagerDashboardService {
     private final DashboardQueryRepository queries;
     private final TicketRepository tickets;
 
+    // Khởi tạo dịch vụ tổng quan của tư vấn viên.
     public ManagerDashboardService(ManagerQueueService queue, ManagerScopeService scopes,
             TicketReportService reports, ChatDeskService chats, ManagerAppointmentService appointments,
             DashboardQueryRepository queries, TicketRepository tickets) {
@@ -45,6 +47,7 @@ public class ManagerDashboardService {
         this.tickets = tickets;
     }
 
+    // Tổng hợp số liệu và công việc cần chú ý của tư vấn viên.
     public Dashboard get(Long managerId) {
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();

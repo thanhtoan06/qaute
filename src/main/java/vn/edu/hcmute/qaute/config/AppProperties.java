@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+// Lưu các thuộc tính cấu hình ứng dụng có thể thay đổi.
 @Getter
 @Setter
 @Component

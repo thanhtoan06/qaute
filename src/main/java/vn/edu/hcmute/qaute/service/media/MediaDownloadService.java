@@ -21,6 +21,7 @@ import vn.edu.hcmute.qaute.dto.view.MediaStream;
 import vn.edu.hcmute.qaute.entity.media.MediaAsset;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
 
+// Xử lý nghiệp vụ MediaDownload trong hệ thống.
 @Service
 public class MediaDownloadService {
     private final MediaAssetRepository assets;
@@ -28,6 +29,7 @@ public class MediaDownloadService {
     private final Map<MediaUsageType, MediaAccessPolicy> policies;
     private final HttpClient httpClient;
 
+    // Khởi tạo dịch vụ tải xuống và lập chỉ mục chính sách truy cập.
     public MediaDownloadService(MediaAssetRepository assets, Cloudinary cloudinary,
                                 List<MediaAccessPolicy> policies) {
         this.assets = assets;
@@ -38,6 +40,7 @@ public class MediaDownloadService {
     }
 
     @Transactional(readOnly = true)
+    // Mở luồng tải xuống sau khi xác thực quyền truy cập.
     public MediaStream open(Long assetId, Long userId, RoleCode role) {
         MediaAsset asset = assets.findById(assetId).filter(item -> item.getStatus() == MediaStatus.ACTIVE)
                 .orElseThrow(this::notFound);
@@ -63,10 +66,12 @@ public class MediaDownloadService {
         }
     }
 
+    // Xác định loại nội dung được phép hiển thị trực tiếp.
     private static boolean inline(String mimeType) {
         return mimeType != null && (mimeType.startsWith("image/") || "application/pdf".equals(mimeType));
     }
 
+    // Tạo ngoại lệ khi không tìm thấy hoặc không thể truy cập tệp.
     private NotFoundException notFound() {
         return new NotFoundException("Không tìm thấy tệp");
     }

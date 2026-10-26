@@ -24,16 +24,19 @@ import vn.edu.hcmute.qaute.dto.view.ManagerScheduleSlotView;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.manager.ManagerScheduleService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ManagerSchedule.
 @Controller
 @RequestMapping("/manager/schedule")
 public class ManagerScheduleController {
     private final ManagerScheduleService schedule;
 
+    // Khởi tạo bộ điều khiển lịch làm việc.
     public ManagerScheduleController(ManagerScheduleService schedule) {
         this.schedule = schedule;
     }
 
     @GetMapping
+    // Hiển thị lịch tuần, quy tắc và các khung giờ bị chặn.
     public String index(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate week,
             Model model) {
         Long managerId = SecurityUtils.requireUserId();
@@ -66,6 +69,7 @@ public class ManagerScheduleController {
     }
 
     @PostMapping("/rules")
+    // Lưu quy tắc tạo khung giờ hẹn.
     public String saveRule(@Valid @ModelAttribute("ruleForm") AvailabilityRuleForm form,
             BindingResult result, RedirectAttributes redirect) {
         if (result.hasErrors()) {
@@ -84,6 +88,7 @@ public class ManagerScheduleController {
     }
 
     @PostMapping("/rules/{id}/delete")
+    // Tắt quy tắc lịch và xử lý các khung giờ liên quan.
     public String deleteRule(@PathVariable Long id, RedirectAttributes redirect) {
         try {
             int booked = schedule.deleteRule(id, SecurityUtils.requireUserId());
@@ -97,6 +102,7 @@ public class ManagerScheduleController {
     }
 
     @PostMapping("/blocks")
+    // Chặn một khoảng thời gian trong lịch làm việc.
     public String addBlock(@Valid @ModelAttribute("blockForm") AvailabilityBlockForm form,
             BindingResult result, RedirectAttributes redirect) {
         if (result.hasErrors()) {
@@ -115,6 +121,7 @@ public class ManagerScheduleController {
     }
 
     @PostMapping("/blocks/{id}/delete")
+    // Bỏ chặn khoảng thời gian đã chọn.
     public String deleteBlock(@PathVariable Long id, RedirectAttributes redirect) {
         try {
             schedule.deleteBlock(id, SecurityUtils.requireUserId());

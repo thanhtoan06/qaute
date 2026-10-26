@@ -1,8 +1,8 @@
 package vn.edu.hcmute.qaute.controller.manager;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +24,7 @@ import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.report.ServiceReportService;
 import vn.edu.hcmute.qaute.service.report.TicketReportService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ManagerReport.
 @Controller
 public class ManagerReportController {
     private final TicketReportService tickets;
@@ -31,6 +32,7 @@ public class ManagerReportController {
     private final ManagerScopeService managerScopes;
     private final CategoryQueryService categories;
 
+    // Khởi tạo bộ điều khiển báo cáo của quản lý.
     public ManagerReportController(TicketReportService tickets, ServiceReportService services,
                                    ManagerScopeService managerScopes, CategoryQueryService categories) {
         this.tickets = tickets;
@@ -43,6 +45,7 @@ public class ManagerReportController {
     private record Criteria(ReportRange range, ReportScope scope) {}
 
     @GetMapping("/manager/reports")
+    // Hiển thị trang báo cáo trong phạm vi quản lý.
     public String page(@RequestParam(defaultValue = "30") String range,
                        @RequestParam(required = false) String from,
                        @RequestParam(required = false) String to,
@@ -67,6 +70,7 @@ public class ManagerReportController {
 
     @GetMapping("/api/manager/reports/data")
     @ResponseBody
+    // Trả về dữ liệu báo cáo theo khoảng ngày và phạm vi đã chọn.
     public ApiResponse<ReportData> data(@RequestParam(defaultValue = "30") String range,
                                         @RequestParam(required = false) String from,
                                         @RequestParam(required = false) String to,
@@ -78,6 +82,7 @@ public class ManagerReportController {
                 services.appointment(criteria.scope(), criteria.range())));
     }
 
+    // Xác thực bộ lọc và tạo tiêu chí báo cáo.
     private Criteria criteria(Long managerId, String range, String from, String to,
                               Long categoryId, boolean mine) {
         List<Long> allowed = managerScopes.getScopeCategoryIds(managerId);
@@ -98,6 +103,7 @@ public class ManagerReportController {
         return new Criteria(dates, new ReportScope(managerId, categoryIds));
     }
 
+    // Chuyển ngày đầu vào thành ngày báo cáo hợp lệ.
     private LocalDate parse(String value) {
         if (value == null || value.isBlank()) throw new BadRequestException("Vui lòng chọn đủ ngày bắt đầu và kết thúc");
         try { return LocalDate.parse(value); }

@@ -1,10 +1,9 @@
 <%@ tag body-content="empty" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ attribute name="page" type="org.springframework.data.domain.Page" required="true" %>
 <%@ attribute name="baseUrl" type="java.lang.String" required="true" %>
 <%@ attribute name="params" type="java.lang.String" required="false" rtexprvalue="true" %>
+<%-- Hiển thị điều hướng trang và giữ các tham số truy vấn hiện có. --%>
 <c:if test="${page.totalPages > 1}">
     <c:set var="queryPrefix" value="${empty params ? '' : params.concat('&')}"/>
     <nav aria-label="Phân trang">

@@ -7,6 +7,7 @@ import vn.edu.hcmute.qaute.common.constant.SlaStatus;
 import vn.edu.hcmute.qaute.common.constant.TicketPriority;
 import vn.edu.hcmute.qaute.common.constant.TicketStatus;
 
+// Đóng gói dữ liệu ManagerTicketDetail để hiển thị hoặc trả về API.
 public record ManagerTicketDetailView(
         TicketInfo ticket,
         StudentSummary student,

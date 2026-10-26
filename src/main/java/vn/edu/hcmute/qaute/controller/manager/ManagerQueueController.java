@@ -17,20 +17,24 @@ import vn.edu.hcmute.qaute.dto.request.manager.QueueFilter;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.manager.ManagerQueueService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ManagerQueue.
 @Controller
 public class ManagerQueueController {
     private final ManagerQueueService queue;
 
+    // Khởi tạo bộ điều khiển hàng đợi yêu cầu.
     public ManagerQueueController(ManagerQueueService queue) {
         this.queue = queue;
     }
 
     @GetMapping("/manager/queue")
+    // Hiển thị hàng đợi cùng bộ lọc và thông tin phân trang.
     public String list(@ModelAttribute("filter") QueueFilter filter,
                        @RequestParam(defaultValue = "0") int page, Model model,
                        HttpServletRequest request) {
         Long managerId = SecurityUtils.requireUserId();
         filter.setTab(ManagerQueueService.tab(filter.getTab()));
+        filter.setMineStatus(ManagerQueueService.mineStatus(filter.getMineStatus()));
         Pageable pageable = PageUtil.of(page, 15, filter.getSort(), true,
                 ManagerQueueService.SORT_FIELDS, "createdAt");
         model.addAttribute("tickets", queue.list(managerId, filter, pageable));
@@ -49,10 +53,12 @@ public class ManagerQueueController {
         return "manager/queue";
     }
 
+    // Tạo chuỗi tham số cho bộ lọc hàng đợi.
     private static String params(QueueFilter filter, boolean includeTab) {
         StringJoiner params = new StringJoiner("&amp;");
         if (includeTab) add(params, "tab", filter.getTab());
         add(params, "categoryId", filter.getCategoryId());
+        if (includeTab && "mine".equals(filter.getTab())) add(params, "mineStatus", filter.getMineStatus());
         add(params, "priority", filter.getPriority());
         add(params, "status", filter.getStatus());
         add(params, "urgentRequested", filter.getUrgentRequested());
@@ -63,6 +69,7 @@ public class ManagerQueueController {
         return params.toString();
     }
 
+    // Thêm tham số lọc khi giá trị không rỗng.
     private static void add(StringJoiner params, String key, Object value) {
         if (value != null && !value.toString().isBlank()) {
             params.add(key + "=" + URLEncoder.encode(value.toString(), StandardCharsets.UTF_8));

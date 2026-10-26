@@ -5,7 +5,9 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+// Đóng gói dữ liệu đầu vào cho thao tác Reply.
+@Getter
+@Setter
 public class ReplyForm {
     @NotBlank(message = "Vui lòng nhập nội dung trả lời")
     private String contentHtml;

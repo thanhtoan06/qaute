@@ -8,9 +8,11 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import vn.edu.hcmute.qaute.security.QauteUserDetails;
 
+// Hỗ trợ giao tiếp thời gian thực qua WsHandshakeHandler.
 @Component
 public class WsHandshakeHandler extends DefaultHandshakeHandler {
     @Override
+    // Tạo principal cho người dùng đã xác thực trong handshake.
     protected Principal determineUser(ServerHttpRequest request, WebSocketHandler handler,
             Map<String, Object> attributes) {
         QauteUserDetails details = (QauteUserDetails) attributes.get("userDetails");

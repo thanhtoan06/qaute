@@ -22,12 +22,14 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.identity.AuthSessionService;
 import vn.edu.hcmute.qaute.service.identity.PasswordService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho StudentSecurity.
 @Controller
 public class StudentSecurityController {
 
     private final PasswordService passwordService;
     private final AuthSessionService authSessionService;
 
+    // Khởi tạo bộ điều khiển bảo mật với dịch vụ mật khẩu và phiên.
     public StudentSecurityController(PasswordService passwordService,
                                    AuthSessionService authSessionService) {
         this.passwordService = passwordService;
@@ -35,6 +37,7 @@ public class StudentSecurityController {
     }
 
     @GetMapping({"/student/profile/security", "/student/security"})
+    // Hiển thị các phiên đăng nhập và biểu mẫu đổi mật khẩu.
     public String security(Model model) {
         Long userId = SecurityUtils.requireUserId();
         String currentJti = SecurityUtils.currentUser()
@@ -51,6 +54,7 @@ public class StudentSecurityController {
     }
 
     @PostMapping("/student/profile/security/password")
+    // Kiểm tra biểu mẫu và đổi mật khẩu của sinh viên.
     public String changePassword(@Valid @ModelAttribute("form") ChangePasswordForm form,
                                  BindingResult bindingResult,
                                  Model model,
@@ -92,6 +96,7 @@ public class StudentSecurityController {
     }
 
     @PostMapping("/student/profile/sessions/{id}/revoke")
+    // Thu hồi phiên đăng nhập được chọn nếu đó không phải phiên hiện tại.
     public String revokeSession(@PathVariable Long id,
                                 RedirectAttributes redirectAttributes) {
         Long userId = SecurityUtils.requireUserId();
@@ -126,6 +131,7 @@ public class StudentSecurityController {
     }
 
     @PostMapping("/student/profile/sessions/revoke-others")
+    // Thu hồi mọi phiên đăng nhập ngoại trừ phiên hiện tại.
     public String revokeOtherSessions(RedirectAttributes redirectAttributes) {
         Long userId = SecurityUtils.requireUserId();
         String currentJti = SecurityUtils.currentUser()

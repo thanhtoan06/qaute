@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 
+// Cung cấp tiện ích dùng chung cho HtmlSanitizerUtil.
 public final class HtmlSanitizerUtil {
 
     private static final PolicyFactory POLICY = new HtmlPolicyBuilder()
@@ -18,9 +19,11 @@ public final class HtmlSanitizerUtil {
             .allowAttributes("alt").onElements("img")
             .toFactory();
 
+    /** Ngăn khởi tạo lớp tiện ích. */
     private HtmlSanitizerUtil() {
     }
 
+    /** Làm sạch HTML theo chính sách cho phép đã cấu hình. */
     public static String sanitize(String html) {
         return html == null ? "" : POLICY.sanitize(html);
     }

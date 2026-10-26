@@ -63,6 +63,19 @@ public final class AuditActions {
     public static final String TICKET_CATEGORY_CHANGED = "TICKET_CATEGORY_CHANGED";
     public static final String TICKET_FORCE_CLOSED = "TICKET_FORCE_CLOSED";
 
+    // ----- Lịch hẹn và chat trực tuyến -----
+    public static final String APPOINTMENT_BOOKED = "APPOINTMENT_BOOKED";
+    public static final String APPOINTMENT_CANCELLED_BY_STUDENT = "APPOINTMENT_CANCELLED_BY_STUDENT";
+    public static final String APPOINTMENT_RESCHEDULED = "APPOINTMENT_RESCHEDULED";
+    public static final String APPOINTMENT_COMPLETED = "APPOINTMENT_COMPLETED";
+    public static final String APPOINTMENT_NO_SHOW = "APPOINTMENT_NO_SHOW";
+    public static final String CHAT_SESSION_STARTED = "CHAT_SESSION_STARTED";
+    public static final String CHAT_AGENT_REQUESTED = "CHAT_AGENT_REQUESTED";
+    public static final String CHAT_AGENT_ACCEPTED = "CHAT_AGENT_ACCEPTED";
+    public static final String CHAT_SESSION_CANCELLED = "CHAT_SESSION_CANCELLED";
+    public static final String CHAT_SESSION_ENDED = "CHAT_SESSION_ENDED";
+    public static final String CHAT_SESSION_EXPIRED = "CHAT_SESSION_EXPIRED";
+
     // ----- Hành động nhạy cảm khác -----
     public static final String VIEW_STUDENT_PROFILE = "VIEW_STUDENT_PROFILE";
     public static final String APPOINTMENT_CANCELLED_BY_MANAGER = "APPOINTMENT_CANCELLED_BY_MANAGER";
@@ -71,6 +84,7 @@ public final class AuditActions {
     public static final String REPORT_EXPORT = "REPORT_EXPORT";
     public static final String SYSTEM_TEST_EMAIL_QUEUED = "SYSTEM_TEST_EMAIL_QUEUED";
 
+    // Ngăn khởi tạo lớp tiện ích chứa các mã hành động kiểm toán.
     private AuditActions() {
     }
 }

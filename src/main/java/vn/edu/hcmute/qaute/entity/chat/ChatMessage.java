@@ -12,6 +12,7 @@ import vn.edu.hcmute.qaute.common.constant.ChatContentType;
 import vn.edu.hcmute.qaute.common.constant.ChatSenderType;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu ChatMessage được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "chat_messages")
 @Getter @Setter

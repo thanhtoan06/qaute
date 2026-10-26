@@ -42,6 +42,7 @@ import vn.edu.hcmute.qaute.service.system.SettingsService;
 import vn.edu.hcmute.qaute.service.ticket.TicketAccessService;
 import vn.edu.hcmute.qaute.service.ticket.TicketWorkflowService;
 
+// Xử lý nghiệp vụ StudentTicketDetail trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class StudentTicketDetailService {
@@ -57,6 +58,7 @@ public class StudentTicketDetailService {
     private final TicketWorkflowService workflow;
     private final TicketReviewRepository reviews;
 
+    // Khởi tạo dịch vụ chi tiết yêu cầu với các phụ thuộc cần thiết.
     public StudentTicketDetailService(TicketAccessService access, TicketMessageRepository messages,
                                       TicketAttachmentRepository attachments, TicketStatusHistoryRepository histories,
                                       TicketAssignmentRepository assignments, MediaAssetRepository assets,
@@ -76,6 +78,7 @@ public class StudentTicketDetailService {
         this.reviews = reviews;
     }
 
+    // Tạo dữ liệu chi tiết yêu cầu hiển thị cho sinh viên.
     public TicketDetailView getDetail(Long studentId, Long ticketId) {
         Ticket ticket = access.requireViewable(ticketId, studentId, RoleCode.STUDENT);
         List<TicketMessage> ticketMessages = messages.findByTicketIdOrderByCreatedAtAsc(ticketId);
@@ -112,20 +115,24 @@ public class StudentTicketDetailService {
     }
 
     @Transactional
+    // Gửi phản hồi của sinh viên vào yêu cầu.
     public void reply(Long studentId, Long ticketId, String html, List<Long> assetIds) {
         workflow.addStudentReply(ticketId, studentId, html, assetIds == null ? List.of() : assetIds);
     }
 
+    // Tính số lần sinh viên còn có thể mở lại yêu cầu.
     public int reopenRemaining(Long studentId, Long ticketId) {
         Ticket ticket = access.requireViewable(ticketId, studentId, RoleCode.STUDENT);
         return Math.max(0, settings.getInt(SettingKeys.TICKET_REOPEN_MAX) - ticket.getReopenCount());
     }
 
+    // Kiểm tra đánh giá còn trong thời hạn chỉnh sửa.
     private boolean isReviewEditable(TicketReview review, LocalDateTime now) {
         return review.getCreatedAt() != null && !review.getCreatedAt()
                 .plusDays(settings.getInt(SettingKeys.TICKET_RATING_EDIT_DAYS)).isBefore(now);
     }
 
+    // Chuyển đánh giá sang dữ liệu hiển thị.
     private static ReviewView toReviewView(TicketReview review, boolean editable) {
         if (review == null) return null;
         List<String> reasonCodes = review.getReasonCodes() == null || review.getReasonCodes().isBlank() ? List.of()
@@ -134,6 +141,7 @@ public class StudentTicketDetailService {
         return new ReviewView(review.getRating(), reasonCodes, review.getComment(), editable);
     }
 
+    // Tải thông tin tóm tắt của người dùng liên quan.
     private Map<Long, UserSummary> loadSummaries(Ticket ticket, List<TicketMessage> ticketMessages,
                                                    List<TicketAssignment> ticketAssignments) {
         Set<Long> ids = new HashSet<>();
@@ -144,6 +152,7 @@ public class StudentTicketDetailService {
         return ids.isEmpty() ? Map.of() : users.getSummaries(ids);
     }
 
+    // Gom tệp đính kèm đang hoạt động theo tin nhắn.
     private Map<Long, List<AttachmentView>> attachmentsByMessage(List<TicketAttachment> ticketAttachments) {
         if (ticketAttachments.isEmpty()) return Map.of();
         Map<Long, MediaAsset> byId = assets.findAllById(ticketAttachments.stream()
@@ -159,6 +168,7 @@ public class StudentTicketDetailService {
         return result;
     }
 
+    // Tạo dòng thời gian từ lịch sử trạng thái và phân công.
     private List<TimelineEvent> timeline(Long ticketId, List<TicketAssignment> ticketAssignments,
                                          Map<Long, UserSummary> summaries) {
         List<TimelineEvent> result = new ArrayList<>();
@@ -174,6 +184,7 @@ public class StudentTicketDetailService {
         return result;
     }
 
+    // Xác định tên người gửi hiển thị trong hội thoại.
     private static String senderName(TicketMessage message, Map<Long, UserSummary> summaries, Long studentId) {
         if (message.getSenderType() == SenderType.SYSTEM) return "Hệ thống";
         if (message.getSenderType() == SenderType.STUDENT && studentId.equals(message.getSenderId())) return "Bạn";
@@ -181,16 +192,16 @@ public class StudentTicketDetailService {
         return user == null ? "Tư vấn viên" : user.fullName();
     }
 
+    // Chuyển trạng thái yêu cầu thành nhãn tiếng Việt.
     private static String statusLabel(TicketStatus status) {
         if (status == null) return "Cập nhật yêu cầu";
-        return switch (status) {
-            case NEW -> "Đã gửi yêu cầu";
-            case ASSIGNED -> "Đã được nhận";
-            case IN_PROGRESS -> "Đang xử lý";
-            case WAITING_STUDENT -> "Chờ bạn bổ sung";
-            case RESOLVED -> "Đã giải quyết";
-            case CLOSED -> "Đã đóng";
-            case CANCELLED -> "Đã hủy";
-        };
+        if (status == TicketStatus.NEW) return "Đã gửi yêu cầu";
+        if (status == TicketStatus.ASSIGNED) return "Đã được nhận";
+        if (status == TicketStatus.IN_PROGRESS) return "Đang xử lý";
+        if (status == TicketStatus.WAITING_STUDENT) return "Chờ bạn bổ sung";
+        if (status == TicketStatus.RESOLVED) return "Đã giải quyết";
+        if (status == TicketStatus.CLOSED) return "Đã đóng";
+        if (status == TicketStatus.CANCELLED) return "Đã hủy";
+        return "Cập nhật yêu cầu";
     }
 }

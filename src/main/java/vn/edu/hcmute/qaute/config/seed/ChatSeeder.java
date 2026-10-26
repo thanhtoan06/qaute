@@ -32,6 +32,10 @@ import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 @Profile("demo")
 @RequiredArgsConstructor
 public class ChatSeeder implements DemoSeeder {
+    private static final String[] LEGACY_STUDENT_EMAILS = {
+        "24162129@student.hcmute.edu.vn",
+        "24162130@student.hcmute.edu.vn"
+    };
 
     private static final String[][] MANAGER_ACCOUNTS = {
         {"DT", "manager.daotao@qaute.edu.vn"},
@@ -125,10 +129,10 @@ public class ChatSeeder implements DemoSeeder {
     private static final int[] STUDENT_NUMBERS = {
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-        21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-        21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         11,
     };
@@ -980,11 +984,13 @@ public class ChatSeeder implements DemoSeeder {
     private final ManagerScopeService scopes;
     private final EntityManager entityManager;
 
+    // Xác định thứ tự chạy của seeder hội thoại.
     @Override
     public int order() {
         return 60;
     }
 
+    // Tạo các phiên trò chuyện và tin nhắn demo.
     @Override
     @Transactional
     public void seed() {
@@ -1016,7 +1022,10 @@ public class ChatSeeder implements DemoSeeder {
             String[] dialogue = DIALOGUES[index];
             int studentNumber = STUDENT_NUMBERS[index];
             String initialQuestion = dialogue[0];
-            User student = user("241621" + String.format("%02d", studentNumber) + "@student.hcmute.edu.vn");
+            String studentEmail = index < LEGACY_STUDENT_EMAILS.length
+                    ? LEGACY_STUDENT_EMAILS[index]
+                    : String.valueOf(111111 + studentNumber - 1) + "@qaute.edu.vn";
+            User student = user(studentEmail);
             if (sessions.existsByStudentIdAndInitialQuestion(student.getId(), initialQuestion)) {
                 continue;
             }
@@ -1118,6 +1127,7 @@ public class ChatSeeder implements DemoSeeder {
         }
     }
 
+    // Chọn quản lý phụ trách chuyên mục trò chuyện.
     private User getManagerForCategory(String categoryCode, Map<String, User> managers) {
         int separator = categoryCode.indexOf('_');
         if (separator <= 0) {
@@ -1131,6 +1141,7 @@ public class ChatSeeder implements DemoSeeder {
         return manager;
     }
 
+    // Tìm tài khoản demo theo email.
     private User user(String email) {
         return users.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new IllegalStateException("Thiếu tài khoản demo " + email));

@@ -25,6 +25,7 @@ import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
 import vn.edu.hcmute.qaute.service.notification.NotificationService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
+// Xử lý nghiệp vụ StudentDashboard trong hệ thống.
 @Service
 public class StudentDashboardServiceImpl implements StudentDashboardService {
 
@@ -41,6 +42,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
     private final CategoryQueryService categoryQueryService;
     private final UserLookupService userLookupService;
 
+    // Khởi tạo dịch vụ tổng quan với các phụ thuộc cần thiết.
     public StudentDashboardServiceImpl(StudentTicketQueryService ticketQueryService,
                                        TicketRepository ticketRepository,
                                        NotificationService notificationService,
@@ -59,6 +61,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
     @Override
     @Transactional(readOnly = true)
+    // Tổng hợp số liệu và nội dung hiển thị trên bảng điều khiển sinh viên.
     public StudentDashboardView getDashboard(Long studentId) {
         if (studentId == null) {
             return new StudentDashboardView(Map.of(), List.of(), null, 0L, List.of());
@@ -117,6 +120,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
         );
     }
 
+    // Chuyển danh sách yêu cầu thành các mục hiển thị.
     private List<TicketListItem> mapToTicketListItems(List<Ticket> tickets) {
         if (tickets == null || tickets.isEmpty()) {
             return List.of();
@@ -147,4 +151,3 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
         }).toList();
     }
 }
-

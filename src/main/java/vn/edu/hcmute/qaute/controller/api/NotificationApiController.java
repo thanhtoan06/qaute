@@ -15,17 +15,20 @@ import vn.edu.hcmute.qaute.dto.view.NotificationView;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.notification.NotificationService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho NotificationApi.
 @RestController
 @RequestMapping("/api/notifications")
 public class NotificationApiController {
 
     private final NotificationService notificationService;
 
+    // Khởi tạo bộ điều khiển thông báo.
     public NotificationApiController(NotificationService notificationService) {
         this.notificationService = notificationService;
     }
 
     @GetMapping
+    // Lấy danh sách thông báo theo trang và trạng thái đã đọc.
     public ApiResponse<Page<NotificationView>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -36,12 +39,14 @@ public class NotificationApiController {
     }
 
     @GetMapping("/unread-count")
+    // Lấy số lượng thông báo chưa đọc.
     public ApiResponse<Long> unreadCount() {
         Long userId = SecurityUtils.requireUserId();
         return ApiResponse.ok(notificationService.unreadCount(userId));
     }
 
     @PostMapping("/{id}/read")
+    // Đánh dấu một thông báo là đã đọc.
     public ApiResponse<Void> markRead(@PathVariable Long id) {
         Long userId = SecurityUtils.requireUserId();
         notificationService.markRead(userId, id);
@@ -49,6 +54,7 @@ public class NotificationApiController {
     }
 
     @PostMapping("/read-all")
+    // Đánh dấu tất cả thông báo là đã đọc.
     public ApiResponse<Void> markAllRead() {
         Long userId = SecurityUtils.requireUserId();
         notificationService.markAllRead(userId);
@@ -56,10 +62,10 @@ public class NotificationApiController {
     }
 
     @DeleteMapping("/{id}")
+    // Ẩn một thông báo khỏi danh sách của người dùng.
     public ApiResponse<Void> hide(@PathVariable Long id) {
         Long userId = SecurityUtils.requireUserId();
         notificationService.hide(userId, id);
         return ApiResponse.ok(null);
     }
 }
-

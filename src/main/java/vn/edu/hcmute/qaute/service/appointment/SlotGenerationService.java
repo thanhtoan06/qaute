@@ -18,6 +18,7 @@ import vn.edu.hcmute.qaute.repository.appointment.AvailabilityBlockRepository;
 import vn.edu.hcmute.qaute.repository.appointment.AvailabilityRuleRepository;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
+// Xử lý nghiệp vụ SlotGeneration trong hệ thống.
 @Service
 public class SlotGenerationService {
     private final AvailabilityRuleRepository rules;
@@ -25,6 +26,7 @@ public class SlotGenerationService {
     private final AppointmentSlotRepository slots;
     private final SettingsService settings;
 
+    // Khởi tạo dịch vụ tạo khung giờ theo quy tắc khả dụng.
     public SlotGenerationService(AvailabilityRuleRepository rules, AvailabilityBlockRepository blocks,
             AppointmentSlotRepository slots, SettingsService settings) {
         this.rules = rules;
@@ -33,11 +35,13 @@ public class SlotGenerationService {
         this.settings = settings;
     }
 
+    // Tạo khung giờ còn trống cho một tư vấn viên.
     @Transactional
     public void generateForManager(Long managerId) {
         generateForManager(managerId, LocalDateTime.now());
     }
 
+    // Tạo khung giờ cho tất cả tư vấn viên đang hoạt động.
     @Transactional
     public void generateAll() {
         LocalDateTime now = LocalDateTime.now();
@@ -46,11 +50,13 @@ public class SlotGenerationService {
         }
     }
 
+    // Đánh dấu các khung giờ đã qua là hết hạn.
     @Transactional
     public int expirePast() {
         return slots.expirePast(LocalDateTime.now());
     }
 
+    // Sinh khung giờ cho một tư vấn viên tại thời điểm chỉ định.
     private void generateForManager(Long managerId, LocalDateTime now) {
         int days = settings.getInt(SettingKeys.APPOINTMENT_GENERATE_DAYS);
         int defaultMinutes = settings.getInt(SettingKeys.APPOINTMENT_SLOT_MINUTES);
@@ -103,6 +109,7 @@ public class SlotGenerationService {
         slots.saveAll(generated);
     }
 
+    // Kiểm tra khung giờ có giao với khoảng thời gian bị chặn.
     private boolean overlaps(List<AvailabilityBlock> blocks, LocalDateTime start, LocalDateTime end) {
         return blocks.stream().anyMatch(block -> block.getStartAt().isBefore(end)
                 && block.getEndAt().isAfter(start));

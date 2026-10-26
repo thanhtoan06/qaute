@@ -82,6 +82,20 @@
 .qaute-home-redesign .rounded-4.p-4.text-white.shadow-sm .btn-light:hover { transform: translateY(-2px); box-shadow: 0 8px 19px rgba(0,0,0,.15); }
 .qaute-home-redesign .hcmute-section .row.g-3.flex-grow-1 .hcmute-card-modern { min-height: 145px; }
 .qaute-home-redesign .hcmute-section .row.g-3.flex-grow-1 .bi { filter: drop-shadow(0 3px 6px rgba(33, 101, 189, .08)); }
+.qaute-home-redesign .hcmute-intro-card { position: relative; isolation: isolate; overflow: hidden; border: 1px solid var(--intro-border); background: radial-gradient(ellipse at 100% 0%, var(--intro-glow), transparent 55%), linear-gradient(145deg, var(--intro-bg), #fff 78%) !important; box-shadow: 0 8px 22px var(--intro-shadow); transition: transform .3s cubic-bezier(.2,.75,.3,1), box-shadow .3s ease, border-color .3s ease; }
+.qaute-home-redesign .row.g-3.flex-grow-1 > div:nth-child(1) .hcmute-intro-card { --intro-bg: #f0f8ff; --intro-glow: rgba(66, 153, 225, .2); --intro-border: #d7eaff; --intro-shadow: rgba(34, 108, 178, .08); --intro-accent: #2374c6; --intro-icon-bg: linear-gradient(145deg, #dff1ff, #c7e4ff); --intro-icon-border: #c5e2fb; --intro-icon-shadow: rgba(35, 116, 198, .22); }
+.qaute-home-redesign .row.g-3.flex-grow-1 > div:nth-child(2) .hcmute-intro-card { --intro-bg: #f6f3ff; --intro-glow: rgba(139, 111, 231, .2); --intro-border: #e5ddff; --intro-shadow: rgba(104, 77, 181, .08); --intro-accent: #7353c6; --intro-icon-bg: linear-gradient(145deg, #eee8ff, #ddd3ff); --intro-icon-border: #ded3ff; --intro-icon-shadow: rgba(115, 83, 198, .22); }
+.qaute-home-redesign .hcmute-intro-card::before { content: ""; position: absolute; z-index: -1; inset: 0 0 auto; height: 4px; background: linear-gradient(90deg, var(--intro-accent), color-mix(in srgb, var(--intro-accent), #fff 48%)); transform: scaleX(.28); transform-origin: left; transition: transform .35s cubic-bezier(.2,.75,.3,1); }
+.qaute-home-redesign .hcmute-intro-card::after { content: ""; position: absolute; z-index: -1; right: -34px; bottom: -42px; width: 112px; height: 112px; border: 1px solid color-mix(in srgb, var(--intro-accent), transparent 82%); border-radius: 50%; box-shadow: 0 0 0 16px color-mix(in srgb, var(--intro-accent), transparent 95%), 0 0 0 34px color-mix(in srgb, var(--intro-accent), transparent 97%); pointer-events: none; transition: transform .45s ease; }
+.qaute-home-redesign .hcmute-intro-card:hover { transform: translateY(-6px); border-color: color-mix(in srgb, var(--intro-accent), #fff 55%); box-shadow: 0 17px 34px var(--intro-shadow), 0 0 0 3px color-mix(in srgb, var(--intro-accent), transparent 93%); }
+.qaute-home-redesign .hcmute-intro-card:hover::before { transform: scaleX(1); }
+.qaute-home-redesign .hcmute-intro-card:hover::after { transform: scale(1.18) translate(-5px, -5px); }
+.qaute-home-redesign .hcmute-intro-icon { display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 46px; margin-bottom: .85rem; border: 1px solid var(--intro-icon-border); border-radius: 15px; background: var(--intro-icon-bg); color: var(--intro-accent); font-size: 1.25rem; box-shadow: 0 6px 14px var(--intro-icon-shadow), inset 0 1px 0 rgba(255,255,255,.8); animation: hcmute-intro-float 3.6s ease-in-out infinite alternate; transition: transform .3s cubic-bezier(.2,.75,.3,1), box-shadow .3s ease; }
+.qaute-home-redesign .row.g-3.flex-grow-1 > div:nth-child(2) .hcmute-intro-icon { animation-delay: -.9s; }
+@keyframes hcmute-intro-float { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+.qaute-home-redesign .hcmute-intro-card:hover .hcmute-intro-icon { transform: rotate(-7deg) scale(1.12); box-shadow: 0 9px 19px var(--intro-icon-shadow), inset 0 1px 0 rgba(255,255,255,.9); animation-play-state: paused; }
+.qaute-home-redesign .hcmute-intro-title { margin-bottom: .45rem; color: var(--intro-accent); font-size: .94rem; font-weight: 850; line-height: 1.35; }
+.qaute-home-redesign .hcmute-intro-desc { margin: 0; color: #627990; font-size: .74rem; line-height: 1.7; }
 .qaute-home-redesign #faq .max-w-xl { max-width: 720px; }
 .qaute-home-redesign #faq .accordion { --bs-accordion-btn-focus-box-shadow: 0 0 0 3px rgba(35, 105, 199, .08); }
 .qaute-home-redesign #faq .accordion-item { border-color: #edf1f7 !important; background: transparent; }
@@ -108,12 +122,146 @@
 .qaute-home-redesign .hcmute-card-modern .rounded-circle.bg-white-10 { border: 1px solid rgba(255,255,255,.12); }
 .qaute-home-redesign .transition-all { transition: all .2s ease; }
 .qaute-home-redesign .btn:focus-visible, .qaute-home-redesign a:focus-visible, .qaute-home-redesign input:focus-visible, .qaute-home-redesign button:focus-visible { outline: 3px solid rgba(52, 120, 229, .33); outline-offset: 3px; }
+.qaute-home-redesign .hcmute-quick-services { background: radial-gradient(ellipse at 10% 10%, rgba(107, 166, 255, .12), transparent 42%), linear-gradient(180deg, #edf4fd 0%, #f7f9fd 100%); }
+.qaute-home-redesign .hcmute-service-card { --service-accent: #2d75c8; --service-tint: #eaf3ff; border-color: color-mix(in srgb, var(--service-accent), #fff 84%); background: radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--service-accent), transparent 91%), transparent 52%), #fff; }
+.qaute-home-redesign .hcmute-quick-services .row > div:nth-child(2) .hcmute-service-card { --service-accent: #148b82; --service-tint: #e3f7f3; }
+.qaute-home-redesign .hcmute-quick-services .row > div:nth-child(3) .hcmute-service-card { --service-accent: #7958c7; --service-tint: #f0eaff; }
+.qaute-home-redesign .hcmute-quick-services .row > div:nth-child(4) .hcmute-service-card { --service-accent: #d07a2d; --service-tint: #fff1df; }
+.qaute-home-redesign .hcmute-service-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--service-accent), transparent 85%); transform: scaleX(.38); transform-origin: left; transition: transform .3s ease; }
+.qaute-home-redesign .hcmute-service-card:hover::before { transform: scaleX(1); }
+.qaute-home-redesign .hcmute-service-card::after { background: radial-gradient(circle, color-mix(in srgb, var(--service-accent), transparent 86%), transparent 68%); }
+.qaute-home-redesign .hcmute-service-icon { border-color: color-mix(in srgb, var(--service-accent), #fff 78%); background: linear-gradient(145deg, #fff, var(--service-tint)); color: var(--service-accent); box-shadow: 0 5px 14px color-mix(in srgb, var(--service-accent), transparent 88%), inset 0 1px 0 #fff; }
+.qaute-home-redesign .hcmute-service-title { color: #223d5c; }
+.qaute-home-redesign .hcmute-service-card:hover .hcmute-service-title { color: var(--service-accent); }
+.qaute-home-redesign .hcmute-section { background-color: #fff; }
+.qaute-home-redesign .hcmute-section-muted { background: radial-gradient(ellipse at 100% 0%, rgba(69, 130, 220, .08), transparent 35%), linear-gradient(145deg, #f1f6fd 0%, #f8faff 54%, #f2f7fc 100%); }
+.qaute-home-redesign .hcmute-title-main { position: relative; }
+.qaute-home-redesign .hcmute-section .hcmute-title-main::after { content: ""; display: block; width: 54px; height: 4px; margin-top: .8rem; border-radius: 99px; background: linear-gradient(90deg, #347fe0, #8ab9f0); }
+.qaute-home-redesign .hcmute-section .text-center .hcmute-title-main::after { margin-right: auto; margin-left: auto; }
+.qaute-home-redesign #discovery > .container-xl > .row:first-child { margin-bottom: 2.5rem !important; }
+.qaute-home-redesign #discovery > .container-xl > .row:first-child .hcmute-card-modern { border-color: #e0eafb; background: radial-gradient(ellipse at 100% 0%, rgba(113, 164, 231, .12), transparent 55%), linear-gradient(145deg, #fff, #f8fbff); }
+.qaute-home-redesign #discovery > .container-xl > .row:first-child .hcmute-card-modern > .d-flex .bi-fire { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 10px; background: #fff0e8; }
+.qaute-home-redesign #discovery #popular-faq-list > a { border-color: #e8eef6 !important; background: linear-gradient(110deg, #fff, #fbfdff); }
+.qaute-home-redesign #discovery #popular-faq-list > a:hover { border-color: #cbdcf1 !important; background: linear-gradient(110deg, #f2f7ff, #fff) !important; box-shadow: 0 7px 18px rgba(27, 69, 116, .07); transform: translateY(-2px); }
+.qaute-home-redesign #discovery > .container-xl > .hcmute-card-modern { border-color: #dce8f7; background: linear-gradient(110deg, #edf5ff, #fff 70%); }
+.qaute-home-redesign #discovery > .container-xl > .hcmute-card-modern .hcmute-logo-icon { width: 54px !important; height: 54px !important; border-radius: 17px; box-shadow: 0 7px 16px rgba(38, 107, 185, .12); }
+.qaute-home-redesign #discovery > .container-xl > .hcmute-card-modern .btn { box-shadow: 0 5px 13px rgba(33, 101, 189, .08); }
+.qaute-home-redesign #faq-category-buttons { padding: .7rem; border: 1px solid #e3ebf5; border-radius: 18px; background: rgba(255,255,255,.8); box-shadow: 0 8px 22px rgba(19, 49, 86, .045); }
+.qaute-home-redesign #faq-category-buttons .btn { border-color: transparent; }
+.qaute-home-redesign #faq-category-buttons .btn.active-category .badge, .qaute-home-redesign #faq-category-buttons .btn.btn-primary .badge { background: rgba(255,255,255,.2) !important; color: #fff !important; }
+.qaute-home-redesign #faq .col-lg-9 > .hcmute-card-modern { border-color: #e3ebf5; background: linear-gradient(145deg, #fff, #fcfdff); }
+.qaute-home-redesign #faq .accordion-item { margin-bottom: .55rem; overflow: hidden; border: 1px solid #e8edf5 !important; border-radius: 14px; background: #fff; transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.qaute-home-redesign #faq .accordion-item:hover { border-color: #cbdcf1 !important; box-shadow: 0 5px 16px rgba(24, 62, 104, .055); transform: translateY(-1px); }
+.qaute-home-redesign #faq .accordion-item:last-child { margin-bottom: 0; }
+.qaute-home-redesign #faq .accordion-button:not(.collapsed) { background: linear-gradient(105deg, #eef6ff, #fbfdff); }
+.qaute-home-redesign #faq .accordion-button .badge { padding: .38rem .6rem; border: 1px solid #d9e8fa; border-radius: 999px; background: #f0f6ff !important; }
+.qaute-home-redesign #faq .accordion-button:not(.collapsed) .badge { border-color: #c8def8; background: #e4f0ff !important; }
+.qaute-home-redesign #ticket, .qaute-home-redesign #booking { isolation: isolate; overflow: hidden; }
+.qaute-home-redesign #ticket::before, .qaute-home-redesign #booking::before { content: ""; position: absolute; z-index: -1; top: -100px; right: -70px; width: 280px; height: 280px; border: 1px solid rgba(64, 128, 208, .1); border-radius: 50%; box-shadow: 0 0 0 28px rgba(64, 128, 208, .025), 0 0 0 62px rgba(64, 128, 208, .018); pointer-events: none; }
+.qaute-home-redesign #booking::before { border-color: rgba(121, 88, 199, .12); box-shadow: 0 0 0 28px rgba(121, 88, 199, .03), 0 0 0 62px rgba(121, 88, 199, .018); }
+.qaute-home-redesign #ticket > .container-xl, .qaute-home-redesign #booking > .container-xl { z-index: 1; }
+.qaute-home-redesign #ticket .col-lg-5 > .hcmute-card-modern, .qaute-home-redesign #booking .col-lg-5 > .hcmute-card-modern { padding: 2rem !important; border-color: #dce8f7; background: radial-gradient(ellipse at 50% 0%, rgba(82, 148, 227, .13), transparent 50%), linear-gradient(145deg, #fff, #f8fbff); }
+.qaute-home-redesign #booking .col-lg-5 > .hcmute-card-modern { border-color: #e5def8; background: radial-gradient(ellipse at 50% 0%, rgba(133, 105, 216, .14), transparent 50%), linear-gradient(145deg, #fff, #fbf9ff); }
+.qaute-home-redesign #ticket .col-lg-5 > .hcmute-card-modern .display-6, .qaute-home-redesign #booking .col-lg-5 > .hcmute-card-modern .display-6 { width: 74px; height: 74px; margin: 0 auto; border-radius: 22px; box-shadow: 0 8px 20px rgba(42, 105, 177, .13); }
+.qaute-home-redesign #booking .col-lg-5 > .hcmute-card-modern .display-6 { border-color: #e3daf9; background: linear-gradient(145deg, #f3efff, #e7ddff); color: #7353c6 !important; box-shadow: 0 8px 20px rgba(115, 83, 198, .14); }
+.qaute-home-redesign #ticket .col-lg-5 > .hcmute-card-modern .btn, .qaute-home-redesign #booking .col-lg-5 > .hcmute-card-modern .btn { padding: .75rem 1.25rem; }
+.qaute-home-redesign #ticket { background: radial-gradient(ellipse at 100% 0%, rgba(63, 139, 222, .1), transparent 38%), linear-gradient(145deg, #f0f6ff, #f8faff 58%, #f3f8fd); }
+.qaute-home-redesign #booking { background: radial-gradient(ellipse at 100% 0%, rgba(133, 105, 216, .09), transparent 38%), linear-gradient(145deg, #f7f4ff, #fbfaff 58%, #f4f7fd); }
+.qaute-home-redesign .hcmute-journey-section { position: relative; padding: clamp(3.5rem, 7vw, 6.25rem) 0; overflow: hidden; background: radial-gradient(ellipse at 6% 100%, rgba(82, 166, 232, .12), transparent 35%), linear-gradient(135deg, #fff 0%, #f4f8ff 56%, #eef5ff 100%); }
+.qaute-home-redesign .hcmute-journey-section::before { content: ""; position: absolute; top: -130px; right: -100px; width: 340px; height: 340px; border: 1px solid rgba(54, 119, 193, .1); border-radius: 50%; box-shadow: 0 0 0 28px rgba(54, 119, 193, .025), 0 0 0 62px rgba(54, 119, 193, .018); pointer-events: none; }
+.qaute-home-redesign .hcmute-journey-copy { position: relative; z-index: 1; max-width: 620px; }
+.qaute-home-redesign .hcmute-journey-copy .hcmute-title-main { max-width: 600px; font-size: clamp(1.9rem, 3.6vw, 3rem); }
+.qaute-home-redesign .hcmute-journey-copy .hcmute-desc-main { max-width: 590px; font-size: .98rem; }
+.qaute-home-redesign .hcmute-journey-art { position: relative; display: grid; min-height: 340px; place-items: center; isolation: isolate; }
+.qaute-home-redesign .hcmute-journey-art::before, .qaute-home-redesign .hcmute-journey-art::after { content: ""; position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; }
+.qaute-home-redesign .hcmute-journey-art::before { width: min(72vw, 310px); aspect-ratio: 1; border: 1px solid rgba(49, 116, 192, .15); box-shadow: 0 0 0 20px rgba(66, 137, 216, .035), 0 0 0 50px rgba(66, 137, 216, .025); animation: hcmute-journey-orbit 18s linear infinite; }
+.qaute-home-redesign .hcmute-journey-art::after { width: min(54vw, 228px); aspect-ratio: 1; background: radial-gradient(circle, rgba(92, 156, 225, .2), rgba(165, 208, 255, .09) 55%, transparent 72%); filter: blur(2px); }
+.qaute-home-redesign .hcmute-journey-emblem { display: grid; width: clamp(150px, 20vw, 218px); aspect-ratio: 1; place-items: center; border: 1px solid rgba(255,255,255,.9); border-radius: 38% 62% 56% 44% / 45% 42% 58% 55%; background: linear-gradient(145deg, #fff 5%, #eaf4ff 55%, #d6eaff); color: #286fc7; box-shadow: 0 25px 60px rgba(38, 103, 174, .2), inset 0 2px 0 #fff; animation: hcmute-journey-float 4.2s ease-in-out infinite alternate; }
+.qaute-home-redesign .hcmute-journey-emblem .bi { font-size: clamp(5rem, 9vw, 7.5rem); filter: drop-shadow(0 10px 13px rgba(35, 100, 173, .2)); }
+.qaute-home-redesign .hcmute-journey-spark { position: absolute; display: grid; width: 62px; height: 62px; place-items: center; border: 1px solid rgba(255,255,255,.9); border-radius: 20px; background: linear-gradient(145deg, #fff, #eef6ff); color: #3478c5; box-shadow: 0 12px 28px rgba(35, 84, 136, .13); font-size: 1.65rem; animation: hcmute-journey-float 3.6s ease-in-out infinite alternate; }
+.qaute-home-redesign .hcmute-journey-spark-one { top: 14%; left: 12%; transform: rotate(-9deg); }
+.qaute-home-redesign .hcmute-journey-spark-two { right: 9%; bottom: 18%; color: #7958c7; animation-delay: -.8s; }
+.qaute-home-redesign .hcmute-journey-spark-three { top: 15%; right: 14%; width: 46px; height: 46px; border-radius: 16px; color: #df9a35; font-size: 1.2rem; animation-delay: -1.4s; }
+.qaute-home-redesign .hcmute-journey-caption { position: absolute; right: 3%; bottom: 4%; display: flex; align-items: center; gap: .65rem; padding: .75rem 1rem; border: 1px solid rgba(255,255,255,.9); border-radius: 15px; background: rgba(255,255,255,.88); color: #3c5877; font-size: .76rem; font-weight: 750; box-shadow: 0 12px 28px rgba(28, 67, 111, .1); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.qaute-home-redesign .hcmute-journey-caption .bi { color: #269681; font-size: 1.05rem; }
+@keyframes hcmute-journey-float { from { translate: 0 0; } to { translate: 0 -9px; } }
+@keyframes hcmute-journey-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.qaute-home-redesign .hcmute-values-section { position: relative; isolation: isolate; overflow: hidden; padding: clamp(3.8rem, 7vw, 6.5rem) 0; background: radial-gradient(ellipse at 50% -15%, rgba(71, 139, 228, .32), transparent 48%), linear-gradient(130deg, #071d3b 0%, #0d3261 52%, #123f78 100%); color: #fff; }
+.qaute-home-redesign .hcmute-values-section::before, .qaute-home-redesign .hcmute-values-section::after { content: ""; position: absolute; z-index: -1; border: 1px solid rgba(255,255,255,.1); border-radius: 50%; pointer-events: none; }
+.qaute-home-redesign .hcmute-values-section::before { top: -210px; left: -140px; width: 470px; height: 470px; box-shadow: 0 0 0 30px rgba(255,255,255,.02), 0 0 0 76px rgba(255,255,255,.014); }
+.qaute-home-redesign .hcmute-values-section::after { right: -200px; bottom: -280px; width: 550px; height: 550px; box-shadow: 0 0 0 36px rgba(255,255,255,.018), 0 0 0 82px rgba(255,255,255,.012); }
+.qaute-home-redesign .hcmute-values-heading { max-width: 760px; margin: 0 auto 2.8rem; text-align: center; }
+.qaute-home-redesign .hcmute-values-heading .hcmute-eyebrow { border-color: rgba(255,255,255,.19); background: rgba(255,255,255,.1); color: #c6e2ff; }
+.qaute-home-redesign .hcmute-values-title { margin: 0 auto .9rem; color: #fff; font-size: clamp(1.9rem, 4vw, 3.1rem); font-weight: 850; line-height: 1.15; letter-spacing: -.045em; text-wrap: balance; }
+.qaute-home-redesign .hcmute-values-lead { max-width: 650px; margin: 0 auto; color: rgba(226, 238, 255, .77); font-size: .98rem; line-height: 1.8; }
+.qaute-home-redesign .hcmute-value-card { --value-accent: #74c8ff; position: relative; height: 100%; min-height: 260px; padding: 1.65rem; overflow: hidden; border: 1px solid rgba(255,255,255,.15); border-radius: 22px; background: linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.055)); box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 15px 34px rgba(0, 13, 37, .12); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transition: transform .3s cubic-bezier(.2,.75,.3,1), background .3s ease, border-color .3s ease, box-shadow .3s ease; }
+.qaute-home-redesign .hcmute-values-grid > div:nth-child(2) .hcmute-value-card { --value-accent: #70e0cf; }
+.qaute-home-redesign .hcmute-values-grid > div:nth-child(3) .hcmute-value-card { --value-accent: #d5b7ff; }
+.qaute-home-redesign .hcmute-values-grid > div:nth-child(4) .hcmute-value-card { --value-accent: #ffd17a; }
+.qaute-home-redesign .hcmute-value-card::after { content: ""; position: absolute; right: -44px; bottom: -72px; width: 180px; height: 180px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; box-shadow: 0 0 0 22px rgba(255,255,255,.025), 0 0 0 48px rgba(255,255,255,.018); transition: transform .4s ease; pointer-events: none; }
+.qaute-home-redesign .hcmute-value-card:hover { transform: translateY(-7px); border-color: color-mix(in srgb, var(--value-accent), transparent 45%); background: linear-gradient(145deg, rgba(255,255,255,.19), rgba(255,255,255,.08)); box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 23px 42px rgba(0, 13, 37, .24); }
+.qaute-home-redesign .hcmute-value-card:hover::after { transform: scale(1.12) translate(-7px, -7px); }
+.qaute-home-redesign .hcmute-value-icon { display: flex; align-items: center; justify-content: center; width: 78px; height: 78px; margin-bottom: 1.35rem; border: 1px solid color-mix(in srgb, var(--value-accent), transparent 65%); border-radius: 24px; background: linear-gradient(145deg, color-mix(in srgb, var(--value-accent), transparent 82%), rgba(255,255,255,.08)); color: var(--value-accent); font-size: 2.6rem; box-shadow: 0 10px 25px color-mix(in srgb, var(--value-accent), transparent 88%), inset 0 1px 0 rgba(255,255,255,.14); transition: transform .3s cubic-bezier(.2,.75,.3,1), box-shadow .3s ease; }
+.qaute-home-redesign .hcmute-value-card:hover .hcmute-value-icon { transform: translateY(-4px) rotate(-5deg) scale(1.06); box-shadow: 0 14px 30px color-mix(in srgb, var(--value-accent), transparent 82%), inset 0 1px 0 rgba(255,255,255,.2); }
+.qaute-home-redesign .hcmute-value-title { position: relative; z-index: 1; margin: 0 0 .65rem; color: #fff; font-size: 1.12rem; font-weight: 800; }
+.qaute-home-redesign .hcmute-value-desc { position: relative; z-index: 1; max-width: 340px; margin: 0; color: rgba(226, 238, 255, .76); font-size: .86rem; line-height: 1.8; }
+.qaute-home-redesign .hcmute-values-grid > div:nth-child(4) .hcmute-value-desc { max-width: 280px; }
+.qaute-home-redesign .hcmute-path-section { position: relative; overflow: hidden; padding: clamp(3.6rem, 7vw, 6rem) 0; background: radial-gradient(ellipse at 95% 10%, rgba(120, 93, 204, .08), transparent 32%), linear-gradient(145deg, #f5f8fd, #fff 48%, #f3f7fd); }
+.qaute-home-redesign .hcmute-path-heading { max-width: 700px; margin: 0 auto 2.8rem; text-align: center; }
+.qaute-home-redesign .hcmute-path-heading .hcmute-desc-main { margin: 0 auto; }
+.qaute-home-redesign .hcmute-path-grid { position: relative; }
+.qaute-home-redesign .hcmute-path-grid::before { content: ""; position: absolute; z-index: 0; top: 3.35rem; right: 16.5%; left: 16.5%; height: 2px; background: linear-gradient(90deg, #84baf0, #a6c6ec 50%, #b9a9e8); }
+.qaute-home-redesign .hcmute-path-card { position: relative; z-index: 1; height: 100%; min-height: 275px; padding: 1.65rem 1.5rem; border: 1px solid #e3ebf5; border-radius: 22px; background: linear-gradient(150deg, rgba(255,255,255,.98), rgba(248,251,255,.97)); text-align: center; box-shadow: 0 12px 30px rgba(24, 62, 104, .065); transition: transform .3s cubic-bezier(.2,.75,.3,1), border-color .3s ease, box-shadow .3s ease; }
+.qaute-home-redesign .hcmute-path-card:hover { transform: translateY(-6px); border-color: #cbdcf1; box-shadow: 0 20px 40px rgba(24, 62, 104, .12); }
+.qaute-home-redesign .hcmute-path-number { position: absolute; top: 1rem; right: 1.15rem; color: #a4b5ca; font-size: .72rem; font-weight: 850; letter-spacing: .08em; }
+.qaute-home-redesign .hcmute-path-icon { position: relative; display: grid; width: 78px; height: 78px; margin: 0 auto 1.25rem; place-items: center; border: 1px solid #d9e9fc; border-radius: 24px; background: linear-gradient(145deg, #f1f7ff, #e2efff); color: #3478c5; font-size: 2.35rem; box-shadow: 0 9px 20px rgba(44, 111, 185, .13), inset 0 1px 0 #fff; transition: transform .3s ease, box-shadow .3s ease; }
+.qaute-home-redesign .hcmute-path-card:hover .hcmute-path-icon { transform: translateY(-3px) scale(1.06) rotate(-4deg); box-shadow: 0 13px 25px rgba(44, 111, 185, .18), inset 0 1px 0 #fff; }
+.qaute-home-redesign .hcmute-path-icon-search { border-color: #d9eee9; background: linear-gradient(145deg, #effbf8, #def5ef); color: #218d7c; box-shadow: 0 9px 20px rgba(33, 141, 124, .12), inset 0 1px 0 #fff; }
+.qaute-home-redesign .hcmute-path-icon-support { border-color: #e5ddf7; background: linear-gradient(145deg, #f7f3ff, #eae2ff); color: #7958c7; box-shadow: 0 9px 20px rgba(121, 88, 199, .13), inset 0 1px 0 #fff; }
+.qaute-home-redesign .hcmute-path-title { margin: 0 0 .65rem; color: #233f60; font-size: 1.05rem; font-weight: 800; }
+.qaute-home-redesign .hcmute-path-desc { max-width: 330px; margin: 0 auto; color: #71849b; font-size: .82rem; line-height: 1.75; }
+.qaute-home-redesign .hcmute-journey-copy .hcmute-eyebrow { box-shadow: 0 7px 18px rgba(44, 111, 185, .08); }
+.qaute-home-redesign .hcmute-journey-copy .hcmute-title-main { background: linear-gradient(100deg, #183655 0%, #256ab5 72%, #4683ca 100%); background-clip: text; -webkit-text-fill-color: transparent; }
+.qaute-home-redesign .hcmute-journey-copy .hcmute-title-main::after { width: 76px; height: 5px; background: linear-gradient(90deg, #2d75c8, #77c8d5, #a88be8); }
+.qaute-home-redesign .hcmute-journey-copy .badge { border-color: #e0eaf5 !important; box-shadow: 0 5px 14px rgba(27, 69, 116, .05); transition: transform .2s ease, box-shadow .2s ease; }
+.qaute-home-redesign .hcmute-journey-copy .badge:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(27, 69, 116, .1); }
+.qaute-home-redesign .hcmute-journey-emblem { animation: hcmute-journey-float 4.2s ease-in-out infinite alternate, hcmute-emblem-glow 4.2s ease-in-out infinite alternate; }
+@keyframes hcmute-emblem-glow { from { box-shadow: 0 20px 48px rgba(38, 103, 174, .15), inset 0 2px 0 #fff; } to { box-shadow: 0 28px 68px rgba(38, 103, 174, .26), inset 0 2px 0 #fff; } }
+.qaute-home-redesign .hcmute-journey-spark { animation-duration: 3.4s; }
+.qaute-home-redesign .hcmute-values-section { background-image: radial-gradient(ellipse at 50% -15%, rgba(71, 139, 228, .36), transparent 48%), radial-gradient(ellipse at 100% 100%, rgba(37, 107, 159, .23), transparent 38%), linear-gradient(130deg, #071d3b 0%, #0d3261 52%, #123f78 100%); }
+.qaute-home-redesign .hcmute-values-heading .hcmute-eyebrow { box-shadow: 0 6px 20px rgba(112, 200, 255, .1); }
+.qaute-home-redesign .hcmute-value-card { background: radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--value-accent), transparent 91%), transparent 50%), linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.045)); }
+.qaute-home-redesign .hcmute-value-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--value-accent), transparent 82%); transform: scaleX(.4); transform-origin: left; transition: transform .35s ease; }
+.qaute-home-redesign .hcmute-value-card:hover::before { transform: scaleX(1); }
+.qaute-home-redesign .hcmute-path-section { background-image: radial-gradient(ellipse at 0% 100%, rgba(71, 157, 201, .08), transparent 34%), radial-gradient(ellipse at 95% 10%, rgba(120, 93, 204, .1), transparent 32%), linear-gradient(145deg, #f3f7fd, #fff 48%, #f3f7fd); }
+.qaute-home-redesign .hcmute-path-grid::before { top: 3.4rem; height: 3px; background: linear-gradient(90deg, #79b7f1, #79d4c5 52%, #ad91e5); opacity: .75; }
+.qaute-home-redesign .hcmute-path-card { overflow: hidden; background: radial-gradient(ellipse at 50% 0%, rgba(88, 151, 222, .09), transparent 55%), linear-gradient(150deg, #fff, #f8fbff); }
+.qaute-home-redesign .hcmute-path-card::before { content: ""; position: absolute; inset: auto 0 0; height: 4px; background: linear-gradient(90deg, #4d93d9, #85cfd0); transform: scaleX(.24); transform-origin: left; transition: transform .35s ease; }
+.qaute-home-redesign .hcmute-path-grid > div:nth-child(2) .hcmute-path-card::before { background: linear-gradient(90deg, #4db9a7, #8bd6c4); }
+.qaute-home-redesign .hcmute-path-grid > div:nth-child(3) .hcmute-path-card::before { background: linear-gradient(90deg, #8970d2, #c3a6ef); }
+.qaute-home-redesign .hcmute-path-card:hover::before { transform: scaleX(1); }
+.qaute-home-redesign .hcmute-path-number { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #e0eaf5; border-radius: 11px; background: rgba(255,255,255,.8); color: #7290ae; box-shadow: 0 4px 12px rgba(24, 62, 104, .05); }
+.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 a { min-height: 54px; border-color: #e5edf7 !important; background: rgba(255,255,255,.82) !important; transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
+.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 a:hover { transform: translateY(-2px); border-color: #c8daef !important; box-shadow: 0 8px 18px rgba(31, 79, 130, .08); }
+.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 a > span:first-child { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border-radius: 12px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.7); transition: transform .22s ease; }
+.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 a:hover > span:first-child { transform: rotate(-5deg) scale(1.06); }
+.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 > div:nth-child(1) a > span:first-child { background: #fff0e9 !important; color: #d87549 !important; }
+.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 > div:nth-child(2) a > span:first-child { background: #fff6df !important; color: #bc8426 !important; }
+.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 > div:nth-child(3) a > span:first-child { background: #eaf3ff !important; color: #3478c5 !important; }
+.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 > div:nth-child(4) a > span:first-child { background: #e8f7f0 !important; color: #278764 !important; }
+.qaute-home-redesign #faq .accordion-button:not(.collapsed) { box-shadow: inset 3px 0 #4b91d8; }
+.qaute-home-redesign #faq .accordion-button:not(.collapsed)::after { filter: saturate(1.4); }
+.qaute-home-redesign #faq .input-group:focus-within { border-radius: 12px; box-shadow: 0 0 0 4px rgba(53, 125, 204, .1); }
+.qaute-home-redesign #faq .input-group:focus-within .input-group-text, .qaute-home-redesign #faq .input-group:focus-within .form-control { border-color: #78a9df; }
 @media (max-width: 991.98px) {
   .qaute-home-redesign .hcmute-hero .row.align-items-center { padding-top: 3rem !important; padding-bottom: 2.7rem !important; }
   .qaute-home-redesign .hcmute-hero-title { max-width: 690px; }
   .qaute-home-redesign .hcmute-quick-services .container-xl { transform: translateY(-10px); }
   .qaute-home-redesign .hcmute-service-card { min-height: 175px; }
   .qaute-home-redesign .hcmute-section { padding: 3.4rem 0; }
+  .qaute-home-redesign .hcmute-journey-art { min-height: 300px; }
+  .qaute-home-redesign .hcmute-value-card { min-height: 240px; }
+  .qaute-home-redesign .hcmute-path-card { min-height: 290px; padding: 1.4rem 1rem; }
 }
 @media (max-width: 575.98px) {
   .qaute-home-redesign .hcmute-hero .row.align-items-center { padding-top: 2.35rem !important; padding-bottom: 2.5rem !important; }
@@ -140,6 +288,22 @@
   .qaute-home-redesign #faq .accordion-body { padding: .35rem .55rem 1rem; }
   .qaute-home-redesign #faq-category-buttons .btn { font-size: .73rem; }
   .qaute-home-redesign .rounded-4.p-4.text-white.shadow-sm { border-radius: 17px !important; }
+  .qaute-home-redesign .hcmute-journey-section { padding: 3.4rem 0; }
+  .qaute-home-redesign .hcmute-journey-art { min-height: 260px; margin-top: .75rem; }
+  .qaute-home-redesign .hcmute-journey-spark { width: 49px; height: 49px; border-radius: 16px; font-size: 1.35rem; }
+  .qaute-home-redesign .hcmute-journey-spark-three { width: 40px; height: 40px; }
+  .qaute-home-redesign .hcmute-journey-caption { right: 0; bottom: 1%; font-size: .68rem; }
+  .qaute-home-redesign .hcmute-values-section { padding: 3.6rem 0; }
+  .qaute-home-redesign .hcmute-values-heading { margin-bottom: 2rem; }
+  .qaute-home-redesign .hcmute-value-card { min-height: 220px; padding: 1.25rem; border-radius: 18px; }
+  .qaute-home-redesign .hcmute-value-icon { width: 65px; height: 65px; margin-bottom: 1rem; border-radius: 20px; font-size: 2.15rem; }
+  .qaute-home-redesign .hcmute-path-section { padding: 3.4rem 0; }
+  .qaute-home-redesign .hcmute-path-heading { margin-bottom: 2rem; }
+  .qaute-home-redesign .hcmute-path-grid::before { display: none; }
+  .qaute-home-redesign .hcmute-path-card { min-height: 0; padding: 1.35rem 1.1rem; }
+}
+@media (max-width: 767.98px) {
+  .qaute-home-redesign .hcmute-path-grid::before { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .qaute-home-redesign *, .qaute-home-redesign *::before, .qaute-home-redesign *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
@@ -150,6 +314,7 @@
 
 
 <div class="qaute-home-redesign">
+    <%-- Trang chủ giới thiệu dịch vụ, tìm kiếm nhanh và các lối vào hỗ trợ. --%>
     <section class="hcmute-hero">
         <div class="container-xl">
             <div class="row align-items-center g-5 py-4">
@@ -247,6 +412,35 @@
         </div>
     </div>
 
+    <section class="hcmute-journey-section" aria-labelledby="journey-title">
+        <div class="container-xl">
+            <div class="row align-items-center g-4 g-lg-5">
+                <div class="col-lg-6">
+                    <div class="hcmute-journey-copy">
+                        <span class="hcmute-eyebrow"><i class="bi bi-stars" aria-hidden="true"></i>QAUTE là gì?</span>
+                        <h2 class="hcmute-title-main" id="journey-title">QAUTE — người bạn đồng hành của sinh viên HCMUTE</h2>
+                        <p class="hcmute-desc-main mb-0">Từ những thắc mắc về học tập, học phí đến đời sống sinh viên, QAUTE giúp bạn tìm thông tin và kết nối với kênh hỗ trợ phù hợp trong cùng một không gian. Mỗi câu hỏi là một điểm khởi đầu để bạn hiểu rõ hơn và an tâm hơn trên hành trình học tập.</p>
+                        <div class="d-flex flex-wrap gap-2 mt-4">
+                            <span class="badge rounded-pill px-3 py-2 border bg-white text-primary"><i class="bi bi-book-half me-1" aria-hidden="true"></i>Học tập</span>
+                            <span class="badge rounded-pill px-3 py-2 border bg-white text-success"><i class="bi bi-chat-heart me-1" aria-hidden="true"></i>Lắng nghe</span>
+                            <span class="badge rounded-pill px-3 py-2 border bg-white text-warning-emphasis"><i class="bi bi-compass me-1" aria-hidden="true"></i>Định hướng</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hcmute-journey-art" aria-hidden="true">
+                        <span class="hcmute-journey-spark hcmute-journey-spark-one"><i class="bi bi-journal-check"></i></span>
+                        <span class="hcmute-journey-spark hcmute-journey-spark-two"><i class="bi bi-chat-heart-fill"></i></span>
+                        <span class="hcmute-journey-spark hcmute-journey-spark-three"><i class="bi bi-stars"></i></span>
+                        <div class="hcmute-journey-emblem"><i class="bi bi-mortarboard-fill"></i></div>
+                        <div class="hcmute-journey-caption"><i class="bi bi-people-fill"></i><span>Cùng bạn qua từng chặng đường</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <%-- Tổng hợp chủ đề và FAQ nổi bật để người dùng tra cứu nhanh. --%>
     <section class="hcmute-section hcmute-section-muted" id="discovery">
         <div class="container-xl">
             <div class="row g-4 align-items-end mb-5">
@@ -326,8 +520,20 @@
                             <c:choose><c:when test="${not empty firstAnn}"><a href="/announcements/${firstAnn.id()}" class="btn btn-light btn-sm fw-semibold rounded-pill px-3">Xem thông báo <i class="bi bi-arrow-right ms-1"></i></a></c:when><c:otherwise><a href="/pages/guide" class="btn btn-light btn-sm fw-semibold rounded-pill px-3">Xem thông báo <i class="bi bi-arrow-right ms-1"></i></a></c:otherwise></c:choose>
                         </div>
                         <div class="row g-3 flex-grow-1">
-                            <div class="col-6"><div class="hcmute-card-modern p-4 h-100 d-flex flex-column justify-content-center"><i class="bi bi-people-fill fs-4 text-danger mb-2"></i><div class="fs-3 fw-bold text-dark">18.6k</div><div class="small text-muted">Sinh viên đã hỗ trợ</div></div></div>
-                            <div class="col-6"><div class="hcmute-card-modern p-4 h-100 d-flex flex-column justify-content-center"><i class="bi bi-stopwatch-fill fs-4 text-primary mb-2"></i><div class="fs-3 fw-bold text-dark">&lt; 24h</div><div class="small text-muted">Thời gian phản hồi</div></div></div>
+                            <div class="col-6">
+                                <div class="hcmute-card-modern hcmute-intro-card p-3 p-sm-4 h-100">
+                                    <span class="hcmute-intro-icon"><i class="bi bi-journals" aria-hidden="true"></i></span>
+                                    <h3 class="hcmute-intro-title">Đa dạng chủ đề</h3>
+                                    <p class="hcmute-intro-desc">Hỗ trợ các vấn đề về học tập, học phí, học vụ và đời sống sinh viên.</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="hcmute-card-modern hcmute-intro-card p-3 p-sm-4 h-100">
+                                    <span class="hcmute-intro-icon"><i class="bi bi-signpost-2" aria-hidden="true"></i></span>
+                                    <h3 class="hcmute-intro-title">Đúng nơi hỗ trợ</h3>
+                                    <p class="hcmute-intro-desc">Kết nối bạn với thông tin hoặc đơn vị phụ trách phù hợp.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -346,12 +552,13 @@
         </div>
     </section>
 
+    <%-- Lọc FAQ mẫu theo danh mục hoặc từ khóa ngay trên trang chủ. --%>
     <section class="hcmute-section" id="faq">
         <div class="container-xl">
             <div class="text-center max-w-xl mx-auto mb-5">
                 <span class="hcmute-eyebrow"><i class="bi bi-question-circle-fill"></i>Tra cứu</span>
                 <h2 class="hcmute-title-main">Câu hỏi thường gặp</h2>
-                <p class="hcmute-desc-main mx-auto">Tìm nhanh câu trả lời cho các vấn đề học tập và đời sống sinh viên. Tìm kiếm không cần gõ dấu.</p>
+                <p class="hcmute-desc-main mx-auto">Tìm nhanh câu trả lời cho các vấn đề học tập và đời sống sinh viên.</p>
             </div>
             <div class="row g-4">
                 <div class="col-lg-3">
@@ -361,12 +568,12 @@
                             <input type="search" id="faq-filter-input" class="form-control border-start-0" placeholder="Tìm trong danh sách..." onkeyup="filterFaqs()">
                         </div>
                         <div class="d-flex flex-column gap-1" id="faq-category-buttons">
-                            <button type="button" class="btn text-start d-flex justify-content-between align-items-center rounded-3 p-2 active-category btn-primary" style="background-color: var(--hcmute-blue); border-color: var(--hcmute-blue);" onclick="selectFaqCategory('all', this)"><span class="fw-semibold small">Tất cả câu hỏi</span><span class="badge bg-white text-primary rounded-pill">10+</span></button>
-                            <button type="button" class="btn text-start d-flex justify-content-between align-items-center rounded-3 p-2 btn-light text-dark" onclick="selectFaqCategory('hoc-vu', this)"><span class="fw-semibold small">Học vụ &amp; Đào tạo</span><span class="badge bg-secondary-subtle text-secondary rounded-pill">3</span></button>
-                            <button type="button" class="btn text-start d-flex justify-content-between align-items-center rounded-3 p-2 btn-light text-dark" onclick="selectFaqCategory('hoc-phi', this)"><span class="fw-semibold small">Học phí &amp; Gia hạn</span><span class="badge bg-secondary-subtle text-secondary rounded-pill">2</span></button>
-                            <button type="button" class="btn text-start d-flex justify-content-between align-items-center rounded-3 p-2 btn-light text-dark" onclick="selectFaqCategory('dang-ky-mon', this)"><span class="fw-semibold small">Đăng ký môn học</span><span class="badge bg-secondary-subtle text-secondary rounded-pill">2</span></button>
-                            <button type="button" class="btn text-start d-flex justify-content-between align-items-center rounded-3 p-2 btn-light text-dark" onclick="selectFaqCategory('hoc-bong', this)"><span class="fw-semibold small">Học bổng &amp; CTSV</span><span class="badge bg-secondary-subtle text-secondary rounded-pill">2</span></button>
-                            <button type="button" class="btn text-start d-flex justify-content-between align-items-center rounded-3 p-2 btn-light text-dark" onclick="selectFaqCategory('ky-tuc-xa', this)"><span class="fw-semibold small">Ký túc xá</span><span class="badge bg-secondary-subtle text-secondary rounded-pill">1</span></button>
+                            <button type="button" class="btn text-start d-flex justify-content-between align-items-center rounded-3 p-2 active-category btn-primary" style="background-color: var(--hcmute-blue); border-color: var(--hcmute-blue);" onclick="selectFaqCategory('all', this)"><span class="fw-semibold small">Tất cả câu hỏi</span><span class="badge bg-white text-primary rounded-pill">${guestHomeFaqs.size()}</span></button>
+                            <c:forEach var="entry" items="${guestHomeFaqsByCategory}">
+                                <c:set var="categoryName" value="${entry.key}"/>
+                                <c:set var="faqs" value="${entry.value}"/>
+                                <button type="button" class="btn text-start d-flex justify-content-between align-items-center rounded-3 p-2 btn-light text-dark" onclick="selectFaqCategory('${categoryName}', this)"><span class="fw-semibold small">${categoryName}</span><span class="badge bg-secondary-subtle text-secondary rounded-pill">${faqs.size()}</span></button>
+                            </c:forEach>
                         </div>
                         <a href="/faq" class="btn btn-outline-primary btn-sm rounded-pill mt-2"><i class="bi bi-journal-text me-1"></i>Xem kho FAQ đầy đủ</a>
                     </div>
@@ -374,38 +581,33 @@
                 <div class="col-lg-9">
                     <div class="hcmute-card-modern p-4">
                         <div class="accordion accordion-flush" id="faqAccordion">
-                            <div class="accordion-item border-bottom py-2 faq-item" data-category="dang-ky-mon">
-                                <h2 class="accordion-header" id="heading1"><button class="accordion-button collapsed fw-semibold text-dark fs-6" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="false" aria-controls="collapse1"><div class="d-flex flex-column align-items-start gap-1"><span class="badge bg-primary-subtle text-primary small">Đăng ký môn</span><span>Thời gian đăng ký môn học học kỳ mới là khi nào?</span></div></button></h2>
-                                <div id="collapse1" class="accordion-collapse collapse" aria-labelledby="heading1" data-bs-parent="#faqAccordion"><div class="accordion-body text-secondary small pt-1" style="line-height: 1.7;">Lịch đăng ký môn học được Phòng Đào tạo công bố trên trang online.hcmute.edu.vn khoảng 3–4 tuần trước khi học kỳ bắt đầu. Sinh viên đăng ký theo khung giờ được phân bổ theo khóa và ngành đào tạo.</div></div>
-                            </div>
-                            <div class="accordion-item border-bottom py-2 faq-item" data-category="dang-ky-mon">
-                                <h2 class="accordion-header" id="heading2"><button class="accordion-button collapsed fw-semibold text-dark fs-6" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2"><div class="d-flex flex-column align-items-start gap-1"><span class="badge bg-primary-subtle text-primary small">Đăng ký môn</span><span>Tôi có thể hủy môn học đã đăng ký không?</span></div></button></h2>
-                                <div id="collapse2" class="accordion-collapse collapse" aria-labelledby="heading2" data-bs-parent="#faqAccordion"><div class="accordion-body text-secondary small pt-1" style="line-height: 1.7;">Sinh viên được rút môn trong thời gian điều chỉnh đăng ký (thường là 2 tuần đầu học kỳ). Sau thời gian này, môn học sẽ được ghi nhận điểm W nếu rút theo quy định đào tạo.</div></div>
-                            </div>
-                            <div class="accordion-item border-bottom py-2 faq-item" data-category="hoc-phi">
-                                <h2 class="accordion-header" id="heading3"><button class="accordion-button collapsed fw-semibold text-dark fs-6" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3"><div class="d-flex flex-column align-items-start gap-1"><span class="badge bg-primary-subtle text-primary small">Học phí</span><span>Hạn đóng học phí mỗi học kỳ là khi nào?</span></div></button></h2>
-                                <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="heading3" data-bs-parent="#faqAccordion"><div class="accordion-body text-secondary small pt-1" style="line-height: 1.7;">Hạn đóng học phí thường trong vòng 4 tuần kể từ ngày bắt đầu học kỳ. Sinh viên có thể nộp qua ngân hàng liên kết hoặc cổng thanh toán trực tuyến của trường.</div></div>
-                            </div>
-                            <div class="accordion-item border-bottom py-2 faq-item" data-category="hoc-phi">
-                                <h2 class="accordion-header" id="heading4"><button class="accordion-button collapsed fw-semibold text-dark fs-6" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4" aria-expanded="false" aria-controls="collapse4"><div class="d-flex flex-column align-items-start gap-1"><span class="badge bg-primary-subtle text-primary small">Học phí</span><span>Làm thế nào để xin gia hạn nộp học phí?</span></div></button></h2>
-                                <div id="collapse4" class="accordion-collapse collapse" aria-labelledby="heading4" data-bs-parent="#faqAccordion"><div class="accordion-body text-secondary small pt-1" style="line-height: 1.7;">Sinh viên nộp đơn xin gia hạn học phí tại Phòng Kế hoạch – Tài chính kèm minh chứng hoàn cảnh. Bạn cũng có thể gửi ticket tư vấn ngay bên dưới để được hướng dẫn chi tiết.</div></div>
-                            </div>
-                            <div class="accordion-item border-bottom py-2 faq-item" data-category="hoc-vu">
-                                <h2 class="accordion-header" id="heading5"><button class="accordion-button collapsed fw-semibold text-dark fs-6" type="button" data-bs-toggle="collapse" data-bs-target="#collapse5" aria-expanded="false" aria-controls="collapse5"><div class="d-flex flex-column align-items-start gap-1"><span class="badge bg-primary-subtle text-primary small">Học vụ</span><span>Cảnh báo học vụ được xét như thế nào?</span></div></button></h2>
-                                <div id="collapse5" class="accordion-collapse collapse" aria-labelledby="heading5" data-bs-parent="#faqAccordion"><div class="accordion-body text-secondary small pt-1" style="line-height: 1.7;">Sinh viên bị cảnh báo học vụ khi điểm trung bình học kỳ dưới 1.0 (thang 4) hoặc điểm trung bình tích lũy thấp hơn mức quy định theo năm học. Hãy liên hệ cố vấn học tập để được định hướng cải thiện.</div></div>
-                            </div>
-                            <div class="accordion-item border-bottom py-2 faq-item" data-category="hoc-vu">
-                                <h2 class="accordion-header" id="heading6"><button class="accordion-button collapsed fw-semibold text-dark fs-6" type="button" data-bs-toggle="collapse" data-bs-target="#collapse6" aria-expanded="false" aria-controls="collapse6"><div class="d-flex flex-column align-items-start gap-1"><span class="badge bg-primary-subtle text-primary small">Học vụ</span><span>Thủ tục bảo lưu kết quả học tập gồm những gì?</span></div></button></h2>
-                                <div id="collapse6" class="accordion-collapse collapse" aria-labelledby="heading6" data-bs-parent="#faqAccordion"><div class="accordion-body text-secondary small pt-1" style="line-height: 1.7;">Sinh viên nộp đơn bảo lưu tại Phòng Đào tạo kèm giấy tờ minh chứng (giấy khám sức khỏe, lệnh nhập ngũ...). Thời gian bảo lưu tối đa theo quy chế đào tạo hiện hành.</div></div>
-                            </div>
-                            <div class="accordion-item border-bottom py-2 faq-item" data-category="ky-tuc-xa">
-                                <h2 class="accordion-header" id="heading7"><button class="accordion-button collapsed fw-semibold text-dark fs-6" type="button" data-bs-toggle="collapse" data-bs-target="#collapse7" aria-expanded="false" aria-controls="collapse7"><div class="d-flex flex-column align-items-start gap-1"><span class="badge bg-primary-subtle text-primary small">Ký túc xá</span><span>Đăng ký ở ký túc xá cần những điều kiện gì?</span></div></button></h2>
-                                <div id="collapse7" class="accordion-collapse collapse" aria-labelledby="heading7" data-bs-parent="#faqAccordion"><div class="accordion-body text-secondary small pt-1" style="line-height: 1.7;">Sinh viên chính quy đang học tại trường được đăng ký ở KTX. Ưu tiên sinh viên năm nhất, sinh viên diện chính sách xã hội và hoàn cảnh khó khăn.</div></div>
-                            </div>
-                            <div class="accordion-item border-bottom py-2 faq-item" data-category="hoc-bong">
-                                <h2 class="accordion-header" id="heading8"><button class="accordion-button collapsed fw-semibold text-dark fs-6" type="button" data-bs-toggle="collapse" data-bs-target="#collapse8" aria-expanded="false" aria-controls="collapse8"><div class="d-flex flex-column align-items-start gap-1"><span class="badge bg-primary-subtle text-primary small">Học bổng</span><span>Điều kiện xét học bổng khuyến khích học tập là gì?</span></div></button></h2>
-                                <div id="collapse8" class="accordion-collapse collapse" aria-labelledby="heading8" data-bs-parent="#faqAccordion"><div class="accordion-body text-secondary small pt-1" style="line-height: 1.7;">Sinh viên cần có điểm trung bình học kỳ từ 3.2 trở lên, điểm rèn luyện từ loại Tốt, không có môn nào dưới điểm D và đăng ký đủ số tín chỉ tối thiểu theo quy định.</div></div>
-                            </div>
+                            <c:forEach var="faq" items="${guestHomeFaqs}" varStatus="status">
+                                <div class="accordion-item border-bottom py-2 faq-item" data-category="${faq.categoryName}">
+                                    <h2 class="accordion-header" id="heading${faq.id}">
+                                        <button class="accordion-button collapsed fw-semibold text-dark fs-6" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#collapse${faq.id}"
+                                                aria-expanded="false" aria-controls="collapse${faq.id}">
+                                            <div class="d-flex flex-column align-items-start gap-1">
+                                                <span class="badge bg-primary-subtle text-primary small">${faq.categoryName}</span>
+                                                <span>${faq.question}</span>
+                                            </div>
+                                        </button>
+                                    </h2>
+                                    <div id="collapse${faq.id}" class="accordion-collapse collapse"
+                                         aria-labelledby="heading${faq.id}" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body text-secondary small pt-1" style="line-height: 1.7;">
+                                            ${faq.answer}
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                            <c:if test="${empty guestHomeFaqs}">
+                                <div class="text-center py-5">
+                                    <i class="bi bi-inbox text-muted fs-1 mb-3 d-block"></i>
+                                    <h6 class="fw-bold">Chưa có câu hỏi thường gặp nào</h6>
+                                    <p class="text-muted small">Quản trị viên sẽ cập nhật nội dung sớm.</p>
+                                </div>
+                            </c:if>
                         </div>
                         <div id="faq-empty-state" class="text-center py-5 d-none">
                             <i class="bi bi-search text-muted fs-1 mb-3 d-block"></i>
@@ -419,6 +621,83 @@
         </div>
     </section>
 
+    <section class="hcmute-values-section" aria-labelledby="topics-title">
+        <div class="container-xl">
+            <div class="hcmute-values-heading">
+                <span class="hcmute-eyebrow"><i class="bi bi-compass-fill" aria-hidden="true"></i>Cùng bạn qua từng vấn đề</span>
+                <h2 class="hcmute-values-title" id="topics-title">Đồng hành qua từng vấn đề</h2>
+                <p class="hcmute-values-lead">Mỗi chặng đường có những mối quan tâm riêng. QAUTE mong muốn giúp bạn tìm đến thông tin và sự hỗ trợ phù hợp.</p>
+            </div>
+            <div class="row g-3 g-lg-4 hcmute-values-grid">
+                <div class="col-sm-6 col-xl-3">
+                    <article class="hcmute-value-card">
+                        <div class="hcmute-value-icon"><i class="bi bi-journal-bookmark-fill" aria-hidden="true"></i></div>
+                        <h3 class="hcmute-value-title">Học tập &amp; học vụ</h3>
+                        <p class="hcmute-value-desc">Thông tin về môn học, đăng ký học phần và các quy định học tập.</p>
+                    </article>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <article class="hcmute-value-card">
+                        <div class="hcmute-value-icon"><i class="bi bi-wallet2" aria-hidden="true"></i></div>
+                        <h3 class="hcmute-value-title">Học phí &amp; học bổng</h3>
+                        <p class="hcmute-value-desc">Những nội dung sinh viên thường quan tâm trong mỗi năm học.</p>
+                    </article>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <article class="hcmute-value-card">
+                        <div class="hcmute-value-icon"><i class="bi bi-house-heart-fill" aria-hidden="true"></i></div>
+                        <h3 class="hcmute-value-title">Đời sống sinh viên</h3>
+                        <p class="hcmute-value-desc">Các vấn đề về ký túc xá, hoạt động và đời sống tại trường.</p>
+                    </article>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <article class="hcmute-value-card">
+                        <div class="hcmute-value-icon"><i class="bi bi-chat-square-heart-fill" aria-hidden="true"></i></div>
+                        <h3 class="hcmute-value-title">Tư vấn cá nhân</h3>
+                        <p class="hcmute-value-desc">Khi cần trao đổi cụ thể hơn, bạn có thể tìm đến kênh tư vấn phù hợp.</p>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="hcmute-path-section" aria-labelledby="path-title">
+        <div class="container-xl">
+            <div class="hcmute-path-heading">
+                <span class="hcmute-eyebrow"><i class="bi bi-signpost-split-fill" aria-hidden="true"></i>Bắt đầu từ điều bạn cần</span>
+                <h2 class="hcmute-title-main" id="path-title">Một nơi để bắt đầu tìm câu trả lời</h2>
+                <p class="hcmute-desc-main">Từ một thắc mắc ban đầu đến đúng hướng hỗ trợ — QAUTE mong muốn giúp hành trình ấy trở nên dễ hiểu hơn.</p>
+            </div>
+            <div class="row g-3 g-lg-4 hcmute-path-grid">
+                <div class="col-md-4">
+                    <article class="hcmute-path-card">
+                        <span class="hcmute-path-number">01</span>
+                        <div class="hcmute-path-icon hcmute-path-icon-question"><i class="bi bi-question-circle-fill" aria-hidden="true"></i></div>
+                        <h3 class="hcmute-path-title">Có thắc mắc</h3>
+                        <p class="hcmute-path-desc">Bắt đầu từ câu hỏi hoặc vấn đề bạn đang quan tâm trong học tập và đời sống sinh viên.</p>
+                    </article>
+                </div>
+                <div class="col-md-4">
+                    <article class="hcmute-path-card">
+                        <span class="hcmute-path-number">02</span>
+                        <div class="hcmute-path-icon hcmute-path-icon-search"><i class="bi bi-search-heart-fill" aria-hidden="true"></i></div>
+                        <h3 class="hcmute-path-title">Tra cứu thông tin</h3>
+                        <p class="hcmute-path-desc">Tham khảo các nội dung và câu trả lời được tổng hợp dành cho sinh viên.</p>
+                    </article>
+                </div>
+                <div class="col-md-4">
+                    <article class="hcmute-path-card">
+                        <span class="hcmute-path-number">03</span>
+                        <div class="hcmute-path-icon hcmute-path-icon-support"><i class="bi bi-chat-dots-fill" aria-hidden="true"></i></div>
+                        <h3 class="hcmute-path-title">Tìm kênh hỗ trợ phù hợp</h3>
+                        <p class="hcmute-path-desc">Khi cần trao đổi thêm, tìm đến đầu mối tư vấn phù hợp với vấn đề của bạn.</p>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <%-- Đưa người dùng đến đăng nhập để gửi yêu cầu hỗ trợ chính thức. --%>
     <section class="hcmute-section hcmute-section-muted" id="ticket">
         <div class="container-xl">
             <div class="row align-items-center g-4">
@@ -439,6 +718,7 @@
         </div>
     </section>
 
+    <%-- Đưa người dùng đến đăng nhập để xem và đặt lịch tư vấn. --%>
     <section class="hcmute-section hcmute-section-muted" id="booking">
         <div class="container-xl">
             <div class="row align-items-center g-4">
@@ -547,8 +827,10 @@
 </div>
 
 <script>
+// Lọc câu hỏi theo chuyên mục được chọn.
 function selectFaqCategory(category, btn) {
     var buttons = document.querySelectorAll('#faq-category-buttons button');
+    // Đặt lại trạng thái hiển thị của từng nút chuyên mục.
     buttons.forEach(function(b) {
         b.classList.remove('btn-primary');
         b.classList.add('btn-light', 'text-dark');
@@ -561,6 +843,7 @@ function selectFaqCategory(category, btn) {
     btn.style.borderColor = 'var(--hcmute-blue)';
     var items = document.querySelectorAll('.faq-item');
     var visibleCount = 0;
+    // Hiển thị các câu hỏi thuộc chuyên mục đã chọn.
     items.forEach(function(item) {
         if (category === 'all' || item.getAttribute('data-category') === category) {
             item.style.display = '';
@@ -572,10 +855,12 @@ function selectFaqCategory(category, btn) {
     checkFaqEmptyState(visibleCount);
 }
 
+// Lọc câu hỏi theo nội dung người dùng nhập.
 function filterFaqs() {
     var query = document.getElementById('faq-filter-input').value.toLowerCase().trim();
     var items = document.querySelectorAll('.faq-item');
     var visibleCount = 0;
+    // Cập nhật khả năng hiển thị của từng câu hỏi.
     items.forEach(function(item) {
         var text = item.textContent.toLowerCase();
         if (text.indexOf(query) !== -1) {
@@ -588,6 +873,7 @@ function filterFaqs() {
     checkFaqEmptyState(visibleCount);
 }
 
+// Hiển thị trạng thái khi không có câu hỏi phù hợp.
 function checkFaqEmptyState(count) {
     var empty = document.getElementById('faq-empty-state');
     if (empty) {
@@ -599,6 +885,7 @@ function checkFaqEmptyState(count) {
     }
 }
 
+// Cập nhật tên tệp đính kèm được chọn.
 function previewFileName(input) {
     var preview = document.getElementById('file-name-preview');
     if (input.files && input.files[0]) {
@@ -608,6 +895,7 @@ function previewFileName(input) {
     }
 }
 
+// Gửi ticket hỗ trợ nhanh từ biểu mẫu.
 function handleQuickTicketSubmit(e) {
     e.preventDefault();
     var btn = document.getElementById('btn-submit-ticket');
@@ -627,7 +915,9 @@ function handleQuickTicketSubmit(e) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     })
+    // Chuyển phản hồi gửi ticket thành dữ liệu JSON.
     .then(function(res) { return res.json(); })
+    // Cập nhật giao diện sau khi gửi ticket thành công.
     .then(function(res) {
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-send-fill me-1"></i>Gửi ticket';
@@ -650,6 +940,7 @@ function handleQuickTicketSubmit(e) {
             document.getElementById('file-name-preview').textContent = '';
         }
     })
+    // Khôi phục nút gửi và thông báo khi gửi ticket thất bại.
     .catch(function(err) {
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-send-fill me-1"></i>Gửi ticket';
@@ -662,7 +953,9 @@ var selectedDate = 'Thứ 2, ngày mai';
 var selectedSlot = null;
 var selectedModality = 'Trực tiếp tại Phòng A1-102';
 
+// Chọn chuyên viên tư vấn và cập nhật thông tin tóm tắt.
 function selectAdvisor(id, name, dept, el) {
+    // Bỏ trạng thái chọn khỏi các thẻ chuyên viên khác.
     document.querySelectorAll('.advisor-select-card').forEach(function(c) {
         c.classList.remove('active', 'border-primary', 'shadow-sm');
     });
@@ -671,7 +964,9 @@ function selectAdvisor(id, name, dept, el) {
     document.getElementById('summary-advisor').textContent = selectedAdvisorName;
 }
 
+// Chọn khung giờ tư vấn và cập nhật thông tin tóm tắt.
 function selectSlot(time, btn) {
+    // Đặt lại trạng thái của các khung giờ khác.
     document.querySelectorAll('.slot-btn').forEach(function(b) {
         b.classList.remove('btn-primary', 'text-white');
         b.classList.add('btn-outline-secondary');
@@ -685,7 +980,9 @@ function selectSlot(time, btn) {
     document.getElementById('booking-hint').textContent = 'Sẵn sàng đặt lịch! Nhấn nút bên trên để hoàn tất.';
 }
 
+// Chọn hình thức tư vấn và cập nhật thông tin tóm tắt.
 function selectModality(type, el) {
+    // Bỏ trạng thái chọn khỏi các hình thức tư vấn khác.
     document.querySelectorAll('.modality-card').forEach(function(c) {
         c.classList.remove('active', 'border-primary', 'shadow-sm');
     });
@@ -698,6 +995,7 @@ function selectModality(type, el) {
     document.getElementById('summary-modality').textContent = selectedModality;
 }
 
+// Tạo danh sách ngày tư vấn khả dụng.
 function initBookingDays() {
     var grid = document.getElementById('booking-days-grid');
     if (!grid) return;
@@ -711,6 +1009,7 @@ function initBookingDays() {
         }
     }
     var html = '';
+    // Tạo nút cho từng ngày tư vấn khả dụng.
     days.forEach(function(date, index) {
         var wd = dayNames[date.getDay()];
         var formatted = ('0' + date.getDate()).slice(-2) + '/' + ('0' + (date.getMonth() + 1)).slice(-2);
@@ -728,7 +1027,9 @@ function initBookingDays() {
     document.getElementById('summary-date').textContent = selectedDate;
 }
 
+// Chọn ngày tư vấn và cập nhật thông tin tóm tắt.
 function selectDay(dateStr, btn) {
+    // Đặt lại trạng thái của các ngày khác.
     document.querySelectorAll('.day-btn').forEach(function(b) {
         b.classList.remove('btn-primary', 'text-white', 'active-day');
         b.classList.add('btn-outline-secondary');
@@ -741,6 +1042,7 @@ function selectDay(dateStr, btn) {
     document.getElementById('summary-date').textContent = selectedDate;
 }
 
+// Xác nhận đặt lịch tư vấn nhanh.
 function confirmBooking() {
     if (!selectedSlot) {
         alert('Vui lòng chọn một khung giờ tư vấn trước khi xác nhận.');
@@ -754,7 +1056,9 @@ function confirmBooking() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ advisorName: selectedAdvisorName, date: selectedDate, slot: selectedSlot, modality: selectedModality })
     })
+    // Chuyển phản hồi đặt lịch thành dữ liệu JSON.
     .then(function(res) { return res.json(); })
+    // Hiển thị thông tin lịch hẹn sau khi đặt thành công.
     .then(function(res) {
         btn.disabled = false;
         btn.innerHTML = 'Xác nhận đặt lịch';
@@ -767,6 +1071,7 @@ function confirmBooking() {
             document.getElementById('booking-hint').textContent = 'Mã lịch hẹn: ' + res.data.bookingCode;
         }
     })
+    // Khôi phục nút và thông báo kết quả khi đặt lịch thất bại.
     .catch(function() {
         btn.disabled = false;
         btn.innerHTML = 'Xác nhận đặt lịch';
@@ -774,6 +1079,7 @@ function confirmBooking() {
     });
 }
 
+// Khởi tạo danh sách ngày khi tài liệu đã tải xong.
 document.addEventListener('DOMContentLoaded', function() {
     initBookingDays();
 });

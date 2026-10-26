@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
+// Đóng gói dữ liệu đầu vào cho thao tác Faq.
 @Getter
 @Setter
 public class FaqForm {

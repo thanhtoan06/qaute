@@ -14,6 +14,7 @@ import vn.edu.hcmute.qaute.common.constant.ActorType;
 import vn.edu.hcmute.qaute.common.constant.TicketStatus;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu TicketStatusHistory được lưu trữ trong hệ thống.
 @Entity @Table(name = "ticket_status_history")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class TicketStatusHistory extends AuditableEntity {

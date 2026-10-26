@@ -15,16 +15,19 @@ import vn.edu.hcmute.qaute.common.web.FormErrors;
 import vn.edu.hcmute.qaute.dto.request.auth.ActivateAccountForm;
 import vn.edu.hcmute.qaute.service.identity.AccountActivationService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho ActivateAccount.
 @Controller
 public class ActivateAccountController {
 
     private final AccountActivationService accountActivationService;
 
+    // Khởi tạo bộ điều khiển kích hoạt tài khoản.
     public ActivateAccountController(AccountActivationService accountActivationService) {
         this.accountActivationService = accountActivationService;
     }
 
     @GetMapping("/auth/activate")
+    // Hiển thị trang kích hoạt tài khoản.
     public String activatePage(@RequestParam(defaultValue = "") String token, Model model) {
         if (token.isBlank() || !accountActivationService.isTokenValid(token)) {
             model.addAttribute("tokenValid", false);
@@ -42,6 +45,7 @@ public class ActivateAccountController {
     }
 
     @PostMapping("/auth/activate")
+    // Kiểm tra thông tin và kích hoạt tài khoản.
     public String activate(@Valid @ModelAttribute("form") ActivateAccountForm form,
                            BindingResult bindingResult,
                            Model model,

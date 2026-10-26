@@ -16,6 +16,7 @@ import vn.edu.hcmute.qaute.repository.ticket.TicketRepository;
 import vn.edu.hcmute.qaute.service.ticket.event.TicketEventPublisher;
 import vn.edu.hcmute.qaute.service.ticket.event.TicketEventType;
 
+// Xử lý nghiệp vụ TicketMaintenanceJobs trong hệ thống.
 @Component
 public class TicketMaintenanceJobs {
 
@@ -30,6 +31,7 @@ public class TicketMaintenanceJobs {
     private final TicketEventPublisher events;
     private final Set<String> publishedSlaLevels = ConcurrentHashMap.newKeySet();
 
+    // Khởi tạo các tác vụ bảo trì ticket với dịch vụ và kho dữ liệu cần thiết.
     public TicketMaintenanceJobs(JobExecutionTemplate jobs,
                                  TicketWorkflowService workflow,
                                  TicketRepository tickets,
@@ -43,11 +45,13 @@ public class TicketMaintenanceJobs {
     }
 
     @Scheduled(fixedDelay = 900000)
+    // Chạy tác vụ tự động đóng các ticket quá hạn.
     public void autoClose() {
         jobs.run("ticket-auto-close", workflow::autoCloseExpired);
     }
 
     @Scheduled(fixedDelay = 60000)
+    // Cập nhật trạng thái SLA và phát sự kiện khi ticket gặp rủi ro hoặc vi phạm.
     public void slaMonitor() {
         jobs.run("ticket-sla-monitor", () -> {
             LocalDateTime now = LocalDateTime.now();
@@ -77,4 +81,3 @@ public class TicketMaintenanceJobs {
         });
     }
 }
-

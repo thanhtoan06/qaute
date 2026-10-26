@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu TicketTagMap được lưu trữ trong hệ thống.
 @Entity @Table(name = "ticket_tag_map", uniqueConstraints =
         @UniqueConstraint(name = "uk_ticket_tag_map_ticket_tag", columnNames = {"ticket_id", "tag_id"}))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

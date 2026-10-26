@@ -21,6 +21,7 @@ import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.FaqStatus;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu Faq được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "faqs")
 @Getter

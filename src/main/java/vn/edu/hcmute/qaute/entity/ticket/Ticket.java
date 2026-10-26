@@ -17,6 +17,7 @@ import vn.edu.hcmute.qaute.common.constant.TicketPriority;
 import vn.edu.hcmute.qaute.common.constant.TicketStatus;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu Ticket được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "tickets")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder

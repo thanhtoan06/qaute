@@ -23,6 +23,7 @@ import vn.edu.hcmute.qaute.service.identity.UserLookupService;
 import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.ticket.event.TicketDomainEvent;
 
+// Xử lý nghiệp vụ TicketNotificationListener trong hệ thống.
 @Component
 public class TicketNotificationListener {
 
@@ -32,6 +33,7 @@ public class TicketNotificationListener {
     private final ManagerScopeService managerScope;
     private final UserRepository userRepository;
 
+    // Khởi tạo bộ lắng nghe với các dịch vụ và kho dữ liệu liên quan.
     public TicketNotificationListener(TicketRepository ticketRepository,
                                       NotificationService notificationService,
                                       UserLookupService userLookupService,
@@ -46,6 +48,7 @@ public class TicketNotificationListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    // Xử lý sự kiện miền của yêu cầu và gửi thông báo đến những người liên quan.
     public void onTicketDomainEvent(TicketDomainEvent event) {
         if (event == null || event.ticketId() == null || event.type() == null) {
             return;
@@ -60,10 +63,10 @@ public class TicketNotificationListener {
 
         switch (event.type()) {
             case CREATED -> {
-                notifyUser(ticket.getStudentId(), NotificationType.TICKET_CREATED,
-                        "Yêu cầu [#" + code + "] đã được tạo thành công",
-                        "Yêu cầu \"" + title + "\" của bạn đã được ghi nhận và đang chờ tiếp nhận.", ticket);
                 if (ticket.getCurrentAssigneeId() == null) {
+                    notifyUser(ticket.getStudentId(), NotificationType.TICKET_CREATED,
+                            "Yêu cầu [#" + code + "] đã được tạo thành công",
+                            "Yêu cầu \"" + title + "\" của bạn đã được ghi nhận và đang chờ tiếp nhận.", ticket);
                     List<Long> managers = managerScope.findManagerIdsInScope(ticket.getCategoryId());
                     notifyUsers(managers, NotificationType.TICKET_NEW_IN_QUEUE,
                             "Có yêu cầu mới [#" + code + "] trong hàng đợi",
@@ -193,6 +196,7 @@ public class TicketNotificationListener {
         }
     }
 
+    // Gửi thông báo đến danh sách người dùng sau khi phân giải liên kết phù hợp.
     private void notifyUsers(Collection<Long> userIds, NotificationType type, String title, String body, Ticket ticket) {
         if (userIds == null || userIds.isEmpty()) return;
         Set<Long> uniqueIds = userIds.stream().filter(Objects::nonNull).collect(Collectors.toSet());
@@ -205,11 +209,13 @@ public class TicketNotificationListener {
         }
     }
 
+    // Gửi thông báo cho một người dùng nếu mã người dùng hợp lệ.
     private void notifyUser(Long userId, NotificationType type, String title, String body, Ticket ticket) {
         if (userId == null) return;
         notifyUsers(List.of(userId), type, title, body, ticket);
     }
 
+    // Chọn đường dẫn chi tiết yêu cầu dựa trên vai trò người nhận.
     private String resolveLink(RoleCode role, Long ticketId) {
         if (role == RoleCode.STUDENT) {
             return "/student/tickets/" + ticketId;
@@ -221,4 +227,3 @@ public class TicketNotificationListener {
         return "/student/tickets/" + ticketId;
     }
 }
-

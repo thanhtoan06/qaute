@@ -1,6 +1,5 @@
 <%@ tag body-content="empty" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ attribute name="id" type="java.lang.String" required="true" rtexprvalue="true" %>
 <%@ attribute name="title" type="java.lang.String" required="true" rtexprvalue="true" %>
 <%@ attribute name="message" type="java.lang.String" required="true" rtexprvalue="true" %>
@@ -9,6 +8,7 @@
 <%@ attribute name="cssClass" type="java.lang.String" required="false" rtexprvalue="true" %>
 <%@ attribute name="requireReason" type="java.lang.Boolean" required="false" rtexprvalue="true" %>
 <%@ attribute name="requirePersonalInfoConfirmation" type="java.lang.Boolean" required="false" rtexprvalue="true" %>
+<%-- Tạo nút mở hộp thoại xác nhận, các trường bổ sung và biểu mẫu gửi POST. --%>
 <c:set var="modalConfirmLabel" value="${empty confirmLabel ? 'Xác nhận' : confirmLabel}"/>
 <c:set var="modalCssClass" value="${empty cssClass ? 'btn-danger' : cssClass}"/>
 <button type="button" class="btn ${modalCssClass}" data-bs-toggle="modal" data-bs-target="#${id}">

@@ -13,27 +13,33 @@ import vn.edu.hcmute.qaute.common.constant.UserStatus;
 import vn.edu.hcmute.qaute.entity.appointment.Appointment;
 import vn.edu.hcmute.qaute.entity.ticket.Ticket;
 
+// Khai báo truy vấn lưu trữ dữ liệu DashboardQuery.
 @Repository
 public class DashboardQueryRepository {
     private final EntityManager em;
 
+    // Khởi tạo kho truy vấn bảng điều khiển.
     public DashboardQueryRepository(EntityManager em) { this.em = em; }
 
+    // Đếm phiếu được tạo trong khoảng thời gian.
     public long ticketsCreated(LocalDateTime from, LocalDateTime to) {
         return em.createQuery("select count(t) from Ticket t where t.createdAt >= :from and t.createdAt < :to", Long.class)
                 .setParameter("from", from).setParameter("to", to).getSingleResult();
     }
 
+    // Đếm phiếu chưa được phân công.
     public long unassigned() {
         return em.createQuery("select count(t) from Ticket t where t.status = :status", Long.class)
                 .setParameter("status", TicketStatus.NEW).getSingleResult();
     }
 
+    // Đếm phiếu chưa phân công đã cũ hơn mốc thời gian.
     public long oldUnassigned(LocalDateTime cutoff) {
         return em.createQuery("select count(t) from Ticket t where t.status = :status and t.createdAt < :cutoff", Long.class)
                 .setParameter("status", TicketStatus.NEW).setParameter("cutoff", cutoff).getSingleResult();
     }
 
+    // Đếm các phiếu tồn đọng đã cũ hơn mốc thời gian.
     public long oldBacklog(LocalDateTime cutoff) {
         return em.createQuery("select count(t) from Ticket t where t.status in :statuses and t.createdAt < :cutoff", Long.class)
                 .setParameter("statuses", List.of(TicketStatus.NEW, TicketStatus.ASSIGNED,
@@ -41,11 +47,13 @@ public class DashboardQueryRepository {
                 .setParameter("cutoff", cutoff).getSingleResult();
     }
 
+    // Đếm phiên trò chuyện theo trạng thái.
     public long chatCount(ChatSessionStatus status) {
         return em.createQuery("select count(c) from ChatSession c where c.status = :status", Long.class)
                 .setParameter("status", status).getSingleResult();
     }
 
+    // Đếm lịch hẹn đã xác nhận trong ngày.
     public long appointmentsToday(LocalDateTime from, LocalDateTime to) {
         return em.createQuery("select count(a) from Appointment a, AppointmentSlot s where a.slotId = s.id "
                 + "and a.status = :status and s.startAt >= :from and s.startAt < :to", Long.class)
@@ -53,22 +61,26 @@ public class DashboardQueryRepository {
                 .setParameter("from", from).setParameter("to", to).getSingleResult();
     }
 
+    // Đếm người dùng hoạt động gần đây.
     public long recentlyActiveUsers(LocalDateTime since) {
         return em.createQuery("select count(u) from User u where u.status = :status and u.lastLoginAt >= :since", Long.class)
                 .setParameter("status", UserStatus.ACTIVE).setParameter("since", since).getSingleResult();
     }
 
+    // Đếm email gửi thất bại.
     public long failedEmails() {
         return em.createQuery("select count(e) from EmailOutbox e where e.status = :status", Long.class)
                 .setParameter("status", EmailStatus.FAILED).getSingleResult();
     }
 
+    // Đếm phiếu vi phạm SLA chưa đóng.
     public long breachedTickets() {
         return em.createQuery("select count(t) from Ticket t where t.slaStatus = :sla and t.status not in :closed", Long.class)
                 .setParameter("sla", SlaStatus.BREACHED)
                 .setParameter("closed", List.of(TicketStatus.CLOSED, TicketStatus.CANCELLED)).getSingleResult();
     }
 
+    // Lấy các phiếu có rủi ro SLA của quản lý.
     public List<Ticket> managerRisk(Long managerId, int limit) {
         return em.createQuery("select t from Ticket t where t.currentAssigneeId = :id and t.slaStatus in :risks "
                 + "and t.status not in :closed order by case when t.slaStatus = :breached then 0 else 1 end, t.createdAt", Ticket.class)
@@ -77,6 +89,7 @@ public class DashboardQueryRepository {
                 .setParameter("breached", SlaStatus.BREACHED).setMaxResults(limit).getResultList();
     }
 
+    // Lấy phiếu chưa phân công trong các danh mục được chọn.
     public List<Ticket> oldUnassignedInScope(List<Long> categoryIds, LocalDateTime cutoff, int limit) {
         if (categoryIds == null || categoryIds.isEmpty()) return List.of();
         return em.createQuery("select t from Ticket t where t.categoryId in :ids and t.status = :status "
@@ -85,6 +98,7 @@ public class DashboardQueryRepository {
                 .setParameter("cutoff", cutoff).setMaxResults(limit).getResultList();
     }
 
+    // Lấy danh sách cảnh báo vi phạm SLA.
     public List<Ticket> breachedAlerts(int limit) {
         return em.createQuery("select t from Ticket t where t.slaStatus = :sla and t.status not in :closed "
                 + "order by t.createdAt", Ticket.class).setParameter("sla", SlaStatus.BREACHED)
@@ -92,6 +106,7 @@ public class DashboardQueryRepository {
                 .setMaxResults(limit).getResultList();
     }
 
+    // Lấy các lịch hẹn sắp tới của quản lý.
     public List<Appointment> nextAppointments(Long managerId, LocalDateTime now, int limit) {
         return em.createQuery("select a from Appointment a, AppointmentSlot s where a.slotId = s.id "
                 + "and a.managerId = :id and a.status = :status and s.startAt >= :now order by s.startAt", Appointment.class)
@@ -99,6 +114,7 @@ public class DashboardQueryRepository {
                 .setParameter("now", now).setMaxResults(limit).getResultList();
     }
 
+    // Lấy các đánh giá thấp gần đây.
     public List<Object[]> lowRatings(LocalDateTime since, int limit) {
         return em.createQuery("select r.ticketId, t.code, r.rating, r.comment from TicketReview r, Ticket t "
                 + "where r.ticketId = t.id and r.rating <= 2 and r.createdAt >= :since "

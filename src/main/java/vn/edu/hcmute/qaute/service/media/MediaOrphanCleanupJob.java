@@ -7,12 +7,14 @@ import vn.edu.hcmute.qaute.common.constant.MediaStatus;
 import vn.edu.hcmute.qaute.common.job.JobExecutionTemplate;
 import vn.edu.hcmute.qaute.repository.media.MediaAssetRepository;
 
+// Xử lý nghiệp vụ MediaOrphanCleanupJob trong hệ thống.
 @Component
 public class MediaOrphanCleanupJob {
     private final JobExecutionTemplate jobs;
     private final MediaAssetRepository assets;
     private final MediaService media;
 
+    // Khởi tạo tác vụ dọn dẹp tệp mồ côi.
     public MediaOrphanCleanupJob(JobExecutionTemplate jobs, MediaAssetRepository assets, MediaService media) {
         this.jobs = jobs;
         this.assets = assets;
@@ -20,6 +22,7 @@ public class MediaOrphanCleanupJob {
     }
 
     @Scheduled(cron = "0 30 3 * * *")
+    // Xóa các tài nguyên mồ côi đã tồn tại quá 24 giờ.
     public void removeOrphans() {
         jobs.run("media-orphan-cleanup", () -> assets
                 .findByStatusAndCreatedAtBefore(MediaStatus.ORPHAN, LocalDateTime.now().minusHours(24))

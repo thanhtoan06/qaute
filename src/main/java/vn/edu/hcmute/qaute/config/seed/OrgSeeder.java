@@ -55,6 +55,7 @@ public class OrgSeeder implements DemoSeeder {
     private final ManagerCategoryRepository managerCategoryRepository;
     private final UserRepository userRepository;
 
+    // Khởi tạo seeder tổ chức với các kho dữ liệu cần thiết.
     public OrgSeeder(
             DepartmentRepository departmentRepository,
             CategoryRepository categoryRepository,
@@ -68,6 +69,7 @@ public class OrgSeeder implements DemoSeeder {
         this.userRepository = userRepository;
     }
 
+    // Xác định thứ tự chạy của seeder tổ chức.
     @Override
     public int order() {
         return 20;
@@ -77,6 +79,7 @@ public class OrgSeeder implements DemoSeeder {
      * Nạp dữ liệu tổ chức từ database demo trống.
      * DAOTAO là mốc kiểm tra dữ liệu đã được nạp.
      */
+    // Nạp phòng ban, chuyên mục và phân công quản lý demo.
     @Override
     @Transactional
     public void seed() {
@@ -106,7 +109,7 @@ public class OrgSeeder implements DemoSeeder {
                 TAICHINH,
                 "Phòng Kế hoạch – Tài chính",
                 "taichinh@hcmute.edu.vn",
-                "Tòa B, tầng 1",
+                "Tòa A, tầng 1",
                 3);
 
         Department kyTucXa = saveDepartment(
@@ -141,7 +144,7 @@ public class OrgSeeder implements DemoSeeder {
                 KHCN,
                 "Phòng Khoa học Công nghệ",
                 "khcn@hcmute.edu.vn",
-                "Tòa B, khu nghiên cứu",
+                "Tòa A, khu nghiên cứu",
                 8);
 
         Department tramYTe = saveDepartment(
@@ -169,7 +172,7 @@ public class OrgSeeder implements DemoSeeder {
                 SAUDH,
                 "Viện Sau đại học",
                 "saudh@hcmute.edu.vn",
-                "Tòa B, khu đào tạo sau đại học",
+                "Tòa A, khu đào tạo sau đại học",
                 12);
 
         // =====================================================
@@ -716,6 +719,7 @@ public class OrgSeeder implements DemoSeeder {
                         + "71 chuyên mục và phân công 12 manager.");
     }
 
+    // Tìm hoặc tạo phòng ban theo mã.
     private Department saveDepartment(
             String code,
             String name,
@@ -732,6 +736,7 @@ public class OrgSeeder implements DemoSeeder {
                 .build());
     }
 
+    // Tìm hoặc tạo chuyên mục gốc cho phòng ban.
     private Category saveRootCategory(
             String code,
             String name,
@@ -749,6 +754,7 @@ public class OrgSeeder implements DemoSeeder {
                 .build());
     }
 
+    // Tạo chuyên mục con thuộc chuyên mục gốc.
     private void saveChildCategory(
             String code,
             String name,
@@ -765,6 +771,7 @@ public class OrgSeeder implements DemoSeeder {
                 .build());
     }
 
+    // Tạo hồ sơ cho các quản lý phòng ban chính.
     private void createProfiles(
             Department daoTao,
             Department congTacSinhVien,
@@ -777,6 +784,7 @@ public class OrgSeeder implements DemoSeeder {
                 profile(manager(4), "CB004", kyTucXa, AvailabilityStatus.OFFLINE)));
     }
 
+    // Tạo hồ sơ cho các quản lý phòng ban bổ sung.
     private void createAdditionalProfiles(
             Department cntt,
             Department thuVien,
@@ -797,6 +805,7 @@ public class OrgSeeder implements DemoSeeder {
                 profile(manager(12), "CB012", sauDaiHoc, AvailabilityStatus.OFFLINE)));
     }
 
+    // Tạo các phân công chuyên mục ban đầu.
     private void createAssignments() {
         User manager1 = manager(1);
         User manager2 = manager(2);
@@ -816,6 +825,7 @@ public class OrgSeeder implements DemoSeeder {
                 assignment(manager4, "KTX_DICHVU", ManagerCategoryLevel.SECONDARY)));
     }
 
+    // Bổ sung các phân công chuyên mục còn lại.
     private void createAdditionalAssignments() {
         User manager1 = manager(1);
         User manager2 = manager(2);
@@ -919,6 +929,7 @@ public class OrgSeeder implements DemoSeeder {
         ));
     }
 
+    // Tạo hồ sơ quản lý theo thông tin phòng ban.
     private ManagerProfile profile(
             User manager,
             String employeeCode,
@@ -935,6 +946,7 @@ public class OrgSeeder implements DemoSeeder {
                 .build();
     }
 
+    // Tạo phân công chuyên mục cho quản lý.
     private ManagerCategory assignment(
             User manager,
             String categoryCode,
@@ -950,6 +962,7 @@ public class OrgSeeder implements DemoSeeder {
                 .build();
     }
 
+    // Tìm tài khoản quản lý theo số thứ tự.
     private User manager(int number) {
         if (number < 1 || number > MANAGER_EMAILS.length) {
             throw new IllegalArgumentException(

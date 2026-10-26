@@ -13,6 +13,7 @@ import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.SenderType;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu TicketMessage được lưu trữ trong hệ thống.
 @Entity @Table(name = "ticket_messages")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class TicketMessage extends AuditableEntity {

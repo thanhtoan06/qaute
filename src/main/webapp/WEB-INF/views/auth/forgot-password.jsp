@@ -69,6 +69,7 @@
 
 
 
+<%-- Biểu mẫu yêu cầu gửi OTP đến email hoặc mã số sinh viên đã đăng ký. --%>
 <div class="forgot-recovery">
     <div class="recovery-heading">
         <div class="recovery-icon-wrap">
@@ -89,6 +90,7 @@
         </div>
     </c:if>
 
+    <%-- Gửi mã xác minh và hiển thị hướng dẫn bảo mật cùng lỗi trường nhập. --%>
     <form method="post" action="/auth/forgot-password" id="forgot-password-form" novalidate class="recovery-form">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 

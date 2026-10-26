@@ -26,6 +26,7 @@ import vn.edu.hcmute.qaute.security.JwtService;
 import vn.edu.hcmute.qaute.security.event.SessionRevokedEvent;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
+// Xử lý nghiệp vụ AuthSession trong hệ thống.
 @Service
 @Transactional
 public class AuthSessionServiceImpl implements AuthSessionService {
@@ -39,6 +40,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
     private final SettingsService settingsService;
     private final ApplicationEventPublisher eventPublisher;
 
+    // Khởi tạo dịch vụ quản lý phiên xác thực.
     public AuthSessionServiceImpl(AuthSessionRepository authSessionRepository,
                                   LoginHistoryRepository loginHistoryRepository,
                                   UserRepository userRepository,
@@ -53,6 +55,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         this.eventPublisher = eventPublisher;
     }
 
+    // Tạo phiên mới cùng các token truy cập và làm mới.
     @Override
     public SessionTokens createSession(Long userId, boolean remember, String deviceInfo, String ip) {
         User user = findActiveUser(userId);
@@ -75,6 +78,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         return new SessionTokens(accessToken, refreshToken, accessCookieMaxAge, refreshCookieMaxAge);
     }
 
+    // Xoay refresh token và cấp phiên thay thế.
     @Override
     public Optional<SessionTokens> refresh(String refreshToken, String deviceInfo, String ip) {
         if (refreshToken == null || refreshToken.isBlank()) {
@@ -105,6 +109,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         return Optional.of(replacement);
     }
 
+    // Kiểm tra phiên theo JTI còn hiệu lực hay không.
     @Override
     @Transactional(readOnly = true)
     public boolean isSessionActive(String jti) {
@@ -114,6 +119,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
                 .orElse(false);
     }
 
+    // Thu hồi phiên theo JTI và phát sự kiện tương ứng.
     @Override
     public void revokeByJti(String jti, String reason) {
         authSessionRepository.findByJti(jti).ifPresent(session -> {
@@ -123,6 +129,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         });
     }
 
+    // Thu hồi toàn bộ phiên của người dùng.
     @Override
     public void revokeAllSessions(Long userId, String reason) {
         authSessionRepository.findByUserIdOrderByCreatedAtDesc(userId)
@@ -130,6 +137,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         eventPublisher.publishEvent(new SessionRevokedEvent(userId, null));
     }
 
+    // Thu hồi mọi phiên trừ phiên có JTI được giữ lại.
     @Override
     public void revokeAllExcept(Long userId, String keepJti, String reason) {
         authSessionRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
@@ -141,6 +149,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
                 });
     }
 
+    // Thu hồi phiên nếu người thực hiện là chủ sở hữu hoặc quản trị viên.
     @Override
     public void revokeSession(Long sessionId, Long actorUserId) {
         AuthSession session = authSessionRepository.findById(sessionId).orElseThrow(NotFoundException::new);
@@ -155,12 +164,14 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         }
     }
 
+    // Liệt kê các phiên của người dùng.
     @Override
     @Transactional(readOnly = true)
     public List<AuthSessionView> listSessions(Long userId) {
         return listSessions(userId, null);
     }
 
+    // Liệt kê phiên và nhận diện phiên hiện tại.
     @Override
     @Transactional(readOnly = true)
     public List<AuthSessionView> listSessions(Long userId, String currentJti) {
@@ -174,6 +185,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
                 .toList();
     }
 
+    // Lấy lịch sử đăng nhập với giới hạn số bản ghi.
     @Override
     @Transactional(readOnly = true)
     public List<LoginHistoryView> listLoginHistory(Long userId, int limit) {
@@ -186,6 +198,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
                 .toList();
     }
 
+    // Ghi lịch sử cho một lần đăng nhập.
     @Override
     public void recordLogin(Long userId, String identifier, boolean success,
                             String ip, String userAgent) {
@@ -198,6 +211,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
                 .build());
     }
 
+    // Tìm người dùng đang hoạt động và có vai trò.
     private User findActiveUser(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
         if (user.getStatus() != UserStatus.ACTIVE || user.getRole() == null) {
@@ -206,6 +220,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         return user;
     }
 
+    // Tính thời hạn refresh token theo tùy chọn ghi nhớ.
     private int refreshMaxAgeSeconds(boolean remember) {
         int days = settingsService.getInt(remember
                 ? SettingKeys.AUTH_REFRESH_REMEMBER_TTL_DAYS
@@ -214,6 +229,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         return Math.toIntExact(seconds);
     }
 
+    // Thu hồi phiên nếu phiên chưa bị thu hồi trước đó.
     private boolean revoke(AuthSession session, String reason) {
         if (session.getRevokedAt() == null) {
             session.setRevokedAt(LocalDateTime.now());
@@ -224,6 +240,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         return false;
     }
 
+    // Che một phần định danh trước khi lưu lịch sử.
     private String maskIdentifier(String identifier) {
         if (identifier == null || identifier.isBlank()) {
             return "***";

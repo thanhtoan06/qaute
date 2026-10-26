@@ -43,6 +43,7 @@ public class AdminUserController {
     private final FacultyRepository facultyRepository;
     private final DepartmentRepository departmentRepository;
 
+    // Khởi tạo bộ điều khiển người dùng quản trị.
     public AdminUserController(AdminUserQueryService adminUserQueryService,
                                AdminUserService adminUserService, FacultyRepository facultyRepository,
                                DepartmentRepository departmentRepository) {
@@ -53,6 +54,7 @@ public class AdminUserController {
     }
 
     @GetMapping("/admin/users")
+    // Tìm kiếm và phân trang danh sách người dùng.
     public String list(@ModelAttribute("filter") UserFilter filter,
                        @RequestParam(defaultValue = "0") int page,
                        Model model) {
@@ -69,6 +71,7 @@ public class AdminUserController {
     }
 
     @GetMapping("/admin/users/{id}")
+    // Hiển thị thông tin chi tiết người dùng.
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("user", adminUserQueryService.getDetail(id));
         model.addAttribute("currentUserId", SecurityUtils.requireUserId());
@@ -78,6 +81,7 @@ public class AdminUserController {
     }
 
     @GetMapping("/admin/users/new")
+    // Chuẩn bị biểu mẫu tạo người dùng.
     public String newPage(Model model) {
         model.addAttribute("form", new UserCreateForm());
         formOptions(model, false, null);
@@ -85,6 +89,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/admin/users")
+    // Kiểm tra và tạo tài khoản người dùng.
     public String create(@Valid @ModelAttribute("form") UserCreateForm form, BindingResult result,
                          Model model, RedirectAttributes redirect) {
         if (result.hasErrors()) {
@@ -107,6 +112,7 @@ public class AdminUserController {
     }
 
     @GetMapping("/admin/users/{id}/edit")
+    // Tải biểu mẫu chỉnh sửa người dùng.
     public String editPage(@PathVariable Long id, Model model) {
         model.addAttribute("form", adminUserService.getEditForm(id));
         formOptions(model, true, id);
@@ -114,6 +120,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/admin/users/{id}")
+    // Kiểm tra và cập nhật thông tin người dùng.
     public String update(@PathVariable Long id, @Valid @ModelAttribute("form") UserEditForm form,
                          BindingResult result, Model model, RedirectAttributes redirect) {
         if (result.hasErrors()) {
@@ -136,6 +143,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/admin/users/{id}/resend-invitation")
+    // Gửi lại lời mời kích hoạt tài khoản.
     public String resendInvitation(@PathVariable Long id, RedirectAttributes redirect) {
         try {
             adminUserService.resendInvitation(id, SecurityUtils.requireUserId());
@@ -147,6 +155,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/admin/users/{id}/lock")
+    // Kiểm tra yêu cầu rồi khóa tài khoản.
     public String lock(@PathVariable Long id, @Valid @ModelAttribute UserActionForm form,
                        BindingResult result, RedirectAttributes redirect) {
         if (result.hasErrors()) {
@@ -158,6 +167,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/admin/users/{id}/unlock")
+    // Mở khóa tài khoản người dùng.
     public String unlock(@PathVariable Long id, RedirectAttributes redirect) {
         return runAction(id, redirect,
                 () -> adminUserService.unlock(id, SecurityUtils.requireUserId()),
@@ -165,6 +175,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/admin/users/{id}/deactivate")
+    // Kiểm tra yêu cầu rồi vô hiệu hóa tài khoản.
     public String deactivate(@PathVariable Long id, @Valid @ModelAttribute UserActionForm form,
                              BindingResult result, RedirectAttributes redirect) {
         if (result.hasErrors()) {
@@ -176,6 +187,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/admin/users/{id}/reactivate")
+    // Kích hoạt lại tài khoản người dùng.
     public String reactivate(@PathVariable Long id, RedirectAttributes redirect) {
         return runAction(id, redirect,
                 () -> adminUserService.reactivate(id, SecurityUtils.requireUserId()),
@@ -183,6 +195,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/admin/users/{id}/force-reset")
+    // Gửi lời mời đặt lại mật khẩu.
     public String forcePasswordReset(@PathVariable Long id, RedirectAttributes redirect) {
         return runAction(id, redirect,
                 () -> adminUserService.forcePasswordReset(id, SecurityUtils.requireUserId()),
@@ -190,6 +203,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/admin/users/{id}/role")
+    // Kiểm tra yêu cầu rồi đổi vai trò người dùng.
     public String changeRole(@PathVariable Long id,
                              @Valid @ModelAttribute UserRoleChangeForm form,
                              BindingResult result, RedirectAttributes redirect) {
@@ -202,6 +216,7 @@ public class AdminUserController {
     }
 
     @GetMapping("/admin/users/{id}/security")
+    // Hiển thị phiên và lịch sử đăng nhập của người dùng.
     public String security(@PathVariable Long id, Model model) {
         model.addAttribute("user", adminUserQueryService.getDetail(id));
         model.addAttribute("sessions", adminUserService.sessions(id));
@@ -211,6 +226,7 @@ public class AdminUserController {
     }
 
     @PostMapping("/admin/users/{id}/sessions/{sessionId}/revoke")
+    // Thu hồi một phiên đăng nhập của người dùng.
     public String revokeSession(@PathVariable Long id, @PathVariable Long sessionId,
                                 RedirectAttributes redirect) {
         return runSecurityAction(id, redirect,
@@ -219,12 +235,14 @@ public class AdminUserController {
     }
 
     @PostMapping("/admin/users/{id}/sessions/revoke-all")
+    // Thu hồi mọi phiên đăng nhập của người dùng.
     public String revokeAllSessions(@PathVariable Long id, RedirectAttributes redirect) {
         return runSecurityAction(id, redirect,
                 () -> adminUserService.revokeAllSessions(id, SecurityUtils.requireUserId()),
                 "Đã thu hồi mọi phiên đăng nhập");
     }
 
+    // Thực hiện thao tác bảo mật và báo kết quả.
     private String runSecurityAction(Long id, RedirectAttributes redirect, Runnable action, String success) {
         try {
             action.run();
@@ -235,6 +253,7 @@ public class AdminUserController {
         return "redirect:/admin/users/" + id + "/security";
     }
 
+    // Thực hiện thao tác tài khoản và báo kết quả.
     private String runAction(Long id, RedirectAttributes redirect, Runnable action, String success) {
         try {
             action.run();
@@ -245,11 +264,13 @@ public class AdminUserController {
         return "redirect:/admin/users/" + id;
     }
 
+    // Chuyển lỗi thao tác thành thông báo.
     private String actionError(Long id, RedirectAttributes redirect, String message) {
         redirect.addFlashAttribute("flashError", message);
         return "redirect:/admin/users/" + id;
     }
 
+    // Nạp các lựa chọn cần thiết cho biểu mẫu người dùng.
     private void formOptions(Model model, boolean edit, Long id) {
         model.addAttribute("isEdit", edit);
         model.addAttribute("account", edit ? adminUserQueryService.getDetail(id) : null);
@@ -259,6 +280,7 @@ public class AdminUserController {
         model.addAttribute("pageTitle", edit ? "Sửa người dùng" : "Thêm người dùng");
     }
 
+    // Tạo chuỗi tham số lọc cho phân trang.
     private static String paginationParams(UserFilter filter) {
         StringJoiner params = new StringJoiner("&amp;");
         addParam(params, "q", filter.getQ());
@@ -270,6 +292,7 @@ public class AdminUserController {
         return params.toString();
     }
 
+    // Thêm tham số không rỗng vào chuỗi lọc.
     private static void addParam(StringJoiner params, String name, Object value) {
         if (value != null && !value.toString().isBlank()) {
             params.add(name + "=" + URLEncoder.encode(value.toString(), StandardCharsets.UTF_8));

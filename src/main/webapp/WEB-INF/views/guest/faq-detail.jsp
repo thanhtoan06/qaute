@@ -152,6 +152,7 @@
 
             <div class="row qfd-layout">
                 <div class="col-lg-8 qfd-main-column">
+                    <%-- Hiển thị nội dung FAQ, danh mục, thẻ và trạng thái lưu bài. --%>
                     <article class="card qfd-article mb-4">
                         <div class="qfd-kicker"><span class="qfd-kicker-icon"><i
                                     class="bi bi-journal-richtext"></i></span> QAUTE Knowledge Center</div>
@@ -217,6 +218,7 @@
                             </div>
                         </c:if>
 
+                        <%-- Thu thập bình chọn hữu ích và lý do phản hồi của người đọc. --%>
                         <div id="faq-vote" class="card p-3 my-4 bg-light text-center border-0 qfd-vote"
                             data-faq-id="${faq.id()}">
                             <p class="fw-bold mb-2 qfd-vote-heading"><i class="bi bi-chat-square-heart"></i>Bài viết có
@@ -283,6 +285,7 @@
                         </div>
                     </article>
 
+                    <%-- Cung cấp cách liên hệ tư vấn viên nếu FAQ chưa giải quyết được vấn đề. --%>
                     <div class="card p-4 mb-4 bg-blue-lt border-0 qfd-help-panel">
                         <h3 class="card-title mb-2 qfd-help-title"><span class="qfd-help-icon"><i
                                     class="bi bi-headset"></i></span>Vẫn cần hỗ trợ?</h3>
@@ -303,6 +306,7 @@
                     </div>
                 </div>
 
+                <%-- Liệt kê các bài FAQ liên quan để tiếp tục tra cứu. --%>
                 <div class="col-lg-4 qfd-sidebar-column">
                     <aside class="qfd-sidebar">
                         <div class="card mb-4 qfd-related-card">

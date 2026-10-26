@@ -13,14 +13,17 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import vn.edu.hcmute.qaute.common.response.ApiResponse;
 
+// Hỗ trợ xác thực và kiểm soát truy cập qua AuthEntryPoint.
 public class AuthEntryPoint implements AuthenticationEntryPoint {
 
     private final ObjectMapper objectMapper;
 
+    // Khởi tạo bộ xử lý lỗi xác thực với bộ chuyển đổi JSON.
     public AuthEntryPoint(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
+    // Chuyển yêu cầu chưa xác thực đến phản hồi phù hợp với loại yêu cầu.
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException exception) throws IOException, ServletException {
@@ -48,6 +51,7 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
                 + URLEncoder.encode(returnUrl, StandardCharsets.UTF_8));
     }
 
+    // Kiểm tra yêu cầu có cần nhận phản hồi API hay không.
     private boolean isApi(HttpServletRequest request) {
         return request.getRequestURI().startsWith("/api/")
                 || "XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"));

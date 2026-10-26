@@ -8,11 +8,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.web.util.HtmlUtils;
 
+// Cung cấp tiện ích dùng chung cho HighlightUtil.
 public final class HighlightUtil {
 
+    /** Ngăn khởi tạo lớp tiện ích. */
     private HighlightUtil() {
     }
 
+    /** Đánh dấu các cụm từ truy vấn trong văn bản đã escape HTML. */
     public static String highlight(String text, String rawQuery) {
         if (text == null || text.isBlank()) {
             return "";
@@ -67,6 +70,7 @@ public final class HighlightUtil {
         return sb.toString();
     }
 
+    /** Kiểm tra đoạn khớp có nằm trong một thực thể HTML hay không. */
     private static boolean isInsideEntity(String s, int start, int end) {
         int lastAmp = s.lastIndexOf('&', start);
         if (lastAmp != -1) {
@@ -76,6 +80,7 @@ public final class HighlightUtil {
         return false;
     }
 
+    /** Tạo biểu thức chính quy khớp các biến thể dấu tiếng Việt. */
     private static String buildAccentInsensitivePattern(String word) {
         StringBuilder pattern = new StringBuilder();
         for (int i = 0; i < word.length(); i++) {
@@ -102,4 +107,3 @@ public final class HighlightUtil {
         return pattern.toString();
     }
 }
-

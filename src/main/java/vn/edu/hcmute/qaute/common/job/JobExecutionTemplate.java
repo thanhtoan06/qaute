@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+// Thực hiện tác vụ nền định kỳ của ứng dụng qua JobExecutionTemplate.
 @Component
 public class JobExecutionTemplate {
 
@@ -15,6 +16,7 @@ public class JobExecutionTemplate {
 
     private final ConcurrentMap<String, AtomicBoolean> runningJobs = new ConcurrentHashMap<>();
 
+    // Thực thi tác vụ nếu công việc chưa chạy.
     public void run(String jobName, Runnable task) {
         AtomicBoolean running = runningJobs.computeIfAbsent(jobName, key -> new AtomicBoolean());
         if (!running.compareAndSet(false, true)) {
@@ -39,6 +41,7 @@ public class JobExecutionTemplate {
         }
     }
 
+    // Tính thời gian đã trôi qua theo mili giây.
     private long elapsedMillis(long startNanos) {
         return (System.nanoTime() - startNanos) / 1_000_000L;
     }

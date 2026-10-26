@@ -6,17 +6,20 @@ import vn.edu.hcmute.qaute.common.util.TextUtil;
 import vn.edu.hcmute.qaute.entity.knowledge.SearchLog;
 import vn.edu.hcmute.qaute.repository.knowledge.SearchLogRepository;
 
+// Xử lý nghiệp vụ SearchLog trong hệ thống.
 @Service
 @Transactional
 public class SearchLogServiceImpl implements SearchLogService {
 
     private final SearchLogRepository searchLogRepository;
 
+    // Khởi tạo dịch vụ ghi nhật ký tìm kiếm.
     public SearchLogServiceImpl(SearchLogRepository searchLogRepository) {
         this.searchLogRepository = searchLogRepository;
     }
 
     @Override
+    // Lưu nhật ký người dùng nhấp vào kết quả tìm kiếm.
     public void recordClick(String query, Long faqId, String source, Long userId, String ipHash) {
         String qNorm = query != null ? TextUtil.normalizeVi(query) : "";
         if (qNorm.length() > 200) {
@@ -32,4 +35,3 @@ public class SearchLogServiceImpl implements SearchLogService {
         searchLogRepository.save(log);
     }
 }
-

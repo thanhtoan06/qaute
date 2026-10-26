@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu FaqTag được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "faq_tags")
 @Getter

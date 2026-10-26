@@ -33,11 +33,13 @@ public class AdminDepartmentController {
 
     private final AdminDepartmentService adminDepartmentService;
 
+    // Khởi tạo bộ điều khiển phòng ban.
     public AdminDepartmentController(AdminDepartmentService adminDepartmentService) {
         this.adminDepartmentService = adminDepartmentService;
     }
 
     @GetMapping("/admin/departments")
+    // Phân trang và hiển thị danh sách phòng ban.
     public String list(@RequestParam(defaultValue="0") int page, Model model) {
         var results = adminDepartmentService.page(BoundedPages.of(page, 25));
         model.addAttribute("departments", results.getContent());
@@ -47,6 +49,7 @@ public class AdminDepartmentController {
     }
 
     @GetMapping("/admin/departments/new")
+    // Chuẩn bị biểu mẫu tạo phòng ban.
     public String newPage(Model model) {
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", new DepartmentForm());
@@ -56,6 +59,7 @@ public class AdminDepartmentController {
     }
 
     @GetMapping("/admin/departments/{id}/edit")
+    // Tải biểu mẫu chỉnh sửa phòng ban.
     public String editPage(@PathVariable Long id, Model model,
                            RedirectAttributes redirectAttributes) {
         try {
@@ -71,6 +75,7 @@ public class AdminDepartmentController {
     }
 
     @PostMapping("/admin/departments")
+    // Kiểm tra và lưu biểu mẫu phòng ban.
     public String save(@Valid @ModelAttribute("form") DepartmentForm form,
                        BindingResult bindingResult, Model model,
                        RedirectAttributes redirectAttributes) {
@@ -96,6 +101,7 @@ public class AdminDepartmentController {
     }
 
     @PostMapping("/admin/departments/{id}/toggle")
+    // Đổi trạng thái hoạt động của phòng ban.
     public String toggle(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             adminDepartmentService.toggleActive(id, SecurityUtils.requireUserId());
@@ -106,6 +112,7 @@ public class AdminDepartmentController {
         return "redirect:/admin/departments";
     }
 
+    // Gộp lỗi và hiển thị lại biểu mẫu phòng ban.
     private String showFormError(Model model, Map<String, String> additions, DepartmentForm form) {
         Map<String, String> errors = new LinkedHashMap<>();
         Object existing = model.getAttribute("errors");

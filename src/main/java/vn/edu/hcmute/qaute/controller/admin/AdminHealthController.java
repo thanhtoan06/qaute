@@ -11,17 +11,20 @@ import vn.edu.hcmute.qaute.service.admin.SystemHealthService;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.common.constant.AuditActions;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho AdminHealth.
 @Controller
 public class AdminHealthController {
     private final SystemHealthService health;
     private final AuditService audit;
 
+    // Khởi tạo bộ điều khiển kiểm tra hệ thống.
     public AdminHealthController(SystemHealthService health, AuditService audit) {
         this.health = health;
         this.audit = audit;
     }
 
     @GetMapping("/admin/health")
+    // Hiển thị trạng thái các kiểm tra hệ thống.
     public String page(Model model) {
         model.addAttribute("checks", health.checks());
         model.addAttribute("emailConfigured", health.isEmailConfigured());
@@ -30,6 +33,7 @@ public class AdminHealthController {
     }
 
     @PostMapping("/admin/health/test-email")
+    // Đưa thư thử vào hàng đợi gửi email.
     public String testEmail(RedirectAttributes redirect) {
         try {
             health.queueTestEmail(SecurityUtils.requireUser().getEmail());

@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.util.Map;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
@@ -17,12 +17,14 @@ import vn.edu.hcmute.qaute.security.RateLimitService;
 import vn.edu.hcmute.qaute.service.chat.ChatAccessChecker;
 import vn.edu.hcmute.qaute.service.ticket.TicketAccessService;
 
+// Hỗ trợ giao tiếp thời gian thực qua StompChannelInterceptor.
 @Component
 public class StompChannelInterceptor implements ChannelInterceptor {
     private final ObjectProvider<ChatAccessChecker> chatAccess;
     private final TicketAccessService ticketAccess;
     private final RateLimitService rateLimits;
 
+    // Khởi tạo bộ kiểm tra quyền và giới hạn tần suất.
     public StompChannelInterceptor(ObjectProvider<ChatAccessChecker> chatAccess,
             TicketAccessService ticketAccess, RateLimitService rateLimits) {
         this.chatAccess = chatAccess;
@@ -31,6 +33,7 @@ public class StompChannelInterceptor implements ChannelInterceptor {
     }
 
     @Override
+    // Kiểm tra thông điệp STOMP trước khi gửi vào kênh.
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         StompCommand command = accessor.getCommand();
@@ -67,6 +70,7 @@ public class StompChannelInterceptor implements ChannelInterceptor {
         return message;
     }
 
+    // Xác minh quyền đăng ký theo dõi đích đến.
     private void checkSubscribe(String destination, QauteUserDetails user) {
         if ("/user/queue/notifications".equals(destination)) {
             return;
@@ -89,6 +93,7 @@ public class StompChannelInterceptor implements ChannelInterceptor {
         throw new MessagingException("Bạn không có quyền theo dõi kênh này");
     }
 
+    // Đọc mã định danh số từ đường dẫn đích đến.
     private Long pathId(String destination, String prefix) {
         if (destination == null || !destination.startsWith(prefix)) {
             return null;

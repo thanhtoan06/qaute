@@ -21,6 +21,7 @@ import vn.edu.hcmute.qaute.repository.identity.FacultyRepository;
 import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.identity.StudentProfileService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho StudentProfile.
 @Controller
 @RequestMapping("/student/profile")
 public class StudentProfileController {
@@ -28,6 +29,7 @@ public class StudentProfileController {
     private final StudentProfileService studentProfileService;
     private final FacultyRepository facultyRepository;
 
+    // Khởi tạo bộ điều khiển hồ sơ cùng dịch vụ và kho dữ liệu khoa.
     public StudentProfileController(StudentProfileService studentProfileService,
                                    FacultyRepository facultyRepository) {
         this.studentProfileService = studentProfileService;
@@ -35,6 +37,7 @@ public class StudentProfileController {
     }
 
     @GetMapping
+    // Hiển thị hồ sơ và điền biểu mẫu với thông tin hiện tại.
     public String profile(Model model) {
         Long userId = SecurityUtils.requireUserId();
         ProfileView profile = studentProfileService.getProfile(userId);
@@ -56,6 +59,7 @@ public class StudentProfileController {
     }
 
     @PostMapping
+    // Kiểm tra và cập nhật thông tin hồ sơ sinh viên.
     public String updateProfile(@Valid @ModelAttribute("form") ProfileForm form,
                                 BindingResult bindingResult,
                                 Model model,
@@ -87,6 +91,7 @@ public class StudentProfileController {
     }
 
     @PostMapping("/avatar")
+    // Cập nhật ảnh đại diện theo mã tài nguyên được gửi lên.
     public String updateAvatar(@RequestParam("assetId") Long assetId,
                                RedirectAttributes redirectAttributes) {
         Long userId = SecurityUtils.requireUserId();

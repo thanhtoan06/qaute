@@ -1,5 +1,6 @@
 package vn.edu.hcmute.qaute.common.constant;
 
+// Mã lỗi cùng mã HTTP và thông điệp mặc định trả về cho ứng dụng.
 public enum ErrorCode {
     ERR_VALIDATION(400, "Dữ liệu không hợp lệ"),
     ERR_DUPLICATE(409, "Dữ liệu đã tồn tại"),
@@ -20,15 +21,18 @@ public enum ErrorCode {
     private final int httpStatus;
     private final String defaultMessage;
 
+    // Lưu mã HTTP và thông điệp mặc định của lỗi.
     ErrorCode(int httpStatus, String defaultMessage) {
         this.httpStatus = httpStatus;
         this.defaultMessage = defaultMessage;
     }
 
+    // Trả về mã trạng thái HTTP của lỗi.
     public int getHttpStatus() {
         return httpStatus;
     }
 
+    // Trả về thông điệp mặc định của lỗi.
     public String getDefaultMessage() {
         return defaultMessage;
     }

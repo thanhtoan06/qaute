@@ -75,6 +75,7 @@ public class FaqSeeder implements DemoSeeder {
         "SDH_TUYENSINH", "SDH_HOSO", "SDH_HOCVU", "SDH_TUYENSINH_HOSO", "SDH_HOSO_BOSUNG"
     };
 
+    // Khởi tạo seeder FAQ với các kho dữ liệu cần thiết.
     public FaqSeeder(FaqRepository faqRepository,
                      FaqTagRepository faqTagRepository,
                      CategoryRepository categoryRepository,
@@ -85,11 +86,13 @@ public class FaqSeeder implements DemoSeeder {
         this.userRepository = userRepository;
     }
 
+    // Xác định thứ tự chạy của seeder FAQ.
     @Override
     public int order() {
         return 30;
     }
 
+    // Nạp dữ liệu FAQ demo cùng thẻ và chuyên mục liên quan.
     @Override
     @Transactional
     public void seed() {
@@ -161,7 +164,19 @@ public class FaqSeeder implements DemoSeeder {
             }
             User author = getManagerForCategory(def.categoryCode(), managerByDepartment);
 
-            int viewCount = random.nextInt(401);
+            // Set viewCount cao cho 10 bài FAQ phổ biến nhất
+            int viewCount;
+            String title = def.title();
+            if (title.contains("đăng ký học phần") || title.contains("số tín chỉ") ||
+                title.contains("phúc khảo") || title.contains("cảnh báo học vụ") ||
+                title.contains("chuẩn ngoại ngữ") || title.contains("học bổng khuyến khích") ||
+                title.contains("điểm rèn luyện") || title.contains("thanh toán học phí") ||
+                title.contains("đăng ký ở ký túc xá") || title.contains("điểm W")) {
+                viewCount = 5000 + random.nextInt(5000); // 5000-10000 views
+            } else {
+                viewCount = random.nextInt(401); // 0-400 views cho các bài còn lại
+            }
+
             int helpfulCount = random.nextInt(41);
             int notHelpfulCount = random.nextInt(9);
             LocalDateTime publishTime = now.minusDays(random.nextInt(60) + 1).minusHours(random.nextInt(24));
@@ -175,7 +190,7 @@ public class FaqSeeder implements DemoSeeder {
                 slug = baseSlug + "-" + counter++;
             }
 
-            Set<FaqTag> tags = pickTags(allTags, def.preferredTags(), random, 5, 8);
+            Set<FaqTag> tags = pickTags(allTags, def.preferredTags());
             Faq faq = Faq.builder()
                     .categoryId(category.getId())
                     .authorId(author.getId())
@@ -201,6 +216,7 @@ public class FaqSeeder implements DemoSeeder {
         }
     }
 
+    // Chọn quản lý phụ trách chuyên mục FAQ.
     private User getManagerForCategory(String code, Map<String, User> managerByDepartment) {
         for (String[] account : MANAGER_ACCOUNTS) {
             String prefix = account[0] + "_";
@@ -214,6 +230,7 @@ public class FaqSeeder implements DemoSeeder {
         throw new IllegalStateException("Không xác định được quản lý phụ trách chuyên mục: " + code);
     }
 
+    // Tìm hoặc tạo thẻ FAQ theo tên.
     private FaqTag getOrCreateTag(String name) {
         String slug = SlugUtil.slugify(name);
         return faqTagRepository.findBySlug(slug).orElseGet(() -> {
@@ -226,7 +243,8 @@ public class FaqSeeder implements DemoSeeder {
         });
     }
 
-    private Set<FaqTag> pickTags(List<FaqTag> allTags, String[] preferredNames, Random random, int min, int max) {
+    // Chọn các thẻ phù hợp cho một FAQ từ danh sách định nghĩa.
+    private Set<FaqTag> pickTags(List<FaqTag> allTags, String[] preferredNames) {
         Set<FaqTag> result = new HashSet<>();
         if (preferredNames != null) {
             for (String preferredName : preferredNames) {
@@ -237,15 +255,6 @@ public class FaqSeeder implements DemoSeeder {
                     }
                 }
             }
-        }
-        int targetSize = min + random.nextInt(max - min + 1);
-        List<FaqTag> shuffled = new ArrayList<>(allTags);
-        Collections.shuffle(shuffled, random);
-        for (FaqTag tag : shuffled) {
-            if (result.size() >= targetSize) {
-                break;
-            }
-            result.add(tag);
         }
         return result;
     }
@@ -261,6 +270,7 @@ public class FaqSeeder implements DemoSeeder {
     ) {}
 
     /** Giữ 32 FAQ gốc và bổ sung 248 FAQ riêng biệt trong cùng một danh sách. */
+    // Tạo danh sách định nghĩa FAQ dùng cho dữ liệu demo.
     private List<FaqDefinition> createFaqDefinitions() {
         List<FaqDefinition> list = new ArrayList<>();
 

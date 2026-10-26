@@ -45,6 +45,7 @@ public class AdminCategoryService {
     @PersistenceContext
     private EntityManager entityManager;
 
+    // Khởi tạo dịch vụ quản trị chuyên mục.
     public AdminCategoryService(DepartmentRepository departmentRepository,
                                 CategoryRepository categoryRepository,
                                 TicketUsageGuard ticketUsageGuard,
@@ -60,6 +61,7 @@ public class AdminCategoryService {
     // ------------------------------------------------------------------
 
     /** Cây theo phòng ban, kể cả phòng ban/chuyên mục đã tắt. departmentId null = tất cả. */
+    // Tạo cây chuyên mục theo phòng ban.
     @Transactional(readOnly = true)
     public List<AdminCategoryTree> tree(Long departmentId) {
         List<AdminCategoryTree> result = new ArrayList<>();
@@ -95,12 +97,14 @@ public class AdminCategoryService {
         return result;
     }
 
+    // Lấy biểu mẫu của chuyên mục cần sửa.
     @Transactional(readOnly = true)
     public CategoryForm get(Long id) {
         return toForm(requireCategory(id));
     }
 
     /** Form trống cho trang thêm mới; có parentId hợp lệ thì tự chọn phòng ban theo cha. */
+    // Tạo biểu mẫu chuyên mục mới với phòng ban hoặc cha mặc định.
     @Transactional(readOnly = true)
     public CategoryForm newForm(Long departmentId, Long parentId) {
         CategoryForm form = new CategoryForm();
@@ -118,6 +122,7 @@ public class AdminCategoryService {
         return form;
     }
 
+    // Liệt kê phòng ban để chọn trong biểu mẫu.
     @Transactional(readOnly = true)
     public List<DepartmentOption> departmentOptions() {
         return departmentRepository.findAllByOrderBySortOrderAscNameAsc().stream()
@@ -126,6 +131,7 @@ public class AdminCategoryService {
     }
 
     /** Các chuyên mục cấp 1 có thể làm cha (mọi phòng ban, bỏ chính nó); JS lọc theo phòng ban. */
+    // Liệt kê chuyên mục cấp một có thể làm cha.
     @Transactional(readOnly = true)
     public List<CategoryView> parentOptions(Long excludeId) {
         List<CategoryView> options = new ArrayList<>();
@@ -146,6 +152,7 @@ public class AdminCategoryService {
     // Ghi
     // ------------------------------------------------------------------
 
+    // Tạo hoặc cập nhật chuyên mục từ biểu mẫu.
     public CategoryForm save(CategoryForm form, Long actorId) {
         String code = form.getCode() == null ? null : form.getCode().trim().toUpperCase();
         departmentRepository.findById(form.getDepartmentId())
@@ -190,6 +197,7 @@ public class AdminCategoryService {
         return toForm(saved);
     }
 
+    // Đổi trạng thái hoạt động của chuyên mục.
     public void toggleActive(Long id, Long actorId) {
         Category category = requireCategory(id);
         boolean before = category.isActive();
@@ -207,6 +215,7 @@ public class AdminCategoryService {
     // ------------------------------------------------------------------
 
     /** Tính depth mới; kiểm tra cha cùng phòng ban, tối đa 2 cấp và chống vòng lặp. */
+    // Tính cấp chuyên mục và kiểm tra quan hệ cha.
     private int resolveDepth(CategoryForm form, Category existing) {
         Long parentId = form.getParentId();
         if (parentId == null) {
@@ -231,6 +240,7 @@ public class AdminCategoryService {
     }
 
     /** candidate có nằm dưới ancestorId không. Vòng lặp bị chặn bởi MAX_DEPTH nên dữ liệu lỗi cũng không treo. */
+    // Kiểm tra chuyên mục có nằm dưới tổ tiên chỉ định không.
     private boolean isDescendantOf(Category candidate, Long ancestorId) {
         Category current = candidate;
         for (int level = 0; level <= MAX_DEPTH && current != null; level++) {
@@ -247,6 +257,7 @@ public class AdminCategoryService {
     }
 
     /** Dùng chung cho toggle và cho trường hợp bỏ tích "active" trong form sửa. */
+    // Không tắt chuyên mục cha khi vẫn còn chủ đề con đang bật.
     private void ensureCanDisable(Category category) {
         List<Category> children = categoryRepository.findByParentId(category.getId());
         long activeChildren = children.stream().filter(Category::isActive).count();
@@ -254,20 +265,13 @@ public class AdminCategoryService {
             throw new BadRequestException("Còn " + activeChildren
                     + " chủ đề con đang bật, hãy tắt chúng trước");
         }
-        List<Long> ids = new ArrayList<>();
-        ids.add(category.getId());
-        children.forEach(child -> ids.add(child.getId()));
-        long openTickets = ticketUsageGuard.countOpenTicketsByCategoryIds(ids);
-        if (openTickets > 0) {
-            throw new BadRequestException("Còn " + openTickets
-                    + " yêu cầu đang xử lý, hãy chuyển sang chuyên mục khác trước");
-        }
     }
 
     // ------------------------------------------------------------------
     // Hỗ trợ
     // ------------------------------------------------------------------
 
+    // Lấy chuyên mục hoặc báo không tìm thấy.
     private Category requireCategory(Long id) {
         if (id == null) {
             throw new NotFoundException("Không tìm thấy chuyên mục");
@@ -276,6 +280,7 @@ public class AdminCategoryService {
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy chuyên mục"));
     }
 
+    // Áp dụng dữ liệu biểu mẫu lên chuyên mục.
     private void applyForm(Category category, CategoryForm form, String code, int depth) {
         category.setDepartmentId(form.getDepartmentId());
         category.setParentId(form.getParentId());
@@ -288,6 +293,7 @@ public class AdminCategoryService {
         category.setActive(form.isActive());
     }
 
+    // Chuyển chuyên mục thành biểu mẫu chỉnh sửa.
     private CategoryForm toForm(Category category) {
         CategoryForm form = new CategoryForm();
         form.setId(category.getId());
@@ -302,6 +308,7 @@ public class AdminCategoryService {
         return form;
     }
 
+    // Tạo nút cây kèm số liệu chuyên mục.
     private AdminCategoryTree.Node toNode(Category category, List<Long> countIds,
                                            List<AdminCategoryTree.Node> children) {
         return new AdminCategoryTree.Node(
@@ -317,6 +324,7 @@ public class AdminCategoryService {
      * chưa có (hoặc chưa có trường categoryId) thì trả 0, không chạy JPQL lỗi.
      * Khi có entity FAQ, đổi tên "Faq" bên dưới nếu entity đặt tên khác.
      */
+    // Đếm FAQ thuộc các chuyên mục được chỉ định.
     private long countFaqs(Collection<Long> categoryIds) {
         if (categoryIds.isEmpty() || !faqEntityHasCategoryId()) {
             return 0;
@@ -327,6 +335,7 @@ public class AdminCategoryService {
                 .getSingleResult();
     }
 
+    // Kiểm tra entity FAQ có thuộc tính categoryId.
     private boolean faqEntityHasCategoryId() {
         return entityManager.getMetamodel().getEntities().stream()
                 .filter(entity -> "Faq".equals(entity.getName()))
@@ -334,6 +343,7 @@ public class AdminCategoryService {
                         .anyMatch(attribute -> "categoryId".equals(attribute.getName())));
     }
 
+    // Tạo nội dung tóm tắt chuyên mục để ghi nhật ký.
     private static String summarize(Category category) {
         return "code=" + category.getCode() + ", name=" + category.getName()
                 + ", departmentId=" + category.getDepartmentId()
@@ -342,6 +352,7 @@ public class AdminCategoryService {
                 + ", active=" + category.isActive();
     }
 
+    // Chuẩn hóa chuỗi rỗng thành null và cắt khoảng trắng.
     private static String clean(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

@@ -87,9 +87,11 @@
 
 
 
+<%-- Chọn nội dung kích hoạt dựa trên tính hợp lệ của liên kết. --%>
 <div class="activation-page">
     <c:choose>
         <c:when test="${!tokenValid}">
+            <%-- Thông báo liên kết hết hạn/không hợp lệ và cung cấp lối về đăng nhập. --%>
             <div class="activation-invalid">
                 <div class="activation-icon-wrap">
                     <i class="bi bi-x-circle-fill"></i>
@@ -109,6 +111,7 @@
             </div>
         </c:when>
         <c:otherwise>
+            <%-- Biểu mẫu đặt mật khẩu để hoàn tất kích hoạt tài khoản. --%>
             <div class="activation-heading">
                 <div class="activation-icon-wrap">
                     <i class="bi bi-shield-lock-fill"></i>

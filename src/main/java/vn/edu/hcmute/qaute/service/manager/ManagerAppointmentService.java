@@ -29,6 +29,7 @@ import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.ticket.TicketAccessService;
 import vn.edu.hcmute.qaute.common.util.BoundedPages;
 
+// Xử lý nghiệp vụ ManagerAppointment trong hệ thống.
 @Service
 @Transactional
 public class ManagerAppointmentService {
@@ -41,6 +42,7 @@ public class ManagerAppointmentService {
     private final AuditService audit;
     private final TicketAccessService ticketAccess;
 
+    // Khởi tạo dịch vụ quản lý lịch hẹn của tư vấn viên.
     public ManagerAppointmentService(AppointmentRepository appointments, AppointmentSlotRepository slots,
             TicketRepository tickets, UserLookupService users, CategoryQueryService categories,
             NotificationService notifications, AuditService audit, TicketAccessService ticketAccess) {
@@ -54,6 +56,7 @@ public class ManagerAppointmentService {
         this.ticketAccess = ticketAccess;
     }
 
+    // Liệt kê lịch hẹn theo tab và trang được yêu cầu.
     @Transactional(readOnly = true)
     public Page<ManagerAppointmentView> list(Long managerId, String tab, Pageable pageable) {
         pageable = BoundedPages.of(pageable);
@@ -67,11 +70,13 @@ public class ManagerAppointmentService {
         return result.map(this::toView);
     }
 
+    // Lấy chi tiết lịch hẹn thuộc tư vấn viên.
     @Transactional(readOnly = true)
     public ManagerAppointmentView detail(Long id, Long managerId) {
         return toView(requireOwn(id, managerId));
     }
 
+    // Hoàn tất lịch hẹn và lưu kết luận tư vấn.
     public void complete(Long id, Long managerId, AppointmentOutcomeForm form) {
         Appointment appointment = requireOwn(id, managerId);
         AppointmentSlot slot = requireSlot(appointment.getSlotId());
@@ -86,15 +91,21 @@ public class ManagerAppointmentService {
         appointment.setStudentVisibleSummary(visible == null || visible.isBlank() ? null : visible.trim());
         appointment.setStatus(AppointmentStatus.COMPLETED);
         appointments.saveAndFlush(appointment);
+        audit.log(AuditActions.APPOINTMENT_COMPLETED, "Appointment", appointment.getId(),
+                "CONFIRMED", "COMPLETED");
     }
 
+    // Đánh dấu lịch hẹn đã xác nhận là sinh viên vắng mặt.
     public void markNoShow(Long id, Long managerId) {
         Appointment appointment = requireOwn(id, managerId);
         requireStarted(appointment, requireSlot(appointment.getSlotId()));
         appointment.setStatus(AppointmentStatus.NO_SHOW);
         appointments.saveAndFlush(appointment);
+        audit.log(AuditActions.APPOINTMENT_NO_SHOW, "Appointment", appointment.getId(),
+                "CONFIRMED", "NO_SHOW");
     }
 
+    // Hủy lịch hẹn đã xác nhận và thông báo cho sinh viên.
     public void cancel(Long id, Long managerId, String reason) {
         if (reason == null || reason.trim().length() < 10 || reason.trim().length() > 500) {
             throw new BadRequestException("Lý do hủy phải dài 10–500 ký tự");
@@ -116,21 +127,25 @@ public class ManagerAppointmentService {
                 "CONFIRMED", "CANCELLED; reason=" + reason.trim());
     }
 
+    // Lấy lịch hẹn thuộc về tư vấn viên.
     private Appointment requireOwn(Long id, Long managerId) {
         return appointments.findById(id).filter(item -> Objects.equals(item.getManagerId(), managerId))
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy lịch hẹn"));
     }
 
+    // Lấy khung giờ của lịch hẹn.
     private AppointmentSlot requireSlot(Long id) {
         return slots.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy khung giờ"));
     }
 
+    // Kiểm tra lịch hẹn đã xác nhận và đã đến giờ bắt đầu.
     private void requireStarted(Appointment appointment, AppointmentSlot slot) {
         if (appointment.getStatus() != AppointmentStatus.CONFIRMED || slot.getStartAt().isAfter(LocalDateTime.now())) {
             throw new InvalidTransitionException("Chỉ có thể kết thúc lịch đã bắt đầu và đang xác nhận");
         }
     }
 
+    // Chuyển lịch hẹn thành dữ liệu hiển thị cho tư vấn viên.
     private ManagerAppointmentView toView(Appointment appointment) {
         AppointmentSlot slot = requireSlot(appointment.getSlotId());
         LocalDateTime now = LocalDateTime.now();

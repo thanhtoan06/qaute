@@ -17,6 +17,7 @@ import vn.edu.hcmute.qaute.service.email.EmailService;
 import vn.edu.hcmute.qaute.service.governance.AuditService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 
+// Xử lý nghiệp vụ Login trong hệ thống.
 @Service
 public class LoginService {
 
@@ -31,6 +32,7 @@ public class LoginService {
     private final EmailService emailService;
     private final AuditService auditService;
 
+    // Khởi tạo dịch vụ đăng nhập.
     public LoginService(UserRepository userRepository, PasswordEncoder passwordEncoder,
                         AuthSessionService authSessionService, SettingsService settingsService,
                         EmailService emailService, AuditService auditService) {
@@ -42,6 +44,7 @@ public class LoginService {
         this.auditService = auditService;
     }
 
+    // Xác thực thông tin đăng nhập và xử lý trạng thái tài khoản.
     @Transactional
     public LoginOutcome login(LoginForm form, String ip, String userAgent) {
         String identifier = form.getIdentifier().trim();
@@ -110,12 +113,14 @@ public class LoginService {
                 user.getRole().getCode().name(), 0);
     }
 
+    // Tạo kết quả đăng nhập theo trạng thái xác thực.
     private LoginOutcome outcome(LoginOutcome.Kind kind,
                                  vn.edu.hcmute.qaute.dto.view.SessionTokens tokens,
                                  String email, String role, long lockedMinutes) {
         return new LoginOutcome(kind, tokens, email, role, lockedMinutes);
     }
 
+    // Giới hạn độ dài thông tin thiết bị được lưu.
     private String shorten(String value) {
         if (value == null) {
             return null;

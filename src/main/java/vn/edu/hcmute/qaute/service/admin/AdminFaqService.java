@@ -60,6 +60,7 @@ import vn.edu.hcmute.qaute.service.media.MediaService;
 import vn.edu.hcmute.qaute.service.notification.NotificationService;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 
+// Xử lý nghiệp vụ AdminFaq trong hệ thống.
 @Service
 @Transactional(readOnly = true)
 public class AdminFaqService {
@@ -79,6 +80,7 @@ public class AdminFaqService {
     private final ObjectProvider<NotificationService> notifications;
     private final TicketRepository tickets;
 
+    // Khởi tạo dịch vụ quản trị FAQ.
     public AdminFaqService(AdminFaqRepository faqs, CategoryQueryService categories,
                            UserRepository users, FaqRepository faqRepository,
                            FaqTagRepository tagRepository, FaqRevisionRepository revisions,
@@ -98,6 +100,7 @@ public class AdminFaqService {
         this.tickets = tickets;
     }
 
+    // Lấy nội dung FAQ và ghi chú phiên bản để duyệt.
     public AdminFaqReviewView review(Long id) {
         Faq faq = requireFaq(id);
         String authorName = faq.getAuthorId() == null ? "—" : users.findById(faq.getAuthorId())
@@ -113,6 +116,7 @@ public class AdminFaqService {
                 notes);
     }
 
+    // Liệt kê lịch sử phiên bản FAQ cùng tên biên tập viên.
     public List<FaqRevisionView> revisionHistory(Long id) {
         requireFaq(id);
         List<FaqRevision> history = revisions.findByFaqIdOrderByVersionNoDesc(id);
@@ -123,6 +127,7 @@ public class AdminFaqService {
         return history.stream().map(revision -> toRevisionView(revision, editorNames)).toList();
     }
 
+    // Liệt kê lịch sử phiên bản FAQ cùng tên biên tập viên.
     public Page<FaqRevisionView> revisionHistory(Long id, Pageable requested) {
         requireFaq(id);
         Page<FaqRevision> page = revisions.findByFaqIdOrderByVersionNoDesc(id, BoundedPages.of(requested));
@@ -131,6 +136,7 @@ public class AdminFaqService {
         return page.map(item -> toRevisionView(item, names));
     }
 
+    // Lấy một phiên bản FAQ theo số phiên bản.
     public FaqRevisionView revision(Long id, int versionNo) {
         requireFaq(id);
         FaqRevision item = revisions.findByFaqIdAndVersionNo(id, versionNo)
@@ -140,6 +146,7 @@ public class AdminFaqService {
         return toRevisionView(item, editor == null ? Map.of() : Map.of(item.getChangedBy(), editor));
     }
 
+    // Khôi phục nội dung FAQ từ một phiên bản trước đó.
     @Transactional
     public void restoreRevision(Long id, int versionNo, Long actorId) {
         requireAdmin();
@@ -166,6 +173,7 @@ public class AdminFaqService {
                 "v" + previousVersion, "v" + faq.getVersionNo() + " từ v" + versionNo);
     }
 
+    // Chuyển phiên bản FAQ thành dữ liệu hiển thị.
     private static FaqRevisionView toRevisionView(FaqRevision item, Map<Long, String> editorNames) {
         return new FaqRevisionView(item.getVersionNo(), item.getTitle(), item.getSummary(),
                 HtmlSanitizerUtil.sanitize(item.getBodyHtml()), item.getChangedBy(),
@@ -173,11 +181,13 @@ public class AdminFaqService {
                 item.getChangeNote(), item.getCreatedAt());
     }
 
+    // Gửi FAQ để quản trị viên duyệt.
     @Transactional
     public void submitForReview(Long id, Long actorId) {
         submitForReview(id, actorId, false);
     }
 
+    // Gửi FAQ để quản trị viên duyệt.
     @Transactional
     public void submitForReview(Long id, Long actorId, boolean confirmedNoPersonalInfo) {
         Faq faq = requireFaq(id);
@@ -201,6 +211,7 @@ public class AdminFaqService {
         audit.log(AuditActions.FAQ_SUBMITTED, "Faq", id, "DRAFT", "PENDING_REVIEW");
     }
 
+    // Duyệt và xuất bản FAQ đang chờ xem xét.
     @Transactional
     public void approve(Long id, Long reviewerId, LocalDateTime publishAt) {
         requireAdmin();
@@ -209,6 +220,7 @@ public class AdminFaqService {
         publish(faq, reviewerId, publishAt, FaqStatus.PENDING_REVIEW);
     }
 
+    // Xuất bản trực tiếp FAQ ở trạng thái bản nháp.
     @Transactional
     public void publishDirect(Long id, Long adminId, LocalDateTime publishAt) {
         requireAdmin();
@@ -217,6 +229,7 @@ public class AdminFaqService {
         publish(faq, adminId, publishAt, FaqStatus.DRAFT);
     }
 
+    // Từ chối FAQ đang chờ duyệt và ghi lý do.
     @Transactional
     public void reject(Long id, Long reviewerId, String reason) {
         requireAdmin();
@@ -237,6 +250,7 @@ public class AdminFaqService {
         audit.log(AuditActions.FAQ_REJECTED, "Faq", id, "PENDING_REVIEW", "DRAFT: " + note);
     }
 
+    // Lưu trữ FAQ đã xuất bản kèm lý do.
     @Transactional
     public void archive(Long id, Long adminId, String reason) {
         requireAdmin();
@@ -248,6 +262,7 @@ public class AdminFaqService {
         audit.log(AuditActions.FAQ_ARCHIVED, "Faq", id, "PUBLISHED", "ARCHIVED: " + note);
     }
 
+    // Khôi phục FAQ đã lưu trữ về bản nháp.
     @Transactional
     public void restore(Long id, Long adminId) {
         requireAdmin();
@@ -261,6 +276,7 @@ public class AdminFaqService {
         audit.log(AuditActions.FAQ_RESTORED, "Faq", id, "ARCHIVED", "DRAFT");
     }
 
+    // Bật hoặc tắt trạng thái FAQ nổi bật.
     @Transactional
     public void toggleFeatured(Long id, Long adminId) {
         requireAdmin();
@@ -273,6 +289,7 @@ public class AdminFaqService {
                 Boolean.toString(before), Boolean.toString(faq.isFeatured()));
     }
 
+    // Xuất bản FAQ và gửi các thông báo liên quan.
     private void publish(Faq faq, Long reviewerId, LocalDateTime requestedAt, FaqStatus from) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime scheduledAt = requestedAt != null && requestedAt.isAfter(now) ? requestedAt : null;
@@ -297,6 +314,7 @@ public class AdminFaqService {
                 "PUBLISHED at " + (scheduledAt == null ? now : scheduledAt));
     }
 
+    // Gửi thông báo cho tác giả FAQ nếu có.
     private void notifyAuthor(Faq faq, NotificationType type, Map<String, String> details) {
         NotificationService notification = notifications.getIfAvailable();
         if (notification != null && faq.getAuthorId() != null) {
@@ -304,23 +322,27 @@ public class AdminFaqService {
         }
     }
 
+    // Lấy FAQ hoặc báo không tìm thấy.
     private Faq requireFaq(Long id) {
         return faqRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy FAQ"));
     }
 
+    // Kiểm tra FAQ đang ở trạng thái mong đợi.
     private static void requireStatus(Faq faq, FaqStatus expected) {
         if (faq.getStatus() != expected) {
             throw new InvalidTransitionException("FAQ phải ở trạng thái " + expected.name());
         }
     }
 
+    // Đảm bảo người gọi có quyền quản trị.
     private static void requireAdmin() {
         if (!SecurityUtils.hasRole(RoleCode.ADMIN)) {
             throw new InvalidTransitionException("Chỉ quản trị viên được thực hiện thao tác này");
         }
     }
 
+    // Kiểm tra và chuẩn hóa lý do thao tác.
     private static String requireReason(String reason) {
         String trimmed = reason == null ? "" : reason.trim();
         if (trimmed.length() < 10 || trimmed.length() > 500) {
@@ -329,6 +351,7 @@ public class AdminFaqService {
         return trimmed;
     }
 
+    // Lưu chuyển trạng thái và đổi lỗi đồng thời thành xung đột.
     private void flushTransition(Faq faq) {
         try {
             faqRepository.saveAndFlush(faq);
@@ -337,6 +360,7 @@ public class AdminFaqService {
         }
     }
 
+    // Tạo biểu mẫu chỉnh sửa từ FAQ.
     public FaqForm getForm(Long id) {
         Faq faq = faqRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy FAQ"));
@@ -356,6 +380,7 @@ public class AdminFaqService {
         return form;
     }
 
+    // Kiểm tra và lưu nội dung FAQ cùng phiên bản mới.
     @Transactional
     public Long save(FaqForm form, Long actorId) {
         validate(form);
@@ -417,6 +442,7 @@ public class AdminFaqService {
         return faq.getId();
     }
 
+    // Tạo slug duy nhất cho tiêu đề FAQ.
     private String uniqueSlug(String title, Long currentId) {
         String base = SlugUtil.slugify(title);
         if (base.length() > 220) base = base.substring(0, 220).replaceAll("-+$", "");
@@ -428,11 +454,13 @@ public class AdminFaqService {
         return candidate;
     }
 
+    // Kiểm tra slug đã được FAQ khác sử dụng chưa.
     private boolean slugExists(String slug, Long currentId) {
         return currentId == null ? faqRepository.existsBySlug(slug)
                 : faqRepository.existsBySlugAndIdNot(slug, currentId);
     }
 
+    // Chuẩn hóa và tìm hoặc tạo các thẻ FAQ.
     private Set<FaqTag> resolveTags(String input) {
         Set<FaqTag> result = new LinkedHashSet<>();
         if (input == null || input.isBlank()) return result;
@@ -457,6 +485,7 @@ public class AdminFaqService {
         return result;
     }
 
+    // Kiểm tra các trường bắt buộc của biểu mẫu FAQ.
     private static void validate(FaqForm form) {
         if (form == null || form.getTitle() == null || form.getTitle().trim().length() < 10
                 || form.getTitle().trim().length() > 200 || form.getCategoryId() == null
@@ -467,10 +496,12 @@ public class AdminFaqService {
         }
     }
 
+    // Chuyển chuỗi rỗng thành null sau khi cắt khoảng trắng.
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
 
+    // Tìm kiếm FAQ theo bộ lọc và phân trang.
     public Page<AdminFaqListItem> search(AdminFaqFilter filter, Pageable pageable) {
         AdminFaqFilter safeFilter = filter == null ? new AdminFaqFilter() : filter;
         List<Long> categoryIds = safeFilter.getCategoryId() == null ? null
@@ -517,6 +548,7 @@ public class AdminFaqService {
                 faq.getUpdatedAt(), faq.getPublishAt(), faq.getSourceTicketId()));
     }
 
+    // Đếm số FAQ theo từng trạng thái.
     public Map<FaqStatus, Long> countByStatus() {
         Map<FaqStatus, Long> counts = new EnumMap<>(FaqStatus.class);
         for (FaqStatus status : FaqStatus.values()) {
@@ -528,6 +560,7 @@ public class AdminFaqService {
         return counts;
     }
 
+    // Liệt kê tác giả FAQ theo tên.
     public Map<Long, String> authors() {
         return namesFor(faqs.findDistinctAuthorIds()).entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(String.CASE_INSENSITIVE_ORDER))
@@ -535,6 +568,7 @@ public class AdminFaqService {
                         (first, second) -> first, LinkedHashMap::new));
     }
 
+    // Lấy tên hiển thị theo danh sách mã người dùng.
     private Map<Long, String> namesFor(List<Long> ids) {
         if (ids.isEmpty()) return Map.of();
         Map<Long, String> names = new HashMap<>();

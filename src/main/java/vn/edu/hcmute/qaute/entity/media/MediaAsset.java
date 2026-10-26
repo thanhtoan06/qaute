@@ -15,6 +15,7 @@ import vn.edu.hcmute.qaute.common.constant.MediaStatus;
 import vn.edu.hcmute.qaute.common.constant.MediaUsageType;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu MediaAsset được lưu trữ trong hệ thống.
 @Entity
 @Table(name = "media_assets")
 @Getter

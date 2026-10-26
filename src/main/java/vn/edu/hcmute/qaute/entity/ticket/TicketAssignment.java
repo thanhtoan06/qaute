@@ -14,6 +14,7 @@ import lombok.Setter;
 import vn.edu.hcmute.qaute.common.constant.AssignmentType;
 import vn.edu.hcmute.qaute.common.entity.AuditableEntity;
 
+// Biểu diễn dữ liệu TicketAssignment được lưu trữ trong hệ thống.
 @Entity @Table(name = "ticket_assignments")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class TicketAssignment extends AuditableEntity {

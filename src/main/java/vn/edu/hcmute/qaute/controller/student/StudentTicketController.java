@@ -1,7 +1,6 @@
 package vn.edu.hcmute.qaute.controller.student;
 
 import java.util.Map;
-import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
@@ -17,12 +16,14 @@ import vn.edu.hcmute.qaute.security.SecurityUtils;
 import vn.edu.hcmute.qaute.service.organization.CategoryQueryService;
 import vn.edu.hcmute.qaute.service.student.StudentTicketQueryService;
 
+// Tiếp nhận và điều phối các yêu cầu giao diện cho StudentTicket.
 @Controller
 public class StudentTicketController {
 
     private final StudentTicketQueryService queryService;
     private final CategoryQueryService categoryQueryService;
 
+    // Khởi tạo bộ điều khiển danh sách yêu cầu và danh mục.
     public StudentTicketController(StudentTicketQueryService queryService,
                                    CategoryQueryService categoryQueryService) {
         this.queryService = queryService;
@@ -30,6 +31,7 @@ public class StudentTicketController {
     }
 
     @GetMapping("/student/tickets")
+    // Hiển thị yêu cầu của sinh viên theo bộ lọc và trang.
     public String list(@ModelAttribute TicketFilter filter,
                        @RequestParam(defaultValue = "0") int page,
                        @RequestParam(defaultValue = "10") int size,

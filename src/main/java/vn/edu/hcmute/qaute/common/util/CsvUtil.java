@@ -4,13 +4,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+// Cung cấp tiện ích dùng chung cho CsvUtil.
 public final class CsvUtil {
+
+    /** Ngăn khởi tạo lớp tiện ích. */
     private CsvUtil() {
     }
 
     public record Row(int line, List<String> cells) {
     }
 
+    /** Phân tích nội dung CSV thành các dòng và ô dữ liệu. */
     public static List<Row> parse(String csv) {
         if (csv == null) {
             throw new IllegalArgumentException("Nội dung CSV không được để trống");
@@ -87,6 +91,7 @@ public final class CsvUtil {
         return rows;
     }
 
+    /** Thêm dấu nháy đơn để tránh ô CSV bị diễn giải thành công thức. */
     public static String safeCell(String value) {
         if (value == null || value.isEmpty()) {
             return value == null ? "" : value;
@@ -98,6 +103,7 @@ public final class CsvUtil {
         return value;
     }
 
+    /** Mã hóa các giá trị thành một dòng CSV. */
     public static String row(String... values) {
         List<String> encoded = new ArrayList<>(values.length);
         for (String value : values) {
@@ -107,6 +113,7 @@ public final class CsvUtil {
         return String.join(",", encoded) + "\r\n";
     }
 
+    /** Thêm BOM UTF-8 vào nội dung CSV. */
     public static byte[] withBom(String csv) {
         return ("\uFEFF" + (csv == null ? "" : csv)).getBytes(StandardCharsets.UTF_8);
     }

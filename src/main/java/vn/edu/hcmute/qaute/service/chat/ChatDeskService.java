@@ -44,6 +44,7 @@ import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 import vn.edu.hcmute.qaute.service.system.SettingsService;
 import vn.edu.hcmute.qaute.websocket.WsSessionRegistry;
 
+// Xử lý nghiệp vụ ChatDesk trong hệ thống.
 @Service
 @Transactional
 public class ChatDeskService {
@@ -63,6 +64,7 @@ public class ChatDeskService {
     private final TicketRepository tickets;
     private final SimpMessagingTemplate socket;
 
+    // Khởi tạo bàn chat cùng các dịch vụ và kho dữ liệu cần thiết.
     public ChatDeskService(ChatSessionRepository sessions, ManagerScopeService scopes,
             ManagerProfileRepository profiles, ChatAvailabilityService availability,
             SettingsService settings, UserLookupService users, CategoryQueryService categories,
@@ -87,6 +89,7 @@ public class ChatDeskService {
         this.socket = socket;
     }
 
+    // Tiếp nhận một phiên chat đang chờ nếu tư vấn viên còn năng lực phục vụ.
     public void accept(Long sessionId, Long managerId) {
         ChatSession session = sessions.findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
@@ -110,6 +113,8 @@ public class ChatDeskService {
             throw new ConflictException("Phiên đã được tư vấn viên khác nhận");
         }
         session = sessions.findById(sessionId).orElseThrow();
+        audit.log(AuditActions.CHAT_AGENT_ACCEPTED, "ChatSession", sessionId,
+                "status=WAITING", "status=ACTIVE; managerId=" + managerId);
         UserSummary manager = users.getSummary(managerId);
         String managerName = manager == null ? "Tư vấn viên" : manager.fullName();
         messaging.systemMessage(session, "Tư vấn viên " + managerName + " đã tham gia.");
@@ -121,11 +126,14 @@ public class ChatDeskService {
                 "/queue/chat-queue", Map.of("type", "CHAT_ACCEPTED", "sessionId", acceptedId));
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override public void afterCommit() { acknowledged.run(); }
+                @Override
+                // Gửi xác nhận tiếp nhận sau khi giao dịch đã hoàn tất.
+                public void afterCommit() { acknowledged.run(); }
             });
         } else acknowledged.run();
     }
 
+    // Chuyển phiên chat đang hoạt động sang một tư vấn viên đủ điều kiện khác.
     public void transfer(Long sessionId, Long managerId, Long toManagerId) {
         ChatSession session = sessions.findLockedById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phiên chat"));
@@ -157,6 +165,7 @@ public class ChatDeskService {
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
+                // Đóng kết nối đã cấp quyền cho tư vấn viên cũ sau khi lưu chuyển giao.
                 public void afterCommit() {
                     webSocketSessions.closeAllOf(managerId);
                 }
@@ -167,11 +176,13 @@ public class ChatDeskService {
     }
 
     @Transactional(readOnly = true)
+    // Lấy danh sách phiên đang chờ thuộc phạm vi quản lý của tư vấn viên.
     public List<ChatQueueItem> queueSnapshot(Long managerId) {
         return queueSnapshot(managerId, 0);
     }
 
     @Transactional(readOnly = true)
+    // Đếm số phiên đang chờ trong phạm vi quản lý của tư vấn viên.
     public int queueCount(Long managerId) {
         List<Long> ids = scopes.getScopeCategoryIds(managerId);
         return ids.isEmpty() ? 0 : (int) Math.min(Integer.MAX_VALUE,
@@ -179,6 +190,7 @@ public class ChatDeskService {
     }
 
     @Transactional(readOnly = true)
+    // Lấy một trang phiên đang chờ cùng thông tin vị trí và sinh viên.
     public List<ChatQueueItem> queueSnapshot(Long managerId, int page) {
         List<Long> categoryIds = scopes.getScopeCategoryIds(managerId);
         if (categoryIds.isEmpty()) {
@@ -201,6 +213,7 @@ public class ChatDeskService {
     }
 
     @Transactional(readOnly = true)
+    // Liệt kê các phiên chat đang hoạt động của tư vấn viên.
     public List<ManagerChatSessionView> mine(Long managerId) {
         UserSummary manager = users.getSummary(managerId);
         return sessions.findByManagerIdAndStatus(managerId, ChatSessionStatus.ACTIVE).stream()
@@ -216,6 +229,7 @@ public class ChatDeskService {
     }
 
     @Transactional(readOnly = true)
+    // Lấy thông tin sinh viên và các yêu cầu gần đây liên quan đến phiên chat.
     public ChatStudentContextView studentContext(Long sessionId, Long managerId) {
         ChatSession session = requireMine(sessionId, managerId);
         List<Long> scopeCategoryIds = scopes.getScopeCategoryIds(managerId);
@@ -229,6 +243,7 @@ public class ChatDeskService {
     }
 
     @Transactional(readOnly = true)
+    // Liệt kê tư vấn viên đủ điều kiện nhận chuyển giao phiên chat.
     public List<ManagerOption> transferTargets(Long sessionId, Long managerId) {
         ChatSession session = requireMine(sessionId, managerId);
         List<Long> eligible = availability.eligibleManagerIds(session.getCategoryId());
@@ -237,6 +252,7 @@ public class ChatDeskService {
                 .toList();
     }
 
+    // Tìm phiên chat đang hoạt động do tư vấn viên chỉ định phụ trách.
     private ChatSession requireMine(Long sessionId, Long managerId) {
         ChatSession session = sessions.findById(sessionId).orElseThrow(NotFoundException::new);
         if (session.getStatus() != ChatSessionStatus.ACTIVE || !Objects.equals(session.getManagerId(), managerId)) {
@@ -245,11 +261,13 @@ public class ChatDeskService {
         return session;
     }
 
+    // Lấy tên hiển thị của sinh viên hoặc giá trị mặc định.
     private String studentName(Long studentId) {
         UserSummary student = users.getSummary(studentId);
         return student == null ? "Sinh viên" : student.fullName();
     }
 
+    // Kiểm tra tư vấn viên có đang hoạt động và phụ trách chuyên mục hay không.
     private boolean isActiveAdvisor(Long managerId, Long categoryId) {
         return managerId != null && scopes.isInScope(managerId, categoryId)
                 && scopes.findAdvisors(categoryId).stream().map(ManagerOption::id)

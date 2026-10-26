@@ -8,8 +8,10 @@ import java.io.IOException;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+// Hỗ trợ xác thực và kiểm soát truy cập qua CsrfCookieFilter.
 public class CsrfCookieFilter extends OncePerRequestFilter {
 
+    // Tải token CSRF để cookie CSRF được phát sinh khi cần.
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
