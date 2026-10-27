@@ -67,7 +67,7 @@
                         <i class="bi bi-journal-check"></i><span>Thủ tục bảo lưu</span>
                     </button>
                     <button type="button" class="qaute-chat-pill" onclick="sendWidgetQuickMessage('Chuẩn đầu ra tốt nghiệp?')">
-                        <i class="bi bi-translate"></i><span>Chuẩn đầu ra ngoại ngữ</span>
+                        <i class="bi bi-translate"></i><span>Chuẩn đầu ra tốt nghiệp</span>
                     </button>
                 </div>
             </div>
