@@ -1,306 +1,1485 @@
-.qaute-home-redesign { --home-blue: #2165bd; --home-blue-dark: #123b72; --home-ink: #183655; --home-muted: #71849b; --home-border: #e0e9f4; --home-surface: #ffffff; --home-radius: 21px; --home-shadow: 0 8px 28px rgba(19, 49, 86, .06); --home-shadow-hover: 0 18px 42px rgba(19, 49, 86, .12); color: var(--home-ink); overflow: clip; }
-.qaute-home-redesign *, .qaute-home-redesign *::before, .qaute-home-redesign *::after { box-sizing: border-box; }
-.qaute-home-redesign a { text-underline-offset: 3px; }
-.qaute-home-redesign ::selection { color: #fff; background: #2165bd; }
-.qaute-home-redesign .container-xl { position: relative; z-index: 1; }
-.qaute-home-redesign .hcmute-hero { position: relative; isolation: isolate; overflow: hidden; color: #fff; background: radial-gradient(ellipse at 85% 8%, rgba(93, 165, 255, .28), transparent 35%), radial-gradient(ellipse at 5% 100%, rgba(66, 121, 217, .2), transparent 40%), linear-gradient(125deg, #071d3b 0%, #0b3267 49%, #1559a3 100%); }
-.qaute-home-redesign .hcmute-hero::before { content: ""; position: absolute; z-index: -1; top: -240px; right: -100px; width: min(60vw, 680px); aspect-ratio: 1; border: 1px solid rgba(255, 255, 255, .12); border-radius: 50%; box-shadow: 0 0 0 32px rgba(255,255,255,.025), 0 0 0 72px rgba(255,255,255,.018), 0 0 0 124px rgba(255,255,255,.012); pointer-events: none; animation: home-orbit 25s ease-in-out infinite alternate; }
-.qaute-home-redesign .hcmute-hero::after { content: ""; position: absolute; z-index: -1; inset: auto 0 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent); }
-@keyframes home-orbit {
-  from { transform: translate3d(0, 0, 0) rotate(0deg); }
-  to { transform: translate3d(-16px, 18px, 0) rotate(5deg); }
+.qaute-home-redesign {
+    --home-blue: #1c5ab0;
+    --home-blue-dark: #0f356d;
+    --home-ink: #1e3a5a;
+    --home-muted: #6a7c92;
+    --home-border: #e6eff8;
+    --home-surface: #ffffff;
+    --home-radius: 28px;
+    --home-shadow: 0 15px 40px rgba(15, 53, 109, .06);
+    --home-shadow-hover: 0 25px 60px rgba(15, 53, 109, .12);
+    --transition-smooth: all .45s cubic-bezier(.2, .75, .3, 1);
+    color: var(--home-ink);
+    overflow-x: clip;
 }
-.qaute-home-redesign .hcmute-hero .row.align-items-center { padding-top: clamp(2.7rem, 6vw, 5rem) !important; padding-bottom: clamp(2.7rem, 6vw, 5rem) !important; }
-.qaute-home-redesign .hcmute-hero .col-lg-7 { animation: qaute-rise-in .65s cubic-bezier(.2,.75,.3,1) both; }
-.qaute-home-redesign .hcmute-hero-pill { display: inline-flex; align-items: center; gap: .55rem; padding: .58rem .9rem; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; background: rgba(255,255,255,.09); color: #e2edff; font-size: .77rem; font-weight: 650; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
-.qaute-home-redesign .hcmute-hero-pill .bi { color: #9bd5ff; font-size: .95rem; }
-.qaute-home-redesign .hcmute-hero-title { max-width: 780px; margin: 0 0 1.15rem; color: #fff; font-size: clamp(2.15rem, 4.6vw, 4.15rem); font-weight: 850; line-height: 1.12; letter-spacing: -.055em; text-wrap: balance; }
-.qaute-home-redesign .hcmute-hero-desc { max-width: 640px; margin-bottom: 1.65rem; color: rgba(230, 240, 255, .82); font-size: clamp(.94rem, 1.3vw, 1.08rem); line-height: 1.85; }
-.qaute-home-redesign .hcmute-hero-search-box { display: flex; align-items: center; width: 100%; max-width: 100%; min-height: 62px; padding: 6px; border: 1px solid rgba(255,255,255,.3); border-radius: 16px; background: #fff; box-shadow: 0 14px 35px rgba(0, 14, 37, .22), inset 0 1px 0 rgba(255,255,255,.9); transition: transform .25s ease, box-shadow .25s ease; }
-.qaute-home-redesign .hcmute-hero-search-box > .qa-suggest-wrapper { display: flex; flex: 1 1 0; align-items: center; width: 100%; min-width: 0; }
-.qaute-home-redesign .hcmute-hero-search-box:focus-within { transform: translateY(-2px); box-shadow: 0 19px 42px rgba(0, 14, 37, .27), 0 0 0 4px rgba(150, 202, 255, .17); }
-.qaute-home-redesign .hcmute-hero-search-box > i { flex-shrink: 0; color: #6f87a4 !important; }
-.qaute-home-redesign .hcmute-hero-search-input { flex: 1 1 auto; width: 100%; min-width: 0; height: 47px; padding: .7rem .4rem; border: 0; outline: 0; background: transparent; color: #233e5e; font-size: .88rem; box-shadow: none; pointer-events: auto; }
-.qaute-home-redesign .hcmute-hero-search-input:focus-visible { outline: none; }
-.qaute-home-redesign .hcmute-hero-search-input::placeholder { color: #93a2b5; }
-.qaute-home-redesign .hcmute-hero-search-btn { position: relative; flex: 0 0 auto; min-height: 47px; padding: .7rem 1.25rem; overflow: hidden; border: 1px solid #1b5eb2; border-radius: 12px; background: linear-gradient(120deg, #347fe0, #1e5db1); color: #fff; font-size: .83rem; font-weight: 750; box-shadow: 0 5px 13px rgba(29, 89, 166, .22); transition: transform .2s ease, box-shadow .2s ease, background .2s ease; }
-.qaute-home-redesign .hcmute-hero-search-btn:hover { transform: translateY(-1px); background: linear-gradient(120deg, #418be9, #174d96); box-shadow: 0 8px 18px rgba(29, 89, 166, .3); }
-.qaute-home-redesign .hcmute-hero-search-btn:active { transform: scale(.98); }
-.qaute-home-redesign .bg-white-10, .qaute-home-redesign .bg-white-20 { background: rgba(255,255,255,.1) !important; }
-.qaute-home-redesign .hcmute-hero .badge { border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.09) !important; color: #edf5ff !important; font-size: .7rem; font-weight: 650; padding: .42rem .68rem !important; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
-.qaute-home-redesign .hcmute-hero .badge:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.4); background: rgba(255,255,255,.18) !important; }
-.qaute-home-redesign .hcmute-hero .border-top, .qaute-home-redesign .hcmute-hero .border-white-10 { border-color: rgba(255,255,255,.16) !important; }
-.qaute-home-redesign .hcmute-hero-stat-num { color: #fff; font-size: clamp(1.45rem, 2.4vw, 2rem); font-weight: 850; letter-spacing: -.045em; line-height: 1.2; font-variant-numeric: tabular-nums; }
-.qaute-home-redesign .hcmute-hero-stat-label { margin-top: .35rem; color: rgba(222, 235, 252, .73); font-size: .72rem; line-height: 1.5; }
-.qaute-home-redesign .hcmute-hero-image-wrap { position: relative; min-height: 350px; overflow: hidden; border: 1px solid rgba(255,255,255,.3); border-radius: 28px; background: linear-gradient(145deg, rgba(255,255,255,.15), rgba(255,255,255,.025)); box-shadow: 0 26px 65px rgba(0, 15, 39, .27), 0 0 0 9px rgba(255,255,255,.035); transform: rotate(1.4deg); transition: transform .4s cubic-bezier(.2,.75,.3,1), box-shadow .4s ease; animation: qaute-rise-in .8s .12s cubic-bezier(.2,.75,.3,1) both; }
-.qaute-home-redesign .hcmute-hero-image-wrap::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4,26,56,.02) 35%, rgba(4,26,56,.23)); pointer-events: none; }
-.qaute-home-redesign .hcmute-hero-image-wrap img { display: block; min-height: 350px; object-position: center; transition: transform .65s cubic-bezier(.2,.75,.3,1), filter .4s ease; }
-.qaute-home-redesign .hcmute-hero-image-wrap:hover { transform: rotate(0) translateY(-4px); box-shadow: 0 32px 75px rgba(0, 15, 39, .33), 0 0 0 9px rgba(255,255,255,.045); }
-.qaute-home-redesign .hcmute-hero-image-wrap:hover img { transform: scale(1.045); filter: saturate(1.08); }
-.qaute-home-redesign .hcmute-quick-services { position: relative; z-index: 2; padding: 0 0 1.6rem; background: linear-gradient(180deg, #f0f5fc 0%, #f7f9fd 100%); }
-.qaute-home-redesign .hcmute-quick-services .container-xl { transform: translateY(-17px); }
-.qaute-home-redesign .hcmute-service-card { position: relative; display: block; height: 100%; min-height: 190px; padding: 1.25rem 1.15rem; overflow: hidden; border: 1px solid #e2eaf5; border-radius: 17px; background: rgba(255,255,255,.97); color: inherit; text-decoration: none; box-shadow: 0 9px 24px rgba(20, 49, 83, .06); transition: transform .25s cubic-bezier(.2,.75,.3,1), box-shadow .25s ease, border-color .25s ease; }
-.qaute-home-redesign .hcmute-service-card::after { content: ""; position: absolute; right: -43px; bottom: -58px; width: 125px; height: 125px; border-radius: 50%; background: rgba(39, 111, 201, .04); transition: transform .3s ease, background .3s ease; }
-.qaute-home-redesign .hcmute-service-card:hover { transform: translateY(-5px); border-color: #bfd4ed; box-shadow: var(--home-shadow-hover); color: inherit; }
-.qaute-home-redesign .hcmute-service-card:hover::after { transform: scale(1.25); background: rgba(39, 111, 201, .07); }
-.qaute-home-redesign .hcmute-service-icon { display: flex; align-items: center; justify-content: center; width: 47px; height: 47px; margin-bottom: 1rem; border: 1px solid #e0ecfa; border-radius: 14px; background: linear-gradient(145deg, #f5f9ff, #e8f2ff); color: #2c72c4; font-size: 1.35rem; box-shadow: inset 0 1px 0 #fff; transition: transform .25s ease, box-shadow .25s ease; }
-.qaute-home-redesign .hcmute-service-card:hover .hcmute-service-icon { transform: translateY(-2px) rotate(-4deg); box-shadow: 0 7px 15px rgba(39, 111, 201, .12); }
-.qaute-home-redesign .hcmute-service-title { margin: 0 0 .45rem; color: #233f60; font-size: .9rem; font-weight: 800; }
-.qaute-home-redesign .hcmute-service-desc { position: relative; z-index: 1; margin: 0; color: #7c8ea5; font-size: .74rem; line-height: 1.7; }
-.qaute-home-redesign .hcmute-section { position: relative; padding: clamp(3.2rem, 6vw, 5.3rem) 0; background: rgba(255,255,255,.58); }
-.qaute-home-redesign .hcmute-section-muted { background: radial-gradient(ellipse at 100% 0%, rgba(68, 133, 222, .06), transparent 34%), linear-gradient(145deg, #f4f7fc, #f8faff 54%, #f1f6fc); }
-.qaute-home-redesign .hcmute-eyebrow { display: inline-flex; align-items: center; gap: .5rem; margin-bottom: .9rem; padding: .42rem .76rem; border: 1px solid #dce9fa; border-radius: 999px; background: linear-gradient(135deg, #fff, #edf5ff); color: #2867b0; font-size: .68rem; font-weight: 800; letter-spacing: .035em; }
-.qaute-home-redesign .hcmute-eyebrow .bi { font-size: .86rem; }
-.qaute-home-redesign .hcmute-title-main { margin: 0 0 .8rem; color: #1a385a; font-size: clamp(1.7rem, 3.5vw, 2.65rem); font-weight: 850; line-height: 1.2; letter-spacing: -.045em; text-wrap: balance; }
-.qaute-home-redesign .hcmute-desc-main { max-width: 650px; color: #7588a0; font-size: .91rem; line-height: 1.9; }
-.qaute-home-redesign .hcmute-card-modern { border: 1px solid rgba(222, 232, 244, .98); border-radius: var(--home-radius); background: rgba(255,255,255,.95); box-shadow: var(--home-shadow); transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease; }
-.qaute-home-redesign .hcmute-card-modern:hover { border-color: #d1e0f2; box-shadow: var(--home-shadow-hover); }
-.qaute-home-redesign .hcmute-card-modern .text-dark { color: #253f5e !important; }
-.qaute-home-redesign .hcmute-card-modern .text-muted, .qaute-home-redesign .hcmute-card-modern .text-secondary { color: #7c8ea5 !important; }
-.qaute-home-redesign .hcmute-card-modern .text-primary { color: #246dc2 !important; }
-.qaute-home-redesign .hcmute-card-modern .btn { font-weight: 700; transition: transform .2s ease, box-shadow .2s ease, background .2s ease; }
-.qaute-home-redesign .hcmute-card-modern .btn:hover { transform: translateY(-1px); }
-.qaute-home-redesign .hcmute-card-modern .btn-outline-primary { border-color: #c9d9ee; color: #2867b0; background: #fff; }
-.qaute-home-redesign .hcmute-card-modern .btn-outline-primary:hover { border-color: #286fc7; background: #286fc7; color: #fff; }
-.qaute-home-redesign .hcmute-card-modern .hover-shadow, .qaute-home-redesign .hcmute-card-modern .hover-bg-light { transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
-.qaute-home-redesign .hcmute-card-modern .hover-shadow:hover, .qaute-home-redesign .hcmute-card-modern .hover-bg-light:hover { border-color: #d2e2f5 !important; background: #f7faff !important; box-shadow: 0 5px 15px rgba(24, 62, 104, .045); transform: translateX(2px); }
-.qaute-home-redesign .hcmute-card-modern .badge { font-weight: 700; letter-spacing: .005em; }
-.qaute-home-redesign #popular-faq-list > a { border-radius: 13px !important; }
-.qaute-home-redesign #popular-faq-list > a .badge:first-child { border: 1px solid #d8e8fc; background: linear-gradient(145deg, #eff6ff, #e3efff) !important; color: #2365b4 !important; }
-.qaute-home-redesign #popular-faq-list > a .bi-chevron-right { transition: color .2s ease, transform .2s ease; }
-.qaute-home-redesign #popular-faq-list > a:hover .bi-chevron-right { color: #286fc7 !important; transform: translateX(3px); }
-.qaute-home-redesign .hcmute-card-modern .rounded-3.border.bg-light { border-color: #e4ebf4 !important; background: linear-gradient(135deg, #fbfcff, #f4f8fd) !important; transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
-.qaute-home-redesign .hcmute-card-modern a.rounded-3.border.bg-light:hover { border-color: #bed3ed !important; transform: translateY(-2px); box-shadow: 0 7px 16px rgba(23, 58, 99, .07); }
-.qaute-home-redesign .hcmute-logo-icon { display: inline-flex; align-items: center; justify-content: center; border: 1px solid #dce9fa; border-radius: 15px; background: linear-gradient(145deg, #f2f8ff, #e2efff); color: #286fc7; box-shadow: inset 0 1px 0 #fff; }
-.qaute-home-redesign .rounded-4.p-4.text-white.shadow-sm { position: relative; isolation: isolate; overflow: hidden; border: 1px solid rgba(255,255,255,.14); border-radius: 21px !important; background: radial-gradient(ellipse at 100% 0%, rgba(107, 174, 255, .27), transparent 46%), linear-gradient(135deg, #081e3b 0%, #103e7f 100%) !important; box-shadow: 0 13px 31px rgba(8, 34, 72, .16) !important; }
-.qaute-home-redesign .rounded-4.p-4.text-white.shadow-sm::after { content: ""; position: absolute; z-index: -1; top: -65px; right: -55px; width: 175px; height: 175px; border: 1px solid rgba(255,255,255,.11); border-radius: 50%; box-shadow: 0 0 0 20px rgba(255,255,255,.025), 0 0 0 46px rgba(255,255,255,.016); }
-.qaute-home-redesign .rounded-4.p-4.text-white.shadow-sm .btn-light { border: 1px solid rgba(255,255,255,.6); box-shadow: 0 4px 12px rgba(0,0,0,.08); transition: transform .2s ease, box-shadow .2s ease; }
-.qaute-home-redesign .rounded-4.p-4.text-white.shadow-sm .btn-light:hover { transform: translateY(-2px); box-shadow: 0 8px 19px rgba(0,0,0,.15); }
-.qaute-home-redesign .hcmute-section .row.g-3.flex-grow-1 .hcmute-card-modern { min-height: 145px; }
-.qaute-home-redesign .hcmute-section .row.g-3.flex-grow-1 .bi { filter: drop-shadow(0 3px 6px rgba(33, 101, 189, .08)); }
-.qaute-home-redesign .hcmute-intro-card { position: relative; isolation: isolate; overflow: hidden; border: 1px solid var(--intro-border); background: radial-gradient(ellipse at 100% 0%, var(--intro-glow), transparent 55%), linear-gradient(145deg, var(--intro-bg), #fff 78%) !important; box-shadow: 0 8px 22px var(--intro-shadow); transition: transform .3s cubic-bezier(.2,.75,.3,1), box-shadow .3s ease, border-color .3s ease; }
-.qaute-home-redesign .row.g-3.flex-grow-1 > div:nth-child(1) .hcmute-intro-card { --intro-bg: #f0f8ff; --intro-glow: rgba(66, 153, 225, .2); --intro-border: #d7eaff; --intro-shadow: rgba(34, 108, 178, .08); --intro-accent: #2374c6; --intro-icon-bg: linear-gradient(145deg, #dff1ff, #c7e4ff); --intro-icon-border: #c5e2fb; --intro-icon-shadow: rgba(35, 116, 198, .22); }
-.qaute-home-redesign .row.g-3.flex-grow-1 > div:nth-child(2) .hcmute-intro-card { --intro-bg: #f6f3ff; --intro-glow: rgba(139, 111, 231, .2); --intro-border: #e5ddff; --intro-shadow: rgba(104, 77, 181, .08); --intro-accent: #7353c6; --intro-icon-bg: linear-gradient(145deg, #eee8ff, #ddd3ff); --intro-icon-border: #ded3ff; --intro-icon-shadow: rgba(115, 83, 198, .22); }
-.qaute-home-redesign .hcmute-intro-card::before { content: ""; position: absolute; z-index: -1; inset: 0 0 auto; height: 4px; background: linear-gradient(90deg, var(--intro-accent), color-mix(in srgb, var(--intro-accent), #fff 48%)); transform: scaleX(.28); transform-origin: left; transition: transform .35s cubic-bezier(.2,.75,.3,1); }
-.qaute-home-redesign .hcmute-intro-card::after { content: ""; position: absolute; z-index: -1; right: -34px; bottom: -42px; width: 112px; height: 112px; border: 1px solid color-mix(in srgb, var(--intro-accent), transparent 82%); border-radius: 50%; box-shadow: 0 0 0 16px color-mix(in srgb, var(--intro-accent), transparent 95%), 0 0 0 34px color-mix(in srgb, var(--intro-accent), transparent 97%); pointer-events: none; transition: transform .45s ease; }
-.qaute-home-redesign .hcmute-intro-card:hover { transform: translateY(-6px); border-color: color-mix(in srgb, var(--intro-accent), #fff 55%); box-shadow: 0 17px 34px var(--intro-shadow), 0 0 0 3px color-mix(in srgb, var(--intro-accent), transparent 93%); }
-.qaute-home-redesign .hcmute-intro-card:hover::before { transform: scaleX(1); }
-.qaute-home-redesign .hcmute-intro-card:hover::after { transform: scale(1.18) translate(-5px, -5px); }
-.qaute-home-redesign .hcmute-intro-icon { display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 46px; margin-bottom: .85rem; border: 1px solid var(--intro-icon-border); border-radius: 15px; background: var(--intro-icon-bg); color: var(--intro-accent); font-size: 1.25rem; box-shadow: 0 6px 14px var(--intro-icon-shadow), inset 0 1px 0 rgba(255,255,255,.8); animation: hcmute-intro-float 3.6s ease-in-out infinite alternate; transition: transform .3s cubic-bezier(.2,.75,.3,1), box-shadow .3s ease; }
-.qaute-home-redesign .row.g-3.flex-grow-1 > div:nth-child(2) .hcmute-intro-icon { animation-delay: -.9s; }
-@keyframes hcmute-intro-float { from { transform: translateY(0); } to { transform: translateY(-4px); } }
-.qaute-home-redesign .hcmute-intro-card:hover .hcmute-intro-icon { transform: rotate(-7deg) scale(1.12); box-shadow: 0 9px 19px var(--intro-icon-shadow), inset 0 1px 0 rgba(255,255,255,.9); animation-play-state: paused; }
-.qaute-home-redesign .hcmute-intro-title { margin-bottom: .45rem; color: var(--intro-accent); font-size: .94rem; font-weight: 850; line-height: 1.35; }
-.qaute-home-redesign .hcmute-intro-desc { margin: 0; color: #627990; font-size: .74rem; line-height: 1.7; }
-.qaute-home-redesign #faq .max-w-xl { max-width: 720px; }
-.qaute-home-redesign #faq .accordion { --bs-accordion-btn-focus-box-shadow: 0 0 0 3px rgba(35, 105, 199, .08); }
-.qaute-home-redesign #faq .accordion-item { border-color: #edf1f7 !important; background: transparent; }
-.qaute-home-redesign #faq .accordion-item:last-child { border-bottom: 0 !important; }
-.qaute-home-redesign #faq .accordion-button { gap: .75rem; padding: 1rem .85rem; border-radius: 12px; background: transparent; color: #2c4564 !important; box-shadow: none; font-size: .9rem !important; line-height: 1.5; transition: background .2s ease, color .2s ease; }
-.qaute-home-redesign #faq .accordion-button:hover { background: #f6f9fe; }
-.qaute-home-redesign #faq .accordion-button:not(.collapsed) { background: linear-gradient(110deg, #f1f7ff, #f9fbff); color: #205eb0 !important; }
-.qaute-home-redesign #faq .accordion-button::after { flex-shrink: 0; width: 1rem; height: 1rem; background-size: .9rem; opacity: .65; }
-.qaute-home-redesign #faq .accordion-button .badge { font-size: .65rem; font-weight: 750; }
-.qaute-home-redesign #faq .accordion-body { padding: .45rem 1rem 1.15rem; color: #70849d !important; font-size: .82rem !important; line-height: 1.85 !important; }
-.qaute-home-redesign #faq-category-buttons .btn { min-height: 44px; padding: .7rem .8rem !important; border: 1px solid #e1e9f3; border-radius: 11px !important; background: rgba(255,255,255,.9); color: #526b87; font-size: .8rem; box-shadow: 0 2px 7px rgba(15, 41, 73, .025); transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease; }
-.qaute-home-redesign #faq-category-buttons .btn:hover { border-color: #c7d9ef; background: #f4f8ff; color: #235fa8; transform: translateX(2px); }
-.qaute-home-redesign #faq-category-buttons .btn.active-category, .qaute-home-redesign #faq-category-buttons .btn.btn-primary { border-color: #2165bd !important; background: linear-gradient(110deg, #2f78d1, #205cb0) !important; color: #fff !important; box-shadow: 0 6px 15px rgba(33, 101, 189, .17); }
-.qaute-home-redesign #faq-category-buttons .btn .badge { font-size: .65rem; }
-.qaute-home-redesign #faq-filter-input { min-height: 45px; border-color: #e0e8f2; border-radius: 0 11px 11px 0; color: #304965; box-shadow: none; font-size: .8rem; }
-.qaute-home-redesign #faq-filter-input:focus { border-color: #71a4e4; box-shadow: 0 0 0 4px rgba(35,105,199,.08); }
-.qaute-home-redesign #faq .input-group-text { border-color: #e0e8f2; border-radius: 11px 0 0 11px; background: #fff; color: #8297b0; }
-.qaute-home-redesign #faq-empty-state { border-top: 1px solid #edf1f7; }
-.qaute-home-redesign #ticket, .qaute-home-redesign #booking { position: relative; }
-.qaute-home-redesign #ticket .hcmute-card-modern, .qaute-home-redesign #booking .hcmute-card-modern { position: relative; overflow: hidden; }
-.qaute-home-redesign #ticket .display-6, .qaute-home-redesign #booking .display-6 { display: inline-flex; align-items: center; justify-content: center; width: 67px; height: 67px; border: 1px solid #e0ebfa; border-radius: 20px; background: linear-gradient(145deg, #f2f8ff, #e2efff); font-size: 1.8rem; }
-.qaute-home-redesign #ticket .btn-primary, .qaute-home-redesign #booking .btn-primary { border: 1px solid #2165bd; background: linear-gradient(120deg, #347fe0, #1e5db1); box-shadow: 0 6px 15px rgba(33, 101, 189, .16); font-size: .82rem; font-weight: 750; transition: transform .2s ease, box-shadow .2s ease; }
-.qaute-home-redesign #ticket .btn-primary:hover, .qaute-home-redesign #booking .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(33, 101, 189, .24); }
-.qaute-home-redesign .hcmute-card-modern .rounded-circle.bg-white-10 { border: 1px solid rgba(255,255,255,.12); }
-.qaute-home-redesign .transition-all { transition: all .2s ease; }
-.qaute-home-redesign .btn:focus-visible, .qaute-home-redesign a:focus-visible, .qaute-home-redesign input:focus-visible, .qaute-home-redesign button:focus-visible { outline: 3px solid rgba(52, 120, 229, .33); outline-offset: 3px; }
-.qaute-home-redesign .hcmute-quick-services { background: radial-gradient(ellipse at 10% 10%, rgba(107, 166, 255, .12), transparent 42%), linear-gradient(180deg, #edf4fd 0%, #f7f9fd 100%); }
-.qaute-home-redesign .hcmute-service-card { --service-accent: #2d75c8; --service-tint: #eaf3ff; border-color: color-mix(in srgb, var(--service-accent), #fff 84%); background: radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--service-accent), transparent 91%), transparent 52%), #fff; }
-.qaute-home-redesign .hcmute-quick-services .row > div:nth-child(2) .hcmute-service-card { --service-accent: #148b82; --service-tint: #e3f7f3; }
-.qaute-home-redesign .hcmute-quick-services .row > div:nth-child(3) .hcmute-service-card { --service-accent: #7958c7; --service-tint: #f0eaff; }
-.qaute-home-redesign .hcmute-quick-services .row > div:nth-child(4) .hcmute-service-card { --service-accent: #d07a2d; --service-tint: #fff1df; }
-.qaute-home-redesign .hcmute-service-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--service-accent), transparent 85%); transform: scaleX(.38); transform-origin: left; transition: transform .3s ease; }
-.qaute-home-redesign .hcmute-service-card:hover::before { transform: scaleX(1); }
-.qaute-home-redesign .hcmute-service-card::after { background: radial-gradient(circle, color-mix(in srgb, var(--service-accent), transparent 86%), transparent 68%); }
-.qaute-home-redesign .hcmute-service-icon { border-color: color-mix(in srgb, var(--service-accent), #fff 78%); background: linear-gradient(145deg, #fff, var(--service-tint)); color: var(--service-accent); box-shadow: 0 5px 14px color-mix(in srgb, var(--service-accent), transparent 88%), inset 0 1px 0 #fff; }
-.qaute-home-redesign .hcmute-service-title { color: #223d5c; }
-.qaute-home-redesign .hcmute-service-card:hover .hcmute-service-title { color: var(--service-accent); }
-.qaute-home-redesign .hcmute-section { background-color: #fff; }
-.qaute-home-redesign .hcmute-section-muted { background: radial-gradient(ellipse at 100% 0%, rgba(69, 130, 220, .08), transparent 35%), linear-gradient(145deg, #f1f6fd 0%, #f8faff 54%, #f2f7fc 100%); }
-.qaute-home-redesign .hcmute-title-main { position: relative; }
-.qaute-home-redesign .hcmute-section .hcmute-title-main::after { content: ""; display: block; width: 54px; height: 4px; margin-top: .8rem; border-radius: 99px; background: linear-gradient(90deg, #347fe0, #8ab9f0); }
-.qaute-home-redesign .hcmute-section .text-center .hcmute-title-main::after { margin-right: auto; margin-left: auto; }
-.qaute-home-redesign #discovery > .container-xl > .row:first-child { margin-bottom: 2.5rem !important; }
-.qaute-home-redesign #discovery > .container-xl > .row:first-child .hcmute-card-modern { border-color: #e0eafb; background: radial-gradient(ellipse at 100% 0%, rgba(113, 164, 231, .12), transparent 55%), linear-gradient(145deg, #fff, #f8fbff); }
-.qaute-home-redesign #discovery > .container-xl > .row:first-child .hcmute-card-modern > .d-flex .bi-fire { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 10px; background: #fff0e8; }
-.qaute-home-redesign #discovery #popular-faq-list > a { border-color: #e8eef6 !important; background: linear-gradient(110deg, #fff, #fbfdff); }
-.qaute-home-redesign #discovery #popular-faq-list > a:hover { border-color: #cbdcf1 !important; background: linear-gradient(110deg, #f2f7ff, #fff) !important; box-shadow: 0 7px 18px rgba(27, 69, 116, .07); transform: translateY(-2px); }
-.qaute-home-redesign #discovery > .container-xl > .hcmute-card-modern { border-color: #dce8f7; background: linear-gradient(110deg, #edf5ff, #fff 70%); }
-.qaute-home-redesign #discovery > .container-xl > .hcmute-card-modern .hcmute-logo-icon { width: 54px !important; height: 54px !important; border-radius: 17px; box-shadow: 0 7px 16px rgba(38, 107, 185, .12); }
-.qaute-home-redesign #discovery > .container-xl > .hcmute-card-modern .btn { box-shadow: 0 5px 13px rgba(33, 101, 189, .08); }
-.qaute-home-redesign #faq-category-buttons { padding: .7rem; border: 1px solid #e3ebf5; border-radius: 18px; background: rgba(255,255,255,.8); box-shadow: 0 8px 22px rgba(19, 49, 86, .045); }
-.qaute-home-redesign #faq-category-buttons .btn { border-color: transparent; }
-.qaute-home-redesign #faq-category-buttons .btn.active-category .badge, .qaute-home-redesign #faq-category-buttons .btn.btn-primary .badge { background: rgba(255,255,255,.2) !important; color: #fff !important; }
-.qaute-home-redesign #faq .col-lg-9 > .hcmute-card-modern { border-color: #e3ebf5; background: linear-gradient(145deg, #fff, #fcfdff); }
-.qaute-home-redesign #faq .accordion-item { margin-bottom: .55rem; overflow: hidden; border: 1px solid #e8edf5 !important; border-radius: 14px; background: #fff; transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
-.qaute-home-redesign #faq .accordion-item:hover { border-color: #cbdcf1 !important; box-shadow: 0 5px 16px rgba(24, 62, 104, .055); transform: translateY(-1px); }
-.qaute-home-redesign #faq .accordion-item:last-child { margin-bottom: 0; }
-.qaute-home-redesign #faq .accordion-button:not(.collapsed) { background: linear-gradient(105deg, #eef6ff, #fbfdff); }
-.qaute-home-redesign #faq .accordion-button .badge { padding: .38rem .6rem; border: 1px solid #d9e8fa; border-radius: 999px; background: #f0f6ff !important; }
-.qaute-home-redesign #faq .accordion-button:not(.collapsed) .badge { border-color: #c8def8; background: #e4f0ff !important; }
-.qaute-home-redesign #ticket, .qaute-home-redesign #booking { isolation: isolate; overflow: hidden; }
-.qaute-home-redesign #ticket::before, .qaute-home-redesign #booking::before { content: ""; position: absolute; z-index: -1; top: -100px; right: -70px; width: 280px; height: 280px; border: 1px solid rgba(64, 128, 208, .1); border-radius: 50%; box-shadow: 0 0 0 28px rgba(64, 128, 208, .025), 0 0 0 62px rgba(64, 128, 208, .018); pointer-events: none; }
-.qaute-home-redesign #booking::before { border-color: rgba(121, 88, 199, .12); box-shadow: 0 0 0 28px rgba(121, 88, 199, .03), 0 0 0 62px rgba(121, 88, 199, .018); }
-.qaute-home-redesign #ticket > .container-xl, .qaute-home-redesign #booking > .container-xl { z-index: 1; }
-.qaute-home-redesign #ticket .col-lg-5 > .hcmute-card-modern, .qaute-home-redesign #booking .col-lg-5 > .hcmute-card-modern { padding: 2rem !important; border-color: #dce8f7; background: radial-gradient(ellipse at 50% 0%, rgba(82, 148, 227, .13), transparent 50%), linear-gradient(145deg, #fff, #f8fbff); }
-.qaute-home-redesign #booking .col-lg-5 > .hcmute-card-modern { border-color: #e5def8; background: radial-gradient(ellipse at 50% 0%, rgba(133, 105, 216, .14), transparent 50%), linear-gradient(145deg, #fff, #fbf9ff); }
-.qaute-home-redesign #ticket .col-lg-5 > .hcmute-card-modern .display-6, .qaute-home-redesign #booking .col-lg-5 > .hcmute-card-modern .display-6 { width: 74px; height: 74px; margin: 0 auto; border-radius: 22px; box-shadow: 0 8px 20px rgba(42, 105, 177, .13); }
-.qaute-home-redesign #booking .col-lg-5 > .hcmute-card-modern .display-6 { border-color: #e3daf9; background: linear-gradient(145deg, #f3efff, #e7ddff); color: #7353c6 !important; box-shadow: 0 8px 20px rgba(115, 83, 198, .14); }
-.qaute-home-redesign #ticket .col-lg-5 > .hcmute-card-modern .btn, .qaute-home-redesign #booking .col-lg-5 > .hcmute-card-modern .btn { padding: .75rem 1.25rem; }
-.qaute-home-redesign #ticket { background: radial-gradient(ellipse at 100% 0%, rgba(63, 139, 222, .1), transparent 38%), linear-gradient(145deg, #f0f6ff, #f8faff 58%, #f3f8fd); }
-.qaute-home-redesign #booking { background: radial-gradient(ellipse at 100% 0%, rgba(133, 105, 216, .09), transparent 38%), linear-gradient(145deg, #f7f4ff, #fbfaff 58%, #f4f7fd); }
-.qaute-home-redesign .hcmute-journey-section { position: relative; padding: clamp(3.5rem, 7vw, 6.25rem) 0; overflow: hidden; background: radial-gradient(ellipse at 6% 100%, rgba(82, 166, 232, .12), transparent 35%), linear-gradient(135deg, #fff 0%, #f4f8ff 56%, #eef5ff 100%); }
-.qaute-home-redesign .hcmute-journey-section::before { content: ""; position: absolute; top: -130px; right: -100px; width: 340px; height: 340px; border: 1px solid rgba(54, 119, 193, .1); border-radius: 50%; box-shadow: 0 0 0 28px rgba(54, 119, 193, .025), 0 0 0 62px rgba(54, 119, 193, .018); pointer-events: none; }
-.qaute-home-redesign .hcmute-journey-copy { position: relative; z-index: 1; max-width: 620px; }
-.qaute-home-redesign .hcmute-journey-copy .hcmute-title-main { max-width: 600px; font-size: clamp(1.9rem, 3.6vw, 3rem); }
-.qaute-home-redesign .hcmute-journey-copy .hcmute-desc-main { max-width: 590px; font-size: .98rem; }
-.qaute-home-redesign .hcmute-journey-art { position: relative; display: grid; min-height: 340px; place-items: center; isolation: isolate; }
-.qaute-home-redesign .hcmute-journey-art::before, .qaute-home-redesign .hcmute-journey-art::after { content: ""; position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; }
-.qaute-home-redesign .hcmute-journey-art::before { width: min(72vw, 310px); aspect-ratio: 1; border: 1px solid rgba(49, 116, 192, .15); box-shadow: 0 0 0 20px rgba(66, 137, 216, .035), 0 0 0 50px rgba(66, 137, 216, .025); animation: hcmute-journey-orbit 18s linear infinite; }
-.qaute-home-redesign .hcmute-journey-art::after { width: min(54vw, 228px); aspect-ratio: 1; background: radial-gradient(circle, rgba(92, 156, 225, .2), rgba(165, 208, 255, .09) 55%, transparent 72%); filter: blur(2px); }
-.qaute-home-redesign .hcmute-journey-emblem { display: grid; width: clamp(150px, 20vw, 218px); aspect-ratio: 1; place-items: center; border: 1px solid rgba(255,255,255,.9); border-radius: 38% 62% 56% 44% / 45% 42% 58% 55%; background: linear-gradient(145deg, #fff 5%, #eaf4ff 55%, #d6eaff); color: #286fc7; box-shadow: 0 25px 60px rgba(38, 103, 174, .2), inset 0 2px 0 #fff; animation: hcmute-journey-float 4.2s ease-in-out infinite alternate; }
-.qaute-home-redesign .hcmute-journey-emblem .bi { font-size: clamp(5rem, 9vw, 7.5rem); filter: drop-shadow(0 10px 13px rgba(35, 100, 173, .2)); }
-.qaute-home-redesign .hcmute-journey-spark { position: absolute; display: grid; width: 62px; height: 62px; place-items: center; border: 1px solid rgba(255,255,255,.9); border-radius: 20px; background: linear-gradient(145deg, #fff, #eef6ff); color: #3478c5; box-shadow: 0 12px 28px rgba(35, 84, 136, .13); font-size: 1.65rem; animation: hcmute-journey-float 3.6s ease-in-out infinite alternate; }
-.qaute-home-redesign .hcmute-journey-spark-one { top: 14%; left: 12%; transform: rotate(-9deg); }
-.qaute-home-redesign .hcmute-journey-spark-two { right: 9%; bottom: 18%; color: #7958c7; animation-delay: -.8s; }
-.qaute-home-redesign .hcmute-journey-spark-three { top: 15%; right: 14%; width: 46px; height: 46px; border-radius: 16px; color: #df9a35; font-size: 1.2rem; animation-delay: -1.4s; }
-.qaute-home-redesign .hcmute-journey-caption { position: absolute; right: 3%; bottom: 4%; display: flex; align-items: center; gap: .65rem; padding: .75rem 1rem; border: 1px solid rgba(255,255,255,.9); border-radius: 15px; background: rgba(255,255,255,.88); color: #3c5877; font-size: .76rem; font-weight: 750; box-shadow: 0 12px 28px rgba(28, 67, 111, .1); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
-.qaute-home-redesign .hcmute-journey-caption .bi { color: #269681; font-size: 1.05rem; }
-@keyframes hcmute-journey-float { from { translate: 0 0; } to { translate: 0 -9px; } }
-@keyframes hcmute-journey-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.qaute-home-redesign .hcmute-values-section { position: relative; isolation: isolate; overflow: hidden; padding: clamp(3.8rem, 7vw, 6.5rem) 0; background: radial-gradient(ellipse at 50% -15%, rgba(71, 139, 228, .32), transparent 48%), linear-gradient(130deg, #071d3b 0%, #0d3261 52%, #123f78 100%); color: #fff; }
-.qaute-home-redesign .hcmute-values-section::before, .qaute-home-redesign .hcmute-values-section::after { content: ""; position: absolute; z-index: -1; border: 1px solid rgba(255,255,255,.1); border-radius: 50%; pointer-events: none; }
-.qaute-home-redesign .hcmute-values-section::before { top: -210px; left: -140px; width: 470px; height: 470px; box-shadow: 0 0 0 30px rgba(255,255,255,.02), 0 0 0 76px rgba(255,255,255,.014); }
-.qaute-home-redesign .hcmute-values-section::after { right: -200px; bottom: -280px; width: 550px; height: 550px; box-shadow: 0 0 0 36px rgba(255,255,255,.018), 0 0 0 82px rgba(255,255,255,.012); }
-.qaute-home-redesign .hcmute-values-heading { max-width: 760px; margin: 0 auto 2.8rem; text-align: center; }
-.qaute-home-redesign .hcmute-values-heading .hcmute-eyebrow { border-color: rgba(255,255,255,.19); background: rgba(255,255,255,.1); color: #c6e2ff; }
-.qaute-home-redesign .hcmute-values-title { margin: 0 auto .9rem; color: #fff; font-size: clamp(1.9rem, 4vw, 3.1rem); font-weight: 850; line-height: 1.15; letter-spacing: -.045em; text-wrap: balance; }
-.qaute-home-redesign .hcmute-values-lead { max-width: 650px; margin: 0 auto; color: rgba(226, 238, 255, .77); font-size: .98rem; line-height: 1.8; }
-.qaute-home-redesign .hcmute-value-card { --value-accent: #74c8ff; position: relative; height: 100%; min-height: 260px; padding: 1.65rem; overflow: hidden; border: 1px solid rgba(255,255,255,.15); border-radius: 22px; background: linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.055)); box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 15px 34px rgba(0, 13, 37, .12); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transition: transform .3s cubic-bezier(.2,.75,.3,1), background .3s ease, border-color .3s ease, box-shadow .3s ease; }
-.qaute-home-redesign .hcmute-values-grid > div:nth-child(2) .hcmute-value-card { --value-accent: #70e0cf; }
-.qaute-home-redesign .hcmute-values-grid > div:nth-child(3) .hcmute-value-card { --value-accent: #d5b7ff; }
-.qaute-home-redesign .hcmute-values-grid > div:nth-child(4) .hcmute-value-card { --value-accent: #ffd17a; }
-.qaute-home-redesign .hcmute-value-card::after { content: ""; position: absolute; right: -44px; bottom: -72px; width: 180px; height: 180px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; box-shadow: 0 0 0 22px rgba(255,255,255,.025), 0 0 0 48px rgba(255,255,255,.018); transition: transform .4s ease; pointer-events: none; }
-.qaute-home-redesign .hcmute-value-card:hover { transform: translateY(-7px); border-color: color-mix(in srgb, var(--value-accent), transparent 45%); background: linear-gradient(145deg, rgba(255,255,255,.19), rgba(255,255,255,.08)); box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 23px 42px rgba(0, 13, 37, .24); }
-.qaute-home-redesign .hcmute-value-card:hover::after { transform: scale(1.12) translate(-7px, -7px); }
-.qaute-home-redesign .hcmute-value-icon { display: flex; align-items: center; justify-content: center; width: 78px; height: 78px; margin-bottom: 1.35rem; border: 1px solid color-mix(in srgb, var(--value-accent), transparent 65%); border-radius: 24px; background: linear-gradient(145deg, color-mix(in srgb, var(--value-accent), transparent 82%), rgba(255,255,255,.08)); color: var(--value-accent); font-size: 2.6rem; box-shadow: 0 10px 25px color-mix(in srgb, var(--value-accent), transparent 88%), inset 0 1px 0 rgba(255,255,255,.14); transition: transform .3s cubic-bezier(.2,.75,.3,1), box-shadow .3s ease; }
-.qaute-home-redesign .hcmute-value-card:hover .hcmute-value-icon { transform: translateY(-4px) rotate(-5deg) scale(1.06); box-shadow: 0 14px 30px color-mix(in srgb, var(--value-accent), transparent 82%), inset 0 1px 0 rgba(255,255,255,.2); }
-.qaute-home-redesign .hcmute-value-title { position: relative; z-index: 1; margin: 0 0 .65rem; color: #fff; font-size: 1.12rem; font-weight: 800; }
-.qaute-home-redesign .hcmute-value-desc { position: relative; z-index: 1; max-width: 340px; margin: 0; color: rgba(226, 238, 255, .76); font-size: .86rem; line-height: 1.8; }
-.qaute-home-redesign .hcmute-values-grid > div:nth-child(4) .hcmute-value-desc { max-width: 280px; }
-.qaute-home-redesign .hcmute-path-section { position: relative; overflow: hidden; padding: clamp(3.6rem, 7vw, 6rem) 0; background: radial-gradient(ellipse at 95% 10%, rgba(120, 93, 204, .08), transparent 32%), linear-gradient(145deg, #f5f8fd, #fff 48%, #f3f7fd); }
-.qaute-home-redesign .hcmute-path-heading { max-width: 700px; margin: 0 auto 2.8rem; text-align: center; }
-.qaute-home-redesign .hcmute-path-heading .hcmute-desc-main { margin: 0 auto; }
-.qaute-home-redesign .hcmute-path-grid { position: relative; }
-.qaute-home-redesign .hcmute-path-grid::before { content: ""; position: absolute; z-index: 0; top: 3.35rem; right: 16.5%; left: 16.5%; height: 2px; background: linear-gradient(90deg, #84baf0, #a6c6ec 50%, #b9a9e8); }
-.qaute-home-redesign .hcmute-path-card { position: relative; z-index: 1; height: 100%; min-height: 275px; padding: 1.65rem 1.5rem; border: 1px solid #e3ebf5; border-radius: 22px; background: linear-gradient(150deg, rgba(255,255,255,.98), rgba(248,251,255,.97)); text-align: center; box-shadow: 0 12px 30px rgba(24, 62, 104, .065); transition: transform .3s cubic-bezier(.2,.75,.3,1), border-color .3s ease, box-shadow .3s ease; }
-.qaute-home-redesign .hcmute-path-card:hover { transform: translateY(-6px); border-color: #cbdcf1; box-shadow: 0 20px 40px rgba(24, 62, 104, .12); }
-.qaute-home-redesign .hcmute-path-number { position: absolute; top: 1rem; right: 1.15rem; color: #a4b5ca; font-size: .72rem; font-weight: 850; letter-spacing: .08em; }
-.qaute-home-redesign .hcmute-path-icon { position: relative; display: grid; width: 78px; height: 78px; margin: 0 auto 1.25rem; place-items: center; border: 1px solid #d9e9fc; border-radius: 24px; background: linear-gradient(145deg, #f1f7ff, #e2efff); color: #3478c5; font-size: 2.35rem; box-shadow: 0 9px 20px rgba(44, 111, 185, .13), inset 0 1px 0 #fff; transition: transform .3s ease, box-shadow .3s ease; }
-.qaute-home-redesign .hcmute-path-card:hover .hcmute-path-icon { transform: translateY(-3px) scale(1.06) rotate(-4deg); box-shadow: 0 13px 25px rgba(44, 111, 185, .18), inset 0 1px 0 #fff; }
-.qaute-home-redesign .hcmute-path-icon-search { border-color: #d9eee9; background: linear-gradient(145deg, #effbf8, #def5ef); color: #218d7c; box-shadow: 0 9px 20px rgba(33, 141, 124, .12), inset 0 1px 0 #fff; }
-.qaute-home-redesign .hcmute-path-icon-support { border-color: #e5ddf7; background: linear-gradient(145deg, #f7f3ff, #eae2ff); color: #7958c7; box-shadow: 0 9px 20px rgba(121, 88, 199, .13), inset 0 1px 0 #fff; }
-.qaute-home-redesign .hcmute-path-title { margin: 0 0 .65rem; color: #233f60; font-size: 1.05rem; font-weight: 800; }
-.qaute-home-redesign .hcmute-path-desc { max-width: 330px; margin: 0 auto; color: #71849b; font-size: .82rem; line-height: 1.75; }
-.qaute-home-redesign .hcmute-journey-copy .hcmute-eyebrow { box-shadow: 0 7px 18px rgba(44, 111, 185, .08); }
-.qaute-home-redesign .hcmute-journey-copy .hcmute-title-main { background: linear-gradient(100deg, #183655 0%, #256ab5 72%, #4683ca 100%); background-clip: text; -webkit-text-fill-color: transparent; }
-.qaute-home-redesign .hcmute-journey-copy .hcmute-title-main::after { width: 76px; height: 5px; background: linear-gradient(90deg, #2d75c8, #77c8d5, #a88be8); }
-.qaute-home-redesign .hcmute-journey-copy .badge { border-color: #e0eaf5 !important; box-shadow: 0 5px 14px rgba(27, 69, 116, .05); transition: transform .2s ease, box-shadow .2s ease; }
-.qaute-home-redesign .hcmute-journey-copy .badge:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(27, 69, 116, .1); }
-.qaute-home-redesign .hcmute-journey-emblem { animation: hcmute-journey-float 4.2s ease-in-out infinite alternate, hcmute-emblem-glow 4.2s ease-in-out infinite alternate; }
-@keyframes hcmute-emblem-glow { from { box-shadow: 0 20px 48px rgba(38, 103, 174, .15), inset 0 2px 0 #fff; } to { box-shadow: 0 28px 68px rgba(38, 103, 174, .26), inset 0 2px 0 #fff; } }
-.qaute-home-redesign .hcmute-journey-spark { animation-duration: 3.4s; }
-.qaute-home-redesign .hcmute-values-section { background-image: radial-gradient(ellipse at 50% -15%, rgba(71, 139, 228, .36), transparent 48%), radial-gradient(ellipse at 100% 100%, rgba(37, 107, 159, .23), transparent 38%), linear-gradient(130deg, #071d3b 0%, #0d3261 52%, #123f78 100%); }
-.qaute-home-redesign .hcmute-values-heading .hcmute-eyebrow { box-shadow: 0 6px 20px rgba(112, 200, 255, .1); }
-.qaute-home-redesign .hcmute-value-card { background: radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--value-accent), transparent 91%), transparent 50%), linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.045)); }
-.qaute-home-redesign .hcmute-value-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, var(--value-accent), transparent 82%); transform: scaleX(.4); transform-origin: left; transition: transform .35s ease; }
-.qaute-home-redesign .hcmute-value-card:hover::before { transform: scaleX(1); }
-.qaute-home-redesign .hcmute-path-section { background-image: radial-gradient(ellipse at 0% 100%, rgba(71, 157, 201, .08), transparent 34%), radial-gradient(ellipse at 95% 10%, rgba(120, 93, 204, .1), transparent 32%), linear-gradient(145deg, #f3f7fd, #fff 48%, #f3f7fd); }
-.qaute-home-redesign .hcmute-path-grid::before { top: 3.4rem; height: 3px; background: linear-gradient(90deg, #79b7f1, #79d4c5 52%, #ad91e5); opacity: .75; }
-.qaute-home-redesign .hcmute-path-card { overflow: hidden; background: radial-gradient(ellipse at 50% 0%, rgba(88, 151, 222, .09), transparent 55%), linear-gradient(150deg, #fff, #f8fbff); }
-.qaute-home-redesign .hcmute-path-card::before { content: ""; position: absolute; inset: auto 0 0; height: 4px; background: linear-gradient(90deg, #4d93d9, #85cfd0); transform: scaleX(.24); transform-origin: left; transition: transform .35s ease; }
-.qaute-home-redesign .hcmute-path-grid > div:nth-child(2) .hcmute-path-card::before { background: linear-gradient(90deg, #4db9a7, #8bd6c4); }
-.qaute-home-redesign .hcmute-path-grid > div:nth-child(3) .hcmute-path-card::before { background: linear-gradient(90deg, #8970d2, #c3a6ef); }
-.qaute-home-redesign .hcmute-path-card:hover::before { transform: scaleX(1); }
-.qaute-home-redesign .hcmute-path-number { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #e0eaf5; border-radius: 11px; background: rgba(255,255,255,.8); color: #7290ae; box-shadow: 0 4px 12px rgba(24, 62, 104, .05); }
-.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 a { min-height: 54px; border-color: #e5edf7 !important; background: rgba(255,255,255,.82) !important; transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
-.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 a:hover { transform: translateY(-2px); border-color: #c8daef !important; box-shadow: 0 8px 18px rgba(31, 79, 130, .08); }
-.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 a > span:first-child { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border-radius: 12px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.7); transition: transform .22s ease; }
-.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 a:hover > span:first-child { transform: rotate(-5deg) scale(1.06); }
-.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 > div:nth-child(1) a > span:first-child { background: #fff0e9 !important; color: #d87549 !important; }
-.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 > div:nth-child(2) a > span:first-child { background: #fff6df !important; color: #bc8426 !important; }
-.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 > div:nth-child(3) a > span:first-child { background: #eaf3ff !important; color: #3478c5 !important; }
-.qaute-home-redesign #discovery > .container-xl > .row:first-child .row.g-2 > div:nth-child(4) a > span:first-child { background: #e8f7f0 !important; color: #278764 !important; }
-.qaute-home-redesign #faq .accordion-button:not(.collapsed) { box-shadow: inset 3px 0 #4b91d8; }
-.qaute-home-redesign #faq .accordion-button:not(.collapsed)::after { filter: saturate(1.4); }
-.qaute-home-redesign #faq .input-group:focus-within { border-radius: 12px; box-shadow: 0 0 0 4px rgba(53, 125, 204, .1); }
-.qaute-home-redesign #faq .input-group:focus-within .input-group-text, .qaute-home-redesign #faq .input-group:focus-within .form-control { border-color: #78a9df; }
+
+/* Global Section Spacing & Smoothness */
+.qaute-home-redesign section {
+    scroll-margin-top: 115px; /* Offset cho Header cố định */
+}
+
+.qaute-home-redesign .hcmute-section {
+    padding: clamp(5rem, 8vw, 7rem) 0;
+}
+
+.qaute-home-redesign .hcmute-section-muted {
+    background: radial-gradient(ellipse at top left, rgba(234, 244, 255, 0.6) 0%, transparent 60%),
+                radial-gradient(ellipse at bottom right, rgba(240, 248, 255, 0.8) 0%, transparent 50%),
+                #f8fbff;
+}
+
+/* Enhanced Typography & Headings */
+.qaute-home-redesign .hcmute-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem 1.2rem;
+    border: 1px solid rgba(28, 90, 176, 0.15);
+    border-radius: 99px;
+    background: rgba(28, 90, 176, 0.05);
+    color: var(--home-blue);
+    font-size: .85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(28, 90, 176, 0.08);
+}
+
+.qaute-home-redesign .hcmute-title-main {
+    font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+    font-weight: 850;
+    line-height: 1.15;
+    letter-spacing: -.03em;
+    color: var(--home-ink);
+    margin-bottom: 1.25rem;
+    text-wrap: balance;
+}
+
+.qaute-home-redesign .hcmute-desc-main {
+    font-size: 1.15rem;
+    color: var(--home-muted);
+    line-height: 1.8;
+    margin-bottom: 2.5rem;
+    text-wrap: balance;
+}
+
+/* ---------------- HERO (Kept mostly original as requested) ---------------- */
+.qaute-home-redesign .hcmute-hero {
+    position: relative;
+    padding: clamp(3rem, 6vw, 5rem) 0;
+    background: radial-gradient(circle at 100% 0%, rgba(13, 50, 97, 1) 0%, #123b72 50%, #0a1f3d 100%);
+    color: #fff;
+    overflow: hidden;
+}
+.qaute-home-redesign .hcmute-hero::before { content: ""; position: absolute; top: -20%; right: -10%; width: 60%; height: 140%; background: radial-gradient(ellipse, rgba(45, 117, 200, .25) 0%, transparent 60%); pointer-events: none; }
+.qaute-home-redesign .hcmute-hero-pill { display: inline-flex; align-items: center; gap: .5rem; padding: .5rem .8rem; border-radius: 99px; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .2); font-size: .8rem; font-weight: 600; color: #d6e8ff; backdrop-filter: blur(10px); }
+.qaute-home-redesign .hcmute-hero-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; line-height: 1.1; letter-spacing: -.04em; margin-bottom: 1.2rem; background: linear-gradient(180deg, #ffffff 0%, #d6e8ff 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.qaute-home-redesign .hcmute-hero-desc { font-size: 1.1rem; line-height: 1.7; color: rgba(255, 255, 255, .8); margin-bottom: 2.2rem; max-width: 600px; }
+.qaute-home-redesign .hcmute-hero-search-box { position: relative; display: flex; align-items: center; background: #fff; border-radius: 16px; padding: .4rem; box-shadow: 0 15px 35px rgba(0, 0, 0, .2); max-width: 650px; }
+.qaute-home-redesign .hcmute-hero-search-input { flex: 1; border: none; background: transparent; padding: .8rem 1rem .8rem 0; font-size: 1rem; color: #1e3a5a; outline: none; }
+.qaute-home-redesign .hcmute-hero-search-btn { background: #2165bd; color: #fff; border: none; padding: .8rem 1.5rem; border-radius: 12px; font-weight: 700; transition: all .3s ease; }
+.qaute-home-redesign .hcmute-hero-search-btn:hover { background: #184b91; transform: translateY(-2px); }
+.qaute-home-redesign .hcmute-hero-stat-num { font-size: 1.8rem; font-weight: 800; color: #fff; line-height: 1.2; }
+.qaute-home-redesign .hcmute-hero-stat-label { font-size: .8rem; color: rgba(255, 255, 255, .6); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; margin-top: .2rem; }
+.qaute-home-redesign .hcmute-hero-image-wrap { position: relative; height: 500px; border-radius: 30px; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,.3); transform: perspective(1000px) rotateY(-5deg) rotateX(2deg); transition: transform .5s ease; }
+.qaute-home-redesign .hcmute-hero-image-wrap:hover { transform: perspective(1000px) rotateY(0deg) rotateX(0deg); }
+.qaute-home-redesign .hcmute-hero-suggestions {
+    color: #dce8f8 !important;
+}
+.qaute-home-redesign .hcmute-hero-suggestions .badge {
+    border: 1px solid rgba(255, 255, 255, .3);
+    background: rgba(255, 255, 255, .13);
+    color: #fff !important;
+    font-weight: 650;
+    transition: color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease;
+}
+.qaute-home-redesign .hcmute-hero-suggestions .badge:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, .8);
+    background: #fff;
+    color: #123b72 !important;
+}
+.qaute-home-redesign .hcmute-hero-suggestions .badge:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, .72);
+    outline-offset: 3px;
+}
+
+/* ---------------- Enhanced Quick Services ---------------- */
+.qaute-home-redesign .hcmute-quick-services {
+    position: relative;
+    z-index: 10;
+    margin-top: -60px; /* Pull up over hero */
+    padding-bottom: 4rem;
+}
+
+.qaute-home-redesign .hcmute-service-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+    min-height: 250px;
+    padding: 2.5rem 1.5rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: var(--home-radius);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    text-decoration: none;
+    box-shadow: 0 15px 35px rgba(15, 53, 109, 0.08);
+    transition: var(--transition-smooth);
+}
+
+.qaute-home-redesign .hcmute-service-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    background: #ffffff;
+    box-shadow: 0 30px 60px rgba(15, 53, 109, 0.15);
+    border-color: var(--service-accent);
+}
+
+.qaute-home-redesign .hcmute-service-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 85px;
+    height: 85px;
+    margin-bottom: 1.8rem;
+    border-radius: 24px;
+    background: linear-gradient(145deg, #ffffff, var(--service-tint));
+    color: var(--service-accent);
+    font-size: 2.8rem;
+    box-shadow: 0 15px 30px color-mix(in srgb, var(--service-accent), transparent 85%),
+                inset 0 2px 0 rgba(255,255,255,1);
+    transition: all .5s cubic-bezier(.175, .885, .32, 1.275);
+}
+
+.qaute-home-redesign .hcmute-service-card:hover .hcmute-service-icon {
+    transform: translateY(-10px) rotate(8deg) scale(1.1);
+    box-shadow: 0 20px 40px color-mix(in srgb, var(--service-accent), transparent 75%);
+}
+
+.qaute-home-redesign .hcmute-service-title {
+    color: var(--home-ink);
+    font-size: 1.2rem;
+    font-weight: 850;
+    margin-bottom: 1rem;
+    transition: var(--transition-smooth);
+}
+
+.qaute-home-redesign .hcmute-service-card:hover .hcmute-service-title {
+    color: var(--service-accent);
+}
+
+.qaute-home-redesign .hcmute-service-desc {
+    color: var(--home-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Service Card Colors */
+.qaute-home-redesign .col-6:nth-child(1) .hcmute-service-card { --service-accent: #2165bd; --service-tint: #eaf3ff; }
+.qaute-home-redesign .col-6:nth-child(2) .hcmute-service-card { --service-accent: #e85d04; --service-tint: #ffefe6; }
+.qaute-home-redesign .col-6:nth-child(3) .hcmute-service-card { --service-accent: #6f42c1; --service-tint: #f3ecff; }
+.qaute-home-redesign .col-6:nth-child(4) .hcmute-service-card { --service-accent: #0dcaf0; --service-tint: #e3f9fd; }
+.qaute-home-redesign .col-6:nth-child(5) .hcmute-service-card { --service-accent: #198754; --service-tint: #e6f6ec; }
+
+/* ---------------- Enhanced Journey Section ---------------- */
+.qaute-home-redesign .hcmute-journey-section {
+    padding: clamp(5rem, 9vw, 8rem) 0;
+    background: radial-gradient(circle at 10% 100%, rgba(33, 101, 189, .08), transparent 50%),
+                linear-gradient(135deg, #ffffff 0%, #f7faff 100%);
+}
+
+.qaute-home-redesign .hcmute-journey-copy .hcmute-title-main {
+    background: linear-gradient(135deg, #0f356d 0%, #1c5ab0 50%, #4683ca 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.qaute-home-redesign .hcmute-journey-tags .badge {
+    transition: var(--transition-smooth);
+}
+
+.qaute-home-redesign .hcmute-journey-tags .badge:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+}
+
+.qaute-home-redesign .hcmute-journey-art {
+    position: relative;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qaute-home-redesign .hcmute-journey-emblem {
+    width: 260px;
+    height: 260px;
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    background: linear-gradient(135deg, #ffffff, #eaf4ff);
+    display: grid;
+    place-items: center;
+    color: var(--home-blue);
+    box-shadow: 0 40px 80px rgba(28, 90, 176, .15), inset 0 5px 20px rgba(255,255,255,1);
+    animation: hcmute-blob-morph 8s ease-in-out infinite alternate;
+}
+
+@keyframes hcmute-blob-morph {
+    0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: translateY(0); }
+    100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: translateY(-20px); }
+}
+
+.qaute-home-redesign .hcmute-journey-emblem .bi {
+    font-size: 9rem;
+    filter: drop-shadow(0 20px 25px rgba(28, 90, 176, .2));
+}
+
+.qaute-home-redesign .hcmute-journey-spark {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    display: grid;
+    place-items: center;
+    font-size: 2.2rem;
+    box-shadow: 0 20px 40px rgba(15, 53, 109, .1);
+    border: 1px solid rgba(255,255,255,1);
+    animation: hcmute-float-spark 5s ease-in-out infinite alternate;
+}
+
+@keyframes hcmute-float-spark {
+    from { transform: translateY(0) rotate(0) scale(1); }
+    to { transform: translateY(-25px) rotate(15deg) scale(1.05); }
+}
+
+.qaute-home-redesign .hcmute-journey-spark-one { top: 10%; left: 5%; animation-delay: 0s; }
+.qaute-home-redesign .hcmute-journey-spark-two { bottom: 15%; right: 5%; animation-delay: -2s; }
+.qaute-home-redesign .hcmute-journey-spark-three { top: 20%; right: 15%; width: 60px; height: 60px; font-size: 1.5rem; animation-delay: -4s; }
+
+.qaute-home-redesign .hcmute-journey-caption {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.98);
+    padding: 1rem 2rem;
+    border-radius: 99px;
+    font-weight: 800;
+    box-shadow: 0 15px 35px rgba(15, 53, 109, .12);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 10;
+}
+
+/* ---------------- Discovery Section ---------------- */
+.qaute-home-redesign .hcmute-card-modern {
+    background: #ffffff;
+    border-radius: var(--home-radius);
+    box-shadow: var(--home-shadow);
+    transition: var(--transition-smooth);
+}
+
+.qaute-home-redesign .hcmute-topic-link {
+    border: 1px solid var(--home-border);
+}
+
+.qaute-home-redesign .hcmute-topic-link:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(15, 53, 109, 0.08);
+    border-color: #c4dbf6;
+}
+
+.qaute-home-redesign .hcmute-topic-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    transition: transform 0.4s cubic-bezier(.175, .885, .32, 1.275);
+}
+
+.qaute-home-redesign .hcmute-topic-link:hover .hcmute-topic-icon {
+    transform: rotate(-10deg) scale(1.15);
+}
+
+/* Notice Card (Mesh Gradient) */
+.qaute-home-redesign .hcmute-notice-card {
+    background: linear-gradient(135deg, #1e57a8, #3b88e9);
+    border: none;
+}
+
+.qaute-home-redesign .hcmute-notice-bg-shape {
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: hcmute-pulse 6s infinite alternate;
+}
+
+@keyframes hcmute-pulse {
+    0% { transform: scale(1) translate(0, 0); opacity: 0.8; }
+    100% { transform: scale(1.3) translate(-20px, 20px); opacity: 0.4; }
+}
+
+.qaute-home-redesign .hcmute-notice-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px rgba(28, 90, 176, 0.3);
+}
+
+.qaute-home-redesign .hcmute-notice-title {
+    line-height: 1.4;
+    text-wrap: balance;
+}
+
+/* Intro Cards (Đa dạng chủ đề, Đúng nơi hỗ trợ) */
+.qaute-home-redesign .hcmute-intro-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--home-shadow-hover);
+}
+
+.qaute-home-redesign .hcmute-intro-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    font-size: 1.8rem;
+    transition: transform 0.4s ease;
+}
+
+.qaute-home-redesign .hcmute-intro-card:hover .hcmute-intro-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* FAQ Popular List */
+.qaute-home-redesign .hcmute-faq-popular-item:hover {
+    transform: translateX(10px);
+    border-color: #c4dbf6 !important;
+    box-shadow: 0 10px 25px rgba(15, 53, 109, 0.05);
+}
+
+.qaute-home-redesign .hcmute-faq-popular-item:hover .hcmute-faq-number {
+    background: var(--home-blue) !important;
+    color: #fff !important;
+    border-color: var(--home-blue) !important;
+}
+
+.qaute-home-redesign .hcmute-faq-popular-item:hover .hcmute-faq-arrow {
+    background: var(--home-blue) !important;
+    color: #fff !important;
+    transform: translateX(5px);
+}
+
+/* Newbie Banner */
+.qaute-home-redesign .hcmute-newbie-banner {
+    background: linear-gradient(120deg, #e3f2fd 0%, #f0f7ff 100%);
+}
+.qaute-home-redesign .hcmute-newbie-bg-shape {
+    position: absolute;
+    bottom: -100px;
+    left: -50px;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(28, 90, 176, 0.1) 0%, transparent 60%);
+    border-radius: 50%;
+}
+.qaute-home-redesign .hcmute-newbie-banner:hover .hcmute-logo-icon {
+    transform: rotate(15deg) scale(1.1);
+}
+
+/* ---------------- FAQ Section ---------------- */
+.qaute-home-redesign .hcmute-section-faq {
+    background: #ffffff;
+}
+
+.qaute-home-redesign .hcmute-search-glass {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--home-border);
+    transition: var(--transition-smooth);
+}
+
+.qaute-home-redesign .hcmute-search-glass:focus-within {
+    border-color: var(--home-blue);
+    box-shadow: 0 0 0 4px rgba(28, 90, 176, 0.15) !important;
+}
+
+.qaute-home-redesign .hcmute-search-glass input:focus {
+    box-shadow: none;
+}
+
+.qaute-home-redesign .hcmute-category-pills .btn {
+    transition: var(--transition-smooth);
+}
+
+.qaute-home-redesign .hcmute-category-pills .btn:hover:not(.active-category) {
+    background: #f0f5fa !important;
+    transform: translateX(5px);
+}
+
+.qaute-home-redesign .hcmute-category-pills .active-category {
+    background: linear-gradient(135deg, var(--home-blue), #2a7eed) !important;
+    box-shadow: 0 8px 20px rgba(28, 90, 176, 0.3) !important;
+}
+
+.qaute-home-redesign .hcmute-accordion-modern .accordion-item {
+    transition: var(--transition-smooth);
+    border: 1px solid transparent;
+}
+
+.qaute-home-redesign .hcmute-accordion-modern .accordion-item:hover {
+    border-color: var(--home-border);
+    box-shadow: 0 12px 30px rgba(15, 53, 109, 0.08) !important;
+}
+
+.qaute-home-redesign .hcmute-accordion-modern .accordion-button {
+    border-radius: 16px !important;
+    transition: var(--transition-smooth);
+}
+
+.qaute-home-redesign .hcmute-accordion-modern .accordion-button:not(.collapsed) {
+    background: #f8fbff;
+    color: var(--home-blue);
+    box-shadow: inset 4px 0 var(--home-blue);
+}
+
+.qaute-home-redesign .hcmute-accordion-modern .accordion-button::after {
+    transition: transform 0.4s cubic-bezier(.2, .75, .3, 1);
+}
+
+/* ---------------- Values Section ---------------- */
+.qaute-home-redesign .hcmute-values-section {
+    position: relative;
+    padding: clamp(5rem, 8vw, 8rem) 0;
+    background: linear-gradient(135deg, #091e3a 0%, #123564 50%, #174582 100%);
+    color: #fff;
+    overflow: hidden;
+}
+
+.qaute-home-redesign .hcmute-values-section::before,
+.qaute-home-redesign .hcmute-values-section::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+}
+
+.qaute-home-redesign .hcmute-values-section::before { width: 800px; height: 800px; top: -400px; left: -200px; }
+.qaute-home-redesign .hcmute-values-section::after { width: 600px; height: 600px; bottom: -200px; right: -100px; }
+
+.qaute-home-redesign .hcmute-values-heading {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 4rem;
+    position: relative;
+    z-index: 2;
+}
+
+.qaute-home-redesign .hcmute-values-heading .hcmute-eyebrow {
+    border-color: rgba(255,255,255,0.2);
+    color: #8bbaf5;
+}
+
+.qaute-home-redesign .hcmute-values-title {
+    color: #fff;
+}
+
+.qaute-home-redesign .hcmute-value-card {
+    --value-accent: #74c8ff;
+    position: relative;
+    height: 100%;
+    min-height: 280px;
+    padding: 2.5rem 2rem;
+    border-radius: var(--home-radius);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: var(--transition-smooth);
+    z-index: 2;
+    overflow: hidden;
+}
+
+.qaute-home-redesign .hcmute-values-grid > div:nth-child(2) .hcmute-value-card { --value-accent: #6ee7b7; }
+.qaute-home-redesign .hcmute-values-grid > div:nth-child(3) .hcmute-value-card { --value-accent: #ffb84d; }
+.qaute-home-redesign .hcmute-values-grid > div:nth-child(4) .hcmute-value-card { --value-accent: #ff8fa3; }
+
+.qaute-home-redesign .hcmute-value-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--value-accent), transparent 80%), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.qaute-home-redesign .hcmute-value-card:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: color-mix(in srgb, var(--value-accent), transparent 50%);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.qaute-home-redesign .hcmute-value-card:hover::before { opacity: 1; }
+
+.qaute-home-redesign .hcmute-value-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 75px;
+    height: 75px;
+    margin-bottom: 1.8rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--value-accent);
+    font-size: 2.5rem;
+    border: 1px solid rgba(255,255,255,0.15);
+    transition: all 0.4s cubic-bezier(.175, .885, .32, 1.275);
+}
+
+.qaute-home-redesign .hcmute-value-card:hover .hcmute-value-icon {
+    transform: translateY(-5px) scale(1.1) rotate(5deg);
+    background: var(--value-accent);
+    color: #091e3a;
+    box-shadow: 0 10px 25px color-mix(in srgb, var(--value-accent), transparent 50%);
+}
+
+.qaute-home-redesign .hcmute-value-title {
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+
+.qaute-home-redesign .hcmute-value-desc {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+/* ---------------- Path Section ---------------- */
+.qaute-home-redesign .hcmute-path-section {
+    padding: clamp(5rem, 8vw, 7rem) 0;
+    background: #ffffff;
+}
+
+.qaute-home-redesign .hcmute-path-heading {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 4rem;
+}
+
+.qaute-home-redesign .hcmute-path-grid {
+    position: relative;
+}
+
+.qaute-home-redesign .hcmute-path-grid::before {
+    content: "";
+    position: absolute;
+    top: 4.5rem;
+    left: 15%;
+    right: 15%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #cbdcf1 20%, #cbdcf1 80%, transparent);
+    z-index: 0;
+}
+
+.qaute-home-redesign .hcmute-path-card {
+    position: relative;
+    z-index: 1;
+    background: #ffffff;
+    border-radius: var(--home-radius);
+    padding: 3rem 2rem;
+    text-align: center;
+    height: 100%;
+    border: 1px solid var(--home-border);
+    box-shadow: var(--home-shadow);
+    transition: var(--transition-smooth);
+}
+
+.qaute-home-redesign .hcmute-path-card:hover {
+    transform: translateY(-12px);
+    box-shadow: var(--home-shadow-hover);
+    border-color: #a3c4eb;
+}
+
+.qaute-home-redesign .hcmute-path-number {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--home-blue);
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 1rem;
+    box-shadow: 0 8px 15px rgba(28, 90, 176, 0.3);
+}
+
+.qaute-home-redesign .hcmute-path-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+    margin: 1rem auto 2rem;
+    border-radius: 24px;
+    background: #f0f7ff;
+    color: var(--home-blue);
+    font-size: 3rem;
+    transition: all 0.4s cubic-bezier(.175, .885, .32, 1.275);
+}
+
+.qaute-home-redesign .hcmute-path-icon-search { background: #fff0f0; color: #e85d04; }
+.qaute-home-redesign .hcmute-path-icon-support { background: #f0f9f6; color: #198754; }
+
+.qaute-home-redesign .hcmute-path-card:hover .hcmute-path-icon {
+    transform: scale(1.15) rotate(5deg);
+}
+
+.qaute-home-redesign .hcmute-path-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    color: var(--home-ink);
+}
+
+.qaute-home-redesign .hcmute-path-desc {
+    font-size: 1rem;
+    color: var(--home-muted);
+    line-height: 1.7;
+}
+
+/* ---------------- Action & Process Sections (Ticket, Booking, Chat) ---------------- */
+.qaute-home-redesign .hcmute-action-card {
+    transition: var(--transition-smooth);
+}
+
+.qaute-home-redesign .hcmute-action-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.1) !important;
+}
+
+.qaute-home-redesign .hcmute-action-bg {
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    filter: blur(40px);
+    z-index: 0;
+}
+
+.qaute-home-redesign .hcmute-process-grid {
+    position: relative;
+    z-index: 1;
+}
+
+.qaute-home-redesign .hcmute-process-grid::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: 4.5rem;
+    right: 15%;
+    left: 15%;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(28, 90, 176, 0.1), rgba(28, 90, 176, 0.3) 50%, rgba(28, 90, 176, 0.1));
+}
+
+.qaute-home-redesign .hcmute-process-card {
+    background: #ffffff;
+    border-radius: var(--home-radius);
+    border: 1px solid var(--home-border);
+    box-shadow: var(--home-shadow);
+    transition: var(--transition-smooth);
+    z-index: 1;
+}
+
+.qaute-home-redesign .hcmute-process-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--home-shadow-hover);
+    border-color: var(--home-blue);
+}
+
+.qaute-home-redesign .hcmute-process-number {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: .8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--home-muted);
+    background: #f0f5fa;
+    padding: .4rem 1rem;
+    border-radius: 12px;
+}
+
+.qaute-home-redesign .hcmute-process-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+    border-radius: 24px;
+    font-size: 3rem;
+    transition: all 0.4s cubic-bezier(.175, .885, .32, 1.275);
+}
+
+.qaute-home-redesign .hcmute-process-card:hover .hcmute-process-icon {
+    transform: scale(1.15) translateY(-5px);
+}
+
+.qaute-home-redesign .hcmute-process-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    color: var(--home-ink);
+}
+
+.qaute-home-redesign .hcmute-process-desc {
+    font-size: 1rem;
+    color: var(--home-muted);
+    line-height: 1.7;
+}
+
+/* ---------------- Utilities & Buttons ---------------- */
+.qaute-home-redesign .btn {
+    transition: var(--transition-smooth);
+}
+.qaute-home-redesign .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 1199.98px) {
+    .qaute-home-redesign .hcmute-hero-image-wrap { height: 400px; }
+    .qaute-home-redesign .hcmute-path-grid::before,
+    .qaute-home-redesign .hcmute-process-grid::before { display: none; }
+}
+
 @media (max-width: 991.98px) {
-  .qaute-home-redesign .hcmute-hero .row.align-items-center { padding-top: 3rem !important; padding-bottom: 2.7rem !important; }
-  .qaute-home-redesign .hcmute-hero-title { max-width: 690px; }
-  .qaute-home-redesign .hcmute-quick-services .container-xl { transform: translateY(-10px); }
-  .qaute-home-redesign .hcmute-service-card { min-height: 175px; }
-  .qaute-home-redesign .hcmute-section { padding: 3.4rem 0; }
-  .qaute-home-redesign .hcmute-journey-art { min-height: 300px; }
-  .qaute-home-redesign .hcmute-value-card { min-height: 240px; }
-  .qaute-home-redesign .hcmute-path-card { min-height: 290px; padding: 1.4rem 1rem; }
+    .qaute-home-redesign .hcmute-section { padding: 4rem 0; }
+    .qaute-home-redesign .hcmute-journey-art { height: 350px; margin-top: 3rem; }
+    .qaute-home-redesign .hcmute-journey-emblem { width: 200px; height: 200px; }
+    .qaute-home-redesign .hcmute-journey-emblem .bi { font-size: 7rem; }
 }
-@media (max-width: 575.98px) {
-  .qaute-home-redesign .hcmute-hero .row.align-items-center { padding-top: 2.35rem !important; padding-bottom: 2.5rem !important; }
-  .qaute-home-redesign .hcmute-hero-title { font-size: clamp(2rem, 8.5vw, 2.75rem); letter-spacing: -.05em; }
-  .qaute-home-redesign .hcmute-hero-desc { font-size: .88rem; line-height: 1.78; }
-  .qaute-home-redesign .hcmute-hero-pill { padding: .48rem .68rem; font-size: .68rem; }
-  .qaute-home-redesign .hcmute-hero-search-box { min-height: 55px; border-radius: 13px; }
-  .qaute-home-redesign .hcmute-hero-search-input { height: 42px; padding-right: .1rem; font-size: .76rem; }
-  .qaute-home-redesign .hcmute-hero-search-box > i { margin-left: .6rem !important; margin-right: .4rem !important; font-size: .95rem !important; }
-  .qaute-home-redesign .hcmute-hero-search-btn { min-height: 42px; padding: .6rem .78rem; border-radius: 10px; font-size: .74rem; }
-  .qaute-home-redesign .hcmute-hero-stat-num { font-size: 1.35rem; }
-  .qaute-home-redesign .hcmute-hero-stat-label { font-size: .63rem; }
-  .qaute-home-redesign .hcmute-quick-services .container-xl { transform: translateY(-6px); }
-  .qaute-home-redesign .hcmute-service-card { min-height: 166px; padding: 1rem .85rem; border-radius: 15px; }
-  .qaute-home-redesign .hcmute-service-icon { width: 41px; height: 41px; margin-bottom: .75rem; border-radius: 12px; font-size: 1.15rem; }
-  .qaute-home-redesign .hcmute-service-title { font-size: .82rem; }
-  .qaute-home-redesign .hcmute-service-desc { font-size: .69rem; line-height: 1.6; }
-  .qaute-home-redesign .hcmute-section { padding: 2.8rem 0; }
-  .qaute-home-redesign .hcmute-title-main { font-size: 1.75rem; }
-  .qaute-home-redesign .hcmute-desc-main { font-size: .83rem; }
-  .qaute-home-redesign .hcmute-card-modern { border-radius: 16px; }
-  .qaute-home-redesign .hcmute-card-modern.p-4 { padding: 1rem !important; }
-  .qaute-home-redesign #faq .accordion-button { padding: .9rem .5rem; font-size: .81rem !important; }
-  .qaute-home-redesign #faq .accordion-body { padding: .35rem .55rem 1rem; }
-  .qaute-home-redesign #faq-category-buttons .btn { font-size: .73rem; }
-  .qaute-home-redesign .rounded-4.p-4.text-white.shadow-sm { border-radius: 17px !important; }
-  .qaute-home-redesign .hcmute-journey-section { padding: 3.4rem 0; }
-  .qaute-home-redesign .hcmute-journey-art { min-height: 260px; margin-top: .75rem; }
-  .qaute-home-redesign .hcmute-journey-spark { width: 49px; height: 49px; border-radius: 16px; font-size: 1.35rem; }
-  .qaute-home-redesign .hcmute-journey-spark-three { width: 40px; height: 40px; }
-  .qaute-home-redesign .hcmute-journey-caption { right: 0; bottom: 1%; font-size: .68rem; }
-  .qaute-home-redesign .hcmute-values-section { padding: 3.6rem 0; }
-  .qaute-home-redesign .hcmute-values-heading { margin-bottom: 2rem; }
-  .qaute-home-redesign .hcmute-value-card { min-height: 220px; padding: 1.25rem; border-radius: 18px; }
-  .qaute-home-redesign .hcmute-value-icon { width: 65px; height: 65px; margin-bottom: 1rem; border-radius: 20px; font-size: 2.15rem; }
-  .qaute-home-redesign .hcmute-path-section { padding: 3.4rem 0; }
-  .qaute-home-redesign .hcmute-path-heading { margin-bottom: 2rem; }
-  .qaute-home-redesign .hcmute-path-grid::before { display: none; }
-  .qaute-home-redesign .hcmute-path-card { min-height: 0; padding: 1.35rem 1.1rem; }
-}
+
 @media (max-width: 767.98px) {
-  .qaute-home-redesign .hcmute-path-grid::before { display: none; }
+    .qaute-home-redesign .hcmute-hero { padding: 2.5rem 0; }
+    .qaute-home-redesign .hcmute-hero-title { font-size: 2.2rem; }
+    .qaute-home-redesign .hcmute-quick-services { margin-top: -30px; padding-bottom: 2rem; }
+    .qaute-home-redesign .hcmute-service-card { min-height: 200px; padding: 1.5rem; }
+    .qaute-home-redesign .hcmute-values-section { padding: 4rem 0; }
 }
+
+@media (max-width: 575.98px) {
+    .qaute-home-redesign .hcmute-title-main { font-size: 2rem; }
+    .qaute-home-redesign .hcmute-desc-main { font-size: 1rem; }
+    .qaute-home-redesign .hcmute-service-card { min-height: 180px; padding: 1.25rem; border-radius: 20px; }
+    .qaute-home-redesign .hcmute-service-icon { width: 60px; height: 60px; font-size: 2rem; margin-bottom: 1.2rem; }
+    .qaute-home-redesign .hcmute-hero-stat-num { font-size: 1.5rem; }
+    .qaute-home-redesign .hcmute-hero-stat-label { font-size: 0.7rem; }
+    .qaute-home-redesign .hcmute-action-card { padding: 2.5rem 1.5rem !important; }
+    .qaute-home-redesign .hcmute-process-card { padding: 2.5rem 1.5rem !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .qaute-home-redesign *, .qaute-home-redesign *::before, .qaute-home-redesign *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    .qaute-home-redesign *, .qaute-home-redesign *::before, .qaute-home-redesign *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Refined visual rhythm for the homepage content below the hero. */
+.qaute-home-redesign {
+    --home-blue: #1d5ca8;
+    --home-blue-dark: #143b69;
+    --home-ink: #193650;
+    --home-muted: #63778e;
+    --home-border: #e2eaf3;
+    --home-radius: 22px;
+    --home-shadow: 0 12px 32px rgba(20, 59, 105, .07);
+    --home-shadow-hover: 0 20px 42px rgba(20, 59, 105, .13);
+    --transition-smooth: transform .32s cubic-bezier(.2, .75, .3, 1),
+                         box-shadow .32s ease,
+                         border-color .25s ease,
+                         background-color .25s ease,
+                         color .2s ease;
+}
+
+.qaute-home-redesign > section:not(.hcmute-hero) {
+    scroll-margin-top: 8rem;
+}
+
+.qaute-home-redesign .hcmute-section,
+.qaute-home-redesign .hcmute-journey-section,
+.qaute-home-redesign .hcmute-path-section,
+.qaute-home-redesign .hcmute-values-section {
+    padding-block: clamp(3.75rem, 6.5vw, 5.75rem);
+}
+
+.qaute-home-redesign .hcmute-section-muted {
+    background:
+        radial-gradient(ellipse at 8% 12%, rgba(218, 234, 255, .58), transparent 40%),
+        radial-gradient(ellipse at 92% 88%, rgba(231, 240, 255, .65), transparent 42%),
+        #f7faff;
+}
+
+.qaute-home-redesign .hcmute-eyebrow {
+    gap: .55rem;
+    padding: .48rem 1rem;
+    margin-bottom: 1.15rem;
+    color: #245c98;
+    background: #f0f6fd;
+    border-color: #dce9f7;
+    box-shadow: none;
+    font-size: .76rem;
+    letter-spacing: .055em;
+}
+
+.qaute-home-redesign .hcmute-title-main,
+.qaute-home-redesign .hcmute-values-title {
+    font-size: clamp(1.95rem, 3.45vw, 2.8rem);
+    line-height: 1.18;
+    letter-spacing: -.025em;
+    margin-bottom: 1rem;
+    text-wrap: balance;
+}
+
+.qaute-home-redesign .hcmute-desc-main,
+.qaute-home-redesign .hcmute-values-lead {
+    max-width: 66ch;
+    margin-bottom: 0;
+    color: var(--home-muted);
+    font-size: clamp(.98rem, 1.15vw, 1.08rem);
+    line-height: 1.72;
+}
+
+.qaute-home-redesign .hcmute-values-lead {
+    margin-inline: auto;
+    color: rgba(235, 243, 255, .76);
+}
+
+.qaute-home-redesign .hcmute-quick-services {
+    margin-top: -3rem;
+    padding-bottom: 2.5rem;
+}
+
+.qaute-home-redesign .hcmute-service-card {
+    min-height: 218px;
+    padding: 1.7rem 1.1rem;
+    border: 1px solid rgba(220, 232, 247, .95);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 12px 28px rgba(20, 59, 105, .09);
+}
+
+.qaute-home-redesign .hcmute-service-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 19px 36px rgba(20, 59, 105, .14);
+}
+
+.qaute-home-redesign .hcmute-service-icon {
+    width: 68px;
+    height: 68px;
+    margin-bottom: 1.1rem;
+    border-radius: 20px;
+    font-size: 2.2rem;
+}
+
+.qaute-home-redesign .hcmute-service-card:hover .hcmute-service-icon {
+    transform: translateY(-3px) rotate(4deg) scale(1.04);
+}
+
+.qaute-home-redesign .hcmute-service-title {
+    margin-bottom: .5rem;
+    font-size: 1.02rem;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.qaute-home-redesign .hcmute-service-desc {
+    max-width: 30ch;
+    font-size: .86rem;
+    line-height: 1.55;
+}
+
+.qaute-home-redesign .hcmute-journey-section {
+    background:
+        radial-gradient(ellipse at 88% 40%, rgba(217, 234, 255, .64), transparent 38%),
+        linear-gradient(135deg, #fff 0%, #f8fbff 100%);
+}
+
+.qaute-home-redesign .hcmute-journey-art {
+    height: 410px;
+}
+
+.qaute-home-redesign .hcmute-journey-emblem {
+    width: 225px;
+    height: 225px;
+}
+
+.qaute-home-redesign .hcmute-journey-emblem .bi {
+    font-size: 7.5rem;
+}
+
+.qaute-home-redesign .hcmute-journey-caption {
+    bottom: 3%;
+    padding: .8rem 1.35rem;
+    gap: .75rem;
+    font-size: .95rem;
+}
+
+.qaute-home-redesign .hcmute-card-modern,
+.qaute-home-redesign .hcmute-action-card,
+.qaute-home-redesign .hcmute-path-card,
+.qaute-home-redesign .hcmute-process-card {
+    border: 1px solid var(--home-border);
+    border-radius: var(--home-radius);
+    box-shadow: var(--home-shadow);
+}
+
+.qaute-home-redesign .hcmute-card-modern {
+    padding: clamp(1.25rem, 2.4vw, 2rem) !important;
+}
+
+.qaute-home-redesign .hcmute-topic-link {
+    min-height: 76px;
+    padding: .8rem !important;
+    border-color: var(--home-border) !important;
+    border-radius: 16px !important;
+    font-size: .92rem;
+    line-height: 1.4;
+}
+
+.qaute-home-redesign .hcmute-topic-link:hover {
+    transform: translateY(-3px);
+}
+
+.qaute-home-redesign .hcmute-topic-icon {
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+}
+
+.qaute-home-redesign .hcmute-faq-popular-item {
+    min-width: 0;
+    gap: 1rem !important;
+    padding: 1rem !important;
+    border-radius: 16px !important;
+}
+
+.qaute-home-redesign .hcmute-faq-popular-item:hover {
+    transform: translateX(4px);
+}
+
+.qaute-home-redesign .hcmute-faq-popular-item .hcmute-faq-number {
+    width: 42px;
+    height: 42px;
+    font-size: .95rem !important;
+}
+
+.qaute-home-redesign .hcmute-faq-popular-item .hcmute-faq-arrow {
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+}
+
+.qaute-home-redesign .hcmute-notice-card {
+    min-height: 260px;
+    border-radius: var(--home-radius) !important;
+    box-shadow: 0 18px 38px rgba(24, 78, 145, .2) !important;
+}
+
+.qaute-home-redesign .hcmute-intro-card {
+    border-radius: 18px;
+}
+
+.qaute-home-redesign .hcmute-intro-title {
+    color: var(--home-ink);
+    font-size: 1rem !important;
+}
+
+.qaute-home-redesign .hcmute-intro-desc {
+    line-height: 1.55;
+}
+
+.qaute-home-redesign .hcmute-newbie-banner {
+    border: 1px solid #dceafb !important;
+    border-radius: var(--home-radius) !important;
+    box-shadow: 0 16px 36px rgba(20, 59, 105, .09) !important;
+}
+
+.qaute-home-redesign .hcmute-section-faq {
+    background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
+}
+
+.qaute-home-redesign #faq .position-sticky {
+    position: sticky;
+    top: 8rem;
+    align-self: flex-start;
+    max-height: calc(100vh - 9rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #c8d8e9 transparent;
+}
+
+.qaute-home-redesign .hcmute-category-pills .btn {
+    min-height: 48px;
+    border: 1px solid transparent !important;
+    border-radius: 14px !important;
+    padding: .7rem 1rem !important;
+    font-size: .92rem;
+}
+
+.qaute-home-redesign .hcmute-category-pills .active-category {
+    border-color: rgba(29, 92, 168, .18) !important;
+}
+
+.qaute-home-redesign .hcmute-accordion-modern .accordion-item {
+    margin-bottom: .85rem !important;
+    border: 1px solid var(--home-border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 6px 18px rgba(20, 59, 105, .045) !important;
+}
+
+.qaute-home-redesign .hcmute-accordion-modern .accordion-item:hover {
+    transform: translateY(-2px);
+}
+
+.qaute-home-redesign .hcmute-accordion-modern .accordion-button {
+    gap: 1rem;
+    padding: 1.15rem 1.3rem !important;
+    font-size: 1rem !important;
+    line-height: 1.5;
+}
+
+.qaute-home-redesign .hcmute-accordion-modern .accordion-button > div {
+    gap: .55rem !important;
+}
+
+.qaute-home-redesign .hcmute-accordion-modern .accordion-body {
+    padding: 1rem 1.3rem 1.3rem !important;
+    color: #526981 !important;
+    font-size: .97rem !important;
+    line-height: 1.75 !important;
+}
+
+.qaute-home-redesign .hcmute-values-section {
+    background:
+        radial-gradient(ellipse at 10% 0%, rgba(59, 119, 190, .22), transparent 42%),
+        linear-gradient(135deg, #0d2747 0%, #123a67 58%, #17477c 100%);
+}
+
+.qaute-home-redesign .hcmute-values-heading {
+    margin-bottom: 3rem;
+}
+
+.qaute-home-redesign .hcmute-value-card {
+    min-height: 245px;
+    padding: 2rem 1.65rem;
+    border-radius: 20px;
+}
+
+.qaute-home-redesign .hcmute-value-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1.35rem;
+    border-radius: 18px;
+    font-size: 2.05rem;
+}
+
+.qaute-home-redesign .hcmute-value-title {
+    margin-bottom: .7rem;
+    font-size: 1.12rem;
+    line-height: 1.4;
+}
+
+.qaute-home-redesign .hcmute-value-desc {
+    margin-bottom: 0;
+    font-size: .92rem;
+    line-height: 1.65;
+}
+
+.qaute-home-redesign .hcmute-path-heading {
+    margin-bottom: 3rem;
+}
+
+.qaute-home-redesign .hcmute-path-card {
+    min-height: 280px;
+    padding: 2.55rem 1.7rem 1.8rem;
+}
+
+.qaute-home-redesign .hcmute-path-card:hover,
+.qaute-home-redesign .hcmute-process-card:hover {
+    transform: translateY(-5px);
+}
+
+.qaute-home-redesign .hcmute-path-icon {
+    width: 74px;
+    height: 74px;
+    margin: .65rem auto 1.35rem;
+    border-radius: 21px;
+    font-size: 2.35rem;
+}
+
+.qaute-home-redesign .hcmute-path-title {
+    margin-bottom: .65rem;
+    font-size: 1.16rem;
+    line-height: 1.4;
+}
+
+.qaute-home-redesign .hcmute-path-desc {
+    margin-bottom: 0;
+    font-size: .94rem;
+    line-height: 1.65;
+}
+
+.qaute-home-redesign .hcmute-action-card {
+    padding: 2.3rem !important;
+    box-shadow: 0 14px 34px rgba(20, 59, 105, .09) !important;
+}
+
+.qaute-home-redesign .hcmute-action-card > i {
+    font-size: 3.25rem !important;
+}
+
+.qaute-home-redesign .hcmute-action-card h4 {
+    color: var(--home-ink);
+    font-size: 1.18rem;
+    line-height: 1.4;
+}
+
+.qaute-home-redesign .hcmute-action-card p {
+    color: var(--home-muted) !important;
+    font-size: .94rem !important;
+    line-height: 1.65;
+}
+
+.qaute-home-redesign .hcmute-process-grid::before {
+    background: linear-gradient(90deg, transparent, rgba(29, 92, 168, .22) 20%, rgba(29, 92, 168, .22) 80%, transparent);
+}
+
+.qaute-home-redesign .hcmute-process-card {
+    padding: 2rem 1.5rem !important;
+    overflow: hidden;
+}
+
+.qaute-home-redesign .hcmute-process-number {
+    top: 1rem;
+    right: 1rem;
+    padding: .35rem .7rem;
+    border: 1px solid #e8eef6;
+    font-size: .7rem;
+}
+
+.qaute-home-redesign .hcmute-process-icon {
+    width: 68px;
+    height: 68px;
+    margin-top: .75rem;
+    margin-bottom: 1.15rem !important;
+    border-radius: 19px;
+    font-size: 2.15rem;
+}
+
+.qaute-home-redesign .hcmute-process-card:hover .hcmute-process-icon {
+    transform: translateY(-3px) scale(1.04);
+}
+
+.qaute-home-redesign .hcmute-process-title {
+    margin-bottom: .65rem;
+    font-size: 1.08rem;
+    line-height: 1.4;
+}
+
+.qaute-home-redesign .hcmute-process-desc {
+    font-size: .93rem;
+    line-height: 1.65;
+}
+
+.qaute-home-redesign .btn {
+    font-weight: 700;
+}
+
+.qaute-home-redesign a:focus-visible,
+.qaute-home-redesign button:focus-visible,
+.qaute-home-redesign input:focus-visible {
+    outline: 3px solid rgba(49, 126, 211, .55);
+    outline-offset: 3px;
+}
+
+.qaute-home-redesign [data-home-reveal="pending"] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity .58s ease var(--home-reveal-delay, 0ms),
+                transform .58s cubic-bezier(.2, .75, .3, 1) var(--home-reveal-delay, 0ms);
+}
+
+.qaute-home-redesign [data-home-reveal="visible"] {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity .58s ease var(--home-reveal-delay, 0ms),
+                transform .58s cubic-bezier(.2, .75, .3, 1) var(--home-reveal-delay, 0ms);
+}
+
+@media (max-width: 991.98px) {
+    .qaute-home-redesign .hcmute-section,
+    .qaute-home-redesign .hcmute-journey-section,
+    .qaute-home-redesign .hcmute-path-section,
+    .qaute-home-redesign .hcmute-values-section {
+        padding-block: 3.75rem;
+    }
+
+    .qaute-home-redesign .hcmute-quick-services {
+        margin-top: -2rem;
+    }
+
+    .qaute-home-redesign .hcmute-service-card {
+        min-height: 205px;
+    }
+
+    .qaute-home-redesign .hcmute-journey-art {
+        height: 350px;
+        margin-top: 1rem;
+    }
+
+    .qaute-home-redesign #faq .position-sticky {
+        position: static !important;
+        max-height: none;
+        overflow: visible;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .qaute-home-redesign .hcmute-section,
+    .qaute-home-redesign .hcmute-journey-section,
+    .qaute-home-redesign .hcmute-path-section,
+    .qaute-home-redesign .hcmute-values-section {
+        padding-block: 3.25rem;
+    }
+
+    .qaute-home-redesign .hcmute-quick-services {
+        margin-top: -1.5rem;
+        padding-bottom: 1.75rem;
+    }
+
+    .qaute-home-redesign .hcmute-service-card {
+        min-height: 190px;
+        padding: 1.25rem .9rem;
+    }
+
+    .qaute-home-redesign .hcmute-service-icon {
+        width: 58px;
+        height: 58px;
+        margin-bottom: .85rem;
+        border-radius: 17px;
+        font-size: 1.9rem;
+    }
+
+    .qaute-home-redesign .hcmute-service-title {
+        font-size: .97rem;
+    }
+
+    .qaute-home-redesign .hcmute-service-desc {
+        font-size: .82rem;
+    }
+
+    .qaute-home-redesign .hcmute-path-card {
+        min-height: 250px;
+    }
+
+    .qaute-home-redesign .hcmute-values-heading,
+    .qaute-home-redesign .hcmute-path-heading {
+        margin-bottom: 2.25rem;
+    }
+
+    .qaute-home-redesign .hcmute-action-card {
+        padding: 1.75rem 1.25rem !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .qaute-home-redesign > section:not(.hcmute-hero) {
+        scroll-margin-top: 5.5rem;
+    }
+
+    .qaute-home-redesign .hcmute-section,
+    .qaute-home-redesign .hcmute-journey-section,
+    .qaute-home-redesign .hcmute-path-section,
+    .qaute-home-redesign .hcmute-values-section {
+        padding-block: 2.8rem;
+    }
+
+    .qaute-home-redesign .hcmute-title-main,
+    .qaute-home-redesign .hcmute-values-title {
+        font-size: clamp(1.7rem, 7vw, 2.15rem);
+    }
+
+    .qaute-home-redesign .hcmute-desc-main,
+    .qaute-home-redesign .hcmute-values-lead {
+        font-size: .96rem;
+    }
+
+    .qaute-home-redesign .hcmute-eyebrow {
+        font-size: .68rem;
+        letter-spacing: .045em;
+    }
+
+    .qaute-home-redesign .hcmute-quick-services {
+        margin-top: -1rem;
+        padding-bottom: 1.25rem;
+    }
+
+    .qaute-home-redesign .hcmute-service-card {
+        min-height: 176px;
+        padding: 1rem .7rem;
+        border-radius: 17px;
+    }
+
+    .qaute-home-redesign .hcmute-service-icon {
+        width: 52px;
+        height: 52px;
+        margin-bottom: .7rem;
+        font-size: 1.65rem;
+    }
+
+    .qaute-home-redesign .hcmute-service-desc {
+        font-size: .78rem;
+        line-height: 1.45;
+    }
+
+    .qaute-home-redesign .hcmute-journey-art {
+        height: 290px;
+    }
+
+    .qaute-home-redesign .hcmute-journey-emblem {
+        width: 165px;
+        height: 165px;
+    }
+
+    .qaute-home-redesign .hcmute-journey-emblem .bi {
+        font-size: 5.5rem;
+    }
+
+    .qaute-home-redesign .hcmute-journey-spark {
+        width: 58px;
+        height: 58px;
+        border-radius: 17px;
+        font-size: 1.6rem;
+    }
+
+    .qaute-home-redesign .hcmute-journey-spark-three {
+        width: 46px;
+        height: 46px;
+        font-size: 1.2rem;
+    }
+
+    .qaute-home-redesign .hcmute-journey-caption {
+        max-width: 92%;
+        padding: .7rem 1rem;
+        font-size: .85rem;
+    }
+
+    .qaute-home-redesign .hcmute-card-modern {
+        padding: 1.1rem !important;
+    }
+
+    .qaute-home-redesign .hcmute-topic-grid {
+        --bs-gutter-x: .65rem;
+        --bs-gutter-y: .65rem;
+    }
+
+    .qaute-home-redesign .hcmute-topic-link {
+        min-height: 68px;
+        gap: .55rem !important;
+        padding: .6rem !important;
+        font-size: .81rem;
+    }
+
+    .qaute-home-redesign .hcmute-topic-icon {
+        flex-basis: 34px;
+        width: 34px;
+        height: 34px;
+    }
+
+    .qaute-home-redesign .hcmute-faq-popular-item {
+        gap: .65rem !important;
+        padding: .75rem !important;
+    }
+
+    .qaute-home-redesign .hcmute-faq-popular-item .hcmute-faq-arrow {
+        display: none !important;
+    }
+
+    .qaute-home-redesign .hcmute-accordion-modern .accordion-button {
+        padding: .95rem 1rem !important;
+        font-size: .94rem !important;
+    }
+
+    .qaute-home-redesign .hcmute-accordion-modern .accordion-body {
+        padding: .8rem 1rem 1.05rem !important;
+        font-size: .92rem !important;
+    }
+
+    .qaute-home-redesign .hcmute-value-card {
+        min-height: 220px;
+        padding: 1.5rem 1.2rem;
+    }
+
+    .qaute-home-redesign .hcmute-value-icon {
+        width: 56px;
+        height: 56px;
+        margin-bottom: 1rem;
+        font-size: 1.8rem;
+    }
+
+    .qaute-home-redesign .hcmute-value-title {
+        font-size: 1rem;
+    }
+
+    .qaute-home-redesign .hcmute-value-desc,
+    .qaute-home-redesign .hcmute-path-desc,
+    .qaute-home-redesign .hcmute-process-desc {
+        font-size: .88rem;
+    }
+
+    .qaute-home-redesign .hcmute-path-card {
+        min-height: 0;
+        padding: 2.35rem 1.25rem 1.4rem;
+    }
+
+    .qaute-home-redesign .hcmute-process-card {
+        padding: 1.6rem 1.1rem !important;
+    }
+
+    .qaute-home-redesign .hcmute-process-title {
+        font-size: 1rem;
+    }
+
+    .qaute-home-redesign .hcmute-process-number {
+        top: .8rem;
+        right: .8rem;
+        font-size: .65rem;
+    }
 }

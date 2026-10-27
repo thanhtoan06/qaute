@@ -180,5 +180,20 @@
         }
     });
 
+    // Xử lý hiệu ứng cuộn trang cho Header.
+    function handleNavbarScroll() {
+        const navbar = document.querySelector('.hcmute-navbar');
+        if (navbar) {
+            if (window.scrollY > 20) {
+                navbar.classList.add('navbar-scrolled');
+            } else {
+                navbar.classList.remove('navbar-scrolled');
+            }
+        }
+    }
+
+    window.addEventListener('scroll', handleNavbarScroll);
+    document.addEventListener('DOMContentLoaded', handleNavbarScroll);
+
     window.Qaute = Qaute;
 }(window, document));

@@ -89,9 +89,17 @@
   50% { transform: rotate(-2deg) translateY(-7px) }
 }
 @media(min-width:992px) {
-  .qaute-faq-pro .faq-layout { display: flex; align-items: stretch; overflow: visible }
-  .qaute-faq-pro .faq-sidebar { position: static; overflow: visible }
-  .qaute-faq-pro .faq-layout > .col-lg-9 { overflow: visible }
+  .qaute-faq-pro .faq-layout { display: flex; align-items: flex-start; overflow: visible }
+  .qaute-faq-pro .faq-sidebar,
+  .qaute-faq-pro .faq-layout > .col-lg-9 {
+    height: min(720px, calc(100vh - 10rem));
+    min-height: 320px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #c8d8e9 transparent;
+  }
+  .qaute-faq-pro .faq-sidebar { position: sticky; top: 8rem }
   .qaute-faq-pro .faq-sidebar .faq-filter-sticky { position: static }
 }
 @media(max-width:991.98px) {

@@ -70,3 +70,29 @@ document.querySelectorAll('[data-chatbot-open]').forEach(function(button) {
         window.openQauteChatbot();
     });
 });
+
+var homeRevealTargets = document.querySelectorAll(
+    '.hcmute-quick-services .hcmute-service-card, ' +
+    '.hcmute-journey-copy, .hcmute-journey-art, ' +
+    '#discovery .hcmute-card-modern, #discovery .hcmute-newbie-banner, ' +
+    '#faq .faq-item, .hcmute-values-grid .hcmute-value-card, ' +
+    '.hcmute-path-grid .hcmute-path-card, .hcmute-action-card, ' +
+    '.hcmute-process-card'
+);
+
+if ('IntersectionObserver' in window) {
+    var homeRevealObserver = new IntersectionObserver(function(entries, observer) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.setAttribute('data-home-reveal', 'visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -32px 0px' });
+
+    homeRevealTargets.forEach(function(element, index) {
+        element.style.setProperty('--home-reveal-delay', (index % 4) * 65 + 'ms');
+        element.setAttribute('data-home-reveal', 'pending');
+        homeRevealObserver.observe(element);
+    });
+}
