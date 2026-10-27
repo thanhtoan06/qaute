@@ -47,6 +47,8 @@
 .qaute-announcements .qa-announcement-card:hover .qa-announcement-icon { transform: rotate(-7deg) scale(1.06); background: linear-gradient(145deg, #3458db, #5074f0); color: #fff }
 .qaute-announcements .qa-announcement-label { display: inline-flex; align-items: center; gap: .4rem; padding: .36rem .62rem; border: 1px solid #e3f5f2; border-radius: 999px; background: #effbf9; color: #178b82; font-size: .7rem; font-weight: 800; letter-spacing: .04em }
 .qaute-announcements .qa-announcement-label i { font-size: .8rem }
+.qaute-announcements .qa-announcement-label.qa-announcement-pinned { border-color: #f1dfb5; background: #fff8e8; color: #8a5b0a }
+.qaute-announcements .qa-announcement-label.qa-announcement-pinned i { color: #b77908 }
 .qaute-announcements .qa-announcement-title { margin: 0 0 .7rem; font-size: clamp(1.08rem, 1.7vw, 1.3rem); font-weight: 800; line-height: 1.45; letter-spacing: -.02em }
 .qaute-announcements .qa-announcement-title a { color: #172748; background-image: linear-gradient(currentColor, currentColor); background-size: 0 1px; background-repeat: no-repeat; background-position: 0 100%; transition: color .25s ease, background-size .3s ease }
 .qaute-announcements .qa-announcement-title a:hover { color: var(--qa-blue); background-size: 100% 1px }
@@ -129,7 +131,14 @@
                 <div class="card-body">
                   <div class="qa-card-topline">
                     <div class="qa-announcement-icon"><i class="bi bi-file-earmark-richtext"></i></div>
-                    <span class="qa-announcement-label"><i class="bi bi-check-circle-fill"></i> THÔNG BÁO</span>
+                    <c:choose>
+                      <c:when test="${a.pinned()}">
+                        <span class="qa-announcement-label qa-announcement-pinned"><i class="bi bi-pin-angle-fill"></i> ĐÃ GHIM</span>
+                      </c:when>
+                      <c:otherwise>
+                        <span class="qa-announcement-label"><i class="bi bi-check-circle-fill"></i> THÔNG BÁO</span>
+                      </c:otherwise>
+                    </c:choose>
                   </div>
                   <h3 class="qa-announcement-title"><a href="/announcements/${a.id()}" class="text-decoration-none">
                       <c:out value="${a.title()}" />
