@@ -8,3 +8,4 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/core.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/components.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/pages.css">
+<script src="${pageContext.request.contextPath}/assets/js/common/markup-actions.js"></script>

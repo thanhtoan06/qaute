@@ -1,496 +1,14 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
-<title>Đặt lịch hẹn tư vấn mới | QAUTE</title>
+
+<head>
+    <title>Đặt lịch hẹn tư vấn mới | QAUTE</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/pages/student/appointment-book.css">
+</head>
 
 <div class="qa-page-student-appointment-book" data-qa-view="student-appointment-book">
-<style>
-/* ==========================================================================
-   STUDENT APPOINTMENT BOOKING - MODERN DESIGN SYSTEM 2026
-   Palette: Azure Navy (#091e3e) -> Royal Blue (#124991) -> Deep Teal (#087d92)
-   Accent: Electric Cyan (#00d2ff), Emerald (#10b981), Amber (#f59e0b)
-   ========================================================================== */
-.qa-page-student-appointment-book {
-    --student-primary: #124991;
-    --student-primary-dark: #091e3e;
-    --student-teal: #087d92;
-    --student-cyan: #00d2ff;
-    --student-emerald: #10b981;
-    --student-border: #e2e8f0;
-    --student-card-shadow: 0 10px 30px -5px rgba(9, 30, 62, 0.07), 0 4px 10px -2px rgba(9, 30, 62, 0.04);
-    min-width: 0;
-    color: #1e293b;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-}
 
-/* 1. HERO BANNER */
-.qa-page-student-appointment-book .student-hero-banner {
-    position: relative;
-    background: linear-gradient(135deg, #091e3e 0%, #124991 55%, #087d92 100%);
-    border-radius: 24px;
-    padding: clamp(1.5rem, 3vw, 2.25rem);
-    color: #ffffff;
-    overflow: hidden;
-    margin-bottom: 2rem;
-    box-shadow: 0 20px 40px -15px rgba(9, 30, 62, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-}
-.qa-page-student-appointment-book .student-hero-banner::before {
-    content: '';
-    position: absolute;
-    top: -40%;
-    right: -10%;
-    width: 420px;
-    height: 420px;
-    background: radial-gradient(circle, rgba(0, 210, 255, 0.22) 0%, rgba(18, 73, 145, 0) 70%);
-    border-radius: 50%;
-    pointer-events: none;
-}
-.qa-page-student-appointment-book .student-hero-banner::after {
-    content: '';
-    position: absolute;
-    bottom: -50%;
-    left: 20%;
-    width: 350px;
-    height: 350px;
-    background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, rgba(9, 30, 62, 0) 70%);
-    border-radius: 50%;
-    pointer-events: none;
-}
-.qa-page-student-appointment-book .hero-content-wrap {
-    position: relative;
-    z-index: 2;
-}
-.qa-page-student-appointment-book .hero-eyebrow-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 999px;
-    padding: 0.35rem 0.95rem;
-    font-size: 0.78rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #bbf2f6;
-    margin-bottom: 0.75rem;
-}
-.qa-page-student-appointment-book .hero-eyebrow-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--student-cyan);
-    box-shadow: 0 0 10px var(--student-cyan);
-    animation: studentPulse 2s infinite ease-in-out;
-}
-@keyframes studentPulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.35); opacity: 0.7; }
-}
-.qa-page-student-appointment-book .hero-title {
-    font-size: clamp(1.45rem, 2.5vw, 2.15rem);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.25;
-    margin-bottom: 0.5rem;
-    color: #ffffff;
-}
-.qa-page-student-appointment-book .hero-subtitle {
-    font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.85);
-    max-width: 650px;
-    line-height: 1.55;
-    margin: 0;
-}
-.qa-page-student-appointment-book .hero-back-btn {
-    background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    color: #ffffff;
-    backdrop-filter: blur(6px);
-    border-radius: 12px;
-    padding: 0.6rem 1.15rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.22s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.qa-page-student-appointment-book .hero-back-btn:hover {
-    background: rgba(255, 255, 255, 0.28);
-    color: #ffffff;
-    transform: translateX(-3px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-}
-
-/* 2. STEPPER PROGRESS BAR */
-.qa-page-student-appointment-book .wizard-stepper-card {
-    background: #ffffff;
-    border: 1px solid var(--student-border);
-    border-radius: 20px;
-    box-shadow: var(--student-card-shadow);
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 2rem;
-}
-.qa-page-student-appointment-book .wizard-steps {
-    display: flex;
-    justify-content: space-between;
-    position: relative;
-    margin: 0;
-    padding: 0;
-}
-.qa-page-student-appointment-book .wizard-step-item {
-    flex: 1;
-    text-align: center;
-    position: relative;
-    user-select: none;
-    transition: all 0.2s ease;
-    padding: 0.35rem 0.5rem;
-}
-.qa-page-student-appointment-book .wizard-step-item .step-number {
-    width: 44px;
-    height: 44px;
-    line-height: 44px;
-    border-radius: 14px;
-    background-color: #f1f5f9;
-    color: #64748b;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 750;
-    font-size: 1rem;
-    border: 2px solid #e2e8f0;
-    margin-bottom: 0.5rem;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.qa-page-student-appointment-book .wizard-step-item.active .step-number {
-    background: linear-gradient(135deg, #124991 0%, #087d92 100%);
-    color: #ffffff;
-    border-color: #00d2ff;
-    box-shadow: 0 0 0 5px rgba(0, 210, 255, 0.25), 0 8px 18px rgba(18, 73, 145, 0.35);
-    transform: translateY(-2px);
-}
-.qa-page-student-appointment-book .wizard-step-item.completed .step-number {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff;
-    border-color: #34d399;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-.qa-page-student-appointment-book .wizard-step-item.completed .step-number::after {
-    content: '\F272';
-    font-family: 'bootstrap-icons';
-    font-size: 1.15rem;
-    font-weight: bold;
-}
-.qa-page-student-appointment-book .wizard-step-item.completed .step-number > span {
-    display: none;
-}
-.qa-page-student-appointment-book .wizard-step-item .step-title {
-    font-size: 0.88rem;
-    font-weight: 650;
-    color: #64748b;
-    display: block;
-    line-height: 1.35;
-}
-.qa-page-student-appointment-book .wizard-step-item.active .step-title {
-    font-weight: 800;
-    color: #091e3e;
-}
-.qa-page-student-appointment-book .wizard-step-item.completed .step-title {
-    color: #10b981;
-    font-weight: 700;
-}
-.qa-page-student-appointment-book .wizard-step-item:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    top: 25px;
-    left: 55%;
-    width: 90%;
-    height: 3px;
-    background-color: #e2e8f0;
-    z-index: 0;
-    transition: background-color 0.3s ease;
-}
-.qa-page-student-appointment-book .wizard-step-item.completed:not(:last-child)::after {
-    background: linear-gradient(90deg, #10b981, #059669);
-}
-
-/* 3. WIZARD PANELS & CARDS */
-.qa-page-student-appointment-book .wizard-panel {
-    display: none;
-}
-.qa-page-student-appointment-book .wizard-panel.active {
-    display: block;
-}
-.qa-page-student-appointment-book .card {
-    border: 1px solid var(--student-border);
-    border-radius: 20px;
-    background: #ffffff;
-    box-shadow: var(--student-card-shadow);
-    transition: all 0.25s ease;
-    overflow: hidden;
-}
-.qa-page-student-appointment-book .card-header {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-bottom: 1px solid #e2e8f0;
-    padding: 1.25rem 1.6rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.qa-page-student-appointment-book .card-title {
-    color: #091e3e;
-    font-size: 1.15rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0;
-}
-.qa-page-student-appointment-book .step-badge-pill {
-    background: linear-gradient(135deg, #124991 0%, #087d92 100%);
-    color: #ffffff;
-    border-radius: 999px;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.78rem;
-    font-weight: 750;
-    letter-spacing: 0.04em;
-    box-shadow: 0 3px 8px rgba(18, 73, 145, 0.2);
-}
-.qa-page-student-appointment-book .card-body {
-    padding: clamp(1.25rem, 2.5vw, 2rem);
-}
-.qa-page-student-appointment-book .card-footer {
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-    padding: 1.15rem 1.6rem;
-}
-
-/* 4. ADVISOR CARDS */
-.qa-page-student-appointment-book .advisor-card {
-    cursor: pointer;
-    border: 2px solid #e2e8f0;
-    border-radius: 16px;
-    transition: all 0.22s ease;
-    background: #ffffff;
-}
-.qa-page-student-appointment-book .advisor-card:hover {
-    border-color: #124991;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(18, 73, 145, 0.08);
-}
-.qa-page-student-appointment-book .advisor-card.selected {
-    border-color: #124991 !important;
-    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
-    box-shadow: 0 0 0 3px rgba(18, 73, 145, 0.15);
-}
-.qa-page-student-appointment-book .dot-online {
-    display: inline-block;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background-color: var(--student-emerald);
-    box-shadow: 0 0 6px var(--student-emerald);
-}
-.qa-page-student-appointment-book .dot-busy {
-    display: inline-block;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background-color: #f59e0b;
-}
-.qa-page-student-appointment-book .dot-offline {
-    display: inline-block;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background-color: #94a3b8;
-}
-
-/* 5. QUICK DATE & SLOTS */
-.qa-page-student-appointment-book .quick-date-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-}
-.qa-page-student-appointment-book .quick-date-btn {
-    min-width: 0;
-    min-height: 72px;
-    padding: 0.65rem 0.5rem;
-    border-radius: 14px;
-    border: 1.5px solid #cbd5e1;
-    background: #ffffff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-.qa-page-student-appointment-book .quick-date-btn:hover {
-    border-color: #124991;
-    background: #f8fafc;
-    transform: translateY(-2px);
-}
-.qa-page-student-appointment-book .quick-date-btn.selected {
-    background: linear-gradient(135deg, #124991 0%, #087d92 100%) !important;
-    border-color: #124991 !important;
-    color: #ffffff !important;
-    box-shadow: 0 6px 16px rgba(18, 73, 145, 0.28);
-}
-.qa-page-student-appointment-book .slot-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
-}
-.qa-page-student-appointment-book .slot-btn {
-    min-height: 76px;
-    border-radius: 14px;
-    border: 1.5px solid #cbd5e1;
-    background: #ffffff;
-    color: #0f172a;
-    padding: 0.65rem;
-    transition: all 0.2s ease;
-}
-.qa-page-student-appointment-book .slot-btn:hover {
-    border-color: #124991;
-    background: #eff6ff;
-    transform: translateY(-2px);
-}
-.qa-page-student-appointment-book .slot-btn.selected {
-    background: linear-gradient(135deg, #124991 0%, #087d92 100%) !important;
-    border-color: #124991 !important;
-    color: #ffffff !important;
-    box-shadow: 0 6px 16px rgba(18, 73, 145, 0.28);
-}
-.qa-page-student-appointment-book .slot-btn.selected .slot-modality,
-.qa-page-student-appointment-book .slot-btn.selected .slot-manager {
-    color: rgba(255, 255, 255, 0.85) !important;
-}
-
-/* 6. MODALITY CHOICE CARDS */
-.qa-page-student-appointment-book .appointment-choice-card {
-    cursor: pointer;
-    border: 2px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 1.25rem;
-    transition: all 0.22s ease;
-    background: #ffffff;
-}
-.qa-page-student-appointment-book .appointment-choice-card:hover {
-    border-color: #124991;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(18, 73, 145, 0.08);
-}
-.qa-page-student-appointment-book .appointment-choice-card.selected {
-    border-color: #124991;
-    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
-    box-shadow: 0 0 0 3px rgba(18, 73, 145, 0.15);
-}
-
-/* 7. FORM INPUTS & BUTTONS */
-.qa-page-student-appointment-book .form-label {
-    color: #1e293b;
-    font-size: 0.85rem;
-    font-weight: 700;
-    margin-bottom: 0.45rem;
-}
-.qa-page-student-appointment-book .form-label.required::after {
-    content: " *";
-    color: #ef4444;
-    font-weight: bold;
-}
-.qa-page-student-appointment-book .form-control,
-.qa-page-student-appointment-book .form-select {
-    border: 1.5px solid #cbd5e1;
-    border-radius: 12px;
-    padding: 0.65rem 0.95rem;
-    color: #1e293b;
-    font-size: 0.92rem;
-    background-color: #ffffff;
-    transition: all 0.2s ease;
-}
-.qa-page-student-appointment-book .form-control:focus,
-.qa-page-student-appointment-book .form-select:focus {
-    border-color: #124991;
-    box-shadow: 0 0 0 4px rgba(18, 73, 145, 0.12);
-    outline: none;
-}
-.qa-page-student-appointment-book .btn {
-    border-radius: 12px;
-    font-weight: 700;
-    padding: 0.65rem 1.45rem;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.qa-page-student-appointment-book .btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-}
-.qa-page-student-appointment-book .btn-primary {
-    background: linear-gradient(135deg, #124991 0%, #087d92 100%);
-    border: none;
-    color: #ffffff;
-    box-shadow: 0 6px 16px rgba(18, 73, 145, 0.28);
-}
-.qa-page-student-appointment-book .btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, #091e3e 0%, #124991 100%);
-    box-shadow: 0 8px 22px rgba(18, 73, 145, 0.38);
-}
-.qa-page-student-appointment-book .btn-success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    border: none;
-    color: #ffffff;
-    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
-}
-.qa-page-student-appointment-book .btn-success:hover:not(:disabled) {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
-}
-.qa-page-student-appointment-book .btn-outline-secondary {
-    border: 1.5px solid #cbd5e1;
-    color: #475569;
-    background: #ffffff;
-}
-
-@media (min-width: 576px) {
-    .qa-page-student-appointment-book .quick-date-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-@media (min-width: 992px) {
-    .qa-page-student-appointment-book .slot-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-@media (max-width: 767.98px) {
-    .qa-page-student-appointment-book .student-hero-banner {
-        border-radius: 18px;
-        padding: 1.25rem;
-    }
-    .qa-page-student-appointment-book .wizard-stepper-card {
-        padding: 1rem 0.5rem;
-        border-radius: 16px;
-    }
-    .qa-page-student-appointment-book .wizard-step-item .step-number {
-        width: 36px;
-        height: 36px;
-        line-height: 36px;
-        font-size: 0.9rem;
-        border-radius: 10px;
-    }
-    .qa-page-student-appointment-book .wizard-step-item .step-title {
-        font-size: 0.78rem;
-    }
-}
-</style>
 
 <div class="row justify-content-center">
     <div class="col-12 col-xl-10">
@@ -559,7 +77,7 @@
                     <span class="badge bg-light text-secondary border">Bước 1/3</span>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info border-0 rounded-4 d-flex align-items-center p-3 mb-4" style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);">
+                    <div class="alert alert-info border-0 rounded-4 d-flex align-items-center p-3 mb-4 u-bg-linear-gradient-135deg-e0f2fe-0-f0f9ff-100">
                         <i class="bi bi-info-circle-fill text-info fs-3 me-3"></i>
                         <div class="text-secondary small">
                             <strong class="text-dark d-block">Lựa chọn chuyên trách:</strong>
@@ -598,7 +116,7 @@
                         </div>
                     </div>
 
-                    <div id="advisorSection" style="display:none">
+                    <div id="advisorSection" class="u-display-none">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <label class="form-label fw-bold m-0">
                                 <i class="bi bi-people-fill me-1 text-primary"></i>Chọn tư vấn viên mong muốn (Tùy chọn)
@@ -661,7 +179,7 @@
                             <div class="col-md-6">
                                 <div class="appointment-choice-card h-100" data-modality-choice="IN_PERSON">
                                     <div class="d-flex align-items-start gap-3">
-                                        <span class="avatar avatar-md bg-primary-lt text-primary rounded-3" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                        <span class="avatar avatar-md bg-primary-lt text-primary rounded-3 u-width-44px u-height-44px u-display-inline-flex u-align-items-center u-justify-content-center u-text-size-1-25rem">
                                             <i class="bi bi-geo-alt-fill"></i>
                                         </span>
                                         <div>
@@ -674,7 +192,7 @@
                             <div class="col-md-6">
                                 <div class="appointment-choice-card h-100" data-modality-choice="ONLINE">
                                     <div class="d-flex align-items-start gap-3">
-                                        <span class="avatar avatar-md bg-success-lt text-success rounded-3" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                        <span class="avatar avatar-md bg-success-lt text-success rounded-3 u-width-44px u-height-44px u-display-inline-flex u-align-items-center u-justify-content-center u-text-size-1-25rem">
                                             <i class="bi bi-camera-video-fill"></i>
                                         </span>
                                         <div>
@@ -687,7 +205,7 @@
                         </div>
                     </div>
 
-                    <hr class="my-4" style="border-top: 1px dashed #cbd5e1;">
+                    <hr class="my-4 u-border-top-1px-dashed-cbd5e1">
 
                     <!-- Available Slots Grid -->
                     <div>
@@ -703,12 +221,12 @@
                             <p class="mb-0 fw-medium">Vui lòng chọn ngày để hiển thị các khung giờ trống</p>
                         </div>
 
-                        <div id="slotLoading" style="display:none" class="text-center py-5 bg-light rounded-4 border">
-                            <span class="spinner-border text-primary mb-2" style="width: 2.5rem; height: 2.5rem;"></span>
+                        <div id="slotLoading" class="u-display-none" class="text-center py-5 bg-light rounded-4 border">
+                            <span class="spinner-border text-primary mb-2 u-width-2-5rem u-height-2-5rem"></span>
                             <div class="fw-bold text-secondary">Đang tải khung giờ khả dụng...</div>
                         </div>
 
-                        <div id="slotEmpty" style="display:none" class="text-center text-secondary py-5 bg-light rounded-4 border">
+                        <div id="slotEmpty" class="u-display-none" class="text-center text-secondary py-5 bg-light rounded-4 border">
                             <i class="bi bi-calendar-x display-5 mb-2 d-block text-warning"></i>
                             <h5 class="fw-bold text-dark mb-1">Không có khung giờ trống trong ngày này</h5>
                             <p class="small text-muted mb-0">Tất cả khung giờ đã được đặt kín hoặc chưa mở lịch. Vui lòng chọn ngày khác.</p>
@@ -716,7 +234,7 @@
 
                         <div id="slotGrid" class="slot-grid"></div>
 
-                        <div id="slotModalityEmpty" style="display:none" class="text-center text-secondary py-4 bg-light rounded-4 border mt-3">
+                        <div id="slotModalityEmpty" class="u-display-none" class="text-center text-secondary py-4 bg-light rounded-4 border mt-3">
                             <i class="bi bi-exclamation-triangle text-warning me-1"></i>
                             Không có khung giờ phù hợp với hình thức đã chọn. Hãy thử chọn hình thức khác hoặc ngày khác.
                         </div>
@@ -740,7 +258,7 @@
             <div class="wizard-panel card" id="panel-3">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <span class="step-badge-pill" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <span class="step-badge-pill u-bg-linear-gradient-135deg-10b981-0-059669-100">
                             <i class="bi bi-check2-circle me-1"></i> Bước 3
                         </span>
                         <span>Nội Dung Trao Đổi & Xác Nhận Đặt Lịch</span>
@@ -749,7 +267,7 @@
                 </div>
                 <div class="card-body">
                     <!-- Confirm Summary Card -->
-                    <div class="alert alert-success border-0 rounded-4 d-flex align-items-start gap-3 mb-4 p-3" id="confirmSummary" style="background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);">
+                    <div class="alert alert-success border-0 rounded-4 d-flex align-items-start gap-3 mb-4 p-3 u-bg-linear-gradient-135deg-ecfdf5-0-f0fdf4-100" id="confirmSummary">
                         <i class="bi bi-calendar-check-fill fs-2 text-success mt-1"></i>
                         <div class="flex-fill">
                             <div class="fw-bold text-dark fs-6" id="summarySlot">—</div>
@@ -818,9 +336,18 @@
     </div>
 </div>
 
-<script>
-window.APPT_TREE = [<c:forEach var="dept" items="${tree}" varStatus="ds">{id:${dept.id()},name:"<c:out value='${dept.name()}'/>",categories:[<c:forEach var="cat" items="${dept.categories()}" varStatus="cs">{id:${cat.id()},name:"<c:out value='${cat.name()}'/>",children:[<c:forEach var="sub" items="${cat.children()}" varStatus="ss">{id:${sub.id()},name:"<c:out value='${sub.name()}'/>"}${!ss.last?',':''}</c:forEach>]}${!cs.last?',':''}</c:forEach>]}${!ds.last?',':''}</c:forEach>];
-window.APPT_CTX = '${ctx}';
-</script>
+<div id="appointment-tree-data" class="d-none" data-context-path="<c:out value='${ctx}'/>">
+    <c:forEach var="dept" items="${tree}">
+        <div data-department-id="${dept.id()}" data-department-name="<c:out value='${dept.name()}'/>">
+            <c:forEach var="cat" items="${dept.categories()}">
+                <div data-category-id="${cat.id()}" data-category-name="<c:out value='${cat.name()}'/>">
+                    <c:forEach var="sub" items="${cat.children()}">
+                        <span data-subcategory-id="${sub.id()}" data-subcategory-name="<c:out value='${sub.name()}'/>"></span>
+                    </c:forEach>
+                </div>
+            </c:forEach>
+        </div>
+    </c:forEach>
+</div>
 <script src="${ctx}/assets/js/student/appointment-book.js?v=20261026b"></script>
 </div>

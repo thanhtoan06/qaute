@@ -1,0 +1,165 @@
+.qaute-chatbot-root { --qaute-blue: #206bc4; --qaute-blue-dark: #154c91; --qaute-blue-deep: #0b1d36; --qaute-blue-light: #eaf3ff; --qaute-ink: #203650; --qaute-muted: #788ca5; --qaute-border: #e2eaf4; position: fixed; right: 24px; bottom: 24px; z-index: 9999; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; color: var(--qaute-ink); }
+.qaute-chatbot-root *, .qaute-chatbot-root *::before, .qaute-chatbot-root *::after { box-sizing: border-box; }
+.qaute-chatbot-root button, .qaute-chatbot-root input { font-family: inherit; }
+.qaute-chatbot-root button:focus-visible, .qaute-chatbot-root input:focus-visible { outline: 3px solid rgba(61, 145, 239, .4); outline-offset: 3px; }
+.qaute-chatbot-root .qaute-chat-input:focus-visible { outline: none; }
+.qaute-chat-trigger { position: relative; display: flex; align-items: center; justify-content: center; isolation: isolate; width: 76px; height: 76px; border-radius: 50%; cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; transition: transform .25s cubic-bezier(.2, .75, .3, 1), box-shadow .25s ease; }
+.qaute-chat-trigger:active { cursor: grabbing; transform: scale(.94); }
+.qaute-trigger-aura { position: absolute; inset: -13px; z-index: -3; border-radius: 50%; background: radial-gradient(circle, rgba(47, 126, 226, .2), transparent 72%); opacity: .8; pointer-events: none; animation: qauteAura 3.5s ease-in-out infinite; }
+.qaute-trigger-pulse { position: absolute; inset: -5px; z-index: -2; border: 1px solid rgba(66, 151, 245, .58); border-radius: 50%; background: rgba(50, 126, 220, .07); animation: qautePulse 2.5s ease-out infinite; pointer-events: none; }
+.qaute-trigger-ring { position: absolute; inset: -2px; z-index: -1; border: 1px solid rgba(255, 255, 255, .8); border-radius: 50%; box-shadow: 0 0 0 1px rgba(32, 107, 196, .16); pointer-events: none; transition: inset .25s ease; }
+.qaute-trigger-inner { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; overflow: hidden; border: 2px solid rgba(255, 255, 255, .96); border-radius: 50%; background: radial-gradient(circle at 28% 18%, rgba(111, 184, 255, .95), transparent 43%), linear-gradient(145deg, #347fda, #174b96 75%); box-shadow: 0 9px 25px rgba(20, 65, 124, .32), inset 0 1px 0 rgba(255, 255, 255, .3); transition: transform .25s ease, box-shadow .25s ease; }
+.qaute-trigger-inner::after { content: ""; position: absolute; top: 0; bottom: 0; left: -120%; width: 70%; transform: skewX(-18deg); background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .34), transparent); pointer-events: none; }
+.qaute-chat-trigger:hover .qaute-trigger-inner { transform: scale(1.045); box-shadow: 0 13px 31px rgba(20, 65, 124, .38), inset 0 1px 0 rgba(255, 255, 255, .35); }
+.qaute-chat-trigger:hover .qaute-trigger-inner::after { animation: qaute-shine .8s ease; }
+.qaute-chat-trigger:hover .qaute-trigger-ring { inset: -5px; }
+.qaute-trigger-img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; background: transparent; padding: 0; transform: scale(1.45); pointer-events: none; }
+.qaute-trigger-badge { position: absolute; top: -5px; right: -10px; display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border: 2px solid #ffffff; border-radius: 999px; background: linear-gradient(135deg, #268e71, #15765d); color: #ffffff; font-size: .62rem; font-weight: 800; line-height: 1; white-space: nowrap; pointer-events: none; box-shadow: 0 4px 11px rgba(15, 106, 80, .2); }
+.qaute-badge-dot { display: inline-block; width: 5px; height: 5px; flex-shrink: 0; border-radius: 50%; background: #a4ffdb; box-shadow: 0 0 0 2px rgba(164, 255, 219, .15); }
+.qaute-trigger-spark { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #8fc8ff; box-shadow: 0 0 9px rgba(91, 165, 255, .8); pointer-events: none; }
+.qaute-trigger-spark--one { top: 0; left: 3px; animation: qauteSpark 3s ease-in-out infinite; }
+.qaute-trigger-spark--two { right: 0; bottom: 8px; width: 4px; height: 4px; animation: qauteSpark 3s ease-in-out 1.1s infinite; }
+@keyframes qautePulse {
+  0% { transform: scale(.94); opacity: .65; }
+  70% { transform: scale(1.38); opacity: 0; }
+  100% { transform: scale(1.42); opacity: 0; }
+}
+@keyframes qauteAura {
+  0%, 100% { transform: scale(.95); opacity: .65; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+@keyframes qauteSpark {
+  0%, 100% { transform: scale(.75); opacity: .45; }
+  50% { transform: scale(1.35); opacity: 1; }
+}
+.qaute-trigger-badge, .qaute-trigger-img, .qaute-trigger-ring, .qaute-trigger-pulse, .qaute-trigger-aura { will-change: transform; }
+.qaute-chat-panel { position: absolute; right: 0; bottom: 92px; display: flex; flex-direction: column; width: 430px; max-width: calc(100vw - 32px); height: 640px; max-height: calc(100vh - 126px); max-height: calc(100dvh - 126px); min-height: 360px; overflow: hidden; border: 1px solid rgba(197, 215, 239, .95); border-radius: 23px; background: #ffffff; box-shadow: 0 28px 80px rgba(10, 34, 67, .22), 0 7px 22px rgba(10, 34, 67, .08), inset 0 1px 0 rgba(255, 255, 255, .9); transform-origin: bottom right; animation: qauteSlideUp .3s cubic-bezier(.16, 1, .3, 1); z-index: 10000; isolation: isolate; }
+.qaute-chat-panel::before { content: ""; position: absolute; top: 0; right: 0; left: 0; height: 1px; z-index: 2; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .9), transparent); pointer-events: none; }
+@keyframes qauteSlideUp {
+  from { opacity: 0; transform: translateY(17px) scale(.965); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.qaute-chat-header { position: relative; isolation: isolate; flex-shrink: 0; min-height: 83px; padding: 13px 15px; overflow: hidden; color: #ffffff; background: radial-gradient(ellipse at 90% -30%, rgba(112, 185, 255, .42), transparent 45%), radial-gradient(ellipse at 0% 100%, rgba(34, 113, 209, .35), transparent 45%), linear-gradient(118deg, #0b2342 0%, #123e70 52%, #175ba4 100%); }
+.qaute-chat-header::before { content: ""; position: absolute; z-index: -1; right: -45px; top: -94px; width: 205px; height: 205px; border: 1px solid rgba(255, 255, 255, .13); border-radius: 50%; box-shadow: 0 0 0 18px rgba(255, 255, 255, .025), 0 0 0 43px rgba(255, 255, 255, .018); pointer-events: none; }
+.qaute-chat-header::after { content: ""; position: absolute; z-index: -1; right: 60px; bottom: -60px; width: 110px; height: 110px; border-radius: 50%; background: rgba(86, 157, 239, .11); filter: blur(2px); pointer-events: none; }
+.qaute-chat-header-glow { position: absolute; z-index: -1; top: -90%; left: -35%; width: 72%; height: 280%; background: linear-gradient(95deg, transparent, rgba(255, 255, 255, .04), transparent); transform: rotate(18deg); pointer-events: none; }
+.qaute-chat-brand { position: relative; min-width: 0; }
+.qaute-chat-logo-wrap { position: relative; flex-shrink: 0; width: 38px; height: 38px; }
+.qaute-chat-logo-inner { position: relative; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255, 255, 255, .95); background: radial-gradient(circle at 28% 18%, rgba(111, 184, 255, .95), transparent 43%), linear-gradient(145deg, #347fda, #174b96 75%); box-shadow: 0 4px 13px rgba(0, 0, 0, .18); }
+.qaute-chat-logo { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; transform: scale(1.45); pointer-events: none; border: none; }
+.qaute-chat-heading-copy { min-width: 0; }
+.qaute-chat-title { color: #ffffff; font-size: .94rem; font-weight: 800; line-height: 1.35; letter-spacing: -.015em; }
+.qaute-chat-status { display: flex; align-items: center; gap: 6px; margin-top: 3px; color: rgba(229, 241, 255, .82); font-size: .665rem; line-height: 1.5; }
+.qaute-status-indicator { display: inline-block; width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: #6ae2b1; box-shadow: 0 0 0 3px rgba(106, 226, 177, .13); }
+.qaute-online-dot { position: absolute; right: -1px; bottom: -1px; width: 11px; height: 11px; border: 2px solid #ffffff; border-radius: 50%; background: #36c58c; box-shadow: 0 1px 4px rgba(0, 0, 0, .15); z-index: 2; }
+.qaute-chat-btn-header { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 1px solid rgba(255, 255, 255, .19); border-radius: 11px; background: rgba(255, 255, 255, .12); color: #ffffff; cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); transition: background .2s ease, border-color .2s ease, transform .2s ease; }
+.qaute-chat-btn-header:hover { border-color: rgba(255, 255, 255, .34); background: rgba(255, 255, 255, .22); transform: translateY(-1px); }
+.qaute-chat-btn-header:active { transform: scale(.95); }
+.qaute-chat-context { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding: 9px 15px; border-bottom: 1px solid #e7eef8; background: linear-gradient(100deg, #f3f8ff, #ffffff); color: #627b9a; font-size: .7rem; line-height: 1.4; }
+.qaute-context-icon { display: inline-flex; align-items: center; justify-content: center; width: 23px; height: 23px; flex-shrink: 0; border-radius: 8px; background: #e4f0ff; color: #2872ca; font-size: .78rem; }
+.qaute-chat-body { display: flex; flex: 1 1 auto; flex-direction: column; gap: 13px; min-height: 0; overflow-y: auto; padding: 15px 13px 13px; background: radial-gradient(ellipse at 100% 0%, rgba(60, 128, 214, .055), transparent 35%), radial-gradient(ellipse at 0% 65%, rgba(45, 114, 200, .03), transparent 38%), #f7faff; scrollbar-width: thin; scrollbar-color: #c7d6e8 transparent; overscroll-behavior: contain; scroll-behavior: smooth; }
+.qaute-chat-body::-webkit-scrollbar { width: 5px; }
+.qaute-chat-body::-webkit-scrollbar-track { background: transparent; }
+.qaute-chat-body::-webkit-scrollbar-thumb { border-radius: 8px; background: #c7d6e8; }
+.qaute-chat-body::-webkit-scrollbar-thumb:hover { background: #a6bdd8; }
+.qaute-chat-welcome { display: flex; align-items: center; gap: 7px; margin: 0 0 1px 37px; }
+.qaute-welcome-line { width: 17px; height: 2px; border-radius: 9px; background: #5594df; }
+.qaute-welcome-label { color: #8ba0ba; font-size: .58rem; font-weight: 800; letter-spacing: .1em; }
+.qaute-msg-row { display: flex; align-items: flex-end; gap: 8px; max-width: 91%; animation: qauteMessageIn .25s ease both; }
+.qaute-msg-bot { align-self: flex-start; }
+.qaute-msg-user { align-self: flex-end; flex-direction: row-reverse; }
+@keyframes qauteMessageIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.qaute-bot-avatar { display: flex; align-items: center; justify-content: center; flex: 0 0 30px; width: 30px; height: 30px; overflow: hidden; border: 1px solid #dce8f7; border-radius: 11px; background: #ffffff; box-shadow: 0 3px 9px rgba(21, 59, 101, .08); }
+.qaute-bot-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; background: #ffffff; transform: scale(1.4); }
+.qaute-bubble { max-width: 100%; padding: 11px 13px; border-radius: 15px; font-size: .82rem; line-height: 1.65; word-break: break-word; overflow-wrap: anywhere; box-shadow: 0 3px 9px rgba(16, 43, 77, .035); }
+.qaute-bubble-bot { border: 1px solid #e0e9f4; border-bottom-left-radius: 5px; background: #ffffff; color: #354c67; }
+.qaute-bubble-bot strong { color: #245b9c; font-weight: 800; }
+.qaute-bubble-bot p { margin-bottom: 0.45rem; }
+.qaute-bubble-bot p:last-child { margin-bottom: 0; }
+.qaute-bubble-bot ul, .qaute-bubble-bot ol { margin-bottom: 0.45rem; padding-left: 1.15rem; }
+.qaute-bubble-bot li { margin-bottom: 0.2rem; }
+.qaute-bubble-user { border: 1px solid rgba(255, 255, 255, .17); border-bottom-right-radius: 5px; background: linear-gradient(135deg, #347fda, #205caa 80%); color: #ffffff; box-shadow: 0 5px 13px rgba(32, 95, 175, .14); }
+.qaute-bubble-user a { color: #ffffff; text-decoration: underline; text-underline-offset: 2px; }
+.qaute-bubble-kicker { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; color: #3979bd; font-size: .67rem; font-weight: 800; }
+.qaute-bubble-kicker .bi { font-size: .73rem; }
+.qaute-msg-time { margin-top: 5px; opacity: .68; font-size: .63rem; line-height: 1.4; text-align: right; }
+.qaute-bubble-bot .qaute-msg-time { color: #8b9cb1; }
+.qaute-bubble-user .qaute-msg-time { color: rgba(255, 255, 255, .82); }
+.qaute-pills-wrap { margin: 2px 0 0 38px; padding: 11px; border: 1px solid #e2eaf5; border-radius: 15px; background: rgba(255, 255, 255, .83); box-shadow: 0 4px 12px rgba(16, 43, 77, .025); }
+.qaute-pills-heading { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; }
+.qaute-pills-heading-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 8px; background: #edf5ff; color: #2872ca; font-size: .74rem; }
+.qaute-pills-label { color: #536b87; font-size: .69rem; font-weight: 800; letter-spacing: .025em; }
+.qaute-pills-list { display: flex; flex-wrap: wrap; gap: 7px; }
+.qaute-chat-pill { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 7px 9px; border: 1px solid #dce7f5; border-radius: 10px; background: linear-gradient(135deg, #ffffff, #f7faff); color: #416384; font-size: .69rem; font-weight: 650; line-height: 1.45; text-align: left; cursor: pointer; transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease, box-shadow .2s ease; }
+.qaute-chat-pill .bi { flex-shrink: 0; color: #4785cb; font-size: .79rem; transition: transform .2s ease; }
+.qaute-chat-pill:hover { border-color: #8eb7e8; background: linear-gradient(135deg, #f0f7ff, #e7f2ff); color: #1e5da5; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(35, 105, 199, .07); }
+.qaute-chat-pill:hover .bi { transform: scale(1.1); }
+.qaute-chat-pill:active { transform: scale(.98); }
+.qaute-chat-hint { display: flex; align-items: flex-start; gap: 7px; margin: 0 0 2px 38px; padding: 1px 2px; color: #8598b0; font-size: .68rem; line-height: 1.6; }
+.qaute-chat-hint .bi { margin-top: 2px; flex-shrink: 0; color: #6b9bd4; }
+.qaute-chat-footer { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding: 12px 13px 10px; border-top: 1px solid #e3ebf5; background: rgba(255, 255, 255, .97); }
+.qaute-input-shell { display: flex; align-items: center; flex: 1 1 auto; min-width: 0; min-height: 45px; gap: 8px; padding: 0 12px; border: 1px solid #dce6f2; border-radius: 14px; background: #f8faff; transition: border-color .2s ease, background .2s ease, box-shadow .2s ease; }
+.qaute-input-shell:focus-within { border-color: #6aa0e4; background: #ffffff; box-shadow: 0 0 0 4px rgba(35, 105, 199, .08); }
+.qaute-input-icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; color: #91a5bd; font-size: .92rem; transition: color .2s ease; }
+.qaute-input-shell:focus-within .qaute-input-icon { color: #3478c8; }
+.qaute-chat-input { flex: 1 1 auto; min-width: 0; min-height: 42px; padding: .65rem 0; border: none; outline: none; background: transparent; color: #2c425d; box-shadow: none; font-size: .8rem; line-height: 1.4; }
+.qaute-chat-input::placeholder { color: #9baabd; opacity: 1; }
+.qaute-chat-input:focus { outline: none; border: none; box-shadow: none; }
+.qaute-chat-send-btn { display: flex; align-items: center; justify-content: center; flex: 0 0 45px; width: 45px; height: 45px; padding: 0; border: 1px solid #2369c7; border-radius: 14px; background: linear-gradient(135deg, #347fda, #1758a5); color: #ffffff; cursor: pointer; font-size: .95rem; box-shadow: 0 5px 13px rgba(32, 95, 175, .2), inset 0 1px 0 rgba(255, 255, 255, .17); transition: background .2s ease, transform .2s ease, box-shadow .2s ease; }
+.qaute-chat-send-btn:hover { background: linear-gradient(135deg, #2a73cb, #104a91); transform: translateY(-2px); box-shadow: 0 8px 18px rgba(32, 95, 175, .28); }
+.qaute-chat-send-btn:active { transform: translateY(0) scale(.96); }
+.qaute-chat-send-btn .bi { transition: transform .2s ease; }
+.qaute-chat-send-btn:hover .bi { transform: translate(1px, -1px); }
+.qaute-chat-bottomline { display: flex; align-items: center; justify-content: center; gap: 5px; flex-shrink: 0; padding: 0 12px 10px; background: #ffffff; color: #97a6b8; font-size: .61rem; line-height: 1.3; }
+.qaute-chat-bottomline .bi { color: #45917b; font-size: .72rem; }
+.qaute-chat-bottom-dot { width: 3px; height: 3px; margin: 0 2px; border-radius: 50%; background: #becbda; }
+.qaute-typing { display: inline-flex; align-items: center; gap: 4px; width: fit-content; padding: 10px 13px; border: 1px solid #e0e9f4; border-radius: 14px; background: #ffffff; box-shadow: 0 3px 9px rgba(16, 43, 77, .035); }
+.qaute-typing-dot { width: 6px; height: 6px; border-radius: 50%; background: #82a5cd; animation: qauteBounce 1.4s infinite ease-in-out both; }
+.qaute-typing-dot:nth-child(1) { animation-delay: -.32s; }
+.qaute-typing-dot:nth-child(2) { animation-delay: -.16s; }
+@keyframes qauteBounce {
+  0%, 80%, 100% { transform: scale(.45); opacity: .45; }
+  40% { transform: scale(1); opacity: 1; }
+}
+.qaute-bubble .btn { border-radius: 9px; }
+.qaute-bubble .btn-outline-danger { border-color: #e1b7bc; color: #a33e4b; background: #fff9fa; font-weight: 650; transition: background .2s ease, transform .2s ease, border-color .2s ease; }
+.qaute-bubble .btn-outline-danger:hover { border-color: #cc727d; background: #fff0f2; transform: translateY(-1px); }
+@media (max-width: 575.98px) {
+  .qaute-chatbot-root { right: 15px; bottom: 15px; }
+  .qaute-chat-trigger { width: 66px; height: 66px; }
+  .qaute-trigger-img { width: 100%; height: 100%; }
+  .qaute-trigger-badge { top: -4px; right: -7px; padding: 4px 7px; font-size: .59rem; }
+  .qaute-chat-panel { position: fixed; right: 8px; bottom: 89px; width: calc(100vw - 16px); max-width: none; height: min(690px, calc(100dvh - 104px)); max-height: calc(100dvh - 104px); min-height: 350px; border-radius: 20px; transform-origin: bottom right; }
+  .qaute-chat-header { min-height: 77px; padding: 11px 12px; }
+  .qaute-chat-title { font-size: .89rem; }
+  .qaute-chat-status { font-size: .61rem; }
+  .qaute-chat-context { padding: 8px 12px; font-size: .67rem; }
+  .qaute-chat-body { gap: 12px; padding: 12px 10px; }
+  .qaute-msg-row { max-width: 95%; gap: 7px; }
+  .qaute-bot-avatar { flex-basis: 27px; width: 27px; height: 27px; border-radius: 9px; }
+  .qaute-bubble { padding: 10px 11px; font-size: .79rem; }
+  .qaute-pills-wrap { margin-left: 33px; padding: 9px; }
+  .qaute-chat-pill { padding: 7px 8px; font-size: .66rem; }
+  .qaute-chat-hint { margin-left: 33px; font-size: .65rem; }
+  .qaute-chat-footer { gap: 7px; padding: 10px 10px 8px; }
+  .qaute-input-shell { min-height: 42px; gap: 7px; padding: 0 10px; border-radius: 12px; }
+  .qaute-chat-input { min-height: 40px; font-size: .77rem; }
+  .qaute-chat-send-btn { flex-basis: 42px; width: 42px; height: 42px; border-radius: 12px; }
+  .qaute-chat-bottomline { padding-bottom: 8px; font-size: .57rem; }
+}
+@media (max-width: 360px) {
+  .qaute-chatbot-root { right: 12px; bottom: 12px; }
+  .qaute-chat-trigger { width: 60px; height: 60px; }
+  .qaute-trigger-img { width: 100%; height: 100%; }
+  .qaute-trigger-badge { right: -8px; font-size: .56rem; }
+  .qaute-chat-panel { right: 5px; width: calc(100vw - 10px); max-height: calc(100dvh - 92px); bottom: 77px; }
+  .qaute-chat-status { font-size: .58rem; }
+  .qaute-pills-wrap { margin-left: 0; }
+  .qaute-chat-hint { margin-left: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qaute-chatbot-root *, .qaute-chatbot-root *::before, .qaute-chatbot-root *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

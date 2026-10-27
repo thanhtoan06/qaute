@@ -1,54 +1,13 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
-<title>Tùy chọn thông báo</title>
-<div class="qa-page-student-notification-preferences" data-qa-view="student-notification-preferences">
-<style>
-.qa-page-student-notification-preferences { --page-accent: #2878c5; --page-accent-dark: #205a94; --page-tint: #edf6ff; --page-line: #d9eaff; min-width: 0; color: #344c67; }
-.qa-page-student-notification-preferences > .page-header, .qa-page-student-notification-preferences > .qa-page-heading, .qa-page-student-notification-preferences > .d-flex:has(> .page-title), .qa-page-student-notification-preferences > .d-flex:has(> div > .page-title) { position: relative; isolation: isolate; display: flex; align-items: center; gap: 1rem; margin: 0 0 1.4rem !important; padding: clamp(1rem,2vw,1.45rem); overflow: hidden; border: 1px solid #dfe8f3; border-radius: 20px; background: radial-gradient(circle at 96% 0%, #edf6ff, transparent 34%), linear-gradient(125deg,#fff,#f7faff); box-shadow: 0 9px 26px rgba(16,48,84,.06); }
-.qa-page-student-notification-preferences > .page-header::after, .qa-page-student-notification-preferences > .qa-page-heading::after { content: ""; position: absolute; z-index: -1; right: -42px; bottom: -88px; width: 160px; height: 160px; border: 1px solid #d9eaff; border-radius: 50%; box-shadow: 0 0 0 18px rgba(32,107,196,.014),0 0 0 40px rgba(32,107,196,.009); pointer-events: none; }
-.qa-page-student-notification-preferences .qa-view-title { display: inline-flex; align-items: center; gap: .68rem; max-width: 100%; color: #193858; font-size: clamp(1.3rem,2vw,1.75rem); font-weight: 850; line-height: 1.3; letter-spacing: -.045em; }
-.qa-page-student-notification-preferences .qa-view-title-icon { display: inline-flex; flex: 0 0 36px; width: 36px; height: 36px; align-items: center; justify-content: center; border: 1px solid #d9eaff; border-radius: 12px; color: #205a94; background: linear-gradient(145deg,#fff,#edf6ff); box-shadow: 0 6px 15px rgba(20,55,92,.08); }
-.qa-page-student-notification-preferences .card { position: relative; border: 1px solid #e0e9f3; border-radius: 18px; background: rgba(255,255,255,.98); box-shadow: 0 7px 22px rgba(16,48,84,.05); transition: border-color .22s ease,box-shadow .22s ease,transform .22s ease; }
-.qa-page-student-notification-preferences .card:hover { border-color: #d9eaff; box-shadow: 0 13px 30px rgba(16,48,84,.085); }
-.qa-page-student-notification-preferences .card-header { display: flex; align-items: center; gap: .65rem; min-height: 56px; border-bottom: 1px solid #eaf0f7; border-radius: 18px 18px 0 0; background: linear-gradient(115deg,#fff,#edf6ff); }
-.qa-page-student-notification-preferences .card-title { color: #294664; font-weight: 800; letter-spacing: -.015em; }
-.qa-page-student-notification-preferences .card-body { color: #435b75; }
-.qa-page-student-notification-preferences .card-footer { border-top: 1px solid #eaf0f7; background: linear-gradient(110deg,#fbfdff,#edf6ff); }
-.qa-page-student-notification-preferences .form-label { color: #405a76; font-size: .79rem; font-weight: 750; }
-.qa-page-student-notification-preferences .form-control, .qa-page-student-notification-preferences .form-select { min-height: 42px; border-color: #d7e3f1; border-radius: 10px; color: #2c4562; background-color: #fff; box-shadow: 0 2px 5px rgba(20,50,84,.025); transition: border-color .2s ease,box-shadow .2s ease; }
-.qa-page-student-notification-preferences textarea.form-control { min-height: 112px; line-height: 1.65; }
-.qa-page-student-notification-preferences .form-control:focus, .qa-page-student-notification-preferences .form-select:focus { border-color: #2878c5; box-shadow: 0 0 0 4px #edf6ff; }
-.qa-page-student-notification-preferences .btn { border-radius: 10px; font-weight: 650; transition: transform .18s ease,box-shadow .18s ease,background-color .18s ease; }
-.qa-page-student-notification-preferences .btn:not(:disabled):not(.btn-close):hover { transform: translateY(-1px); }
-.qa-page-student-notification-preferences .btn-primary { border-color: #2878c5; background: linear-gradient(120deg,#2878c5,#205a94); box-shadow: 0 5px 13px #d9eaff; }
-.qa-page-student-notification-preferences .btn-outline-primary { border-color: #d9eaff; color: #205a94; background: #fff; }
-.qa-page-student-notification-preferences .btn-outline-primary:hover { border-color: #2878c5; color: #fff; background: linear-gradient(120deg,#2878c5,#205a94); }
-.qa-page-student-notification-preferences .qa-filter-bar { gap: .9rem; padding: clamp(.95rem,1.8vw,1.25rem); border: 1px solid #dfe8f3; border-radius: 16px; background: linear-gradient(135deg,#fff,#edf6ff); box-shadow: 0 7px 20px rgba(16,48,84,.04); }
-.qa-page-student-notification-preferences .table-responsive { border: 1px solid #e3ebf5; border-radius: 14px; background: #fff; }
-.qa-page-student-notification-preferences .table { margin-bottom: 0; color: #405872; }
-.qa-page-student-notification-preferences .table thead th { color: #607892; font-size: .72rem; font-weight: 800; letter-spacing: .045em; background: linear-gradient(110deg,#edf6ff,#f8faff); border-bottom-color: #dfe8f3; }
-.qa-page-student-notification-preferences .table tbody tr { transition: background-color .18s ease; }
-.qa-page-student-notification-preferences .table tbody tr:hover { background: #edf6ff; }
-.qa-page-student-notification-preferences .alert { border-radius: 13px; box-shadow: 0 5px 15px rgba(16,48,84,.04); }
-.qa-page-student-notification-preferences .nav-tabs { gap: .25rem; border-bottom-color: #dce7f3; }
-.qa-page-student-notification-preferences .nav-tabs .nav-link { border-radius: 10px 10px 0 0; font-weight: 650; }
-.qa-page-student-notification-preferences .nav-tabs .nav-link.active { color: #205a94; box-shadow: inset 0 -2px #2878c5; }
-.qa-page-student-notification-preferences .nav-pills .nav-link.active { color: #205a94; background: #edf6ff; box-shadow: inset 0 0 0 1px #d9eaff; }
-.qa-page-student-notification-preferences .progress { overflow: hidden; border-radius: 999px; background: #e9eff6; }
-.qa-page-student-notification-preferences .progress-bar { border-radius: inherit; }
 
-@media (max-width: 767.98px) {
-  .qa-page-student-notification-preferences > .page-header, .qa-page-student-notification-preferences > .qa-page-heading, .qa-page-student-notification-preferences > .d-flex:has(> .page-title), .qa-page-student-notification-preferences > .d-flex:has(> div > .page-title) { align-items: flex-start; padding: .95rem; }
-  .qa-page-student-notification-preferences .card { border-radius: 15px; }
-  .qa-page-student-notification-preferences .card-body { padding: 1rem; }
-  .qa-page-student-notification-preferences .table-responsive { border-radius: 11px; }
-  .qa-page-student-notification-preferences .qa-view-title-icon { flex-basis: 31px; width: 31px; height: 31px; border-radius: 10px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .qa-page-student-notification-preferences *, .qa-page-student-notification-preferences *::before, .qa-page-student-notification-preferences *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-}
-</style>
+<head>
+    <title>Tùy chọn thông báo</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/pages/student/notification-preferences.css">
+</head>
+<div class="qa-page-student-notification-preferences" data-qa-view="student-notification-preferences">
+
 
 <div class="page-header d-print-none mb-3">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -67,7 +26,7 @@
         <div class="card-header"><h3 class="card-title">Kênh nhận thông báo</h3></div>
         <div class="table-responsive">
             <table class="table table-vcenter card-table">
-                <thead><tr><th>Loại sự kiện</th><th class="text-center" style="width: 150px">Trong ứng dụng</th><th class="text-center" style="width: 130px">Email</th></tr></thead>
+                <thead><tr><th>Loại sự kiện</th><th class="text-center u-width-150px">Trong ứng dụng</th><th class="text-center u-width-130px">Email</th></tr></thead>
                 <tbody>
                     <c:forEach var="preference" items="${preferences}">
                         <tr>

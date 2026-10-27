@@ -1,70 +1,11 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/common/taglibs.jspf" %>
-<title>Quên mật khẩu</title>
-<style>
-.forgot-recovery { --recovery-blue: #2369c7; --recovery-blue-dark: #174b96; --recovery-ink: #1c3555; --recovery-muted: #7c8ea6; --recovery-border: #e0e9f4; position: relative; isolation: isolate; color: var(--recovery-ink); animation: qaute-enter .45s cubic-bezier(.2, .75, .3, 1) both; }
-.forgot-recovery *, .forgot-recovery *::before, .forgot-recovery *::after { box-sizing: border-box; }
-.forgot-recovery::before { content: ""; position: absolute; z-index: -1; top: -40px; right: -25px; width: 145px; height: 145px; border: 1px solid rgba(35, 105, 199, .09); border-radius: 50%; box-shadow: 0 0 0 17px rgba(35, 105, 199, .025), 0 0 0 36px rgba(35, 105, 199, .015); pointer-events: none; }
-.forgot-recovery::after { content: ""; position: absolute; z-index: -1; left: -33px; bottom: -35px; width: 105px; height: 105px; border-radius: 50%; background: radial-gradient(circle, rgba(35, 105, 199, .065), transparent 72%); pointer-events: none; }
-.recovery-heading { position: relative; margin-bottom: 1.8rem; }
-.recovery-icon-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 68px; margin-bottom: 1.35rem; border: 1px solid rgba(255, 255, 255, .95); border-radius: 21px; background: linear-gradient(145deg, #ffffff, #eaf3ff); color: var(--recovery-blue); box-shadow: 0 9px 24px rgba(35, 105, 199, .16), 0 0 0 8px rgba(35, 105, 199, .035); animation: qaute-auth-icon-enter .5s cubic-bezier(.2, .75, .3, 1) both, qaute-auth-icon-glow 4s ease-in-out 1s infinite; }
-.recovery-icon-wrap .bi { font-size: 1.85rem; line-height: 1; }
-.recovery-icon-wrap::after { content: ""; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: #43c59a; box-shadow: 0 0 0 3px rgba(67, 197, 154, .12); }
-.recovery-eyebrow { display: inline-flex; align-items: center; gap: .45rem; margin-bottom: .85rem; padding: .38rem .72rem; border: 1px solid #dce9fa; border-radius: 999px; background: linear-gradient(135deg, #f4f8ff, #eaf3ff); color: #326db6; font-size: .67rem; font-weight: 800; letter-spacing: .075em; text-transform: uppercase; }
-.recovery-eyebrow .bi { font-size: .78rem; }
-.recovery-title { margin: 0 0 .55rem; color: var(--recovery-ink); font-size: clamp(1.55rem, 4vw, 1.95rem); font-weight: 850; line-height: 1.24; letter-spacing: -.045em; }
-.recovery-description { max-width: 440px; margin: 0; color: var(--recovery-muted); font-size: .86rem; line-height: 1.8; }
-.recovery-alert { margin-bottom: 1.2rem; padding: .8rem .9rem; border: 1px solid #f3c7ce; border-radius: 12px; background: linear-gradient(120deg, #fff7f8, #fffdfd); color: #a83c4e; box-shadow: 0 4px 12px rgba(173, 57, 78, .04); font-size: .79rem; line-height: 1.65; }
-.recovery-alert .bi { flex-shrink: 0; align-self: flex-start; margin-top: 2px; font-size: 1rem; }
-.recovery-form .form-label { display: flex; align-items: center; gap: .35rem; margin-bottom: .55rem; color: #344e6d; font-size: .81rem; font-weight: 750; }
-.recovery-form .form-label.required::after { color: #e05b6b; }
-.recovery-form .input-group { position: relative; display: flex; flex-wrap: nowrap; min-height: 52px; border: 1px solid #dce6f2; border-radius: 13px; background: #ffffff; box-shadow: 0 3px 10px rgba(22, 54, 91, .025); transition: border-color .22s ease, box-shadow .22s ease, transform .22s ease, background .22s ease; }
-.recovery-form .input-group:hover { border-color: #bfd3eb; box-shadow: 0 4px 14px rgba(22, 54, 91, .045); }
-.recovery-form .input-group:focus-within { border-color: #6aa0e4; background: #ffffff; box-shadow: 0 0 0 4px rgba(35, 105, 199, .09), 0 7px 17px rgba(22, 54, 91, .045); }
-.recovery-form .input-group:has(.form-control.is-invalid) { border-color: #e8a5ad; background: #fffafb; }
-.recovery-form .input-group:has(.form-control.is-invalid):focus-within { border-color: #da7581; box-shadow: 0 0 0 4px rgba(220, 68, 88, .075); }
-.recovery-form .input-group-text { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; padding: 0 .9rem; border: 0 !important; border-radius: 12px 0 0 12px !important; background: transparent !important; color: #8197b3 !important; font-size: 1.05rem; transition: color .2s ease; }
-.recovery-form .input-group:focus-within .input-group-text { color: var(--recovery-blue) !important; }
-.recovery-form .form-control { min-width: 0; min-height: 50px; padding: .75rem .6rem .75rem 0; border: 0 !important; border-radius: 0 12px 12px 0 !important; background: transparent !important; color: #243c5a; outline: 0; box-shadow: none !important; font-size: .86rem; }
-.recovery-form .form-control::placeholder { color: #a0afc1; opacity: 1; }
-.recovery-form .form-control.is-invalid { background-image: none; }
-.recovery-form .invalid-feedback, .recovery-form .form-hint { font-size: .76rem; line-height: 1.6; }
-.recovery-field-hint { display: flex; align-items: flex-start; gap: .4rem; margin-top: .65rem; color: #8a9bb0; font-size: .72rem; line-height: 1.6; }
-.recovery-field-hint .bi { margin-top: 2px; flex-shrink: 0; color: #7296c3; }
-.recovery-form .recovery-submit { position: relative; display: flex; align-items: center; justify-content: center; gap: .55rem; min-height: 51px; padding: .8rem 1.1rem; overflow: hidden; border: 1px solid #2467c5; border-radius: 13px !important; background: linear-gradient(115deg, #2d78d4 0%, #205eb8 52%, #184e9d 100%) !important; color: #ffffff; box-shadow: 0 7px 18px rgba(35, 105, 199, .2), inset 0 1px 0 rgba(255, 255, 255, .15); font-size: .87rem; font-weight: 750; letter-spacing: .005em; transition: transform .22s ease, box-shadow .22s ease, filter .22s ease; }
-.recovery-form .recovery-submit::before { content: ""; position: absolute; top: 0; left: -120%; width: 70%; height: 100%; background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .2), transparent); transform: skewX(-18deg); pointer-events: none; }
-.recovery-form .recovery-submit:hover { color: #ffffff; filter: saturate(1.08); transform: translateY(-2px); box-shadow: 0 11px 24px rgba(35, 105, 199, .27), inset 0 1px 0 rgba(255, 255, 255, .2); }
-.recovery-form .recovery-submit:hover::before { animation: qaute-shine .75s ease; }
-.recovery-form .recovery-submit:active { transform: translateY(0) scale(.99); }
-.recovery-form .recovery-submit:focus-visible { outline-offset: 4px; }
-.recovery-form .recovery-submit .bi { font-size: 1rem; }
-.recovery-assurance { display: flex; align-items: flex-start; gap: .65rem; margin-top: 1.3rem; padding: .9rem .95rem; border: 1px solid #e2ecf8; border-radius: 12px; background: linear-gradient(125deg, rgba(245, 249, 255, .95), rgba(255, 255, 255, .9)); }
-.recovery-assurance-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 10px; background: #e5f1ff; color: #3478c8; font-size: .95rem; }
-.recovery-assurance-copy { min-width: 0; }
-.recovery-assurance-title { margin: 0 0 .2rem; color: #385571; font-size: .75rem; font-weight: 750; }
-.recovery-assurance-text { margin: 0; color: #8595a9; font-size: .7rem; line-height: 1.6; }
-.recovery-divider { height: 1px; margin: 1.5rem 0 1.15rem; border: 0; background: linear-gradient(90deg, transparent, #e1eaf4 18%, #e1eaf4 82%, transparent); }
-.recovery-back { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; color: #7d8fa6; font-size: .78rem; line-height: 1.7; }
-.recovery-back a { display: inline-flex; align-items: center; gap: .3rem; color: #286bbd !important; font-weight: 750; text-decoration: none !important; transition: color .2s ease, gap .2s ease; }
-.recovery-back a:hover { gap: .5rem; color: #174b96 !important; }
-.recovery-back a .bi { font-size: .9rem; }
-@media (max-width: 575.98px) {
-  .forgot-recovery::before { top: -25px; right: -24px; width: 105px; height: 105px; }
-  .forgot-recovery::after { left: -20px; bottom: -25px; width: 75px; height: 75px; }
-  .recovery-heading { margin-bottom: 1.4rem; }
-  .recovery-title { font-size: 1.55rem; }
-  .recovery-icon-wrap { width: 60px; height: 60px; margin-bottom: 1.15rem; border-radius: 18px; }
-  .recovery-icon-wrap .bi { font-size: 1.65rem; }
-  .recovery-form .input-group { min-height: 49px; }
-  .recovery-form .input-group-text { min-width: 43px; padding-right: .7rem; padding-left: .7rem; }
-  .recovery-form .form-control { min-height: 47px; font-size: .82rem; }
-  .recovery-form .recovery-submit { min-height: 48px; }
-  .recovery-assurance { padding: .8rem; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .forgot-recovery, .forgot-recovery *, .forgot-recovery *::before, .forgot-recovery *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-}
-</style>
+
+<head>
+    <title>Quên mật khẩu</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/pages/auth/forgot-password.css">
+</head>
+
 
 
 
@@ -111,8 +52,7 @@
             <qa:formError field="identifier"/>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-3 shadow-sm recovery-submit"
-                style="background-color: var(--hcmute-blue); border-color: var(--hcmute-blue);">
+        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-3 shadow-sm recovery-submit u-bg-color-var-hcmute-blue u-border-color-var-hcmute-blue">
             <i class="bi bi-send-fill"></i>
             Gửi mã OTP xác nhận
         </button>
