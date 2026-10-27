@@ -18,7 +18,7 @@
             <c:if test="${not empty traceId}">
                 <p class="text-secondary">Mã tham chiếu: <c:out value="${traceId}"/></p>
             </c:if>
-<pre style="color: red; text-align: left; max-width: 900px; margin: 20px auto; overflow: auto; background: #fff; padding: 15px; border: 1px solid #ccc;">
+<pre class="u-color-red u-text-align-left u-max-w-900px u-margin-20px-auto u-overflow-auto u-bg-fff u-padding-15px u-border-1px-solid-ccc">
 Exception: ${requestScope['jakarta.servlet.error.exception']}
 Message: ${requestScope['jakarta.servlet.error.message']}
 <%

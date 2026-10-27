@@ -1,0 +1,376 @@
+/* ==========================================================================
+   STUDENT CHAT & CHAT HISTORY - MODERN DESIGN SYSTEM 2026
+   Palette: Azure Navy (#091e3e) -> Royal Blue (#124991) -> Deep Teal (#087d92)
+   Accent: Electric Cyan (#00d2ff), Emerald (#10b981), Amber (#f59e0b)
+   ========================================================================== */
+.qa-page-student-chat {
+    --student-primary: #124991;
+    --student-primary-dark: #091e3e;
+    --student-teal: #087d92;
+    --student-cyan: #00d2ff;
+    --student-emerald: #10b981;
+    --student-amber: #f59e0b;
+    --student-border: #e2e8f0;
+    --student-card-shadow: 0 10px 30px -5px rgba(9, 30, 62, 0.07), 0 4px 10px -2px rgba(9, 30, 62, 0.04);
+    min-width: 0;
+    color: #1e293b;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* 1. HERO BANNER */
+.qa-page-student-chat .student-hero-banner {
+    position: relative;
+    background: linear-gradient(135deg, #091e3e 0%, #124991 55%, #087d92 100%);
+    border-radius: 24px;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    color: #ffffff;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px -15px rgba(9, 30, 62, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.qa-page-student-chat .student-hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -10%;
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(0, 210, 255, 0.22) 0%, rgba(18, 73, 145, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.qa-page-student-chat .student-hero-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    left: 20%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, rgba(9, 30, 62, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.qa-page-student-chat .hero-content-wrap {
+    position: relative;
+    z-index: 2;
+}
+.qa-page-student-chat .hero-eyebrow-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    padding: 0.35rem 0.95rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #bbf2f6;
+    margin-bottom: 0.75rem;
+}
+.qa-page-student-chat .hero-eyebrow-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--student-cyan);
+    box-shadow: 0 0 10px var(--student-cyan);
+    animation: studentPulse 2s infinite ease-in-out;
+}
+@keyframes studentPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.35); opacity: 0.7; }
+}
+.qa-page-student-chat .hero-title {
+    font-size: clamp(1.45rem, 2.5vw, 2.15rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+.qa-page-student-chat .hero-subtitle {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 650px;
+    line-height: 1.55;
+    margin: 0;
+}
+.qa-page-student-chat .hero-action-btn {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: 0.6rem 1.15rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.22s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.qa-page-student-chat .hero-action-btn:hover {
+    background: rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+.qa-page-student-chat .hero-action-btn.btn-active-white {
+    background: #ffffff;
+    color: #091e3e;
+    border-color: #ffffff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+.qa-page-student-chat .hero-action-btn.btn-active-white:hover {
+    background: #f8fafc;
+    color: #124991;
+}
+
+/* 2. MAIN CARD STYLING */
+.qa-page-student-chat .card {
+    border: 1px solid var(--student-border);
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: var(--student-card-shadow);
+    transition: all 0.25s ease;
+    overflow: hidden;
+}
+.qa-page-student-chat .card-header {
+    background: linear-gradient(135deg, #091e3e 0%, #124991 70%, #087d92 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.25rem 1.6rem;
+    color: #ffffff;
+}
+.qa-page-student-chat .history-card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.25rem 1.6rem;
+    color: #091e3e;
+}
+.qa-page-student-chat .card-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+.qa-page-student-chat .card-body {
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+}
+.qa-page-student-chat .card-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 1.15rem 1.6rem;
+}
+
+/* 3. FORM CONTROLS */
+.qa-page-student-chat .form-label {
+    color: #1e293b;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+}
+.qa-page-student-chat .form-label.required::after {
+    content: " *";
+    color: #ef4444;
+    font-weight: bold;
+}
+.qa-page-student-chat .form-control,
+.qa-page-student-chat .form-select {
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 0.65rem 0.95rem;
+    color: #1e293b;
+    font-size: 0.92rem;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.qa-page-student-chat .form-control:focus,
+.qa-page-student-chat .form-select:focus {
+    border-color: #124991;
+    box-shadow: 0 0 0 4px rgba(18, 73, 145, 0.12);
+    outline: none;
+}
+
+/* 4. BUTTONS */
+.qa-page-student-chat .btn {
+    border-radius: 12px;
+    font-weight: 700;
+    padding: 0.65rem 1.45rem;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.qa-page-student-chat .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+.qa-page-student-chat .btn-primary {
+    background: linear-gradient(135deg, #124991 0%, #087d92 100%);
+    border: none;
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(18, 73, 145, 0.28);
+}
+.qa-page-student-chat .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #091e3e 0%, #124991 100%);
+    box-shadow: 0 8px 22px rgba(18, 73, 145, 0.38);
+}
+.qa-page-student-chat .btn-outline-secondary {
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+    background: #ffffff;
+}
+.qa-page-student-chat .btn-outline-secondary:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+/* 5. CHAT ROOM & MESSAGES */
+.qa-page-student-chat .qa-chat-room {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+}
+.qa-page-student-chat .qa-chat-messages {
+    height: 460px;
+    max-height: 62vh;
+    overflow-y: auto;
+    padding: 1.25rem;
+    background: radial-gradient(circle at 100% 0%, rgba(18, 73, 145, 0.05), transparent 40%), #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+.qa-page-student-chat .qa-chat-row {
+    display: flex;
+    width: 100%;
+}
+.qa-page-student-chat .qa-chat-row.qa-chat-me {
+    justify-content: flex-end;
+}
+.qa-page-student-chat .qa-chat-row.qa-chat-other {
+    justify-content: flex-start;
+}
+.qa-page-student-chat .qa-chat-row.qa-chat-system {
+    justify-content: center;
+}
+.qa-page-student-chat .qa-chat-bubble {
+    max-width: 78%;
+    padding: 0.75rem 1rem;
+    border-radius: 16px;
+    position: relative;
+    word-break: break-word;
+    white-space: pre-wrap;
+    line-height: 1.55;
+    font-size: 0.92rem;
+}
+.qa-page-student-chat .qa-chat-me .qa-chat-bubble {
+    background: linear-gradient(135deg, #124991 0%, #087d92 100%);
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 5px 15px rgba(18, 73, 145, 0.2);
+}
+.qa-page-student-chat .qa-chat-other .qa-chat-bubble {
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+.qa-page-student-chat .qa-chat-system .qa-chat-bubble {
+    background-color: #f1f5f9;
+    color: #64748b;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.95rem;
+    border-radius: 999px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+}
+.qa-page-student-chat .qa-chat-sender {
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    display: block;
+    color: #087d92;
+}
+.qa-page-student-chat .qa-chat-meta {
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.3rem;
+    margin-top: 0.35rem;
+    opacity: 0.85;
+}
+.qa-page-student-chat .qa-chat-typing {
+    font-size: 0.82rem;
+    color: #64748b;
+    font-style: italic;
+    padding: 0.4rem 1.25rem;
+    min-height: 1.8rem;
+    background-color: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+}
+.qa-page-student-chat .qa-chat-star-rating {
+    display: inline-flex;
+    gap: 0.35rem;
+    font-size: 2rem;
+    color: #cbd5e1;
+    cursor: pointer;
+}
+.qa-page-student-chat .qa-chat-star-rating .qa-star {
+    transition: all 0.15s ease;
+}
+.qa-page-student-chat .qa-chat-star-rating .qa-star:hover,
+.qa-page-student-chat .qa-chat-star-rating .qa-star.active {
+    color: #f59e0b;
+    transform: scale(1.15);
+}
+
+/* 6. HISTORY TABLE STYLING */
+.qa-page-student-chat .history-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+.qa-page-student-chat .history-table thead th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.25rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+.qa-page-student-chat .history-table tbody td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+.qa-page-student-chat .history-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+.qa-page-student-chat .history-table tbody tr:hover {
+    background-color: #f8faff;
+}
+
+/* RESPONSIVE */
+@media (max-width: 767.98px) {
+    .qa-page-student-chat .student-hero-banner {
+        border-radius: 18px;
+        padding: 1.25rem;
+    }
+    .qa-page-student-chat .qa-chat-messages {
+        height: 380px;
+    }
+}

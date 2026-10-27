@@ -30,7 +30,7 @@
                         <div id="chat-history-subtitle" class="small text-secondary"></div>
                     </div>
                 </div>
-                <div id="chat-history-messages" class="card-body overflow-auto" style="height:65vh"
+                <div id="chat-history-messages" class="card-body overflow-auto u-height-65vh"
                      aria-live="polite">
                     <div class="text-secondary">Chọn một phiên để xem nội dung.</div>
                 </div>

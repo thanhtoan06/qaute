@@ -1,8 +1,26 @@
 (function (window, document) {
     'use strict';
 
-    var ctx = window.APPT_CTX || '';
-    var tree = window.APPT_TREE || [];
+    var treeData = document.getElementById('appointment-tree-data');
+    var ctx = treeData ? treeData.getAttribute('data-context-path') : '';
+    var tree = treeData ? Array.prototype.map.call(treeData.children, function (department) {
+        return {
+            id: Number(department.getAttribute('data-department-id')),
+            name: department.getAttribute('data-department-name'),
+            categories: Array.prototype.map.call(department.children, function (category) {
+                return {
+                    id: Number(category.getAttribute('data-category-id')),
+                    name: category.getAttribute('data-category-name'),
+                    children: Array.prototype.map.call(category.children, function (subcategory) {
+                        return {
+                            id: Number(subcategory.getAttribute('data-subcategory-id')),
+                            name: subcategory.getAttribute('data-subcategory-name')
+                        };
+                    })
+                };
+            })
+        };
+    }) : [];
 
     var currentStep = 1;
     var selectedAdvisorId = null;

@@ -1,0 +1,2 @@
+.slot-btn { min-width: 110px; transition: all 0.15s ease-in-out; }
+.slot-btn.selected { background-color: var(--tblr-primary) !important; color: #fff !important; border-color: var(--tblr-primary) !important; }
