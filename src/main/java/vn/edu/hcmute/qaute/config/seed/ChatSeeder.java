@@ -32,10 +32,8 @@ import vn.edu.hcmute.qaute.service.organization.ManagerScopeService;
 @Profile("demo")
 @RequiredArgsConstructor
 public class ChatSeeder implements DemoSeeder {
-    private static final String[] LEGACY_STUDENT_EMAILS = {
-        "24162129@student.hcmute.edu.vn",
-        "24162130@student.hcmute.edu.vn"
-    };
+    // Hai fixture đầu tiên thuộc về các tài khoản demo đã được gỡ bỏ.
+    private static final int REMOVED_LEGACY_STUDENT_DEMO_COUNT = 2;
 
     private static final String[][] MANAGER_ACCOUNTS = {
         {"DT", "manager.daotao@qaute.edu.vn"},
@@ -1018,13 +1016,15 @@ public class ChatSeeder implements DemoSeeder {
         }
 
         for (int index = 0; index < CATEGORY_CODES.length; index++) {
+            if (index < REMOVED_LEGACY_STUDENT_DEMO_COUNT) {
+                continue;
+            }
+
             String categoryCode = CATEGORY_CODES[index];
             String[] dialogue = DIALOGUES[index];
             int studentNumber = STUDENT_NUMBERS[index];
             String initialQuestion = dialogue[0];
-            String studentEmail = index < LEGACY_STUDENT_EMAILS.length
-                    ? LEGACY_STUDENT_EMAILS[index]
-                    : String.valueOf(111111 + studentNumber - 1) + "@qaute.edu.vn";
+            String studentEmail = String.valueOf(111111 + studentNumber - 1) + "@qaute.edu.vn";
             User student = user(studentEmail);
             if (sessions.existsByStudentIdAndInitialQuestion(student.getId(), initialQuestion)) {
                 continue;

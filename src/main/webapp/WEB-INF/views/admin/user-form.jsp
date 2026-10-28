@@ -21,12 +21,12 @@
       <div class="card-body">
         <c:if test="${not empty errors['global']}"><div class="alert alert-danger"><c:out value="${errors['global']}"/></div></c:if>
         <!-- Chế độ sửa: hiển thị vai trò và email -->
+        <!-- Chế độ tạo: chọn vai trò và nhập email -->
         <c:choose>
           <c:when test="${isEdit}">
             <div class="mb-3"><label class="form-label">Vai trò</label><div><c:out value="${account.role()}"/></div></div>
             <div class="mb-3"><label class="form-label">Email</label><div><c:out value="${account.email()}"/></div></div>
           </c:when>
-          <!-- Chế độ tạo: chọn vai trò và nhập email -->
           <c:otherwise>
             <div class="mb-3"><label class="form-label required" for="role">Vai trò</label>
               <select class="form-select ${not empty errors['role'] ? 'is-invalid' : ''}" id="role" name="role" required>
