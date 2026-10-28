@@ -72,5 +72,5 @@
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
-<script src="${ctx}/assets/js/admin/reports.js" defer></script>
+<script src="${ctx}/assets/js/admin/reports.js?v=20261029a" defer></script>
 </div>

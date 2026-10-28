@@ -18,18 +18,18 @@
   // Định dạng giá trị phần trăm.
   const pct = value => `${format(value)}%`;
 
-  // Chuyển ngày thành chuỗi YYYY-MM-DD theo giờ địa phương.
+  // Chuyển ngày thành chuỗi YYYY-MM-DD theo ngày Việt Nam.
   function localDate(date) {
-    const year = date.getFullYear(), month = String(date.getMonth() + 1).padStart(2, '0');
-    return `${year}-${month}-${String(date.getDate()).padStart(2, '0')}`;
+    const year = date.getUTCFullYear(), month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-${String(date.getUTCDate()).padStart(2, '0')}`;
   }
 
   // Cập nhật ngày bắt đầu và kết thúc theo khoảng thời gian định sẵn.
   function updatePresetDates() {
     if (range.value === 'custom') return;
-    const end = new Date();
+    const end = new Date(Qaute.todayDateValue() + 'T00:00:00Z');
     const start = new Date(end);
-    start.setDate(end.getDate() - Number(range.value) + 1);
+    start.setUTCDate(end.getUTCDate() - Number(range.value) + 1);
     from.value = localDate(start);
     to.value = localDate(end);
   }

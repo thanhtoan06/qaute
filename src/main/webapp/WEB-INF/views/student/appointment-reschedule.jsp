@@ -62,7 +62,7 @@
                                 <div class="text-secondary small">Thời gian hiện tại:</div>
                                 <div class="text-danger fw-semibold">
                                     <i class="bi bi-clock me-1"></i>
-                                    <c:out value="${appointment.startAt()}"/> – <c:out value="${appointment.endAt().toLocalTime()}"/>
+                                    <time datetime="${appointment.startAt()}" data-qaute-datetime><c:out value="${appointment.startAt()}"/></time> – <c:out value="${appointment.endAt().toLocalTime()}"/>
                                 </div>
                             </div>
                         </div>
@@ -145,5 +145,5 @@
     </div>
 </div>
 
-<script src="${pageContext.request.contextPath}/assets/js/pages/student/appointment-reschedule.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/pages/student/appointment-reschedule.js?v=20261028a"></script>
 </div>

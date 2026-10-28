@@ -92,7 +92,7 @@
                                 <div class="appointment-card-header">
                                     <div class="time-chip">
                                         <i class="bi bi-clock-fill text-primary"></i>
-                                        <span><c:out value="${item.startAt()}"/> – <c:out value="${item.endAt().toLocalTime()}"/></span>
+                                        <span><time datetime="${item.startAt()}" data-qaute-datetime><c:out value="${item.startAt()}"/></time> – <c:out value="${item.endAt().toLocalTime()}"/></span>
                                     </div>
                                     <div>
                                         <c:choose>

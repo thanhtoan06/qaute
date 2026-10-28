@@ -489,5 +489,5 @@
     </div>
 </div>
 
-<script src="${ctx}/assets/js/student/chat-student.js?v=20261030"></script>
+<script src="${ctx}/assets/js/student/chat-student.js?v=20261029a"></script>
 </div>

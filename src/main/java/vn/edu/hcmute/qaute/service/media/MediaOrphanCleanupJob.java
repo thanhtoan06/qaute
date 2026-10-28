@@ -21,7 +21,7 @@ public class MediaOrphanCleanupJob {
         this.media = media;
     }
 
-    @Scheduled(cron = "0 30 3 * * *")
+    @Scheduled(cron = "0 30 3 * * *", zone = "Asia/Ho_Chi_Minh")
     // Xóa các tài nguyên mồ côi đã tồn tại quá 24 giờ.
     public void removeOrphans() {
         jobs.run("media-orphan-cleanup", () -> assets

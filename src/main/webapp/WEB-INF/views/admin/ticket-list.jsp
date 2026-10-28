@@ -209,7 +209,7 @@
                     </c:choose>
                   </td>
                   <td class="small text-secondary text-nowrap">
-                    <i class="bi bi-clock me-1 text-muted"></i><c:out value="${item.createdAt()}"/>
+                    <i class="bi bi-clock me-1 text-muted"></i><time datetime="${item.createdAt()}" data-qaute-datetime><c:out value="${item.createdAt()}"/></time>
                   </td>
                   <td class="text-end text-nowrap">
                     <a class="btn btn-sm btn-outline-primary" href="${ctx}/admin/tickets/${item.id()}">

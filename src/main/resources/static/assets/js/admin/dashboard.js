@@ -74,7 +74,7 @@
         item => ({title: item.name, detail: `${number(item.count)} lượt`, url: '/admin/faq/synonyms'}));
       list('adm-alert-ratings', d.lowRatings, item => item);
       list('adm-alert-audit', d.recentActivity,
-        item => ({title: item.action, detail: item.at ? new Date(item.at).toLocaleString('vi-VN') : ''}));
+        item => ({title: item.action, detail: item.at ? Qaute.formatDateTime(item.at) : ''}));
       el('adm-dashboard-content').classList.remove('d-none');
       chart('adm-d-chart-daily', 'line', d.daily30.map(item => new Date(item.day + 'T00:00:00').toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'})),
         d.daily30.map(item => item.count), '#206bc4');

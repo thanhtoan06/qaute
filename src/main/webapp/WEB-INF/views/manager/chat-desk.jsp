@@ -111,6 +111,6 @@
 </div>
 
 <div class="modal fade" id="chat-transfer-modal" tabindex="-1" aria-labelledby="chat-transfer-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h3 id="chat-transfer-label" class="modal-title">Chuyển hội thoại</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div><div class="modal-body"><label for="chat-transfer-target" class="form-label">Tư vấn viên nhận</label><select id="chat-transfer-target" class="form-select"></select></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button><button id="chat-transfer-confirm" type="button" class="btn btn-primary">Chuyển</button></div></div></div></div>
-<script src="${ctx}/assets/js/manager/chat-desk.js?v=20261028" defer></script>
+<script src="${ctx}/assets/js/manager/chat-desk.js?v=20261029a" defer></script>
 <script src="${pageContext.request.contextPath}/assets/js/pages/manager/chat-desk.js"></script>
 </div>

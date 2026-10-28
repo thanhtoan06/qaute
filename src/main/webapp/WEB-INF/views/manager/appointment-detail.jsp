@@ -14,7 +14,7 @@
 <div class="row g-3">
   <div class="col-12 col-lg-7"><div class="card"><div class="card-header"><h3 class="card-title"><c:out value="${appointment.topic()}"/></h3></div><div class="card-body">
     <dl class="row mb-0">
-      <dt class="col-sm-4">Thời gian</dt><dd class="col-sm-8"><c:out value="${appointment.startAt()}"/> – <c:out value="${appointment.endAt().toLocalTime()}"/></dd>
+      <dt class="col-sm-4">Thời gian</dt><dd class="col-sm-8"><time datetime="${appointment.startAt()}" data-qaute-datetime><c:out value="${appointment.startAt()}"/></time> – <c:out value="${appointment.endAt().toLocalTime()}"/></dd>
       <dt class="col-sm-4">Trạng thái</dt><dd class="col-sm-8"><span class="badge bg-blue-lt"><c:out value="${appointment.status()}"/></span></dd>
       <dt class="col-sm-4">Hình thức</dt><dd class="col-sm-8"><c:out value="${appointment.modality()}"/></dd>
       <dt class="col-sm-4">Địa điểm</dt><dd class="col-sm-8"><c:out value="${appointment.location()}"/></dd>

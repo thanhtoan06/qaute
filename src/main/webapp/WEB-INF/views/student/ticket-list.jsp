@@ -237,7 +237,7 @@
                                         </c:choose>
                                     </td>
                                     <td class="text-secondary small text-nowrap">
-                                        <i class="bi bi-clock-history me-1 text-muted"></i><c:out value="${item.lastActivityAt()}"/>
+                                        <i class="bi bi-clock-history me-1 text-muted"></i><time datetime="${item.lastActivityAt()}" data-qaute-datetime><c:out value="${item.lastActivityAt()}"/></time>
                                     </td>
                                     <td class="text-end text-nowrap">
                                         <a href="${ctx}/student/tickets/${item.id()}" class="btn btn-sm btn-outline-primary">
@@ -270,7 +270,7 @@
                                         </c:if>
                                     </span>
                                     <span class="text-muted small">
-                                        <i class="bi bi-clock me-1"></i><c:out value="${item.lastActivityAt()}"/>
+                                        <i class="bi bi-clock me-1"></i><time datetime="${item.lastActivityAt()}" data-qaute-datetime><c:out value="${item.lastActivityAt()}"/></time>
                                     </span>
                                 </div>
                             </div>

@@ -380,7 +380,7 @@
                                     <div class="card bg-primary-lt p-2 border-0">
                                         <div class="fw-bold text-primary">
                                             <i class="bi bi-clock-fill me-1"></i>
-                                            <c:out value="${dashboard.nextAppointment().startAt()}"/> – <c:out value="${dashboard.nextAppointment().endAt().toLocalTime()}"/>
+                                            <time datetime="${dashboard.nextAppointment().startAt()}" data-qaute-datetime><c:out value="${dashboard.nextAppointment().startAt()}"/></time> – <c:out value="${dashboard.nextAppointment().endAt().toLocalTime()}"/>
                                         </div>
                                     </div>
                                     <h4 class="card-title">

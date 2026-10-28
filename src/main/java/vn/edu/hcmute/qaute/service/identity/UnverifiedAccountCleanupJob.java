@@ -38,7 +38,7 @@ public class UnverifiedAccountCleanupJob {
     }
 
     // Xóa tài khoản chờ xác minh đã quá thời hạn cấu hình.
-    @Scheduled(cron = "0 15 * * * *")
+    @Scheduled(cron = "0 15 * * * *", zone = "Asia/Ho_Chi_Minh")
     @Transactional
     public void cleanup() {
         jobExecutionTemplate.run("unverified-account-cleanup", () -> {

@@ -21,7 +21,7 @@
   <c:otherwise><div class="row g-3">
     <c:forEach var="item" items="${result.content}"><div class="col-12 col-lg-6">
       <div class="card h-100"><div class="card-body">
-        <div class="d-flex justify-content-between gap-2 mb-2"><strong><c:out value="${item.startAt()}"/> – <c:out value="${item.endAt().toLocalTime()}"/></strong><span class="badge bg-blue-lt"><c:out value="${item.status()}"/></span></div>
+        <div class="d-flex justify-content-between gap-2 mb-2"><strong><time datetime="${item.startAt()}" data-qaute-datetime><c:out value="${item.startAt()}"/></time> – <c:out value="${item.endAt().toLocalTime()}"/></strong><span class="badge bg-blue-lt"><c:out value="${item.status()}"/></span></div>
         <h3 class="card-title"><c:out value="${item.topic()}"/></h3>
         <div>Sinh viên: <strong><c:out value="${item.student().user().fullName()}"/></strong></div>
         <div class="text-secondary"><c:out value="${item.categoryPath()}"/></div>

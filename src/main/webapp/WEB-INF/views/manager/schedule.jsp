@@ -85,7 +85,7 @@
   <div class="col-12 col-xl-5">
     <div class="card mb-3"><div class="card-header"><h3 class="card-title">Khung chặn</h3></div><div class="card-body">
       <c:choose><c:when test="${empty blocks}"><p class="text-secondary">Chưa có khung chặn sắp tới.</p></c:when><c:otherwise><c:forEach var="block" items="${blocks}">
-        <div class="d-flex justify-content-between gap-2 border-bottom py-2"><div><strong><c:out value="${block.startAt}"/> – <c:out value="${block.endAt}"/></strong><div class="small text-secondary"><c:out value="${block.reason}"/></div></div>
+        <div class="d-flex justify-content-between gap-2 border-bottom py-2"><div><strong><time datetime="${block.startAt}" data-qaute-datetime><c:out value="${block.startAt}"/></time> – <time datetime="${block.endAt}" data-qaute-datetime><c:out value="${block.endAt}"/></time></strong><div class="small text-secondary"><c:out value="${block.reason}"/></div></div>
         <form method="post" action="${ctx}/manager/schedule/blocks/${block.id}/delete"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/><button class="btn btn-sm btn-outline-danger">Bỏ chặn</button></form></div>
       </c:forEach></c:otherwise></c:choose>
     </div></div>

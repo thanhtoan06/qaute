@@ -349,5 +349,5 @@
         </div>
     </c:forEach>
 </div>
-<script src="${ctx}/assets/js/student/appointment-book.js?v=20261026b"></script>
+<script src="${ctx}/assets/js/student/appointment-book.js?v=20261028a"></script>
 </div>

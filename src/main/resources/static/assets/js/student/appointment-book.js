@@ -61,23 +61,23 @@
 
     // Định dạng ngày theo chuẩn yyyy-MM-dd.
     function formatDateValue(date) {
-        return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0')
-            + '-' + String(date.getDate()).padStart(2, '0');
+        return date.getUTCFullYear() + '-' + String(date.getUTCMonth() + 1).padStart(2, '0')
+            + '-' + String(date.getUTCDate()).padStart(2, '0');
     }
 
     // Tạo các lựa chọn ngày làm việc sắp tới.
     function renderQuickDates() {
         if (!quickDateGrid || !dateInput) return;
-        var date = new Date();
+        var date = new Date(Qaute.todayDateValue() + 'T00:00:00Z');
         var html = '';
         var count = 0;
         while (count < 6) {
-            date.setDate(date.getDate() + 1);
-            if (date.getDay() === 0 || date.getDay() === 6) continue;
+            date.setUTCDate(date.getUTCDate() + 1);
+            if (date.getUTCDay() === 0 || date.getUTCDay() === 6) continue;
             var value = formatDateValue(date);
-            var label = date.toLocaleDateString('vi-VN', {weekday: 'short'}).replace('.', '');
-            var day = String(date.getDate()).padStart(2, '0');
-            var month = String(date.getMonth() + 1).padStart(2, '0');
+            var label = new Intl.DateTimeFormat('vi-VN', {weekday: 'short', timeZone: 'UTC'}).format(date).replace('.', '');
+            var day = String(date.getUTCDate()).padStart(2, '0');
+            var month = String(date.getUTCMonth() + 1).padStart(2, '0');
             html += '<button type="button" class="btn btn-outline-secondary quick-date-btn w-100"'
                 + ' data-date="' + value + '"><span class="quick-date-weekday small">' + escH(label)
                 + '</span><strong class="quick-date-value">' + day + '/' + month + '</strong></button>';
@@ -104,7 +104,7 @@
     }
 
     // Đặt ngày tối thiểu theo ngày địa phương của sinh viên.
-    var today = formatDateValue(new Date());
+    var today = Qaute.todayDateValue();
     if (dateInput) { dateInput.min = today; if (!dateInput.value) dateInput.value = today; }
 
     // ─── Step navigation ─────────────────────────────────────────────────────
@@ -324,9 +324,7 @@
         slotGrid.innerHTML = '';
         // Tạo giao diện và thao tác chọn cho từng khung giờ.
         slots.forEach(function (slot) {
-            var start = new Date(slot.startAt);
-            var end   = new Date(slot.endAt);
-            var timeLabel = fmtTime(start) + ' – ' + fmtTime(end);
+            var timeLabel = Qaute.formatTime(slot.startAt) + ' – ' + Qaute.formatTime(slot.endAt);
             var mIcon = slot.modality === 'ONLINE' ? 'bi-camera-video-fill'
                 : slot.modality === 'IN_PERSON' ? 'bi-geo-alt-fill' : 'bi-arrow-left-right';
             var mLabel = slot.modality === 'ONLINE' ? 'Online' : slot.modality === 'IN_PERSON' ? 'Trực tiếp' : 'Linh hoạt';
@@ -394,11 +392,6 @@
         btnNext2.disabled = !selectedSlot || !requested;
         slotModalityEmpty.style.display = requested && slots.length && !visibleCount
             ? 'block' : 'none';
-    }
-
-    // Định dạng thời gian theo giờ và phút.
-    function fmtTime(d) {
-        return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
     }
 
     if (dateInput) dateInput.addEventListener('change', loadSlots);

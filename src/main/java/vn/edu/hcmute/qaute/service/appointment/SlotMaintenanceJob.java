@@ -17,7 +17,7 @@ public class SlotMaintenanceJob {
     }
 
     // Tạo khung giờ mới và hết hạn các khung giờ đã qua.
-    @Scheduled(cron = "0 10 0 * * *")
+    @Scheduled(cron = "0 10 0 * * *", zone = "Asia/Ho_Chi_Minh")
     public void maintain() {
         jobs.run("appointment-slots", () -> {
             slots.generateAll();

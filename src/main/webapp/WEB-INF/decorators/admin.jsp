@@ -291,7 +291,7 @@
 
                         <%@ include file="/WEB-INF/views/common/scripts.jspf" %>
                         <%@ include file="/WEB-INF/views/common/ws-scripts.jspf" %>
-                            <script src="${pageContext.request.contextPath}/assets/js/workspace.js" defer></script>
+                            <script src="${pageContext.request.contextPath}/assets/js/workspace.js?v=20261029a" defer></script>
                     </body>
 
                     </html>

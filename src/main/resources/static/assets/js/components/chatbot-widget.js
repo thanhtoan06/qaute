@@ -143,7 +143,7 @@
         if (e && e.preventDefault) e.preventDefault();
         var text = (input.value || '').trim();
         if (!text) return;
-        var now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        var now = window.Qaute.formatTime(new Date().toISOString());
         var userHtml = '<div class="qaute-msg-row qaute-msg-user">' +
             '<div class="qaute-bubble qaute-bubble-user">' +
             escapeHtml(text) +
