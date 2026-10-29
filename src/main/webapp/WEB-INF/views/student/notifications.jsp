@@ -148,5 +148,5 @@
     </c:choose>
 </section>
 
-<script src="${pageContext.request.contextPath}/assets/js/pages/student/notifications.js?v=20261029a"></script>
+<script src="${pageContext.request.contextPath}/assets/js/pages/student/notifications.js?v=20261029a" defer></script>
 </div>

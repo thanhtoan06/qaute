@@ -306,8 +306,8 @@
         linear-gradient(135deg, rgba(255, 255, 255, .98), rgba(247, 249, 255, .96)),
         #fff;
     box-shadow: 0 18px 36px rgba(35, 59, 103, .07);
-    opacity: 0;
-    transform: translateY(18px);
+    opacity: 1;
+    transform: translateY(0);
     transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease, background .24s ease;
 }
 .qa-page-admin-notifications .notification-list-item.is-visible {

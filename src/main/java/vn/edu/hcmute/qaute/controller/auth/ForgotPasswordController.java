@@ -59,9 +59,13 @@ public class ForgotPasswordController {
 
         String identifier = form.getIdentifier().trim();
         try {
-            passwordResetService.start(identifier);
-            redirectAttributes.addFlashAttribute("flashSuccess",
-                    "Nếu tài khoản tồn tại, mã OTP đã được gửi tới email");
+            if (!passwordResetService.start(identifier)) {
+                redirectAttributes.addFlashAttribute("flashError",
+                        "Email hoặc MSSV chưa được đăng ký, hoặc tài khoản chưa được kích hoạt.");
+                redirectAttributes.addFlashAttribute("form", form);
+                return "redirect:/auth/forgot-password";
+            }
+            redirectAttributes.addFlashAttribute("flashSuccess", "Mã OTP đã được gửi tới email của bạn.");
         } catch (RateLimitException exception) {
             redirectAttributes.addFlashAttribute("flashError", exception.getMessage());
         }

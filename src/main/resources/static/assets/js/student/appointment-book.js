@@ -138,6 +138,7 @@
         // Nạp chuyên mục tương ứng với phòng ban đã chọn.
         deptSelect.addEventListener('change', function () {
             var deptId = Number(this.value);
+            var selectedCategoryId = fCategoryId.value;
             catSelect.innerHTML = '<option value="">-- Chọn chuyên mục --</option>';
             catSelect.disabled = true;
             fCategoryId.value = '';
@@ -165,6 +166,10 @@
                 });
             });
             catSelect.disabled = false;
+            if (selectedCategoryId && catSelect.querySelector('option[value="' + selectedCategoryId + '"]')) {
+                catSelect.value = selectedCategoryId;
+                catSelect.dispatchEvent(new Event('change'));
+            }
         });
     }
 
@@ -488,5 +493,19 @@
 
     // ─── Init ─────────────────────────────────────────────────────────────────
     populateDepts();
+    if (deptSelect) {
+        var savedCategoryId = fCategoryId.value;
+        if (savedCategoryId) {
+            var selectedDepartment = tree.find(function (dept) {
+                return (dept.categories || []).some(function (category) {
+                    return String(category.id) === savedCategoryId || (category.children || []).some(function (subcategory) {
+                        return String(subcategory.id) === savedCategoryId;
+                    });
+                });
+            });
+            if (selectedDepartment) deptSelect.value = String(selectedDepartment.id);
+        }
+        deptSelect.dispatchEvent(new Event('change'));
+    }
 
 }(window, document));

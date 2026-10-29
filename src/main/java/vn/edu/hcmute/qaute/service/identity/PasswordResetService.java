@@ -57,11 +57,15 @@ public class PasswordResetService {
         this.auditService = auditService;
     }
 
-    // Gửi OTP đặt lại mật khẩu nếu tìm thấy tài khoản đang hoạt động.
+    // Chỉ gửi OTP đặt lại mật khẩu cho tài khoản đang hoạt động.
     @Transactional
-    public void start(String identifier) {
-        findActiveUser(identifier).ifPresent(user ->
-                otpService.issue(user, OtpPurpose.PASSWORD_RESET, "otp-reset"));
+    public boolean start(String identifier) {
+        Optional<User> user = findActiveUser(identifier);
+        if (user.isEmpty()) {
+            return false;
+        }
+        otpService.issue(user.get(), OtpPurpose.PASSWORD_RESET, "otp-reset");
+        return true;
     }
 
     // Xác minh OTP và cấp token đặt lại mật khẩu.
