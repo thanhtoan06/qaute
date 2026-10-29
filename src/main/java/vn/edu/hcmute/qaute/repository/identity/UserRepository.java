@@ -20,6 +20,9 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     // Tìm người dùng theo mã số sinh viên.
     Optional<User> findByMssv(String mssv);
 
+    // Tìm người dùng theo họ tên không phân biệt hoa thường.
+    List<User> findAllByFullNameIgnoreCase(String fullName);
+
     // Kiểm tra email đã được sử dụng chưa.
     boolean existsByEmailIgnoreCase(String email);
 
