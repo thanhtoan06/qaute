@@ -21,7 +21,7 @@ import vn.edu.hcmute.qaute.service.system.SettingsService;
 @Service
 public class LoginService {
 
-    private static final Pattern MSSV = Pattern.compile("^\\d{8}$");
+    private static final Pattern MSSV = Pattern.compile("^\\d{6}(?:\\d{2})?$");
     private static final String DUMMY_HASH =
             "$2a$10$7EqJtq98hPqEX7fNZaFWoO6sQxYw7L9n4W6K5g0Yx6qX6L0M6z6eW";
 
@@ -49,9 +49,7 @@ public class LoginService {
     public LoginOutcome login(LoginForm form, String ip, String userAgent) {
         String identifier = form.getIdentifier().trim();
         String normalized = identifier.toLowerCase(Locale.ROOT);
-        User user = MSSV.matcher(identifier).matches()
-                ? userRepository.findByMssv(identifier).orElse(null)
-                : userRepository.findByEmailIgnoreCase(normalized).orElse(null);
+        User user = findUser(identifier, normalized);
         if (user == null) {
             passwordEncoder.matches(form.getPassword(), DUMMY_HASH);
             authSessionService.recordLogin(null, identifier, false, ip, shorten(userAgent));
@@ -111,6 +109,18 @@ public class LoginService {
         authSessionService.recordLogin(user.getId(), identifier, true, ip, shorten(userAgent));
         return outcome(LoginOutcome.Kind.OK, tokens, user.getEmail(),
                 user.getRole().getCode().name(), 0);
+    }
+
+    private User findUser(String identifier, String normalized) {
+        if (MSSV.matcher(identifier).matches()) {
+            return userRepository.findByMssv(identifier).orElse(null);
+        }
+        User emailUser = userRepository.findByEmailIgnoreCase(normalized).orElse(null);
+        if (emailUser != null) {
+            return emailUser;
+        }
+        var nameMatches = userRepository.findAllByFullNameIgnoreCase(identifier);
+        return nameMatches.size() == 1 ? nameMatches.get(0) : null;
     }
 
     // Tạo kết quả đăng nhập theo trạng thái xác thực.

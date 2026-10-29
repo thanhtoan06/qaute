@@ -10,8 +10,8 @@ import lombok.Setter;
 @Setter
 public class LoginForm {
 
-    @NotBlank(message = "Vui lòng nhập email hoặc MSSV")
-    @Size(max = 150, message = "Email hoặc MSSV không hợp lệ")
+    @NotBlank(message = "Vui lòng nhập email, MSSV hoặc họ tên")
+    @Size(max = 150, message = "Thông tin đăng nhập không hợp lệ")
     private String identifier;
 
     @NotBlank(message = "Vui lòng nhập mật khẩu")

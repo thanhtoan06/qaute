@@ -52,14 +52,14 @@
         <input type="hidden" name="returnUrl" value="<c:out value='${returnUrl}'/>"/>
 
         <div class="mb-3">
-            <label class="form-label required" for="identifier">Email hoặc MSSV</label>
+            <label class="form-label required" for="identifier">Email, MSSV hoặc họ tên</label>
             <div class="input-group">
                 <span class="input-group-text">
                     <i class="bi bi-person-vcard-fill"></i>
                 </span>
                 <input class="form-control ${not empty errors['identifier'] ? 'is-invalid' : ''}"
                        id="identifier" name="identifier" value="<c:out value='${form.identifier}'/>"
-                       placeholder="Ví dụ: MSSV, email hoặc tên đăng nhập"
+                       placeholder="Nhập MSSV, email hoặc họ tên"
                        maxlength="150" autocomplete="username" autofocus>
             </div>
             <qa:formError field="identifier"/>
