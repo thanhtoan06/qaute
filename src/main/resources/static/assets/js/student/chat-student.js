@@ -367,17 +367,10 @@
     function formatTime(isoString) {
         if (!isoString) return '';
         try {
-            const date = new Date(isoString);
-            const now = new Date();
-            const pad = n => String(n).padStart(2, '0');
-
-            // Nếu tin nhắn là ngày khác với ngày hiện tại, hiển thị ngày
-            if (date.toDateString() !== now.toDateString()) {
-                return pad(date.getDate()) + '/' + pad(date.getMonth() + 1) + '/' + date.getFullYear() + ' ' +
-                       date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
-            }
-            // Cùng ngày, chỉ hiển thị giờ
-            return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const formatted = Qaute.formatDateTime(isoString);
+            if (!formatted) return '';
+            const today = Qaute.formatDateTime(new Date().toISOString()).slice(0, 10);
+            return formatted.slice(0, 10) === today ? formatted.slice(11) : formatted;
         } catch (_) {
             return '';
         }

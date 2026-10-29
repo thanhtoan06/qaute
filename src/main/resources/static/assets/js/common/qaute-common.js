@@ -129,23 +129,56 @@
         return element.innerHTML;
     };
 
-    // Định dạng ngày giờ theo cách hiển thị của trang.
-    Qaute.formatDateTime = function (isoString) {
-        const value = isoString == null ? '' : String(isoString);
-        const localDateTime = value.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(\.\d+)?$/);
-        const normalizedValue = localDateTime
-            ? localDateTime[1] + (localDateTime[2] ? localDateTime[2].slice(0, 4).padEnd(4, '0') : '')
-            : value;
-        const date = new Date(normalizedValue);
-        if (Number.isNaN(date.getTime())) {
-            return '';
+    // Chuyển thời điểm không có múi giờ từ máy chủ thành giờ Việt Nam.
+    Qaute.parseDateTime = function (value) {
+        const text = value == null ? '' : String(value).trim();
+        const localDateTime = text.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?)$/);
+        if (!text) {
+            return new Date(NaN);
         }
-        // Bổ sung số 0 cho các giá trị ngày giờ một chữ số.
+        if (!localDateTime) {
+            return new Date(text);
+        }
+        const normalizedValue = localDateTime[1].replace(/\.(\d{3})\d+$/, '.$1');
+        return new Date(normalizedValue + '+07:00');
+    };
+
+    // Lấy ngày hiện tại theo múi giờ Việt Nam, không phụ thuộc thiết bị.
+    Qaute.todayDateValue = function () {
+        const vietnamTime = new Date(Date.now() + 7 * 60 * 60 * 1000);
         const pad = function (number) {
             return String(number).padStart(2, '0');
         };
-        return pad(date.getDate()) + '/' + pad(date.getMonth() + 1) + '/' +
-            date.getFullYear() + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+        return vietnamTime.getUTCFullYear() + '-' + pad(vietnamTime.getUTCMonth() + 1) + '-' +
+            pad(vietnamTime.getUTCDate());
+    };
+
+    // Định dạng thời điểm nhất quán theo múi giờ Việt Nam.
+    Qaute.formatDateTime = function (value) {
+        const date = Qaute.parseDateTime(value);
+        if (Number.isNaN(date.getTime())) {
+            return '';
+        }
+        const vietnamTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+        const pad = function (number) {
+            return String(number).padStart(2, '0');
+        };
+        return pad(vietnamTime.getUTCDate()) + '/' + pad(vietnamTime.getUTCMonth() + 1) + '/' +
+            vietnamTime.getUTCFullYear() + ' ' + pad(vietnamTime.getUTCHours()) + ':' +
+            pad(vietnamTime.getUTCMinutes());
+    };
+
+    // Định dạng giờ và phút theo múi giờ Việt Nam.
+    Qaute.formatTime = function (value) {
+        const date = Qaute.parseDateTime(value);
+        if (Number.isNaN(date.getTime())) {
+            return '';
+        }
+        const vietnamTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+        const pad = function (number) {
+            return String(number).padStart(2, '0');
+        };
+        return pad(vietnamTime.getUTCHours()) + ':' + pad(vietnamTime.getUTCMinutes());
     };
 
     // Định dạng các mốc thời gian trong nội dung trang.

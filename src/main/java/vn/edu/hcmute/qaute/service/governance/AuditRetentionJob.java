@@ -33,7 +33,7 @@ public class AuditRetentionJob {
         this.auditLogRepository = auditLogRepository;
     }
 
-    @Scheduled(cron = "0 0 4 * * *")
+    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Ho_Chi_Minh")
     // Xóa nhật ký audit đã quá thời hạn lưu trữ cấu hình.
     public void purgeOldAuditLogs() {
         jobExecutionTemplate.run("audit-retention", () -> {

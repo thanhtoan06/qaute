@@ -51,7 +51,7 @@
       <td><c:choose><c:when test="${item.status() eq 'DRAFT'}"><span class="badge bg-secondary-lt">Nháp</span></c:when><c:when test="${item.status() eq 'PENDING_REVIEW'}"><span class="badge bg-yellow-lt">Chờ duyệt</span></c:when><c:when test="${item.status() eq 'PUBLISHED'}"><span class="badge bg-green-lt">Đã xuất bản</span></c:when><c:otherwise><span class="badge bg-gray-lt">Lưu trữ</span></c:otherwise></c:choose></td>
       <td><c:out value="${item.viewCount()}"/></td>
       <td><c:set var="voteCount" value="${item.helpfulCount() + item.notHelpfulCount()}"/><c:choose><c:when test="${voteCount gt 0}"><fmt:formatNumber value="${100.0 * item.helpfulCount() / voteCount}" maxFractionDigits="0"/>% <span class="small text-secondary">(${voteCount})</span></c:when><c:otherwise><span class="text-secondary">—</span></c:otherwise></c:choose></td>
-      <td><c:out value="${item.updatedAt()}"/></td>
+      <td><time datetime="${item.updatedAt()}" data-qaute-datetime><c:out value="${item.updatedAt()}"/></time></td>
       <!-- Các nút thao tác theo trạng thái -->
       <td><div class="d-flex flex-wrap gap-1">
         <c:if test="${item.status() ne 'ARCHIVED'}"><a class="btn btn-sm btn-outline-primary" href="${ctx}/admin/faq/${item.id()}/edit">Sửa</a></c:if>

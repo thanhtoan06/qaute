@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded',
         const response = await fetch(event.relatedTarget.dataset.url, { credentials: 'same-origin' });
         if (!response.ok) throw new Error('Không tải được chi tiết nhật ký.');
         const item = await response.json();
-        fields.at.textContent = item.createdAt || '—';
+        fields.at.textContent = item.createdAt ? Qaute.formatDateTime(item.createdAt) : '—';
         fields.actor.textContent = [item.actorName, item.actorRole].filter(Boolean).join(' · ');
         fields.action.textContent = [item.actionLabel, item.action].filter(Boolean).join(' · ');
         fields.entity.textContent = [item.entityType, item.entityId].filter((part) => part !== null && part !== undefined).join(' #');

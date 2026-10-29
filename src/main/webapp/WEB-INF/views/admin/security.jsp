@@ -68,8 +68,8 @@
                   <tr>
                     <td><c:out value="${session.deviceInfo()}" default="Không xác định"/></td>
                     <td><c:out value="${session.ip()}" default="—"/></td>
-                    <td><c:out value="${session.createdAt()}"/></td>
-                    <td><c:out value="${session.lastUsedAt()}" default="—"/></td>
+                    <td><time datetime="${session.createdAt()}" data-qaute-datetime><c:out value="${session.createdAt()}"/></time></td>
+                    <td><time datetime="${session.lastUsedAt()}" data-qaute-datetime><c:out value="${session.lastUsedAt()}" default="—"/></time></td>
                     <td>
                       <c:choose>
                         <c:when test="${session.current()}"><span class="badge bg-green-lt">Hiện tại</span></c:when>

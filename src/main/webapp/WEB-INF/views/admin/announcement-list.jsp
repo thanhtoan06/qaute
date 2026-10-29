@@ -28,7 +28,7 @@
       <td><span class="fw-semibold"><c:out value="${a.title}"/></span><c:if test="${a.pinned}"><span class="badge bg-yellow-lt ms-2">Ghim</span></c:if><div class="small text-secondary"><c:out value="${a.summary}"/></div></td>
       <td><c:out value="${a.audience}"/></td>
       <td><span class="badge ${a.status eq 'PUBLISHED' ? 'bg-green-lt' : a.status eq 'EXPIRED' ? 'bg-gray-lt' : 'bg-secondary-lt'}"><c:out value="${a.status}"/></span></td>
-      <td><c:out value="${a.publishAt}"/></td><td><c:out value="${a.expiresAt}"/></td>
+      <td><time datetime="${a.publishAt}" data-qaute-datetime><c:out value="${a.publishAt}"/></time></td><td><time datetime="${a.expiresAt}" data-qaute-datetime><c:out value="${a.expiresAt}"/></time></td>
       <!-- Các nút thao tác: sửa, xuất bản, xóa, gỡ đăng -->
       <td><div class="d-flex flex-wrap gap-1"><c:if test="${a.status eq 'DRAFT'}">
         <a class="btn btn-sm btn-outline-primary" href="${ctx}/admin/announcements/${a.id}/edit">Sửa</a>

@@ -42,10 +42,8 @@ public class AppointmentSeeder implements DemoSeeder {
     private static final String STUDENT_EMAIL_SUFFIX = "@qaute.edu.vn";
     private static final int STUDENT_MSSV_START = 111111;
     private static final int STUDENT_COUNT = 20;
-    private static final String[] LEGACY_STUDENT_EMAILS = {
-        "24162129@student.hcmute.edu.vn",
-        "24162130@student.hcmute.edu.vn",
-    };
+    // Hai fixture đầu tiên thuộc về các tài khoản demo đã được gỡ bỏ.
+    private static final int REMOVED_LEGACY_STUDENT_DEMO_COUNT = 2;
 
     private static final String[] MANAGER_KEYS = {
         "DT",
@@ -1977,9 +1975,11 @@ public class AppointmentSeeder implements DemoSeeder {
             int studentIndex = status == AppointmentStatus.CONFIRMED
                     ? (confirmedStudentIndex++ % STUDENT_COUNT)
                     : (historyStudentIndex++ * 7 + 3) % STUDENT_COUNT;
-            String studentEmail = index < LEGACY_STUDENT_EMAILS.length
-                    ? LEGACY_STUDENT_EMAILS[index]
-                    : (STUDENT_MSSV_START + studentIndex) + STUDENT_EMAIL_SUFFIX;
+            if (index < REMOVED_LEGACY_STUDENT_DEMO_COUNT) {
+                continue;
+            }
+
+            String studentEmail = (STUDENT_MSSV_START + studentIndex) + STUDENT_EMAIL_SUFFIX;
             User student = user(studentEmail);
             if (appointments.existsByStudentIdAndTopic(student.getId(), TOPICS[index])) {
                 continue;

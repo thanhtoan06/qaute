@@ -175,10 +175,7 @@
     function formatTime(value) {
         if (!value) return '';
         try {
-            const date = new Date(value);
-            if (isNaN(date.getTime())) return '';
-            const pad = n => String(n).padStart(2, '0');
-            return pad(date.getHours()) + ':' + pad(date.getMinutes());
+            return Qaute.formatTime(value);
         } catch (_) { return ''; }
     }
     // Hiển thị một tin nhắn trong hội thoại đang mở.

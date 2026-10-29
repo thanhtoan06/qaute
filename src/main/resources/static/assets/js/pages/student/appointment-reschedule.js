@@ -21,7 +21,7 @@
     var form = document.getElementById('rescheduleForm');
 
     // Min date = today
-    var today = new Date().toISOString().slice(0, 10);
+    var today = Qaute.todayDateValue();
     if (dateInput) {
         dateInput.min = today;
         dateInput.value = today;
@@ -81,11 +81,6 @@
             );
     }
 
-    // Định dạng thời gian theo quy ước tiếng Việt.
-    function fmtTime(d) {
-        return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
-    }
-
     // Mã hóa ký tự HTML trước khi chèn nội dung vào giao diện.
     function escH(s) {
         return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -97,9 +92,7 @@
         slots.forEach(
             // Hiển thị một nút cho từng khung giờ khả dụng.
             function (slot) {
-                var start = new Date(slot.startAt);
-                var end = new Date(slot.endAt);
-                var timeLabel = fmtTime(start) + ' – ' + fmtTime(end);
+                var timeLabel = Qaute.formatTime(slot.startAt) + ' – ' + Qaute.formatTime(slot.endAt);
                 var mIcon = slot.modality === 'ONLINE' ? '🖥' : slot.modality === 'IN_PERSON' ? '🏫' : '🔄';
                 var mLabel = slot.modality === 'ONLINE' ? 'Online' : slot.modality === 'IN_PERSON' ? 'Trực tiếp' : 'Linh hoạt';
 

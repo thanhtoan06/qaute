@@ -31,8 +31,8 @@
           <dt class="col-sm-4 text-secondary">Vai trò</dt>
           <dd class="col-sm-8"><c:choose><c:when test="${user.role() == 'STUDENT'}">Sinh viên</c:when><c:when test="${user.role() == 'MANAGER'}">Tư vấn viên</c:when><c:otherwise>Quản trị viên</c:otherwise></c:choose></dd>
           <dt class="col-sm-4 text-secondary">Trạng thái</dt><dd class="col-sm-8"><span class="badge bg-secondary-lt"><c:out value="${user.status()}"/></span></dd>
-          <dt class="col-sm-4 text-secondary">Đăng nhập gần nhất</dt><dd class="col-sm-8"><c:out value="${empty user.lastLoginAt() ? 'Chưa đăng nhập' : user.lastLoginAt()}"/></dd>
-          <dt class="col-sm-4 text-secondary">Ngày tạo</dt><dd class="col-sm-8"><c:out value="${user.createdAt()}"/></dd>
+          <dt class="col-sm-4 text-secondary">Đăng nhập gần nhất</dt><dd class="col-sm-8"><time datetime="${user.lastLoginAt()}" data-qaute-datetime><c:out value="${empty user.lastLoginAt() ? 'Chưa đăng nhập' : user.lastLoginAt()}"/></time></dd>
+          <dt class="col-sm-4 text-secondary">Ngày tạo</dt><dd class="col-sm-8"><time datetime="${user.createdAt()}" data-qaute-datetime><c:out value="${user.createdAt()}"/></time></dd>
           <dt class="col-sm-4 text-secondary">Ticket liên quan</dt><dd class="col-sm-8"><span class="badge bg-blue-lt"><c:out value="${user.relatedTicketCount()}"/></span></dd>
         </dl>
       </div>

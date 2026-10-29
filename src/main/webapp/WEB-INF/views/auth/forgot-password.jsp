@@ -30,6 +30,18 @@
             <span><c:out value="${errors['global']}"/></span>
         </div>
     </c:if>
+    <c:if test="${not empty flashError}">
+        <div class="alert alert-danger d-flex align-items-center gap-2 recovery-alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span><c:out value="${flashError}"/></span>
+        </div>
+    </c:if>
+    <c:if test="${not empty flashSuccess}">
+        <div class="alert alert-success d-flex align-items-center gap-2 recovery-alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <span><c:out value="${flashSuccess}"/></span>
+        </div>
+    </c:if>
 
     <%-- Gửi mã xác minh và hiển thị hướng dẫn bảo mật cùng lỗi trường nhập. --%>
     <form method="post" action="/auth/forgot-password" id="forgot-password-form" novalidate class="recovery-form">

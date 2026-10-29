@@ -1,6 +1,7 @@
 package vn.edu.hcmute.qaute.controller.student;
 
 import jakarta.validation.Valid;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
@@ -26,6 +27,8 @@ import vn.edu.hcmute.qaute.dto.request.student.TicketFilter;
 // Tiếp nhận và điều phối các yêu cầu giao diện cho StudentAppointmentBook.
 @Controller
 public class StudentAppointmentBookController {
+    private static final DateTimeFormatter APPOINTMENT_TIME_FORMAT =
+            DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
 
     private final AppointmentService appointmentService;
     private final CategoryQueryService categoryQueryService;
@@ -78,7 +81,7 @@ public class StudentAppointmentBookController {
             );
             AppointmentView appt = appointmentService.book(SecurityUtils.requireUserId(), cmd);
             flash.addFlashAttribute("flashSuccess",
-                    "Đã đặt lịch hẹn thành công lúc " + appt.startAt());
+                    "Đã đặt lịch hẹn thành công lúc " + appt.startAt().format(APPOINTMENT_TIME_FORMAT));
             return "redirect:/student/appointments";
         } catch (AppException e) {
             String msg = e.getCode() == ErrorCode.ERR_SLOT_TAKEN

@@ -35,8 +35,8 @@
           <tr>
             <td><c:out value="${empty session.deviceInfo() ? '—' : session.deviceInfo()}"/></td>
             <td><c:out value="${empty session.ip() ? '—' : session.ip()}"/></td>
-            <td><c:out value="${session.createdAt()}"/></td>
-            <td><c:out value="${empty session.lastUsedAt() ? '—' : session.lastUsedAt()}"/></td>
+            <td><time datetime="${session.createdAt()}" data-qaute-datetime><c:out value="${session.createdAt()}"/></time></td>
+            <td><time datetime="${session.lastUsedAt()}" data-qaute-datetime><c:out value="${empty session.lastUsedAt() ? '—' : session.lastUsedAt()}"/></time></td>
             <td><c:choose><c:when test="${session.revoked()}"><span class="badge bg-secondary-lt">Đã thu hồi</span></c:when><c:when test="${session.expired()}"><span class="badge bg-secondary-lt">Hết hạn</span></c:when><c:otherwise><span class="badge bg-green-lt">Còn hiệu lực</span></c:otherwise></c:choose></td>
             <!-- Nút thu hồi từng phiên -->
             <td>
@@ -64,7 +64,7 @@
       <tbody>
         <c:forEach var="entry" items="${loginHistory}">
           <tr>
-            <td><c:out value="${entry.at()}"/></td>
+            <td><time datetime="${entry.at()}" data-qaute-datetime><c:out value="${entry.at()}"/></time></td>
             <td><c:choose><c:when test="${entry.success()}"><span class="badge bg-green-lt">Thành công</span></c:when><c:otherwise><span class="badge bg-red-lt">Thất bại</span></c:otherwise></c:choose></td>
             <td><c:out value="${empty entry.ip() ? '—' : entry.ip()}"/></td>
             <td class="text-wrap"><c:out value="${empty entry.userAgent() ? '—' : entry.userAgent()}"/></td>

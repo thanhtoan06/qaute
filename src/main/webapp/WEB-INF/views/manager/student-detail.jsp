@@ -43,7 +43,7 @@
       <tbody><c:choose><c:when test="${empty detail.tickets().content}"><tr><td colspan="5" class="text-center text-secondary py-4">Không có yêu cầu trong phạm vi của bạn.</td></tr></c:when>
       <c:otherwise><c:forEach var="ticket" items="${detail.tickets().content}"><tr>
         <td><c:out value="${ticket.code()}"/></td><td><c:out value="${ticket.title()}"/></td>
-        <td><qa:statusBadge status="${ticket.status()}"/></td><td><c:out value="${ticket.createdAt()}"/></td>
+        <td><qa:statusBadge status="${ticket.status()}"/></td><td><time datetime="${ticket.createdAt()}" data-qaute-datetime><c:out value="${ticket.createdAt()}"/></time></td>
         <td><a class="btn btn-sm btn-outline-primary" href="${ctx}/manager/tickets/${ticket.id()}">Mở</a></td>
       </tr></c:forEach></c:otherwise></c:choose></tbody>
     </table></div></div>
@@ -54,7 +54,7 @@
       <thead><tr><th>Thời gian</th><th>Chủ đề</th><th>Trạng thái</th><th></th></tr></thead>
       <tbody><c:choose><c:when test="${empty detail.appointments().content}"><tr><td colspan="4" class="text-center text-secondary py-4">Chưa có lịch hẹn với bạn.</td></tr></c:when>
       <c:otherwise><c:forEach var="appointment" items="${detail.appointments().content}"><tr>
-        <td><c:out value="${appointment.startAt()}"/></td><td><c:out value="${appointment.topic()}"/></td>
+        <td><time datetime="${appointment.startAt()}" data-qaute-datetime><c:out value="${appointment.startAt()}"/></time></td><td><c:out value="${appointment.topic()}"/></td>
         <td><c:out value="${appointment.status()}"/></td>
         <td><a class="btn btn-sm btn-outline-primary" href="${ctx}/manager/appointments/${appointment.id()}">Mở</a></td>
       </tr></c:forEach></c:otherwise></c:choose></tbody>
@@ -66,7 +66,7 @@
       <thead><tr><th>Bắt đầu</th><th>Câu hỏi</th><th>Trạng thái</th></tr></thead>
       <tbody><c:choose><c:when test="${empty detail.chats().content}"><tr><td colspan="3" class="text-center text-secondary py-4">Chưa có phiên chat với bạn.</td></tr></c:when>
       <c:otherwise><c:forEach var="chat" items="${detail.chats().content}"><tr>
-        <td><c:out value="${chat.startedAt()}"/></td><td><c:out value="${chat.question()}"/></td>
+        <td><time datetime="${chat.startedAt()}" data-qaute-datetime><c:out value="${chat.startedAt()}"/></time></td><td><c:out value="${chat.question()}"/></td>
         <td><c:out value="${chat.status()}"/></td>
       </tr></c:forEach></c:otherwise></c:choose></tbody>
     </table></div></div>

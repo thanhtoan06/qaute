@@ -28,7 +28,7 @@
       <td class="fw-semibold"><c:out value="${item.title()}"/></td>
       <td><c:out value="${item.categoryPath()}"/></td>
       <td><c:choose><c:when test="${item.status() eq 'DRAFT'}"><span class="badge bg-secondary-lt">Nháp</span></c:when><c:when test="${item.status() eq 'PENDING_REVIEW'}"><span class="badge bg-yellow-lt">Chờ duyệt</span></c:when><c:when test="${item.status() eq 'PUBLISHED'}"><span class="badge bg-green-lt">Đã xuất bản</span></c:when><c:otherwise><span class="badge bg-gray-lt">Lưu trữ</span></c:otherwise></c:choose></td>
-      <td><c:out value="${item.updatedAt()}"/></td>
+      <td><time datetime="${item.updatedAt()}" data-qaute-datetime><c:out value="${item.updatedAt()}"/></time></td>
       <td><c:choose><c:when test="${item.status() eq 'DRAFT'}"><a class="btn btn-sm btn-outline-primary" href="${ctx}/manager/faq/${item.id()}/edit">Sửa và gửi duyệt</a></c:when><c:when test="${item.status() eq 'PUBLISHED'}"><a class="btn btn-sm btn-outline-primary" href="${ctx}/faq/${fn:escapeXml(item.slug())}">Xem bài</a></c:when><c:otherwise><span class="text-secondary">—</span></c:otherwise></c:choose></td>
     </tr></c:forEach>
   </c:otherwise></c:choose></tbody>

@@ -102,8 +102,8 @@
                                     </div>
                                 </td>
                                 <td><c:out value="${empty session.ip() ? '—' : session.ip()}"/></td>
-                                <td><c:out value="${session.createdAt()}"/></td>
-                                <td><c:out value="${empty session.lastUsedAt() ? '—' : session.lastUsedAt()}"/></td>
+                                <td><time datetime="${session.createdAt()}" data-qaute-datetime><c:out value="${session.createdAt()}"/></time></td>
+                                <td><time datetime="${session.lastUsedAt()}" data-qaute-datetime><c:out value="${empty session.lastUsedAt() ? '—' : session.lastUsedAt()}"/></time></td>
                                 <td>
                                     <c:choose>
                                         <c:when test="${session.current()}">

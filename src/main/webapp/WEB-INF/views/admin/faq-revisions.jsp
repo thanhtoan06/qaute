@@ -48,7 +48,7 @@
   <thead><tr><th>Phiên bản</th><th>Người sửa</th><th>Ghi chú</th><th>Thời gian</th><th>Thao tác</th></tr></thead>
   <tbody><c:choose><c:when test="${empty history}"><tr><td colspan="5" class="text-secondary">Chưa có phiên bản.</td></tr></c:when>
   <c:otherwise><c:forEach var="item" items="${history}"><tr>
-    <td>#${item.versionNo()}</td><td><c:out value="${item.changedByName()}"/></td><td><c:out value="${item.changeNote()}"/></td><td><c:out value="${item.createdAt()}"/></td>
+    <td>#${item.versionNo()}</td><td><c:out value="${item.changedByName()}"/></td><td><c:out value="${item.changeNote()}"/></td><td><time datetime="${item.createdAt()}" data-qaute-datetime><c:out value="${item.createdAt()}"/></time></td>
     <!-- Nút xem và khôi phục phiên bản -->
     <td><div class="d-flex gap-1"><a class="btn btn-sm btn-outline-secondary" href="${ctx}/admin/faq/${faq.id()}/revisions/${item.versionNo()}">Xem</a>
       <c:if test="${faq.status() ne 'ARCHIVED'}"><qa:confirmModal id="restore-revision-${item.versionNo()}" title="Khôi phục phiên bản" message="Tạo phiên bản mới từ phiên bản ${item.versionNo()}? Trạng thái FAQ hiện tại được giữ nguyên." actionUrl="${ctx}/admin/faq/${faq.id()}/revisions/${item.versionNo()}/restore" confirmLabel="Khôi phục" cssClass="btn-sm btn-outline-primary"/></c:if>

@@ -68,10 +68,8 @@
         });
         // Định dạng thời điểm hợp lệ trên trang.
         document.querySelectorAll('time[data-workspace-datetime]').forEach(element => {
-            const date = new Date(element.dateTime);
-            if (!Number.isNaN(date.getTime())) element.textContent = new Intl.DateTimeFormat('vi-VN', {
-                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-            }).format(date);
+            const formatted = window.Qaute.formatDateTime(element.dateTime);
+            if (formatted) element.textContent = formatted;
         });
         sync();
     }

@@ -26,7 +26,7 @@
     <thead><tr><th>Thiết bị</th><th>IP</th><th>Tạo lúc</th><th>Hoạt động cuối</th><th>Trạng thái</th><th></th></tr></thead>
     <tbody><c:choose><c:when test="${empty sessions}"><tr><td colspan="6" class="text-secondary">Chưa có phiên đăng nhập.</td></tr></c:when><c:otherwise><c:forEach var="session" items="${sessions}"><tr>
       <td><c:out value="${session.deviceInfo()}" default="Không xác định"/></td><td><c:out value="${session.ip()}" default="—"/></td>
-      <td><c:out value="${session.createdAt()}"/></td><td><c:out value="${session.lastUsedAt()}" default="—"/></td>
+      <td><time datetime="${session.createdAt()}" data-qaute-datetime><c:out value="${session.createdAt()}"/></time></td><td><time datetime="${session.lastUsedAt()}" data-qaute-datetime><c:out value="${session.lastUsedAt()}" default="—"/></time></td>
       <td><c:choose><c:when test="${session.current()}"><span class="badge bg-green-lt">Hiện tại</span></c:when><c:when test="${session.revoked()}"><span class="badge bg-secondary-lt">Đã thu hồi</span></c:when><c:when test="${session.expired()}"><span class="badge bg-yellow-lt">Hết hạn</span></c:when><c:otherwise><span class="badge bg-blue-lt">Đang hoạt động</span></c:otherwise></c:choose></td>
       <td><c:if test="${not session.current() and not session.revoked() and not session.expired()}"><form method="post" action="${ctx}/manager/profile/sessions/${session.id()}/revoke"><input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/><button class="btn btn-sm btn-outline-danger" type="submit">Thu hồi</button></form></c:if></td>
     </tr></c:forEach></c:otherwise></c:choose></tbody>

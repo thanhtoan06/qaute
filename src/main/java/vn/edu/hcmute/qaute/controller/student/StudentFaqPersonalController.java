@@ -1,6 +1,7 @@
 package vn.edu.hcmute.qaute.controller.student;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +26,8 @@ import vn.edu.hcmute.qaute.service.knowledge.FaqQueryService;
 @Controller
 public class StudentFaqPersonalController {
     private static final int PAGE_SIZE = 20;
+    private static final DateTimeFormatter VIEWED_AT_FORMAT =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final FaqPersonalService personal;
     private final FaqQueryService faqs;
@@ -53,8 +56,9 @@ public class StudentFaqPersonalController {
         Page<FaqListItem> recent = personal.recent(userId, PageRequest.of(Math.max(0, page), PAGE_SIZE));
         List<Long> faqIds = recent.getContent().stream().map(FaqListItem::id).toList();
         Set<Long> bookmarkedIds = faqs.bookmarkedIds(userId, faqIds);
-        Map<Long, LocalDateTime> viewedAt = views.findByUserIdAndFaqIdIn(userId, faqIds).stream()
-                .collect(Collectors.toMap(view -> view.getFaqId(), view -> view.getLastViewedAt()));
+        Map<Long, String> viewedAt = views.findByUserIdAndFaqIdIn(userId, faqIds).stream()
+                .collect(Collectors.toMap(view -> view.getFaqId(),
+                        view -> view.getLastViewedAt().format(VIEWED_AT_FORMAT)));
         model.addAttribute("page", recent);
         model.addAttribute("bookmarkedIds", bookmarkedIds);
         model.addAttribute("viewedAt", viewedAt);

@@ -23,7 +23,7 @@
       <h1 class="h1"><c:out value="${faq.title()}"/></h1>
       <div class="text-secondary small border-bottom pb-3 mb-3">
         Tác giả: <c:out value="${faq.authorName()}"/> · Trạng thái: <c:out value="${faq.status()}"/>
-        <c:if test="${not empty faq.publishAt()}"> · Hẹn giờ: <c:out value="${faq.publishAt()}"/></c:if>
+        <c:if test="${not empty faq.publishAt()}"> · Hẹn giờ: <time datetime="${faq.publishAt()}" data-qaute-datetime><c:out value="${faq.publishAt()}"/></time></c:if>
       </div>
       <c:if test="${not empty faq.summary()}"><div class="lead text-secondary bg-light rounded p-3 mb-4"><c:out value="${faq.summary()}"/></div></c:if>
       <div class="qa-faq-content lh-lg"><c:out value="${faq.bodyHtml()}" escapeXml="false"/></div>
@@ -76,7 +76,7 @@
     <div class="card"><div class="card-body">
       <h3 class="card-title">Lịch sử ghi chú</h3>
       <c:choose><c:when test="${empty faq.revisions()}"><p class="text-secondary mb-0">Chưa có phiên bản lưu.</p></c:when>
-      <c:otherwise><div class="list-group list-group-flush" data-tv2-pageable"><c:forEach var="revision" items="${faq.revisions()}"><div class="list-group-item px-0"><div class="fw-semibold">Phiên bản ${revision.versionNo()}</div><div class="small text-secondary"><c:out value="${revision.createdAt()}"/> · Người sửa #<c:out value="${revision.changedBy()}"/></div><c:if test="${not empty revision.changeNote()}"><p class="mb-0 mt-1"><c:out value="${revision.changeNote()}"/></p></c:if></div></c:forEach></div></c:otherwise></c:choose>
+      <c:otherwise><div class="list-group list-group-flush" data-tv2-pageable"><c:forEach var="revision" items="${faq.revisions()}"><div class="list-group-item px-0"><div class="fw-semibold">Phiên bản ${revision.versionNo()}</div><div class="small text-secondary"><time datetime="${revision.createdAt()}" data-qaute-datetime><c:out value="${revision.createdAt()}"/></time> · Người sửa #<c:out value="${revision.changedBy()}"/></div><c:if test="${not empty revision.changeNote()}"><p class="mb-0 mt-1"><c:out value="${revision.changeNote()}"/></p></c:if></div></c:forEach></div></c:otherwise></c:choose>
     </div></div>
   </div>
 </div>

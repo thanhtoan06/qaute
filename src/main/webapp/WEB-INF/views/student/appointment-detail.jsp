@@ -59,7 +59,7 @@
                             <dt class="col-sm-4 text-secondary">Thời gian hẹn</dt>
                             <dd class="col-sm-8 fw-semibold text-primary">
                                 <i class="bi bi-clock me-1"></i>
-                                <c:out value="${appointment.startAt()}"/> – <c:out value="${appointment.endAt().toLocalTime()}"/>
+                                <time datetime="${appointment.startAt()}" data-qaute-datetime><c:out value="${appointment.startAt()}"/></time> – <c:out value="${appointment.endAt().toLocalTime()}"/>
                             </dd>
 
                             <dt class="col-sm-4 text-secondary">Chuyên mục</dt>

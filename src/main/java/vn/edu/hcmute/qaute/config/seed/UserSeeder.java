@@ -26,17 +26,6 @@ public class UserSeeder implements DemoSeeder {
     /** MSSV dải seed mới: 111111 – 111130 (20 sinh viên). */
     private static final int STUDENT_MSSV_START = 111111;
 
-    /** Hai tài khoản sinh viên bổ sung sử dụng MSSV và email cũ. */
-    private static final String[] LEGACY_STUDENT_MSSVS = {
-        "24162129",
-        "24162130"
-    };
-
-    private static final String[] LEGACY_STUDENT_NAMES = {
-        "Lê Thanh Toàn",
-        "Hà Quốc Toản"
-    };
-
     /** 12 manager, mỗi tài khoản phụ trách một nhóm phòng ban. */
     private static final String[] MANAGER_EMAILS = {
         "manager.daotao@qaute.edu.vn",
@@ -205,32 +194,6 @@ public class UserSeeder implements DemoSeeder {
                     .cohort("2026")
                     .program("Đại học chính quy")
                     .build());
-        }
-
-        // Bổ sung hai tài khoản sinh viên sử dụng MSSV và email cũ.
-        for (int i = 0; i < LEGACY_STUDENT_MSSVS.length; i++) {
-            String mssv = LEGACY_STUDENT_MSSVS[i];
-            String email = mssv + "@student.hcmute.edu.vn";
-            String fullName = LEGACY_STUDENT_NAMES[i];
-            User student = userRepository.findByEmailIgnoreCase(email)
-                    .or(() -> userRepository.findByMssv(mssv))
-                    .orElseGet(() -> saveUser(
-                            studentRole,
-                            email,
-                            fullName,
-                            mssv,
-                            "Student@12345",
-                            now));
-
-            StudentProfile profile = studentProfileRepository.findByUserId(student.getId())
-                    .orElseGet(() -> StudentProfile.builder()
-                            .userId(student.getId())
-                            .build());
-            profile.setFacultyId(informationTechnologyFaculty.getId());
-            profile.setClassCode("241621C");
-            profile.setCohort("2024");
-            profile.setProgram("Đại học chính quy");
-            studentProfileRepository.save(profile);
         }
     }
 

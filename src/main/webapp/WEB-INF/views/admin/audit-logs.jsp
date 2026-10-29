@@ -36,7 +36,7 @@
   <thead><tr><th>Thời gian</th><th>Người thực hiện</th><th>Hành động</th><th>Đối tượng</th><th>IP</th><th></th></tr></thead>
   <tbody><c:choose><c:when test="${empty logs.content}"><tr><td colspan="6" class="text-center text-secondary py-5">Không có dòng nhật ký phù hợp.</td></tr></c:when>
   <c:otherwise><c:forEach var="log" items="${logs.content}"><tr>
-    <td><c:out value="${log.createdAt()}"/></td>
+    <td><time datetime="${log.createdAt()}" data-qaute-datetime><c:out value="${log.createdAt()}"/></time></td>
     <td><div class="fw-semibold"><c:out value="${log.actorName()}"/></div><small class="text-secondary"><c:out value="${log.actorRole()}"/></small></td>
     <td><div><c:out value="${log.actionLabel()}"/></div><small class="text-secondary"><c:out value="${log.action()}"/></small></td>
     <td><c:out value="${log.entityType()}"/> <c:if test="${not empty log.entityId()}">#<c:out value="${log.entityId()}"/></c:if></td>
@@ -69,5 +69,5 @@
     </div>
   </div></div>
 </div>
-<script src="${ctx}/assets/js/admin/audit-logs.js" defer></script>
+<script src="${ctx}/assets/js/admin/audit-logs.js?v=20261029a" defer></script>
 </div>
